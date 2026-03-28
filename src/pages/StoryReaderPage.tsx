@@ -303,122 +303,64 @@ export function StoryReaderPage() {
             <YourStorySidebar />
           </aside>
 
-          {/* Main reading area */}
-          <div className="flex-1 relative flex flex-col min-h-screen">
-            {/* Scene image */}
-            <div
-              className="absolute inset-0 bg-cover bg-top"
-              style={{ backgroundImage: `url(${activeSceneImage})`, backgroundColor: '#1a1525', transition: 'background-image 0.6s ease' }}
-            />
-            <div
-              className="absolute inset-0"
-              style={{ background: 'linear-gradient(to bottom, rgba(13,10,18,0) 0%, rgba(13,10,18,0.5) 40%, rgba(13,10,18,0.95) 65%, rgba(13,10,18,1) 100%)' }}
-            />
+          {/* Main reading area — scene top, prose panel bottom */}
+          <div className="flex-1 flex flex-col h-screen overflow-hidden">
 
-            {/* Loading overlay */}
-            <AnimatePresence>
-              {isGeneratingScene && (
-                <motion.div
-                  className="absolute inset-0 z-30 flex flex-col items-center justify-center"
-                  style={{ background: 'rgba(13,10,18,0.85)' }}
-                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                >
-                  <LoadingSpinner />
-                  <p className="text-textSecondary text-sm mt-4">Generating your scene...</p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Desktop nav bar */}
-            <div className="relative z-10 flex items-center justify-between px-8 pt-6 pb-3">
-              <div />
-              <ProgressBar current={currentBeat} total={TOTAL_BEATS} />
-              <div className="flex items-center gap-3">
-                {selfieUrl && (
-                  <div className="w-8 h-8 rounded-full overflow-hidden border-2 shrink-0" style={{ borderColor: '#c84b9e' }}>
-                    <img src={selfieUrl} alt="You" className="w-full h-full object-cover" />
-                  </div>
-                )}
-                <GemCounter />
-              </div>
-            </div>
-
-            {/* Reading column — centered */}
-            <div className="relative z-10 mt-auto mx-auto w-full max-w-[680px] px-6 pb-10 flex flex-col gap-5">
-              {/* Chapter label */}
-              <div className="flex items-center justify-between">
-                <p className="text-textMuted text-xs uppercase tracking-widest">Chapter {currentChapter} — {chapter.title}</p>
-                <p className="text-textMuted text-xs">{currentBeat}/{TOTAL_BEATS}</p>
-              </div>
-
-              {/* Prose */}
-              <div className="space-y-4 min-h-[80px]">
-                {isChapterStart ? (
-                  <p className="text-textPrimary text-lg leading-relaxed whitespace-pre-line">
-                    {openingDisplayed}
-                    {!openingDone && <span className="cursor-blink text-accent">|</span>}
-                  </p>
-                ) : (
-                  <p className="text-textPrimary text-lg leading-relaxed whitespace-pre-line">
-                    {chapter.openingProse}
-                  </p>
-                )}
-
-                <AnimatePresence>
-                  {showContinuation && (
-                    <motion.p
-                      className="text-textPrimary text-lg leading-relaxed whitespace-pre-line"
-                      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                    >
-                      {continuationText}
-                      {isTyping && <span className="cursor-blink text-accent">|</span>}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
-
-                {isStreaming && !contDisplayed && (
-                  <div className="space-y-2">
-                    <div className="skeleton h-4 w-full" />
-                    <div className="skeleton h-4 w-4/5" />
-                    <div className="skeleton h-4 w-3/4" />
-                  </div>
-                )}
-              </div>
-
-              {/* Choices */}
-              <AnimatePresence mode="wait">
-                {(!showContinuation || isTyping) && !isGeneratingScene && (
-                  <motion.div
-                    className="space-y-2"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                  >
-                    {chapter.choices.map((choice, i) => (
-                      <ChoiceButton
-                        key={i}
-                        text={choice.text}
-                        gemCost={choice.gemCost}
-                        index={i}
-                        selectedIndex={selectedChoiceIndex}
-                        disabled={isStreaming}
-                        onSelect={handleChoice}
-                      />
-                    ))}
+            {/* Scene — top 45% */}
+            <div className="relative flex-none" style={{ height: '45vh' }}>
+              <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${activeSceneImage})`, backgroundColor: '#1a1525', transition: 'background-image 0.6s ease' }} />
+              <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(13,10,18,0.25) 0%, rgba(13,10,18,0) 35%, rgba(13,10,18,0.9) 85%, rgba(13,10,18,1) 100%)' }} />
+              <AnimatePresence>
+                {isGeneratingScene && (
+                  <motion.div className="absolute inset-0 z-30 flex flex-col items-center justify-center" style={{ background: 'rgba(13,10,18,0.85)' }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                    <LoadingSpinner />
+                    <p className="text-textSecondary text-sm mt-4">Generating your scene...</p>
                   </motion.div>
                 )}
               </AnimatePresence>
+              {/* Nav over scene */}
+              <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-8 pt-5">
+                <p className="text-textMuted text-xs uppercase tracking-widest">Chapter {currentChapter} — {chapter.title}</p>
+                <ProgressBar current={currentBeat} total={TOTAL_BEATS} />
+                <div className="flex items-center gap-3">
+                  {selfieUrl && <div className="w-8 h-8 rounded-full overflow-hidden border-2 shrink-0" style={{ borderColor: '#c84b9e' }}><img src={selfieUrl} alt="You" className="w-full h-full object-cover" /></div>}
+                  <GemCounter />
+                </div>
+              </div>
+            </div>
 
-              {showContinuation && !isTyping && !isStreaming && (
-                <motion.button
-                  className="choice-btn justify-center"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  onClick={handleNextBeat}
-                >
-                  Continue →
-                </motion.button>
-              )}
+            {/* Prose panel — scrollable */}
+            <div className="flex-1 overflow-y-auto" style={{ background: '#0d0b12' }}>
+              <div className="mx-auto w-full max-w-[680px] px-8 pt-6 pb-10 flex flex-col gap-5">
+                <p className="text-textMuted text-xs text-right">{currentBeat}/{TOTAL_BEATS}</p>
+                <div className="space-y-4 min-h-[80px]">
+                  {isChapterStart ? (
+                    <p className="text-textPrimary text-lg leading-relaxed whitespace-pre-line">{openingDisplayed}{!openingDone && <span className="cursor-blink text-accent">|</span>}</p>
+                  ) : (
+                    <p className="text-textPrimary text-lg leading-relaxed whitespace-pre-line">{chapter.openingProse}</p>
+                  )}
+                  <AnimatePresence>
+                    {showContinuation && (
+                      <motion.p className="text-textPrimary text-lg leading-relaxed whitespace-pre-line" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                        {continuationText}{isTyping && <span className="cursor-blink text-accent">|</span>}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                  {isStreaming && !contDisplayed && <div className="space-y-2"><div className="skeleton h-4 w-full" /><div className="skeleton h-4 w-4/5" /><div className="skeleton h-4 w-3/4" /></div>}
+                </div>
+                <AnimatePresence mode="wait">
+                  {(!showContinuation || isTyping) && !isGeneratingScene && (
+                    <motion.div className="space-y-2" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+                      {displayChoices.map((choice, i) => (
+                        <ChoiceButton key={i} text={choice.text} gemCost={choice.gemCost} index={i} selectedIndex={selectedChoiceIndex} disabled={isStreaming} onSelect={handleChoice} />
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                {showContinuation && !isTyping && !isStreaming && (
+                  <motion.button className="choice-btn justify-center" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} onClick={handleNextBeat}>Continue →</motion.button>
+                )}
+              </div>
             </div>
           </div>
         </div>

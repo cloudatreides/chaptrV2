@@ -179,8 +179,17 @@ export function LandingPage() {
                 <span className="text-white font-medium text-lg" style={{ fontFamily: SG }}>chaptr</span>
               </div>
               <div className="flex items-center gap-8">
-                {['Features', 'How It Works', 'Testimonials'].map((link) => (
-                  <span key={link} className="text-white/70 text-sm font-medium cursor-pointer hover:text-white transition-colors" style={{ fontFamily: SG }}>{link}</span>
+                {[
+                  { label: 'Features', id: 'how-it-works' },
+                  { label: 'How It Works', id: 'how-it-works' },
+                  { label: 'Testimonials', id: 'testimonials' },
+                ].map(({ label, id }) => (
+                  <span
+                    key={label}
+                    className="text-white/70 text-sm font-medium cursor-pointer hover:text-white transition-colors"
+                    style={{ fontFamily: SG }}
+                    onClick={() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })}
+                  >{label}</span>
                 ))}
               </div>
             </nav>
@@ -223,7 +232,7 @@ export function LandingPage() {
         </div>
 
         {/* ── Desktop How It Works ── */}
-        <section style={{ background: '#0D0D10' }} className="py-24">
+        <section id="how-it-works" style={{ background: '#0D0D10' }} className="py-24">
           <div className="page-container mx-auto px-20">
             {/* Header */}
             <div className="flex flex-col items-center text-center gap-3 mb-14">
