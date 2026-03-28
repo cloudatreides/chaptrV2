@@ -163,7 +163,7 @@ export function LandingPage() {
 
         {/* ── Desktop Hero ── */}
         <div className="relative" style={{ height: 700 }}>
-          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/hero-desktop.jpeg)' }} />
+          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/hero-desktop.png)' }} />
           {/* Dark scrim over the centre where content sits */}
           <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 80% 70% at 50% 55%, rgba(13,11,18,0.62) 0%, rgba(13,11,18,0) 100%)' }} />
           {/* Top edge fade */}
