@@ -11,6 +11,8 @@ interface Props {
 export function YourStorySheet({ open, onClose }: Props) {
   const choices = useStore((s) => s.choices)
   const currentChapter = useStore((s) => s.currentChapter)
+  const junhoTrust = useStore((s) => s.characterState.junhoTrust)
+  const selfieUrl = useStore((s) => s.selfieUrl)
 
   const grouped = SEOUL_TRANSFER_CHAPTERS.map((ch) => ({
     chapter: ch,
@@ -35,6 +37,36 @@ export function YourStorySheet({ open, onClose }: Props) {
             <button onClick={onClose} className="text-textMuted hover:text-textPrimary transition-colors">
               <X size={20} />
             </button>
+          </div>
+
+          {/* You */}
+          {selfieUrl && (
+            <div className="flex items-center gap-3 px-5 pb-3">
+              <div className="w-10 h-10 rounded-full overflow-hidden border-2 shrink-0" style={{ borderColor: '#c84b9e' }}>
+                <img src={selfieUrl} alt="You" className="w-full h-full object-cover" />
+              </div>
+              <div>
+                <p className="text-textPrimary text-sm font-semibold">You (Y/N)</p>
+                <p className="text-textMuted text-xs">Main character</p>
+              </div>
+            </div>
+          )}
+
+          {/* Trust bar */}
+          <div className="px-5 pb-4 space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-textMuted text-xs">Junho</span>
+              <span className="text-textMuted text-xs">{junhoTrust}/100</span>
+            </div>
+            <div className="h-1 rounded-full bg-border overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-700"
+                style={{
+                  width: `${junhoTrust}%`,
+                  background: junhoTrust > 70 ? 'linear-gradient(90deg,#c84b9e,#8b5cf6)' : junhoTrust > 40 ? '#8b5cf6' : '#4b5563',
+                }}
+              />
+            </div>
           </div>
 
           {/* Timeline */}

@@ -1,27 +1,22 @@
 # Chaptr V2 — Current Session State
 
 ## In Progress
-- Adding `chapterBrief` arc guardrails to Claude system prompt (narrative arc fix)
+- Nothing active — all features implemented, pending Vercel deploy
 
 ## Done This Session
-- Full V2 prototype built from Pencil wireframes — React + Vite + TS + Tailwind + Zustand + Framer Motion + Vaul
-- Routes: / (landing) → /upload → /universes → /story
-- Mobile landing: full scrollable (hero → how it works → testimonials → footer)
-- Desktop landing: Pencil YwiY2 layout — centered hero, Playfair Display, nav links, 3-col steps with exported images, 3-col testimonials, proper footer
-- Hero images exported directly from Pencil (.pen) — hero-landing.jpeg (mobile portrait) + hero-desktop.jpeg (landscape)
-- Step images exported from Pencil — step1-upload.jpeg, step2-world.jpeg, step3-story.jpeg
-- Mobile gradient fixed — scene/silhouettes visible, only bottom 25% darkens
-- Pushed to: https://github.com/cloudatreides/chaptrV2
+- `chapterBrief` arc guardrails — already implemented in both storyData.ts + claudeStream.ts
+- `characterState` tracking — junhoTrust (0-100) in Zustand store, persisted, injected into system prompt
+- Dynamic choice generation — `generateChoices()` in claudeStream.ts, fires after each prose stream, stores in `dynamicChoices`
+- Scene images now change per beat — `continuationSceneImage` per chapter, swaps in after "Generating your scene..." spinner
+- Selfie displayed in reader nav (mobile + desktop), YourStorySidebar, YourStorySheet
+- Desktop landing hero fixed to match Pencil Screen-8 — Space Grotesk headline, corrected subtitle copy, rounded-xl button, 700px hero, dual overlay
 
 ## Next
-- Add `chapterBrief` to `storyData.ts` — 3-sentence arc destination per chapter
-- Inject `chapterBrief` into `buildSystemPrompt()` in `claudeStream.ts`
-- This prevents arc drift after Ch.2 without any architectural change
+- Deploy to Vercel: `npx vercel login` then `npx vercel --prod` from project root
+- OR push to GitHub — auto-deploys if repo already linked
 
 ## Open Issues / Known Gaps
-- No `characterState` object yet (trust/relationship tracking) — needed for deep causal persistence
-- Dynamic choice generation not implemented — choices are hardcoded (fine for PoC)
-- Scene images for story reader are reused from V1 (placeholder quality)
+- Scene images are placeholder quality (V1 reuse) — real AI-generated scenes would require backend
 - No Vercel deploy yet for V2 — still local + GitHub only
 
 ## Key Files

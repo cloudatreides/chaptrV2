@@ -7,7 +7,7 @@ import { GemCounter } from '../components/GemCounter'
 import { ChoiceButton } from '../components/ChoiceButton'
 import { YourStorySheet } from '../components/YourStorySheet'
 import { YourStorySidebar } from '../components/YourStorySidebar'
-import { streamBeatProse } from '../lib/claudeStream'
+import { streamBeatProse, generateChoices } from '../lib/claudeStream'
 import { useStreamingTypewriter, useTypewriter } from '../hooks/useTypewriter'
 
 const API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY ?? ''
@@ -21,11 +21,16 @@ export function StoryReaderPage() {
     isGeneratingScene, setIsGeneratingScene,
     selectedChoiceIndex, setSelectedChoiceIndex,
     continuationProse, setContinuationProse,
+    characterState, updateTrust,
+    dynamicChoices, setDynamicChoices,
+    selfieUrl,
   } = useStore()
 
   const [sheetOpen, setSheetOpen] = useState(false)
 
   const chapter = SEOUL_TRANSFER_CHAPTERS[Math.min(currentChapter - 1, SEOUL_TRANSFER_CHAPTERS.length - 1)]
+  const displayChoices = dynamicChoices ?? chapter.choices
+  const [activeSceneImage, setActiveSceneImage] = useState(chapter.sceneImage)
   const abortRef = useRef<AbortController | null>(null)
 
   // Typewriter for opening prose
@@ -40,12 +45,13 @@ export function StoryReaderPage() {
     setSelectedChoiceIndex(null)
     setIsStreaming(false)
     setIsGeneratingScene(false)
+    setActiveSceneImage(chapter.sceneImage)
   }, [currentChapter, currentBeat])
 
   const handleChoice = async (index: number) => {
     if (selectedChoiceIndex !== null || isStreaming) return
 
-    const choice = chapter.choices[index]
+    const choice = displayChoices[index]
 
     // Gem-gated check
     if (choice.gemCost) {
@@ -54,6 +60,13 @@ export function StoryReaderPage() {
     }
 
     setSelectedChoiceIndex(index)
+    setDynamicChoices(null) // clear so next beat starts fresh until new ones are generated
+
+    // Apply trust delta (only static chapter choices have trustDelta)
+    if (!dynamicChoices) {
+      const staticChoice = chapter.choices[index]
+      if (staticChoice?.trustDelta) updateTrust(staticChoice.trustDelta)
+    }
 
     // Record choice
     addChoice({ chapter: currentChapter, chapterTitle: chapter.title, text: choice.text })
@@ -80,24 +93,40 @@ export function StoryReaderPage() {
     // Streaming from Claude
     setIsGeneratingScene(true)
     await new Promise((r) => setTimeout(r, 800)) // brief scene generation feel
+    setActiveSceneImage(chapter.continuationSceneImage)
     setIsGeneratingScene(false)
     setIsStreaming(true)
     resetCont()
 
     abortRef.current = new AbortController()
     try {
+      let fullProse = ''
       const gen = streamBeatProse({
         chapter: currentChapter,
         chapterTitle: chapter.title,
         choiceText: choice.text,
         choiceHistory: choices,
+        characterState,
         apiKey: API_KEY,
         signal: abortRef.current.signal,
       })
       for await (const chunk of gen) {
         append(chunk)
+        fullProse += chunk
       }
       finish()
+
+      // Generate dynamic choices for the next beat in the background
+      generateChoices({
+        chapter: currentChapter,
+        chapterTitle: chapter.title,
+        prose: fullProse,
+        choiceHistory: choices,
+        characterState,
+        apiKey: API_KEY,
+      }).then((generated) => {
+        if (generated.length > 0) setDynamicChoices(generated)
+      })
     } catch (e: unknown) {
       if (e instanceof Error && e.name !== 'AbortError') {
         append('The story continues...')
@@ -129,7 +158,7 @@ export function StoryReaderPage() {
         {/* Scene image — full bleed */}
         <div
           className="absolute inset-0 bg-cover bg-top"
-          style={{ backgroundImage: `url(${chapter.sceneImage})`, backgroundColor: '#1a1525' }}
+          style={{ backgroundImage: `url(${activeSceneImage})`, backgroundColor: '#1a1525', transition: 'background-image 0.6s ease' }}
         />
         <div
           className="absolute inset-0"
@@ -156,7 +185,14 @@ export function StoryReaderPage() {
             <Menu size={22} />
           </button>
           <ProgressBar current={currentBeat} total={TOTAL_BEATS} />
-          <GemCounter />
+          <div className="flex items-center gap-2">
+            {selfieUrl && (
+              <div className="w-8 h-8 rounded-full overflow-hidden border-2 shrink-0" style={{ borderColor: '#c84b9e' }}>
+                <img src={selfieUrl} alt="You" className="w-full h-full object-cover" />
+              </div>
+            )}
+            <GemCounter />
+          </div>
         </div>
 
         {/* Content area */}
@@ -217,7 +253,7 @@ export function StoryReaderPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
               >
-                {chapter.choices.map((choice, i) => (
+                {displayChoices.map((choice, i) => (
                   <ChoiceButton
                     key={i}
                     text={choice.text}
@@ -272,7 +308,7 @@ export function StoryReaderPage() {
             {/* Scene image */}
             <div
               className="absolute inset-0 bg-cover bg-top"
-              style={{ backgroundImage: `url(${chapter.sceneImage})`, backgroundColor: '#1a1525' }}
+              style={{ backgroundImage: `url(${activeSceneImage})`, backgroundColor: '#1a1525', transition: 'background-image 0.6s ease' }}
             />
             <div
               className="absolute inset-0"
@@ -297,7 +333,14 @@ export function StoryReaderPage() {
             <div className="relative z-10 flex items-center justify-between px-8 pt-6 pb-3">
               <div />
               <ProgressBar current={currentBeat} total={TOTAL_BEATS} />
-              <GemCounter />
+              <div className="flex items-center gap-3">
+                {selfieUrl && (
+                  <div className="w-8 h-8 rounded-full overflow-hidden border-2 shrink-0" style={{ borderColor: '#c84b9e' }}>
+                    <img src={selfieUrl} alt="You" className="w-full h-full object-cover" />
+                  </div>
+                )}
+                <GemCounter />
+              </div>
             </div>
 
             {/* Reading column — centered */}

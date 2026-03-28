@@ -37,8 +37,9 @@ export interface Chapter {
   number: number
   title: string
   sceneImage: string
+  continuationSceneImage: string
   openingProse: string
-  choices: { text: string; gemCost?: number }[]
+  choices: { text: string; gemCost?: number; trustDelta?: number }[]
 }
 
 export const SEOUL_TRANSFER_CHAPTERS: Chapter[] = [
@@ -46,32 +47,35 @@ export const SEOUL_TRANSFER_CHAPTERS: Chapter[] = [
     number: 1,
     title: 'First Day',
     sceneImage: '/scene-elevator.jpg',
+    continuationSceneImage: '/scene-studio.jpg',
     openingProse: 'The elevator doors slide open. Standing in front of you is Lee Junho — the lead vocalist of NOVA. He looks as surprised as you are.',
     choices: [
-      { text: 'Say hello first' },
-      { text: "Pretend you don't recognize him" },
-      { text: 'Ask for his number', gemCost: 10 },
+      { text: 'Say hello first', trustDelta: 5 },
+      { text: "Pretend you don't recognize him", trustDelta: -3 },
+      { text: 'Ask for his number', gemCost: 10, trustDelta: 12 },
     ],
   },
   {
     number: 2,
     title: 'The Rehearsal',
     sceneImage: '/scene-studio.jpg',
+    continuationSceneImage: '/scene-rooftop.jpg',
     openingProse: 'The practice room is empty except for the two of you. Music echoes softly from the speakers. Junho sets down his bag and turns to face you.',
     choices: [
-      { text: 'Offer to help with choreography' },
-      { text: 'Ask about his upcoming concert' },
-      { text: 'Stay silent and listen', gemCost: 10 },
+      { text: 'Offer to help with choreography', trustDelta: 10 },
+      { text: 'Ask about his upcoming concert', trustDelta: 4 },
+      { text: 'Stay silent and listen', gemCost: 10, trustDelta: 8 },
     ],
   },
   {
     number: 3,
     title: 'The Rooftop',
     sceneImage: '/scene-rooftop.jpg',
+    continuationSceneImage: '/scene-elevator.jpg',
     openingProse: 'The door swings open. You step out onto the rooftop, expecting silence.\n\nYou don\'t expect him to already be there.',
     choices: [
-      { text: 'Step closer' },
-      { text: 'Stay where you are' },
+      { text: 'Step closer', trustDelta: 12 },
+      { text: 'Stay where you are', trustDelta: 5 },
     ],
   },
 ]

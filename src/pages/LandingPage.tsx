@@ -162,10 +162,15 @@ export function LandingPage() {
       <div className="hidden md:block">
 
         {/* ── Desktop Hero ── */}
-        <div className="relative" style={{ minHeight: '92vh' }}>
-          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/hero-desktop.jpeg)' }} />
-          {/* Overlay: keeps scene visible, only darkens bottom */}
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(13,11,18,0.35) 0%, rgba(13,11,18,0.45) 50%, rgba(13,11,18,0.92) 85%, rgba(13,11,18,1) 100%)' }} />
+        <div className="relative" style={{ height: 700 }}>
+          {/* bg-top anchors the image at the top — neons stay at top edge, darker street falls in the middle where content sits */}
+          <div className="absolute inset-0 bg-cover bg-top" style={{ backgroundImage: 'url(/hero-desktop.jpeg)' }} />
+          {/* Subtle centre scrim so text is always readable */}
+          <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 70% 60% at 50% 58%, rgba(13,11,18,0.55) 0%, rgba(13,11,18,0) 100%)' }} />
+          {/* Top fade */}
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, #0D0B12 0%, #0D0B1200 20%)' }} />
+          {/* Bottom fade */}
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(0deg, #0D0B12 0%, #0D0B1200 40%)' }} />
 
           <div className="relative z-10 page-container mx-auto">
             {/* Nav */}
@@ -181,33 +186,37 @@ export function LandingPage() {
               </div>
             </nav>
 
-            {/* Hero — centered */}
-            <div className="flex flex-col items-center text-center gap-7 px-16 pt-28 pb-32 max-w-3xl mx-auto">
-              <motion.p className="text-[#D4799A] font-semibold text-xs tracking-[2px] uppercase" style={{ fontFamily: SG }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}>
+            {/* Hero — vertically centred in remaining space */}
+            <div className="flex flex-col items-center text-center gap-5 px-16 max-w-3xl mx-auto" style={{ paddingTop: 160 }}>
+              <motion.p className="text-[#D4799A] font-semibold text-xs tracking-[3px] uppercase" style={{ fontFamily: SG }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}>
                 AI · INTERACTIVE · PERSONALIZED
               </motion.p>
 
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-                <h1 className="text-white font-bold" style={{ fontSize: 'clamp(56px, 6vw, 88px)', letterSpacing: -2, lineHeight: 0.92, fontFamily: 'Playfair Display, Georgia, serif' }}>
+                <h1 className="text-white font-bold" style={{ fontSize: 64, letterSpacing: -1, lineHeight: 1.1, fontFamily: SG, textShadow: '0 2px 20px rgba(0,0,0,0.6)' }}>
                   Your face.<br />Your story.
                 </h1>
               </motion.div>
 
-              <motion.p className="text-[#B0A8BF] text-lg leading-relaxed" style={{ maxWidth: 520, fontFamily: SG }} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
-                Upload your photo. AI writes an interactive story where you are the protagonist — every scene, every choice, every outcome.
+              <motion.p
+                className="text-white/90 text-base leading-relaxed"
+                style={{ maxWidth: 480, fontFamily: SG, textShadow: '0 1px 12px rgba(0,0,0,0.9)' }}
+                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
+              >
+                Upload a selfie. Choose a world. Step inside an AI-powered story where you are the main character.
               </motion.p>
 
-              <motion.div className="flex flex-col items-center gap-3" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
+              <motion.div className="flex flex-col items-center gap-3 mt-2" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
                 <button
-                  className="flex items-center justify-center gap-2 text-white font-bold text-base rounded-full px-10 transition-opacity hover:opacity-90"
-                  style={{ height: 56, background: 'linear-gradient(180deg, #D4799A 0%, #9B7EC8 100%)', fontFamily: SG }}
+                  className="flex items-center justify-center gap-2 text-white font-semibold text-base transition-opacity hover:opacity-90"
+                  style={{ height: 52, paddingLeft: 32, paddingRight: 32, borderRadius: 12, background: 'linear-gradient(90deg, #D4799A 0%, #9B7EC8 100%)', fontFamily: SG }}
                   onClick={() => navigate('/upload')}
                 >
                   Start Your Story →
                 </button>
                 <div className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-accent" />
-                  <span className="text-[#6B6275] text-sm" style={{ fontFamily: SG }}>96.7K stories started this week</span>
+                  <span className="text-white/40 text-sm" style={{ fontFamily: SG }}>96.7K stories started this week</span>
                 </div>
               </motion.div>
             </div>
@@ -308,8 +317,8 @@ export function LandingPage() {
 
             <div style={{ height: 1, background: '#1F1F23', marginTop: 32, marginBottom: 24 }} />
             <div className="flex items-center justify-between">
-              <p className="text-[#4A4A4E] text-xs" style={{ fontFamily: INTER }}>© 2025 Chaptr. All rights reserved.</p>
-              <p className="text-[#4A4A4E] text-xs" style={{ fontFamily: INTER }}>Made with AI · Stories powered by imagination</p>
+              <p className="text-[#4A4A4E] text-xs" style={{ fontFamily: INTER }}>© 2026 Chaptr. All rights reserved.</p>
+              <p className="text-[#4A4A4E] text-xs" style={{ fontFamily: INTER }}>Made by Cloud Labs</p>
             </div>
           </div>
         </footer>
@@ -370,8 +379,8 @@ function MobileFooter() {
           ))}
         </div>
         <div className="flex flex-col gap-1">
-          <p className="text-[#4A4A4E] text-xs" style={{ fontFamily: INTER }}>© 2025 Chaptr. All rights reserved.</p>
-          <p className="text-[#4A4A4E] text-xs" style={{ fontFamily: INTER }}>Made with AI · Stories powered by imagination</p>
+          <p className="text-[#4A4A4E] text-xs" style={{ fontFamily: INTER }}>© 2026 Chaptr. All rights reserved.</p>
+          <p className="text-[#4A4A4E] text-xs" style={{ fontFamily: INTER }}>Made by Cloud Labs</p>
         </div>
       </div>
     </footer>

@@ -5,6 +5,8 @@ import { SEOUL_TRANSFER_CHAPTERS } from '../data/storyData'
 export function YourStorySidebar() {
   const choices = useStore((s) => s.choices)
   const currentChapter = useStore((s) => s.currentChapter)
+  const junhoTrust = useStore((s) => s.characterState.junhoTrust)
+  const selfieUrl = useStore((s) => s.selfieUrl)
 
   const grouped = SEOUL_TRANSFER_CHAPTERS.map((ch) => ({
     chapter: ch,
@@ -15,8 +17,38 @@ export function YourStorySidebar() {
 
   return (
     <div className="flex flex-col h-full px-5 py-6">
+      {/* You */}
+      {selfieUrl && (
+        <div className="flex items-center gap-2.5 mb-4">
+          <div className="w-9 h-9 rounded-full overflow-hidden border-2 shrink-0" style={{ borderColor: '#c84b9e' }}>
+            <img src={selfieUrl} alt="You" className="w-full h-full object-cover" />
+          </div>
+          <div>
+            <p className="text-textPrimary text-xs font-semibold">You (Y/N)</p>
+            <p className="text-textMuted text-xs">Main character</p>
+          </div>
+        </div>
+      )}
+
       {/* Universe label */}
-      <p className="text-textMuted text-xs font-semibold uppercase tracking-widest mb-4">The Seoul Transfer</p>
+      <p className="text-textMuted text-xs font-semibold uppercase tracking-widest mb-3">The Seoul Transfer</p>
+
+      {/* Trust bar */}
+      <div className="mb-4 space-y-1">
+        <div className="flex items-center justify-between">
+          <span className="text-textMuted text-xs">Junho</span>
+          <span className="text-textMuted text-xs">{junhoTrust}/100</span>
+        </div>
+        <div className="h-1 rounded-full bg-border overflow-hidden">
+          <div
+            className="h-full rounded-full transition-all duration-700"
+            style={{
+              width: `${junhoTrust}%`,
+              background: junhoTrust > 70 ? 'linear-gradient(90deg,#c84b9e,#8b5cf6)' : junhoTrust > 40 ? '#8b5cf6' : '#4b5563',
+            }}
+          />
+        </div>
+      </div>
 
       {/* Timeline */}
       <div className="flex-1 overflow-y-auto space-y-4">
