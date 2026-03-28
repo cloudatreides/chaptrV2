@@ -1,4 +1,4 @@
-import { CHARACTER_BIBLE } from '../data/storyData'
+import { CHARACTER_BIBLE, CHAPTER_BRIEFS } from '../data/storyData'
 import type { Choice } from '../store/useStore'
 
 export interface StreamBeatParams {
@@ -10,19 +10,22 @@ export interface StreamBeatParams {
   signal?: AbortSignal
 }
 
-function buildSystemPrompt(choiceHistory: Choice[]): string {
+function buildSystemPrompt(choiceHistory: Choice[], chapter: number): string {
   const historyText = choiceHistory.length > 0
-    ? '\n\nPRIOR CHOICES:\n' + choiceHistory.map(
+    ? '\n\nPRIOR CHOICES (these have shaped the story — honour them causally, not just as references):\n' + choiceHistory.map(
         (c) => `- Ch.${c.chapter} "${c.chapterTitle}": ${c.text}`
       ).join('\n')
     : ''
 
-  return `${CHARACTER_BIBLE}${historyText}
+  const brief = CHAPTER_BRIEFS[chapter]
+  const arcText = brief ? `\n\nCHAPTER ARC DESTINATION (must be true by chapter end regardless of choices made):\n${brief}` : ''
+
+  return `${CHARACTER_BIBLE}${historyText}${arcText}
 
 PROSE CONSTRAINTS:
 - Write 2–4 short paragraphs (max 120 words total).
 - Present tense, second person ("you").
-- End on emotional tension or a quiet revelation.
+- End on emotional tension or a quiet revelation that moves toward the arc destination.
 - Do NOT include choices or option labels — only narrative prose.
 - Do NOT start with "You chose" or reference the choice mechanically.`
 }
@@ -44,7 +47,7 @@ export async function* streamBeatProse(params: StreamBeatParams): AsyncGenerator
       model: 'claude-haiku-4-5',
       max_tokens: 300,
       stream: true,
-      system: buildSystemPrompt(choiceHistory),
+      system: buildSystemPrompt(choiceHistory, chapter),
       messages: [{ role: 'user', content: userMessage }],
     }),
     signal,

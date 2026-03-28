@@ -76,6 +76,14 @@ export const SEOUL_TRANSFER_CHAPTERS: Chapter[] = [
   },
 ]
 
+// Arc destination per chapter — what MUST be true by the end regardless of choices.
+// User choices change the texture of how we get there, not the destination.
+export const CHAPTER_BRIEFS: Record<number, string> = {
+  1: 'By the end of this chapter, Junho and the protagonist have had their first real moment of connection — unexpected, slightly charged, not resolved. Junho has revealed one small unguarded thing about himself. The protagonist has made an impression, positive or complicated depending on the choice made.',
+  2: 'By the end of this chapter, the rehearsal has become unexpectedly personal. Something Junho does or says reveals the pressure he is under. The protagonist has crossed from observer to someone Junho is aware of. The dynamic has shifted — there is now something unspoken between them.',
+  3: 'By the end of this chapter, the rooftop scene ends with a moment of near-confession — something almost said, then pulled back. The reader should feel the weight of what wasn\'t said more than what was. This is the emotional peak of Act 1.',
+}
+
 export const CHARACTER_BIBLE = `
 STORY: The Seoul Transfer
 SETTING: Seoul Arts Academy, present day.
