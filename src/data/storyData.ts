@@ -29,6 +29,36 @@ export const UNIVERSES: Universe[] = [
     locked: true,
     lockedLabel: 'SOON',
   },
+  {
+    id: 'hollow-manor',
+    title: 'Hollow Manor',
+    genre: 'HORROR',
+    genreTag: 'SUPERNATURAL HORROR',
+    description: 'You inherit a crumbling estate on the edge of a dying town. Something inside the walls has been waiting for you.',
+    image: '/sakura.jpg',
+    locked: true,
+    lockedLabel: 'SOON',
+  },
+  {
+    id: 'the-last-signal',
+    title: 'The Last Signal',
+    genre: 'MYSTERY',
+    genreTag: 'NOIR MYSTERY',
+    description: 'A missing person. A city full of liars. You have 48 hours before the only witness disappears for good.',
+    image: '/seoul-night.jpg',
+    locked: true,
+    lockedLabel: 'SOON',
+  },
+  {
+    id: 'edge-of-atlas',
+    title: 'Edge of Atlas',
+    genre: 'ADVENTURE',
+    genreTag: 'EPIC ADVENTURE',
+    description: 'The map ends here. Beyond it, three lost civilisations and the one artefact that could rewrite history.',
+    image: '/sakura.jpg',
+    locked: true,
+    lockedLabel: 'SOON',
+  },
 ]
 
 export const GENRE_FILTERS = ['ALL', 'ROMANCE', 'HORROR', 'MYSTERY', 'ADVENTURE']
