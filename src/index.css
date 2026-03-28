@@ -1,0 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  background-color: #0d0a12;
+  color: #f0ecf8;
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100svh;
+}
+
+/* Page container — 1440px max-width centered */
+.page-container {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+/* Accent gradient button */
+.btn-accent {
+  @apply w-full py-4 rounded-2xl font-semibold text-white text-base tracking-wide transition-opacity;
+  background: linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%);
+}
+.btn-accent:hover {
+  opacity: 0.9;
+}
+.btn-accent:active {
+  opacity: 0.8;
+}
+
+/* Choice button */
+.choice-btn {
+  @apply w-full flex items-center justify-between px-4 py-4 rounded-xl text-left text-textPrimary text-sm font-medium transition-all;
+  background: rgba(26, 21, 37, 0.85);
+  border: 1px solid rgba(42, 32, 64, 0.8);
+  backdrop-filter: blur(12px);
+}
+.choice-btn:hover {
+  border-color: rgba(200, 75, 158, 0.5);
+  background: rgba(42, 21, 60, 0.85);
+}
+.choice-btn.selected {
+  border-color: rgba(200, 75, 158, 0.8);
+  background: rgba(200, 75, 158, 0.15);
+}
+.choice-btn.dimmed {
+  opacity: 0.4;
+}
+.choice-btn.locked {
+  opacity: 0.6;
+}
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #1a1525 25%, #2a2040 50%, #1a1525 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+/* Typewriter cursor blink */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.cursor-blink {
+  animation: blink 1s step-end infinite;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #0d0a12;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2040;
+  border-radius: 2px;
+}

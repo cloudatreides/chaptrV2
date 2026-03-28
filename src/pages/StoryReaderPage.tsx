@@ -1,0 +1,412 @@
+import { useEffect, useRef, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Menu } from 'lucide-react'
+import { useStore } from '../store/useStore'
+import { SEOUL_TRANSFER_CHAPTERS } from '../data/storyData'
+import { GemCounter } from '../components/GemCounter'
+import { ChoiceButton } from '../components/ChoiceButton'
+import { YourStorySheet } from '../components/YourStorySheet'
+import { YourStorySidebar } from '../components/YourStorySidebar'
+import { streamBeatProse } from '../lib/claudeStream'
+import { useStreamingTypewriter, useTypewriter } from '../hooks/useTypewriter'
+
+const API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY ?? ''
+const TOTAL_BEATS = 5
+
+export function StoryReaderPage() {
+  const {
+    currentChapter, currentBeat,
+    choices, addChoice, advanceChapter, advanceBeat,
+    isStreaming, setIsStreaming,
+    isGeneratingScene, setIsGeneratingScene,
+    selectedChoiceIndex, setSelectedChoiceIndex,
+    continuationProse, setContinuationProse,
+  } = useStore()
+
+  const [sheetOpen, setSheetOpen] = useState(false)
+
+  const chapter = SEOUL_TRANSFER_CHAPTERS[Math.min(currentChapter - 1, SEOUL_TRANSFER_CHAPTERS.length - 1)]
+  const abortRef = useRef<AbortController | null>(null)
+
+  // Typewriter for opening prose
+  const { displayed: openingDisplayed, done: openingDone } = useTypewriter(chapter.openingProse, 20)
+  // Streaming typewriter for continuation
+  const { displayed: contDisplayed, isTyping, append, finish, reset: resetCont } = useStreamingTypewriter(18)
+
+  // Reset continuation when chapter/beat changes
+  useEffect(() => {
+    resetCont()
+    setContinuationProse('')
+    setSelectedChoiceIndex(null)
+    setIsStreaming(false)
+    setIsGeneratingScene(false)
+  }, [currentChapter, currentBeat])
+
+  const handleChoice = async (index: number) => {
+    if (selectedChoiceIndex !== null || isStreaming) return
+
+    const choice = chapter.choices[index]
+
+    // Gem-gated check
+    if (choice.gemCost) {
+      const ok = useStore.getState().spendGems(choice.gemCost)
+      if (!ok) return
+    }
+
+    setSelectedChoiceIndex(index)
+
+    // Record choice
+    addChoice({ chapter: currentChapter, chapterTitle: chapter.title, text: choice.text })
+
+    if (!API_KEY) {
+      // Fallback static prose
+      const fallbacks = [
+        '"Hi," you say, before you can stop yourself.\n\n"I\'m Y/N."\n\nJunho blinks. Then, unexpectedly, smiles.',
+        'You turn away as if the neon signs outside demand all your attention.\n\nBut you can feel him watching you anyway.',
+        'You lean forward, heart hammering.\n\n"Can I have your number?" you hear yourself ask.\n\nHe pauses — one beat, two. Then he takes out his phone.',
+      ]
+      setIsGeneratingScene(true)
+      await new Promise((r) => setTimeout(r, 2200))
+      setIsGeneratingScene(false)
+      const text = fallbacks[index % fallbacks.length]
+      setContinuationProse(text)
+      setIsStreaming(true)
+      append(text)
+      finish()
+      setIsStreaming(false)
+      return
+    }
+
+    // Streaming from Claude
+    setIsGeneratingScene(true)
+    await new Promise((r) => setTimeout(r, 800)) // brief scene generation feel
+    setIsGeneratingScene(false)
+    setIsStreaming(true)
+    resetCont()
+
+    abortRef.current = new AbortController()
+    try {
+      const gen = streamBeatProse({
+        chapter: currentChapter,
+        chapterTitle: chapter.title,
+        choiceText: choice.text,
+        choiceHistory: choices,
+        apiKey: API_KEY,
+        signal: abortRef.current.signal,
+      })
+      for await (const chunk of gen) {
+        append(chunk)
+      }
+      finish()
+    } catch (e: unknown) {
+      if (e instanceof Error && e.name !== 'AbortError') {
+        append('The story continues...')
+        finish()
+      }
+    } finally {
+      setIsStreaming(false)
+    }
+  }
+
+  const handleNextBeat = () => {
+    if (currentBeat >= TOTAL_BEATS) {
+      if (currentChapter < SEOUL_TRANSFER_CHAPTERS.length) {
+        advanceChapter()
+      }
+    } else {
+      advanceBeat()
+    }
+  }
+
+  const isChapterStart = currentBeat === 1
+  const showContinuation = selectedChoiceIndex !== null && !isGeneratingScene
+  const continuationText = contDisplayed || continuationProse
+
+  return (
+    <div className="bg-bg min-h-screen">
+      {/* ─── MOBILE ─── */}
+      <div className="lg:hidden relative min-h-screen flex flex-col">
+        {/* Scene image — full bleed */}
+        <div
+          className="absolute inset-0 bg-cover bg-top"
+          style={{ backgroundImage: `url(${chapter.sceneImage})`, backgroundColor: '#1a1525' }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(to bottom, rgba(13,10,18,0) 0%, rgba(13,10,18,0.4) 45%, rgba(13,10,18,0.95) 65%, rgba(13,10,18,1) 100%)' }}
+        />
+
+        {/* Loading overlay */}
+        <AnimatePresence>
+          {isGeneratingScene && (
+            <motion.div
+              className="absolute inset-0 z-30 flex flex-col items-center justify-center"
+              style={{ background: 'rgba(13,10,18,0.85)' }}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            >
+              <LoadingSpinner />
+              <p className="text-textSecondary text-sm mt-4">Generating your scene...</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Nav */}
+        <div className="relative z-10 flex items-center justify-between px-5 pt-10 pb-3">
+          <button onClick={() => setSheetOpen(true)} className="text-textSecondary hover:text-textPrimary transition-colors">
+            <Menu size={22} />
+          </button>
+          <ProgressBar current={currentBeat} total={TOTAL_BEATS} />
+          <GemCounter />
+        </div>
+
+        {/* Content area */}
+        <div className="relative z-10 mt-auto px-5 pb-6 flex flex-col gap-4">
+          {/* Chapter label */}
+          <div className="flex items-center justify-between">
+            <p className="text-textMuted text-xs">Chapter {currentChapter} — {chapter.title}</p>
+            <p className="text-textMuted text-xs">{currentBeat}/{TOTAL_BEATS}</p>
+          </div>
+
+          {/* Prose */}
+          <div className="space-y-3 min-h-[80px]">
+            {isChapterStart ? (
+              <p className="text-textPrimary text-base leading-relaxed whitespace-pre-line">
+                {openingDisplayed}
+                {!openingDone && <span className="cursor-blink text-accent">|</span>}
+              </p>
+            ) : (
+              <p className="text-textPrimary text-base leading-relaxed whitespace-pre-line">
+                {chapter.openingProse}
+              </p>
+            )}
+
+            {/* Continuation */}
+            <AnimatePresence>
+              {showContinuation && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  <p className="text-textPrimary text-base leading-relaxed whitespace-pre-line">
+                    {continuationText}
+                    {isTyping && <span className="cursor-blink text-accent">|</span>}
+                  </p>
+                  {!isTyping && continuationText && !isStreaming && (
+                    <p className="text-textMuted text-xs mt-1 flex items-center gap-1">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                      Writing your story...
+                    </p>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Streaming placeholder */}
+          {isStreaming && !contDisplayed && (
+            <div className="space-y-2">
+              <div className="skeleton h-3 w-full" />
+              <div className="skeleton h-3 w-4/5" />
+              <div className="skeleton h-3 w-3/4" />
+            </div>
+          )}
+
+          {/* Choices */}
+          <AnimatePresence mode="wait">
+            {(!showContinuation || isTyping) && !isGeneratingScene && (
+              <motion.div
+                className="space-y-2"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+              >
+                {chapter.choices.map((choice, i) => (
+                  <ChoiceButton
+                    key={i}
+                    text={choice.text}
+                    gemCost={choice.gemCost}
+                    index={i}
+                    selectedIndex={selectedChoiceIndex}
+                    disabled={isStreaming}
+                    onSelect={handleChoice}
+                  />
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Continue to next beat */}
+          {showContinuation && !isTyping && !isStreaming && (
+            <motion.button
+              className="choice-btn justify-center"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              onClick={handleNextBeat}
+            >
+              Continue →
+            </motion.button>
+          )}
+        </div>
+
+        {/* Your Story sheet */}
+        <YourStorySheet open={sheetOpen} onClose={() => setSheetOpen(false)} />
+      </div>
+
+      {/* ─── DESKTOP ─── */}
+      <div className="hidden lg:flex min-h-screen">
+        <div className="page-container flex w-full mx-auto">
+          {/* Left sidebar — Your Story */}
+          <aside
+            className="w-[260px] shrink-0 flex flex-col border-r border-border sticky top-0 h-screen overflow-y-auto"
+            style={{ background: '#0f0c18' }}
+          >
+            {/* Logo */}
+            <div className="flex items-center gap-2 px-5 pt-6 pb-4 border-b border-border">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%)' }}>
+                <span className="text-white font-bold text-sm">C</span>
+              </div>
+              <span className="text-textPrimary font-semibold">chaptr</span>
+            </div>
+            <YourStorySidebar />
+          </aside>
+
+          {/* Main reading area */}
+          <div className="flex-1 relative flex flex-col min-h-screen">
+            {/* Scene image */}
+            <div
+              className="absolute inset-0 bg-cover bg-top"
+              style={{ backgroundImage: `url(${chapter.sceneImage})`, backgroundColor: '#1a1525' }}
+            />
+            <div
+              className="absolute inset-0"
+              style={{ background: 'linear-gradient(to bottom, rgba(13,10,18,0) 0%, rgba(13,10,18,0.5) 40%, rgba(13,10,18,0.95) 65%, rgba(13,10,18,1) 100%)' }}
+            />
+
+            {/* Loading overlay */}
+            <AnimatePresence>
+              {isGeneratingScene && (
+                <motion.div
+                  className="absolute inset-0 z-30 flex flex-col items-center justify-center"
+                  style={{ background: 'rgba(13,10,18,0.85)' }}
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                >
+                  <LoadingSpinner />
+                  <p className="text-textSecondary text-sm mt-4">Generating your scene...</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Desktop nav bar */}
+            <div className="relative z-10 flex items-center justify-between px-8 pt-6 pb-3">
+              <div />
+              <ProgressBar current={currentBeat} total={TOTAL_BEATS} />
+              <GemCounter />
+            </div>
+
+            {/* Reading column — centered */}
+            <div className="relative z-10 mt-auto mx-auto w-full max-w-[680px] px-6 pb-10 flex flex-col gap-5">
+              {/* Chapter label */}
+              <div className="flex items-center justify-between">
+                <p className="text-textMuted text-xs uppercase tracking-widest">Chapter {currentChapter} — {chapter.title}</p>
+                <p className="text-textMuted text-xs">{currentBeat}/{TOTAL_BEATS}</p>
+              </div>
+
+              {/* Prose */}
+              <div className="space-y-4 min-h-[80px]">
+                {isChapterStart ? (
+                  <p className="text-textPrimary text-lg leading-relaxed whitespace-pre-line">
+                    {openingDisplayed}
+                    {!openingDone && <span className="cursor-blink text-accent">|</span>}
+                  </p>
+                ) : (
+                  <p className="text-textPrimary text-lg leading-relaxed whitespace-pre-line">
+                    {chapter.openingProse}
+                  </p>
+                )}
+
+                <AnimatePresence>
+                  {showContinuation && (
+                    <motion.p
+                      className="text-textPrimary text-lg leading-relaxed whitespace-pre-line"
+                      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                    >
+                      {continuationText}
+                      {isTyping && <span className="cursor-blink text-accent">|</span>}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+
+                {isStreaming && !contDisplayed && (
+                  <div className="space-y-2">
+                    <div className="skeleton h-4 w-full" />
+                    <div className="skeleton h-4 w-4/5" />
+                    <div className="skeleton h-4 w-3/4" />
+                  </div>
+                )}
+              </div>
+
+              {/* Choices */}
+              <AnimatePresence mode="wait">
+                {(!showContinuation || isTyping) && !isGeneratingScene && (
+                  <motion.div
+                    className="space-y-2"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    {chapter.choices.map((choice, i) => (
+                      <ChoiceButton
+                        key={i}
+                        text={choice.text}
+                        gemCost={choice.gemCost}
+                        index={i}
+                        selectedIndex={selectedChoiceIndex}
+                        disabled={isStreaming}
+                        onSelect={handleChoice}
+                      />
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {showContinuation && !isTyping && !isStreaming && (
+                <motion.button
+                  className="choice-btn justify-center"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  onClick={handleNextBeat}
+                >
+                  Continue →
+                </motion.button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ProgressBar({ current, total }: { current: number; total: number }) {
+  const progress = (current / total) * 100
+  return (
+    <div className="flex-1 max-w-[200px] mx-4">
+      <div className="h-0.5 rounded-full bg-border overflow-hidden">
+        <motion.div
+          className="h-full rounded-full"
+          style={{ background: 'linear-gradient(90deg, #c84b9e 0%, #8b5cf6 100%)' }}
+          initial={{ width: 0 }}
+          animate={{ width: `${progress}%` }}
+          transition={{ duration: 0.4 }}
+        />
+      </div>
+    </div>
+  )
+}
+
+function LoadingSpinner() {
+  return (
+    <motion.div
+      className="w-12 h-12 rounded-full border-2 border-transparent border-t-accent"
+      animate={{ rotate: 360 }}
+      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+    />
+  )
+}
