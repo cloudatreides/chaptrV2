@@ -163,14 +163,13 @@ export function LandingPage() {
 
         {/* ── Desktop Hero ── */}
         <div className="relative" style={{ height: 700 }}>
-          {/* bg-top anchors the image at the top — neons stay at top edge, darker street falls in the middle where content sits */}
-          <div className="absolute inset-0 bg-cover bg-top" style={{ backgroundImage: 'url(/hero-desktop.jpeg)' }} />
-          {/* Subtle centre scrim so text is always readable */}
-          <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 70% 60% at 50% 58%, rgba(13,11,18,0.55) 0%, rgba(13,11,18,0) 100%)' }} />
-          {/* Top fade */}
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, #0D0B12 0%, #0D0B1200 20%)' }} />
-          {/* Bottom fade */}
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(0deg, #0D0B12 0%, #0D0B1200 40%)' }} />
+          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/hero-desktop.jpeg)' }} />
+          {/* Dark scrim over the centre where content sits */}
+          <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 80% 70% at 50% 55%, rgba(13,11,18,0.62) 0%, rgba(13,11,18,0) 100%)' }} />
+          {/* Top edge fade */}
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, #0D0B12 0%, rgba(13,11,18,0) 18%)' }} />
+          {/* Bottom edge fade */}
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(0deg, #0D0B12 0%, rgba(13,11,18,0) 35%)' }} />
 
           <div className="relative z-10 page-container mx-auto">
             {/* Nav */}
