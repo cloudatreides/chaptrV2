@@ -12,7 +12,7 @@ export function LandingPage() {
         {/* Full-screen bg image */}
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: 'url(/seoul-night.jpg)' }}
+          style={{ backgroundImage: 'url(/hero-landing.jpeg)' }}
         />
         {/* Gradient overlay */}
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(13,10,18,0.3) 0%, rgba(13,10,18,0.5) 50%, rgba(13,10,18,1) 80%)' }} />
@@ -90,7 +90,7 @@ export function LandingPage() {
           {/* Full-width bg */}
           <div
             className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: 'url(/seoul-night.jpg)' }}
+            style={{ backgroundImage: 'url(/hero-landing.jpeg)' }}
           />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(13,10,18,0.4) 0%, rgba(13,10,18,0.7) 60%, rgba(13,10,18,1) 100%)' }} />
 
