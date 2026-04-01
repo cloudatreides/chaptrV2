@@ -17,13 +17,7 @@ interface Props {
 
 export function ChatScene({ stepId, characterId, maxExchanges, storyContext, onComplete }: Props) {
   const character = CHARACTERS[characterId]
-  const { chatHistory, addChatMessage, setChatSummary, characterState, bio } = useStore()
-
-  // Messages for THIS chat scene only
-  const sceneMessages = chatHistory.filter(
-    (m) => m.characterId === characterId && m.timestamp >= (sceneStartRef.current ?? 0)
-  )
-  const sceneStartRef = useRef(Date.now())
+  const { addChatMessage, setChatSummary, characterState, bio } = useStore()
   const [localMessages, setLocalMessages] = useState<{ role: 'user' | 'character'; content: string }[]>([])
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)

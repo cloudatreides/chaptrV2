@@ -4,9 +4,7 @@ import { Menu } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { STORY_STEPS, getActiveSteps, getTotalBeats, getCurrentBeatNumber } from '../data/storyData'
-import { CHARACTERS } from '../data/characters'
 import { GemCounter } from '../components/GemCounter'
-import { ChoiceButton } from '../components/ChoiceButton'
 import { ChoicePoint } from '../components/ChoicePoint'
 import { ChatScene } from '../components/ChatScene'
 import { YourStorySheet } from '../components/YourStorySheet'
@@ -20,11 +18,11 @@ const API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY ?? ''
 export function StoryReaderPage() {
   const navigate = useNavigate()
   const {
-    currentStepIndex, advanceStep, setCurrentStepIndex,
+    currentStepIndex, advanceStep,
     branchChoices, setBranchChoice,
     choiceDescriptions, addChoiceDescription,
     characterState, updateTrust,
-    trustStatusLabel, setTrustStatusLabel,
+    setTrustStatusLabel,
     selfieUrl, bio,
     isStreaming, setIsStreaming,
     isGeneratingScene, setIsGeneratingScene,
@@ -399,7 +397,7 @@ interface BeatContentProps {
 }
 
 function BeatContent({
-  step, isFirstBeat,
+  step: _step, isFirstBeat,
   openingDisplayed, openingDone,
   streamDisplayed, isTyping, isStreaming, isGeneratingScene,
   hasChosenBeat, beatProse,
