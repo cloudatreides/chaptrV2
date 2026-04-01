@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { ChevronLeft, BookOpen, Lock } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ChevronLeft, BookOpen, Lock, X } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { UNIVERSES, GENRE_FILTERS } from '../data/storyData'
+import type { Universe } from '../data/storyData'
 
 export function UniversesPage() {
   const navigate = useNavigate()
@@ -11,16 +12,15 @@ export function UniversesPage() {
   const resetStory = useStore((s) => s.resetStory)
   const [activeFilter, setActiveFilter] = useState('ALL')
   const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const [selectedUniverse, setSelected] = useState<Universe | null>(null)
 
   const filtered = UNIVERSES.filter(
     (u) => activeFilter === 'ALL' || u.genre === activeFilter
   )
 
-  const selectedId = UNIVERSES.find((u) => !u.locked)?.id ?? null
-
   const handleBegin = () => {
-    if (!selectedId) return
-    setSelectedUniverse(selectedId)
+    if (!selectedUniverse) return
+    setSelectedUniverse(selectedUniverse.id)
     resetStory()
     navigate('/bio')
   }
@@ -48,7 +48,7 @@ export function UniversesPage() {
         {/* Heading */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="text-textPrimary font-bold text-3xl mb-1">Choose Your Story</h1>
-          <p className="text-textSecondary text-base mb-5">Pick a universe. Your story begins here.</p>
+          <p className="text-textSecondary text-base mb-5">Tap a universe to begin.</p>
         </motion.div>
 
         {/* Genre filters */}
@@ -76,7 +76,7 @@ export function UniversesPage() {
         </motion.div>
 
         {/* Story cards */}
-        <div className="flex-1 space-y-4 overflow-y-auto pb-4">
+        <div className="flex-1 space-y-4 overflow-y-auto pb-8 safe-bottom">
           {filtered.map((universe, i) => (
             <motion.div
               key={universe.id}
@@ -87,7 +87,7 @@ export function UniversesPage() {
               style={{ border: hoveredId === universe.id && !universe.locked ? '1px solid rgba(200,75,158,0.5)' : '1px solid #2a2040' }}
               onMouseEnter={() => !universe.locked && setHoveredId(universe.id)}
               onMouseLeave={() => setHoveredId(null)}
-              onClick={() => !universe.locked && setSelectedUniverse(universe.id)}
+              onClick={() => !universe.locked && setSelected(universe)}
             >
               {/* Image */}
               <div
@@ -124,21 +124,76 @@ export function UniversesPage() {
             </motion.div>
           ))}
         </div>
-
-        {/* CTA */}
-        <motion.div
-          className="pt-4 pb-8 space-y-3 safe-bottom"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <button className="btn-accent flex items-center justify-center gap-2" onClick={handleBegin}>
-            <BookOpen size={18} />
-            Begin Story
-          </button>
-          <p className="text-center text-textMuted text-xs">Get notified when Sakura Academy launches</p>
-        </motion.div>
       </div>
+
+      {/* ── Begin Story Modal ── */}
+      <AnimatePresence>
+        {selectedUniverse && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              className="fixed inset-0 z-40"
+              style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelected(null)}
+            />
+
+            {/* Modal */}
+            <motion.div
+              className="fixed z-50 left-1/2 bottom-0 md:bottom-auto md:top-1/2 w-full max-w-md"
+              style={{ transform: 'translateX(-50%)' }}
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 40 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            >
+              <div
+                className="mx-4 mb-6 md:mb-0 rounded-2xl overflow-hidden"
+                style={{ background: '#13101c', border: '1px solid #2a2040' }}
+              >
+                {/* Image header */}
+                <div
+                  className="h-44 bg-cover bg-center relative"
+                  style={{ backgroundImage: `url(${selectedUniverse.image})`, backgroundColor: '#1a1525' }}
+                >
+                  <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(19,16,28,0) 30%, rgba(19,16,28,1) 100%)' }} />
+                  <button
+                    className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center text-white/60 hover:text-white transition-colors"
+                    style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)' }}
+                    onClick={() => setSelected(null)}
+                  >
+                    <X size={16} />
+                  </button>
+                  <div className="absolute bottom-3 left-4">
+                    <span
+                      className="text-xs font-bold px-2 py-1 rounded-full"
+                      style={{ background: 'rgba(200,75,158,0.4)', color: '#f0ecf8', backdropFilter: 'blur(4px)' }}
+                    >
+                      {selectedUniverse.genreTag}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="px-5 pb-5 pt-1">
+                  <h3 className="text-textPrimary font-bold text-xl mb-2">{selectedUniverse.title}</h3>
+                  <p className="text-textSecondary text-sm leading-relaxed mb-5">{selectedUniverse.description}</p>
+
+                  <button
+                    className="btn-accent flex items-center justify-center gap-2"
+                    onClick={handleBegin}
+                  >
+                    <BookOpen size={18} />
+                    Begin Story
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
