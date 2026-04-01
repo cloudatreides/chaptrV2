@@ -127,7 +127,7 @@ export function UniversesPage() {
 
         {/* CTA */}
         <motion.div
-          className="pt-4 pb-8 space-y-3"
+          className="pt-4 pb-8 space-y-3 safe-bottom"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}

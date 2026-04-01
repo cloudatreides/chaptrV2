@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -131,4 +131,26 @@ html, body {
 ::-webkit-scrollbar-thumb {
   background: #2a2040;
   border-radius: 2px;
+}
+
+/* Safe area insets for modern mobile devices */
+@supports (padding: env(safe-area-inset-top)) {
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Scene fallback overlay — used when no Together AI key */
+.scene-fallback-overlay {
+  position: relative;
+}
+.scene-fallback-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(200,75,158,0.08) 0%, rgba(139,92,246,0.08) 100%);
+  pointer-events: none;
 }

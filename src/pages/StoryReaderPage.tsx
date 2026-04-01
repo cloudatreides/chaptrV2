@@ -45,8 +45,8 @@ export function StoryReaderPage() {
   const [hasChosenBeat, setHasChosenBeat] = useState(false)
   const abortRef = useRef<AbortController | null>(null)
 
-  // Scene image for current step
-  const currentImage = sceneImages[currentStep?.id] ?? currentStep?.staticImage ?? '/scene-elevator.jpg'
+  // Scene image for current step — prefer AI-generated, then static, then gradient fallback
+  const currentImage = sceneImages[currentStep?.id] ?? currentStep?.staticImage ?? null
 
   // Typewriter for opening prose (beat-1 only)
   const isFirstBeat = currentStep?.id === 'beat-1'
@@ -243,13 +243,17 @@ export function StoryReaderPage() {
     <div className="bg-bg min-h-screen">
       {/* ─── MOBILE ─── */}
       <div className="lg:hidden relative min-h-screen flex flex-col">
-        {/* Scene image */}
+        {/* Scene image or atmospheric gradient fallback */}
         {!isFullScreenStep && (
           <>
-            <div
-              className="absolute inset-0 bg-cover bg-top transition-all duration-700"
-              style={{ backgroundImage: `url(${currentImage})`, backgroundColor: '#1a1525' }}
-            />
+            {currentImage ? (
+              <div
+                className="absolute inset-0 bg-cover bg-top transition-all duration-700"
+                style={{ backgroundImage: `url(${currentImage})`, backgroundColor: '#1a1525' }}
+              />
+            ) : (
+              <SceneFallbackGradient stepId={currentStep?.id} />
+            )}
             <div
               className="absolute inset-0"
               style={{ background: 'linear-gradient(to bottom, rgba(13,10,18,0) 0%, rgba(13,10,18,0.4) 45%, rgba(13,10,18,0.95) 65%, rgba(13,10,18,1) 100%)' }}
@@ -271,7 +275,7 @@ export function StoryReaderPage() {
         </AnimatePresence>
 
         {/* Nav */}
-        <div className="relative z-10 flex items-center justify-between px-5 pt-10 pb-3">
+        <div className="relative z-10 flex items-center justify-between px-5 pt-10 pb-3 safe-top">
           <button onClick={() => setSheetOpen(true)} className="text-textSecondary hover:text-textPrimary transition-colors">
             <Menu size={22} />
           </button>
@@ -292,7 +296,7 @@ export function StoryReaderPage() {
             {renderStepContent()}
           </div>
         ) : (
-          <div className="relative z-10 mt-auto px-5 pb-6 flex flex-col gap-4">
+          <div className="relative z-10 mt-auto px-5 pb-6 safe-bottom flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <p className="text-textMuted text-xs">Chapter 1 — {currentStep.title}</p>
               <TrustIndicator />
@@ -326,10 +330,14 @@ export function StoryReaderPage() {
             {/* Scene — top (only for beats) */}
             {!isFullScreenStep && (
               <div className="relative flex-none" style={{ height: '45vh' }}>
-                <div
-                  className="absolute inset-0 bg-cover bg-center transition-all duration-700"
-                  style={{ backgroundImage: `url(${currentImage})`, backgroundColor: '#1a1525' }}
-                />
+                {currentImage ? (
+                  <div
+                    className="absolute inset-0 bg-cover bg-center transition-all duration-700"
+                    style={{ backgroundImage: `url(${currentImage})`, backgroundColor: '#1a1525' }}
+                  />
+                ) : (
+                  <SceneFallbackGradient stepId={currentStep?.id} />
+                )}
                 <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(13,10,18,0.25) 0%, rgba(13,10,18,0) 35%, rgba(13,10,18,0.9) 85%, rgba(13,10,18,1) 100%)' }} />
                 <AnimatePresence>
                   {isGeneratingScene && (
@@ -509,6 +517,25 @@ function TheatricalLoader({ title }: { title: string }) {
       </div>
       <p className="text-textMuted text-xs mt-1">{title} — Seoul Arts Academy</p>
     </div>
+  )
+}
+
+// Atmospheric gradient fallback when no scene image is available
+const FALLBACK_GRADIENTS: Record<string, string> = {
+  'beat-1': 'radial-gradient(ellipse at 50% 30%, rgba(200,75,158,0.15) 0%, rgba(13,10,18,1) 70%)',
+  'beat-2': 'radial-gradient(ellipse at 30% 40%, rgba(139,92,246,0.15) 0%, rgba(13,10,18,1) 70%)',
+  'beat-3a': 'radial-gradient(ellipse at 60% 35%, rgba(200,75,158,0.12) 0%, rgba(13,10,18,1) 70%)',
+  'beat-3b': 'radial-gradient(ellipse at 40% 50%, rgba(99,102,241,0.15) 0%, rgba(13,10,18,1) 70%)',
+  'ending-approach-confront': 'radial-gradient(ellipse at 50% 40%, rgba(220,50,80,0.15) 0%, rgba(13,10,18,1) 70%)',
+  'ending-approach-stay': 'radial-gradient(ellipse at 50% 40%, rgba(255,170,100,0.12) 0%, rgba(13,10,18,1) 70%)',
+  'ending-follow-trust': 'radial-gradient(ellipse at 50% 40%, rgba(167,139,250,0.15) 0%, rgba(13,10,18,1) 70%)',
+  'ending-follow-deflect': 'radial-gradient(ellipse at 50% 40%, rgba(100,130,200,0.15) 0%, rgba(13,10,18,1) 70%)',
+}
+
+function SceneFallbackGradient({ stepId }: { stepId?: string }) {
+  const gradient = FALLBACK_GRADIENTS[stepId ?? ''] ?? FALLBACK_GRADIENTS['beat-1']
+  return (
+    <div className="absolute inset-0" style={{ background: gradient }} />
   )
 }
 

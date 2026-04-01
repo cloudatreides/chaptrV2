@@ -123,7 +123,7 @@ export function BioPage() {
 
         {/* CTA */}
         <motion.div
-          className="mt-auto space-y-3 pb-8"
+          className="mt-auto space-y-3 pb-8 safe-bottom"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}

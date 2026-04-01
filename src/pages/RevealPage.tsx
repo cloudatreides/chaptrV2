@@ -112,7 +112,7 @@ export function RevealPage() {
       <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at center, rgba(13,10,18,0.6) 0%, rgba(13,10,18,0.95) 100%)' }} />
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center text-center px-8 max-w-lg">
+      <div className="relative z-10 flex flex-col items-center text-center px-6 md:px-8 max-w-lg w-full">
         {isLoading ? (
           <motion.div
             className="flex flex-col items-center gap-4"
@@ -155,7 +155,7 @@ export function RevealPage() {
             <div className="min-h-[80px] flex items-center justify-center mb-8">
               <p
                 className="text-textPrimary font-light leading-relaxed"
-                style={{ fontSize: 28, fontFamily: "'Playfair Display', Georgia, serif", letterSpacing: '-0.5px' }}
+                style={{ fontSize: 'clamp(22px, 5vw, 28px)', fontFamily: "'Playfair Display', Georgia, serif", letterSpacing: '-0.5px' }}
               >
                 {revealedWords.map((word, i) => (
                   <motion.span
@@ -173,7 +173,7 @@ export function RevealPage() {
 
             {/* Actions */}
             <motion.div
-              className="flex flex-col gap-3 w-full max-w-[280px]"
+              className="flex flex-col gap-3 w-full max-w-[280px] pb-6 safe-bottom"
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: showFull ? 1 : 0, y: showFull ? 0 : 16 }}
               transition={{ duration: 0.4 }}

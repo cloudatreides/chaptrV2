@@ -226,7 +226,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, storyContext, onC
         {isDone ? (
           <motion.div
             key="continue"
-            className="px-5 pb-6 pt-3"
+            className="px-5 pb-6 pt-3 safe-bottom"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
           >
@@ -237,7 +237,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, storyContext, onC
         ) : (
           <motion.div
             key="input"
-            className="px-5 pb-6 pt-3 border-t border-border"
+            className="px-5 pb-6 pt-3 border-t border-border safe-bottom"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
           >
