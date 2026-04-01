@@ -20,12 +20,12 @@ export function UploadPage() {
 
   const handleConfirm = () => {
     if (preview) setSelfieUrl(preview)
-    navigate('/universes')
+    navigate('/story')
   }
 
   const handleSkip = () => {
     setSelfieUrl(null)
-    navigate('/universes')
+    navigate('/story')
   }
 
   return (
@@ -39,7 +39,7 @@ export function UploadPage() {
             </div>
             <span className="text-textPrimary font-semibold">chaptr</span>
           </div>
-          <span className="text-textSecondary text-sm">Step 1 of 3</span>
+          <span className="text-textSecondary text-sm">Step 3 of 3</span>
         </div>
 
         {/* Back */}

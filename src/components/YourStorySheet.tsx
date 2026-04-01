@@ -1,7 +1,8 @@
 import { Drawer } from 'vaul'
 import { X, RotateCcw } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
-import { SEOUL_TRANSFER_CHAPTERS } from '../data/storyData'
+import { CHARACTERS } from '../data/characters'
 
 interface Props {
   open: boolean
@@ -9,17 +10,15 @@ interface Props {
 }
 
 export function YourStorySheet({ open, onClose }: Props) {
-  const choices = useStore((s) => s.choices)
-  const currentChapter = useStore((s) => s.currentChapter)
+  const navigate = useNavigate()
+  const choiceDescriptions = useStore((s) => s.choiceDescriptions)
+  const chatSummaries = useStore((s) => s.chatSummaries)
   const junhoTrust = useStore((s) => s.characterState.junhoTrust)
+  const trustLabel = useStore((s) => s.trustStatusLabel)
   const selfieUrl = useStore((s) => s.selfieUrl)
+  const resetStory = useStore((s) => s.resetStory)
 
-  const grouped = SEOUL_TRANSFER_CHAPTERS.map((ch) => ({
-    chapter: ch,
-    choices: choices.filter((c) => c.chapter === ch.number),
-    isCurrent: ch.number === currentChapter,
-    isUnlocked: ch.number <= currentChapter,
-  }))
+  const summaryEntries = Object.entries(chatSummaries)
 
   return (
     <Drawer.Root open={open} onOpenChange={(v) => !v && onClose()} snapPoints={[0.55, 1]}>
@@ -55,7 +54,7 @@ export function YourStorySheet({ open, onClose }: Props) {
           {/* Trust bar */}
           <div className="px-5 pb-4 space-y-1">
             <div className="flex items-center justify-between">
-              <span className="text-textMuted text-xs">Junho</span>
+              <span className="text-textMuted text-xs">Jiwon</span>
               <span className="text-textMuted text-xs">{junhoTrust}/100</span>
             </div>
             <div className="h-1 rounded-full bg-border overflow-hidden">
@@ -67,39 +66,60 @@ export function YourStorySheet({ open, onClose }: Props) {
                 }}
               />
             </div>
+            <p className="text-textMuted text-[10px]">{trustLabel}</p>
           </div>
 
           {/* Timeline */}
           <div className="flex-1 overflow-y-auto px-5 pb-4 space-y-4">
-            {grouped.map(({ chapter, choices: chChoices, isCurrent, isUnlocked }) => (
-              <div key={chapter.number} className="space-y-1.5">
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full shrink-0 ${isUnlocked ? 'bg-accent' : 'bg-border'}`} />
-                  <span className={`text-sm font-semibold ${isUnlocked ? 'text-textPrimary' : 'text-textMuted'}`}>
-                    Chapter {chapter.number} — {chapter.title}
-                  </span>
-                  {isCurrent && (
-                    <span className="text-xs px-1.5 py-0.5 rounded font-bold bg-accent text-white">NOW</span>
-                  )}
-                </div>
-                {chChoices.length > 0 ? (
-                  <div className="ml-4 space-y-1 border-l border-border pl-3">
-                    {chChoices.map((c, i) => (
-                      <p key={i} className="text-textSecondary text-sm">{c.text}</p>
-                    ))}
+            {/* Choices */}
+            {choiceDescriptions.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-textMuted text-[10px] uppercase tracking-widest">Choices Made</p>
+                {choiceDescriptions.map((c, i) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <div className="w-2 h-2 rounded-full bg-accent mt-1 shrink-0" />
+                    <div>
+                      <p className="text-textPrimary text-sm font-medium">{c.label}</p>
+                      <p className="text-textSecondary text-xs">{c.description}</p>
+                    </div>
                   </div>
-                ) : isCurrent ? (
-                  <p className="ml-4 pl-3 border-l border-border text-textMuted text-sm italic">Making a choice now...</p>
-                ) : null}
+                ))}
               </div>
-            ))}
+            )}
+
+            {/* Chat summaries */}
+            {summaryEntries.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-textMuted text-[10px] uppercase tracking-widest">Conversations</p>
+                {summaryEntries.map(([stepId, summary]) => {
+                  const charId = stepId.includes('2a') ? 'sora' : 'jiwon'
+                  const char = CHARACTERS[charId]
+                  return (
+                    <div key={stepId} className="flex items-start gap-2">
+                      <span className="text-sm shrink-0">{char?.avatar ?? '💬'}</span>
+                      <div>
+                        <p className="text-textPrimary text-sm font-medium">{char?.name ?? charId}</p>
+                        <p className="text-textSecondary text-xs leading-relaxed">{summary}</p>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            {choiceDescriptions.length === 0 && summaryEntries.length === 0 && (
+              <p className="text-textMuted text-sm italic">Your story is just beginning...</p>
+            )}
           </div>
 
           {/* Footer */}
           <div className="px-5 pb-6 pt-3 border-t border-border">
-            <button className="choice-btn justify-center gap-2 w-full">
+            <button
+              className="choice-btn justify-center gap-2 w-full"
+              onClick={() => { resetStory(); onClose(); navigate('/story') }}
+            >
               <RotateCcw size={16} className="text-textSecondary" />
-              <span>Replay a chapter</span>
+              <span>Start over</span>
             </button>
           </div>
         </Drawer.Content>

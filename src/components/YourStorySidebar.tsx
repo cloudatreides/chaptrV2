@@ -1,19 +1,18 @@
 import { RotateCcw } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
-import { SEOUL_TRANSFER_CHAPTERS } from '../data/storyData'
+import { CHARACTERS } from '../data/characters'
 
 export function YourStorySidebar() {
-  const choices = useStore((s) => s.choices)
-  const currentChapter = useStore((s) => s.currentChapter)
+  const navigate = useNavigate()
+  const choiceDescriptions = useStore((s) => s.choiceDescriptions)
+  const chatSummaries = useStore((s) => s.chatSummaries)
   const junhoTrust = useStore((s) => s.characterState.junhoTrust)
+  const trustLabel = useStore((s) => s.trustStatusLabel)
   const selfieUrl = useStore((s) => s.selfieUrl)
+  const resetStory = useStore((s) => s.resetStory)
 
-  const grouped = SEOUL_TRANSFER_CHAPTERS.map((ch) => ({
-    chapter: ch,
-    choices: choices.filter((c) => c.chapter === ch.number),
-    isCurrent: ch.number === currentChapter,
-    isUnlocked: ch.number <= currentChapter,
-  }))
+  const summaryEntries = Object.entries(chatSummaries)
 
   return (
     <div className="flex flex-col h-full px-5 py-6">
@@ -36,7 +35,7 @@ export function YourStorySidebar() {
       {/* Trust bar */}
       <div className="mb-4 space-y-1">
         <div className="flex items-center justify-between">
-          <span className="text-textMuted text-xs">Junho</span>
+          <span className="text-textMuted text-xs">Jiwon</span>
           <span className="text-textMuted text-xs">{junhoTrust}/100</span>
         </div>
         <div className="h-1 rounded-full bg-border overflow-hidden">
@@ -48,38 +47,54 @@ export function YourStorySidebar() {
             }}
           />
         </div>
+        <p className="text-textMuted text-[10px]">{trustLabel}</p>
       </div>
 
       {/* Timeline */}
-      <div className="flex-1 overflow-y-auto space-y-4">
-        {grouped.map(({ chapter, choices: chChoices, isCurrent, isUnlocked }) => (
-          <div key={chapter.number} className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full shrink-0 ${isUnlocked ? 'bg-accent' : 'bg-border'}`} />
-              <span className={`text-xs font-semibold ${isUnlocked ? 'text-textPrimary' : 'text-textMuted'}`}>
-                Ch.{chapter.number} — {chapter.title}
-              </span>
-              {isCurrent && (
-                <span className="text-xs px-1.5 py-0.5 rounded font-bold bg-accent text-white">NOW</span>
-              )}
-            </div>
-            {chChoices.length > 0 ? (
-              <div className="ml-4 space-y-1 border-l border-border pl-3">
-                {chChoices.map((c, i) => (
-                  <p key={i} className="text-textSecondary text-xs">{c.text}</p>
-                ))}
+      <div className="flex-1 overflow-y-auto space-y-3">
+        {/* Choices made */}
+        {choiceDescriptions.length > 0 && (
+          <div className="space-y-1.5">
+            <p className="text-textMuted text-[10px] uppercase tracking-widest">Choices</p>
+            {choiceDescriptions.map((c, i) => (
+              <div key={i} className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-accent mt-1.5 shrink-0" />
+                <p className="text-textSecondary text-xs">{c.label}</p>
               </div>
-            ) : isCurrent ? (
-              <p className="ml-4 pl-3 border-l border-border text-textMuted text-xs italic">Making a choice now...</p>
-            ) : null}
+            ))}
           </div>
-        ))}
+        )}
+
+        {/* Chat summaries */}
+        {summaryEntries.length > 0 && (
+          <div className="space-y-1.5">
+            <p className="text-textMuted text-[10px] uppercase tracking-widest">Conversations</p>
+            {summaryEntries.map(([stepId, summary]) => {
+              // Extract character from step id (e.g. 'chat-1' -> jiwon, 'chat-2a' -> sora)
+              const charId = stepId.includes('2a') ? 'sora' : 'jiwon'
+              const char = CHARACTERS[charId]
+              return (
+                <div key={stepId} className="flex items-start gap-2">
+                  <span className="text-xs shrink-0 mt-0.5">{char?.avatar ?? '💬'}</span>
+                  <p className="text-textSecondary text-xs leading-relaxed">{summary}</p>
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {choiceDescriptions.length === 0 && summaryEntries.length === 0 && (
+          <p className="text-textMuted text-xs italic">Your story is just beginning...</p>
+        )}
       </div>
 
       {/* Replay */}
-      <button className="choice-btn justify-center gap-2 mt-4">
+      <button
+        className="choice-btn justify-center gap-2 mt-4"
+        onClick={() => { resetStory(); navigate('/story') }}
+      >
         <RotateCcw size={14} className="text-textSecondary" />
-        <span className="text-sm">Replay a chapter</span>
+        <span className="text-sm">Start over</span>
       </button>
     </div>
   )

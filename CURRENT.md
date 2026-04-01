@@ -1,38 +1,35 @@
 # Chaptr V2 — Current Session State
 
 ## In Progress
-- Nothing active
+- Researching selfie-in-scene image gen alternatives (fal.ai vs Replicate vs others)
 
 ## Done This Session
-- `characterState` (junhoTrust 0-100) — Zustand store, persisted, injected into Claude system prompt
-- Dynamic choice generation — `generateChoices()` fires after each prose stream, Claude generates contextual next choices
-- Scene images swap per beat — `continuationSceneImage` per chapter, transitions after spinner
-- Selfie avatar — reader nav (mobile + desktop), YourStorySidebar, YourStorySheet
-- Desktop landing hero — correct image (Hero BG.png / umbrella Seoul illustration), bg-center, radial scrim, white/90 subtitle with text-shadow
-- Landing nav links wired — Features/How It Works scroll to #how-it-works, Testimonials to #testimonials
-- Footer — 2026 Chaptr / Made by Cloud Labs
-- Upload + Universes pages — removed page-container override, now max-w-[520px] centered on desktop
-- Story reader desktop — split layout: scene image top 45vh, dark prose panel scrollable below
-- Universe placeholders — Hollow Manor (Horror), The Last Signal (Mystery), Edge of Atlas (Adventure) — all SOON locked
-- Deployed to Vercel + GitHub auto-deploy connected: https://chaptr-v2.vercel.app
+- **Fixed onboarding order**: Landing → /universes (browse freely) → /bio → selfie gate only if needed → /story
+- **Theatrical loading screen**: Replaced spinner with full "BUILDING YOUR WORLD" overlay — cycling status text, progress bar, chapter name
+- **Relationship UI**: junhoTrust now visible — trust bar + status label (e.g. "cautiously curious") in reader nav. Claude returns `{"trustDelta", "statusLabel"}` JSON after each prose beat, parsed and applied automatically.
+- **Bio selection page**: New `/bio` screen with 3 personality archetypes (The Quiet One, The Bold One, The Dreamer) + custom "write your own" option. Bio injected into Claude system prompt to shape protagonist voice.
+- **Markdown stripping**: Bold/italic stripped inline during streaming. Headers and bullets stripped via `stripMarkdown()` on final prose. Trust JSON extracted and cleaned before display.
+
+## New Onboarding Flow
+Landing → /universes (Step 1 of 3) → /bio (Step 2 of 3) → /upload selfie gate (Step 3 of 3, skipped if selfie exists) → /story
 
 ## Next
-- Fix markdown rendering in story prose — Claude occasionally returns `# Chapter X` headers in beat responses. Fix: strip markdown in claudeStream.ts before yielding chunks
-- Desktop hero blur — image is 1440×700px, blurry on retina. Fix: provide 2880×1400 version of Hero BG.png and swap in
-- Verify dynamic choices end-to-end — generateChoices fires after stream but needs testing on beats 2+
+- Selfie-in-scene photo generation (P0) — awaiting API evaluation results
+- Hero BG blurry on retina — needs 2x source image (2880×1400)
 
-## Open Issues / Known Gaps
-- Scene images are reused V1 placeholders — real per-beat images need AI generation backend
-- Markdown leaking into prose output occasionally
-- Hero BG blurry on retina displays — needs 2x source image
+## Open Issues (carried forward)
+- Hero BG blurry on retina — needs 2x source image (2880×1400)
+- Scene images are still placeholder V1 JPEGs — solved when photo gen is wired up
 
 ## Key Files
-- `src/lib/claudeStream.ts` — streaming + system prompt + generateChoices()
+- `src/lib/claudeStream.ts` — streaming + system prompt + generateChoices() + stripMarkdown + extractTrustData
 - `src/data/storyData.ts` — chapter data, CHARACTER_BIBLE, CHAPTER_BRIEFS, UNIVERSES
-- `src/store/useStore.ts` — Zustand store (choices, gems, characterState, dynamicChoices)
-- `src/pages/StoryReaderPage.tsx` — main reader, choice handling, streaming, scene swap
-- `src/pages/LandingPage.tsx` — full landing page (mobile + desktop)
-- `public/hero-desktop.png` — desktop hero background (umbrella Seoul illustration)
+- `src/store/useStore.ts` — Zustand store (selfieUrl, gems, junhoTrust, trustStatusLabel, bio, dynamicChoices)
+- `src/pages/StoryReaderPage.tsx` — main reader, choice handling, streaming, theatrical loader, trust UI
+- `src/pages/BioPage.tsx` — personality archetype selection (new)
+- `src/pages/LandingPage.tsx` — landing page (mobile + desktop)
+- `src/pages/UniversesPage.tsx` — story browser
+- `src/pages/UploadPage.tsx` — selfie upload (now step 3 of 3)
 
 ## Stack
 React + Vite + TS + Tailwind v3 + Zustand + Framer Motion + Vaul + Claude Haiku (direct SSE streaming)

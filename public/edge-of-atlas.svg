@@ -1,0 +1,162 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0e0820"/>
+      <stop offset="25%" stop-color="#1e1235"/>
+      <stop offset="55%" stop-color="#6b2d10"/>
+      <stop offset="75%" stop-color="#c85018"/>
+      <stop offset="90%" stop-color="#e87828"/>
+      <stop offset="100%" stop-color="#d06020"/>
+    </linearGradient>
+    <radialGradient id="sun-glow" cx="50%" cy="68%" r="30%">
+      <stop offset="0%" stop-color="#ffcc60" stop-opacity="0.9"/>
+      <stop offset="40%" stop-color="#e07020" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#6b2d10" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7a4015"/>
+      <stop offset="50%" stop-color="#3a1e08"/>
+      <stop offset="100%" stop-color="#120900"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="soft">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+  </defs>
+
+  <!-- Sky gradient -->
+  <rect width="800" height="450" fill="url(#sky)"/>
+
+  <!-- Sun glow at horizon -->
+  <rect width="800" height="450" fill="url(#sun-glow)"/>
+
+  <!-- Sun disc -->
+  <circle cx="400" cy="290" r="38" fill="#ffe090" opacity="0.92" filter="url(#glow)"/>
+  <circle cx="400" cy="290" r="28" fill="#fff4c0" opacity="0.95"/>
+
+  <!-- Stars in upper sky -->
+  <g fill="#c0a8e0" opacity="0.6">
+    <circle cx="70" cy="35" r="1.5"/><circle cx="145" cy="20" r="1.2"/>
+    <circle cx="210" cy="48" r="1"/><circle cx="290" cy="28" r="1.5"/>
+    <circle cx="355" cy="55" r="1"/><circle cx="440" cy="22" r="1.2"/>
+    <circle cx="520" cy="42" r="1"/><circle cx="610" cy="32" r="1.5"/>
+    <circle cx="680" cy="18" r="1.2"/><circle cx="745" cy="46" r="1"/>
+    <circle cx="120" cy="68" r="1"/><circle cx="478" cy="65" r="0.8"/>
+    <circle cx="660" cy="62" r="1"/><circle cx="790" cy="38" r="0.8"/>
+  </g>
+
+  <!-- Light rays from sun -->
+  <g opacity="0.12" fill="#ffb040">
+    <polygon points="400,285 350,450 370,450"/>
+    <polygon points="400,285 375,450 390,450"/>
+    <polygon points="400,285 410,450 425,450"/>
+    <polygon points="400,285 430,450 448,450"/>
+    <polygon points="400,285 320,450 340,450"/>
+    <polygon points="400,285 460,450 478,450"/>
+  </g>
+
+  <!-- Distant mountain range (dark orange-brown) -->
+  <g fill="#3a1c08" opacity="0.85">
+    <polygon points="0,310 50,248 90,270 130,238 170,260 210,228 255,252 295,218 335,240 375,290 0,310"/>
+    <polygon points="375,290 415,222 455,248 495,215 535,238 575,208 615,232 655,218 695,240 735,225 800,245 800,310 375,310"/>
+  </g>
+
+  <!-- Foreground cliff/plateau left -->
+  <g fill="#2a1206">
+    <polygon points="0,380 0,340 80,298 130,312 170,295 210,308 230,360 0,380"/>
+  </g>
+  <!-- Foreground cliff right -->
+  <g fill="#2a1206">
+    <polygon points="800,380 800,338 720,295 675,310 635,292 595,308 575,360 800,380"/>
+  </g>
+
+  <!-- Ancient gateway arch (center, bright silhouette) -->
+  <g fill="#1a0c04">
+    <!-- Left pillar -->
+    <rect x="318" y="235" width="38" height="165"/>
+    <!-- Right pillar -->
+    <rect x="444" y="235" width="38" height="165"/>
+    <!-- Arch top -->
+    <path d="M316,240 Q400,155 486,240 L486,240 L316,240" fill="#1a0c04"/>
+    <!-- Inner arch cutout (lighter to show depth) -->
+    <path d="M330,240 Q400,175 470,240 L470,240 L330,240" fill="#8b4010" opacity="0.25"/>
+    <!-- Capstone/lintel -->
+    <rect x="304" y="232" width="192" height="18" rx="2"/>
+    <!-- Decorative top -->
+    <rect x="355" y="218" width="90" height="18" rx="2"/>
+    <circle cx="400" cy="185" r="18" fill="#1a0c04"/>
+    <circle cx="400" cy="185" r="11" fill="#8b4010" opacity="0.3"/>
+    <!-- Steps -->
+    <rect x="295" y="388" width="210" height="15" rx="1"/>
+    <rect x="307" y="376" width="186" height="14" rx="1"/>
+    <rect x="319" y="364" width="162" height="14" rx="1"/>
+    <!-- Column details -->
+    <rect x="316" y="250" width="40" height="8" fill="#120800"/>
+    <rect x="444" y="250" width="40" height="8" fill="#120800"/>
+    <rect x="316" y="340" width="40" height="8" fill="#120800"/>
+    <rect x="444" y="340" width="40" height="8" fill="#120800"/>
+  </g>
+
+  <!-- Ruined columns left cluster -->
+  <g fill="#1e1005">
+    <!-- Column stumps -->
+    <rect x="155" y="298" width="22" height="90" rx="2"/>
+    <rect x="155" y="294" width="28" height="10" rx="1"/>
+    <rect x="195" y="308" width="20" height="80" rx="2"/>
+    <rect x="192" y="304" width="26" height="9" rx="1"/>
+    <rect x="232" y="318" width="18" height="70" rx="2"/>
+    <!-- Fallen column -->
+    <rect x="140" y="360" width="80" height="16" rx="6" transform="rotate(-5 140 360)"/>
+    <!-- Base platform -->
+    <rect x="130" y="362" width="130" height="22" rx="2"/>
+    <!-- Rubble blocks -->
+    <rect x="138" y="345" width="22" height="18" rx="2" transform="rotate(8 138 345)"/>
+    <rect x="195" y="350" width="18" height="14" rx="2" transform="rotate(-6 195 350)"/>
+    <rect x="235" y="355" width="15" height="12" rx="2" transform="rotate(4 235 355)"/>
+  </g>
+
+  <!-- Ruined columns right cluster -->
+  <g fill="#1e1005">
+    <rect x="623" y="295" width="22" height="93" rx="2"/>
+    <rect x="620" y="291" width="28" height="10" rx="1"/>
+    <rect x="585" y="305" width="20" height="83" rx="2"/>
+    <rect x="582" y="301" width="26" height="9" rx="1"/>
+    <rect x="548" y="316" width="18" height="72" rx="2"/>
+    <!-- Fallen column -->
+    <rect x="580" y="355" width="80" height="16" rx="6" transform="rotate(5 580 355)"/>
+    <!-- Base -->
+    <rect x="540" y="360" width="130" height="22" rx="2"/>
+    <!-- Rubble -->
+    <rect x="548" y="342" width="22" height="18" rx="2" transform="rotate(-8 548 342)"/>
+    <rect x="598" y="348" width="18" height="14" rx="2" transform="rotate(5 598 348)"/>
+    <rect x="638" y="352" width="15" height="12" rx="2" transform="rotate(-4 638 352)"/>
+  </g>
+
+  <!-- Ground desert floor -->
+  <rect x="0" y="375" width="800" height="75" fill="url(#ground)"/>
+
+  <!-- Sand dunes / ground texture -->
+  <ellipse cx="200" cy="405" rx="220" ry="38" fill="#4a2008" opacity="0.7"/>
+  <ellipse cx="620" cy="408" rx="240" ry="35" fill="#4a2008" opacity="0.7"/>
+  <ellipse cx="400" cy="440" rx="300" ry="28" fill="#200e04" opacity="0.9"/>
+
+  <!-- Atmospheric dust haze at horizon -->
+  <rect x="0" y="268" width="800" height="55" fill="#c06020" opacity="0.12" filter="url(#soft)"/>
+
+  <!-- Vignette -->
+  <radialGradient id="vignette" cx="50%" cy="55%" r="65%">
+    <stop offset="0%" stop-color="#000" stop-opacity="0"/>
+    <stop offset="100%" stop-color="#000" stop-opacity="0.55"/>
+  </radialGradient>
+  <rect width="800" height="450" fill="url(#vignette)"/>
+
+  <!-- Bottom fade -->
+  <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#120900" stop-opacity="0"/>
+    <stop offset="100%" stop-color="#120900" stop-opacity="0.7"/>
+  </linearGradient>
+  <rect width="800" height="450" fill="url(#fade)"/>
+</svg>

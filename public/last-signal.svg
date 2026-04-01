@@ -1,0 +1,188 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#050c18"/>
+      <stop offset="55%" stop-color="#0a1828"/>
+      <stop offset="100%" stop-color="#0f2035"/>
+    </linearGradient>
+    <linearGradient id="ground-reflect" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#102040"/>
+      <stop offset="100%" stop-color="#040810"/>
+    </linearGradient>
+    <radialGradient id="lamp1-glow" cx="22%" cy="55%" r="18%">
+      <stop offset="0%" stop-color="#f0c060" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#0a1828" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="lamp2-glow" cx="78%" cy="52%" r="18%">
+      <stop offset="0%" stop-color="#f0c060" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#0a1828" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="neon1" cx="50%" cy="38%" r="15%">
+      <stop offset="0%" stop-color="#4090ff" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#0a1828" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="neon2" cx="38%" cy="48%" r="10%">
+      <stop offset="0%" stop-color="#ff4060" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#0a1828" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="soft">
+      <feGaussianBlur stdDeviation="4"/>
+    </filter>
+  </defs>
+
+  <!-- Sky -->
+  <rect width="800" height="450" fill="url(#sky)"/>
+
+  <!-- Far background buildings (medium blue-grey) -->
+  <g fill="#0e1e35">
+    <rect x="0" y="120" width="55" height="330"/>
+    <rect x="50" y="150" width="40" height="300"/>
+    <rect x="85" y="100" width="65" height="350"/>
+    <rect x="640" y="90" width="75" height="360"/>
+    <rect x="708" y="120" width="50" height="330"/>
+    <rect x="750" y="145" width="50" height="305"/>
+  </g>
+  <!-- Far building windows (bright) -->
+  <g fill="#3a6090" opacity="0.8">
+    <rect x="8" y="130" width="9" height="12" rx="1"/>
+    <rect x="28" y="130" width="9" height="12" rx="1"/>
+    <rect x="8" y="155" width="9" height="12" rx="1"/>
+    <rect x="28" y="155" width="9" height="12" rx="1" fill="#5080b0" opacity="0.9"/>
+    <rect x="93" y="112" width="9" height="12" rx="1"/>
+    <rect x="112" y="112" width="9" height="12" rx="1" fill="#5080b0" opacity="0.9"/>
+    <rect x="132" y="112" width="9" height="12" rx="1"/>
+    <rect x="93" y="138" width="9" height="12" rx="1" fill="#5080b0" opacity="0.9"/>
+    <rect x="132" y="138" width="9" height="12" rx="1"/>
+    <rect x="648" y="105" width="9" height="12" rx="1"/>
+    <rect x="668" y="105" width="9" height="12" rx="1" fill="#5080b0" opacity="0.9"/>
+    <rect x="690" y="105" width="9" height="12" rx="1"/>
+    <rect x="648" y="130" width="9" height="12" rx="1" fill="#5080b0" opacity="0.9"/>
+    <rect x="690" y="130" width="9" height="12" rx="1"/>
+    <rect x="716" y="135" width="9" height="12" rx="1"/>
+    <rect x="736" y="135" width="9" height="12" rx="1" fill="#5080b0" opacity="0.9"/>
+    <rect x="716" y="160" width="9" height="12" rx="1" fill="#5080b0" opacity="0.9"/>
+    <rect x="736" y="160" width="9" height="12" rx="1"/>
+  </g>
+
+  <!-- Mid buildings (brighter blue) -->
+  <g fill="#0c1830">
+    <rect x="130" y="155" width="110" height="295"/>
+    <rect x="198" y="125" width="85" height="325"/>
+    <rect x="508" y="138" width="90" height="312"/>
+    <rect x="560" y="155" width="85" height="295"/>
+  </g>
+  <!-- Mid building windows (bright blue-white) -->
+  <g fill="#4a7ab0" opacity="0.85">
+    <rect x="140" y="170" width="11" height="15" rx="1"/>
+    <rect x="162" y="170" width="11" height="15" rx="1" fill="#6090c8" opacity="0.9"/>
+    <rect x="184" y="170" width="11" height="15" rx="1"/>
+    <rect x="140" y="198" width="11" height="15" rx="1" fill="#6090c8" opacity="0.9"/>
+    <rect x="162" y="198" width="11" height="15" rx="1"/>
+    <rect x="184" y="198" width="11" height="15" rx="1" fill="#6090c8" opacity="0.9"/>
+    <rect x="140" y="226" width="11" height="15" rx="1"/>
+    <rect x="184" y="226" width="11" height="15" rx="1"/>
+    <rect x="207" y="140" width="11" height="15" rx="1" fill="#6090c8" opacity="0.9"/>
+    <rect x="228" y="140" width="11" height="15" rx="1"/>
+    <rect x="252" y="140" width="11" height="15" rx="1" fill="#6090c8" opacity="0.9"/>
+    <rect x="207" y="168" width="11" height="15" rx="1"/>
+    <rect x="252" y="168" width="11" height="15" rx="1"/>
+    <rect x="516" y="152" width="11" height="15" rx="1"/>
+    <rect x="538" y="152" width="11" height="15" rx="1" fill="#6090c8" opacity="0.9"/>
+    <rect x="560" y="152" width="11" height="15" rx="1"/>
+    <rect x="582" y="152" width="11" height="15" rx="1" fill="#6090c8" opacity="0.9"/>
+    <rect x="516" y="180" width="11" height="15" rx="1" fill="#6090c8" opacity="0.9"/>
+    <rect x="560" y="180" width="11" height="15" rx="1"/>
+    <rect x="582" y="180" width="11" height="15" rx="1"/>
+    <rect x="568" y="172" width="11" height="15" rx="1"/>
+    <rect x="592" y="172" width="11" height="15" rx="1" fill="#6090c8" opacity="0.9"/>
+    <rect x="620" y="172" width="11" height="15" rx="1"/>
+  </g>
+
+  <!-- Neon sign glows -->
+  <rect width="800" height="450" fill="url(#neon1)"/>
+  <rect width="800" height="450" fill="url(#neon2)"/>
+
+  <!-- Neon signs on buildings -->
+  <g filter="url(#glow)">
+    <!-- Blue neon: SIGNAL -->
+    <rect x="312" y="188" width="90" height="26" rx="4" fill="none" stroke="#5090ff" stroke-width="2.5" opacity="0.95"/>
+    <text x="357" y="206" text-anchor="middle" fill="#90c0ff" font-size="11" font-family="monospace" font-weight="bold">SIGNAL</text>
+    <!-- Red neon: bar sign -->
+    <rect x="230" y="215" width="55" height="20" rx="3" fill="none" stroke="#ff4060" stroke-width="2" opacity="0.9"/>
+    <text x="257" y="229" text-anchor="middle" fill="#ff8090" font-size="9" font-family="monospace">BAR</text>
+    <!-- Yellow sign -->
+    <rect x="520" y="200" width="60" height="20" rx="3" fill="#c8900a" opacity="0.3"/>
+    <text x="550" y="214" text-anchor="middle" fill="#ffc840" font-size="9" font-family="monospace">HOTEL</text>
+  </g>
+
+  <!-- Lamp glows -->
+  <rect width="800" height="450" fill="url(#lamp1-glow)"/>
+  <rect width="800" height="450" fill="url(#lamp2-glow)"/>
+
+  <!-- Streetlight poles -->
+  <g stroke="#3a5070" stroke-width="3.5" fill="none">
+    <line x1="175" y1="255" x2="175" y2="420"/>
+    <path d="M175,255 Q175,232 198,230"/>
+    <line x1="198" y1="230" x2="222" y2="230"/>
+  </g>
+  <circle cx="222" cy="230" r="7" fill="#ffd060" filter="url(#glow)"/>
+  <ellipse cx="222" cy="240" rx="5" ry="3" fill="#ffd060" opacity="0.4" filter="url(#soft)"/>
+
+  <g stroke="#3a5070" stroke-width="3.5" fill="none">
+    <line x1="625" y1="245" x2="625" y2="420"/>
+    <path d="M625,245 Q625,222 602,220"/>
+    <line x1="602" y1="220" x2="578" y2="220"/>
+  </g>
+  <circle cx="578" cy="220" r="7" fill="#ffd060" filter="url(#glow)"/>
+  <ellipse cx="578" cy="230" rx="5" ry="3" fill="#ffd060" opacity="0.4" filter="url(#soft)"/>
+
+  <!-- Wet ground -->
+  <rect x="0" y="355" width="800" height="95" fill="url(#ground-reflect)"/>
+
+  <!-- Puddle reflections (bright) -->
+  <ellipse cx="355" cy="385" rx="65" ry="14" fill="#1e4070" opacity="0.8" filter="url(#soft)"/>
+  <ellipse cx="510" cy="400" rx="45" ry="10" fill="#1e4070" opacity="0.6" filter="url(#soft)"/>
+  <ellipse cx="210" cy="405" rx="55" ry="10" fill="#1e3560" opacity="0.5" filter="url(#soft)"/>
+  <!-- Neon reflection in puddle -->
+  <ellipse cx="355" cy="385" rx="30" ry="7" fill="#4060c0" opacity="0.5"/>
+
+  <!-- Rain streaks -->
+  <g stroke="#3a5870" stroke-width="0.8" opacity="0.5">
+    <line x1="55" y1="0" x2="48" y2="70"/><line x1="125" y1="15" x2="118" y2="85"/>
+    <line x1="195" y1="0" x2="188" y2="75"/><line x1="265" y1="10" x2="258" y2="80"/>
+    <line x1="335" y1="0" x2="328" y2="70"/><line x1="405" y1="18" x2="398" y2="88"/>
+    <line x1="475" y1="0" x2="468" y2="72"/><line x1="545" y1="12" x2="538" y2="82"/>
+    <line x1="615" y1="0" x2="608" y2="70"/><line x1="685" y1="8" x2="678" y2="78"/>
+    <line x1="755" y1="0" x2="748" y2="72"/>
+    <line x1="90" y1="75" x2="83" y2="155"/><line x1="160" y1="60" x2="153" y2="140"/>
+    <line x1="230" y1="72" x2="223" y2="152"/><line x1="300" y1="58" x2="293" y2="138"/>
+    <line x1="370" y1="68" x2="363" y2="148"/><line x1="440" y1="55" x2="433" y2="135"/>
+    <line x1="510" y1="62" x2="503" y2="142"/><line x1="580" y1="75" x2="573" y2="155"/>
+    <line x1="650" y1="58" x2="643" y2="138"/><line x1="720" y1="70" x2="713" y2="150"/>
+    <line x1="40" y1="155" x2="33" y2="238"/><line x1="115" y1="140" x2="108" y2="225"/>
+    <line x1="185" y1="150" x2="178" y2="235"/><line x1="258" y1="138" x2="251" y2="222"/>
+    <line x1="325" y1="148" x2="318" y2="232"/><line x1="398" y1="135" x2="391" y2="220"/>
+    <line x1="468" y1="145" x2="461" y2="228"/><line x1="538" y1="138" x2="531" y2="222"/>
+    <line x1="608" y1="148" x2="601" y2="232"/><line x1="678" y1="135" x2="671" y2="220"/>
+    <line x1="748" y1="152" x2="741" y2="235"/>
+  </g>
+
+  <!-- Lone figure silhouette -->
+  <g fill="#060c18">
+    <rect x="387" y="330" width="9" height="32" rx="3"/>
+    <circle cx="391" cy="325" r="6"/>
+    <line x1="387" y1="344" x2="378" y2="358" stroke="#060c18" stroke-width="3" stroke-linecap="round"/>
+    <line x1="396" y1="344" x2="403" y2="358" stroke="#060c18" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <!-- Vignette -->
+  <radialGradient id="vignette" cx="50%" cy="50%" r="65%">
+    <stop offset="0%" stop-color="#000" stop-opacity="0"/>
+    <stop offset="100%" stop-color="#000" stop-opacity="0.6"/>
+  </radialGradient>
+  <rect width="800" height="450" fill="url(#vignette)"/>
+</svg>

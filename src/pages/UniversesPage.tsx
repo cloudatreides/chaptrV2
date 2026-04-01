@@ -22,7 +22,7 @@ export function UniversesPage() {
     if (!selectedId) return
     setSelectedUniverse(selectedId)
     resetStory()
-    navigate('/story')
+    navigate('/bio')
   }
 
   return (
@@ -36,7 +36,7 @@ export function UniversesPage() {
             </div>
             <span className="text-textPrimary font-semibold">chaptr</span>
           </div>
-          <span className="text-textSecondary text-sm">Step 2 of 3</span>
+          <span className="text-textSecondary text-sm">Step 1 of 3</span>
         </div>
 
         {/* Back */}

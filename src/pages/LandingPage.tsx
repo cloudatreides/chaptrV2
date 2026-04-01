@@ -87,7 +87,7 @@ export function LandingPage() {
             <motion.button
               className="btn-accent flex items-center justify-center gap-2"
               style={{ fontFamily: SG }}
-              onClick={() => navigate('/upload')}
+              onClick={() => navigate('/universes')}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35 }}
@@ -218,7 +218,7 @@ export function LandingPage() {
                 <button
                   className="flex items-center justify-center gap-2 text-white font-semibold text-base transition-opacity hover:opacity-90"
                   style={{ height: 52, paddingLeft: 32, paddingRight: 32, borderRadius: 12, background: 'linear-gradient(90deg, #D4799A 0%, #9B7EC8 100%)', fontFamily: SG }}
-                  onClick={() => navigate('/upload')}
+                  onClick={() => navigate('/universes')}
                 >
                   Start Your Story →
                 </button>

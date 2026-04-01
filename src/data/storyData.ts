@@ -1,3 +1,5 @@
+// ─── Universe definitions (unchanged) ───
+
 export interface Universe {
   id: string
   title: string
@@ -35,7 +37,7 @@ export const UNIVERSES: Universe[] = [
     genre: 'HORROR',
     genreTag: 'SUPERNATURAL HORROR',
     description: 'You inherit a crumbling estate on the edge of a dying town. Something inside the walls has been waiting for you.',
-    image: '/sakura.jpg',
+    image: '/hollow-manor.svg',
     locked: true,
     lockedLabel: 'SOON',
   },
@@ -45,17 +47,17 @@ export const UNIVERSES: Universe[] = [
     genre: 'MYSTERY',
     genreTag: 'NOIR MYSTERY',
     description: 'A missing person. A city full of liars. You have 48 hours before the only witness disappears for good.',
-    image: '/seoul-night.jpg',
+    image: '/last-signal.svg',
     locked: true,
     lockedLabel: 'SOON',
   },
   {
     id: 'edge-of-atlas',
     title: 'Edge of Atlas',
-    genre: 'ADVENTURE',
+    genre: 'EPIC ADVENTURE',
     genreTag: 'EPIC ADVENTURE',
     description: 'The map ends here. Beyond it, three lost civilisations and the one artefact that could rewrite history.',
-    image: '/sakura.jpg',
+    image: '/edge-of-atlas.svg',
     locked: true,
     lockedLabel: 'SOON',
   },
@@ -63,68 +65,261 @@ export const UNIVERSES: Universe[] = [
 
 export const GENRE_FILTERS = ['ALL', 'ROMANCE', 'HORROR', 'MYSTERY', 'ADVENTURE']
 
-export interface Chapter {
-  number: number
-  title: string
-  sceneImage: string
-  continuationSceneImage: string
-  openingProse: string
-  choices: { text: string; gemCost?: number; trustDelta?: number }[]
+// ─── V2 Step-based story model ───
+
+export type StepType = 'beat' | 'chat' | 'choice' | 'reveal'
+
+export interface ChoiceOption {
+  id: string
+  label: string
+  description: string
+  sceneHint: string // mood hint shown on card
 }
 
-export const SEOUL_TRANSFER_CHAPTERS: Chapter[] = [
+export interface StoryStep {
+  id: string
+  type: StepType
+  title?: string
+  // Beat fields
+  openingProse?: string // only for first beat or static opening
+  sceneImagePrompt?: string // Together AI FLUX.1 prompt
+  staticImage?: string // fallback
+  arcBrief?: string // what must be true by end of this beat
+  // Chat fields
+  characterId?: string
+  maxExchanges?: number
+  // Choice fields
+  choicePointId?: string
+  options?: ChoiceOption[]
+  // Conditional: which branch choices must match for this step to be active
+  requires?: Record<string, string>
+}
+
+// Scene image prompts for FLUX.1 Schnell — each describes a distinct mood/location
+const SCENE_PROMPTS = {
+  arrival: 'Anime style, a lone figure standing in front of a gleaming modern entertainment building at night in Seoul, cherry blossoms falling, neon signs reflecting on wet pavement, cinematic lighting, dramatic atmosphere',
+  elevator: 'Anime style, inside a sleek modern elevator, warm amber lighting, two silhouettes facing each other, city lights visible through glass walls, intimate tension, cinematic',
+  rehearsal: 'Anime style, spacious dance practice room with mirror walls, warm spotlight on center stage, music equipment scattered, Seoul skyline through floor-to-ceiling windows at dusk',
+  studioApproach: 'Anime style, recording studio interior, mixing console glowing with colorful lights, soundproof walls, intimate warm lighting, two people close together at the desk, creative atmosphere',
+  corridorFollow: 'Anime style, long dimly lit corridor in a modern building, one figure walking ahead casting a long shadow, mysterious blue-tinted lighting, doors along both sides',
+  rooftopConfront: 'Anime style, dramatic rooftop confrontation scene at night, two figures facing each other with city lights sprawling behind them, wind blowing, emotional tension, neon-lit Seoul skyline',
+  rooftopStay: 'Anime style, peaceful rooftop at golden hour, two people sitting side by side at the edge looking at sunset over Seoul, warm colors, quiet intimacy, cherry blossoms on the breeze',
+  backstageTrust: 'Anime style, backstage area after a concert, warm string lights, costumes hanging, two people sharing a quiet moment among the chaos, trust and vulnerability, soft golden glow',
+  cafeDeflect: 'Anime style, a quiet late-night cafe in Seoul, rain on windows, one person sitting alone looking at their phone, melancholic blue lighting, beautiful but lonely atmosphere',
+  reveal: 'Anime style, ethereal dream-like scene, two silhouettes connected by glowing threads of light, abstract Seoul cityscape in background, cosmic purple and pink tones, emotional, beautiful',
+}
+
+export const STORY_STEPS: StoryStep[] = [
+  // ── Act 1: Setup (linear) ──
   {
-    number: 1,
+    id: 'beat-1',
+    type: 'beat',
     title: 'First Day',
-    sceneImage: '/scene-elevator.jpg',
-    continuationSceneImage: '/scene-studio.jpg',
-    openingProse: 'The elevator doors slide open. Standing in front of you is Lee Junho — the lead vocalist of NOVA. He looks as surprised as you are.',
-    choices: [
-      { text: 'Say hello first', trustDelta: 5 },
-      { text: "Pretend you don't recognize him", trustDelta: -3 },
-      { text: 'Ask for his number', gemCost: 10, trustDelta: 12 },
-    ],
+    staticImage: '/scene-elevator.jpg',
+    sceneImagePrompt: SCENE_PROMPTS.arrival,
+    openingProse: 'The elevator doors slide open. Standing in front of you is Lee Jiwon — the lead vocalist of NOVA. He looks as surprised as you are.\n\nNeither of you speaks. The city hums forty floors below.\n\nThen the doors start to close, and he catches them with one hand.',
+    arcBrief: 'First encounter with Jiwon. Establish the spark of something — surprise, curiosity, tension. End with an unresolved moment.',
   },
   {
-    number: 2,
+    id: 'chat-1',
+    type: 'chat',
+    title: 'Talk to Jiwon',
+    characterId: 'jiwon',
+    maxExchanges: 5,
+  },
+  {
+    id: 'beat-2',
+    type: 'beat',
     title: 'The Rehearsal',
-    sceneImage: '/scene-studio.jpg',
-    continuationSceneImage: '/scene-rooftop.jpg',
-    openingProse: 'The practice room is empty except for the two of you. Music echoes softly from the speakers. Junho sets down his bag and turns to face you.',
-    choices: [
-      { text: 'Offer to help with choreography', trustDelta: 10 },
-      { text: 'Ask about his upcoming concert', trustDelta: 4 },
-      { text: 'Stay silent and listen', gemCost: 10, trustDelta: 8 },
+    staticImage: '/scene-studio.jpg',
+    sceneImagePrompt: SCENE_PROMPTS.rehearsal,
+    arcBrief: 'The next day at the academy. Jiwon is rehearsing. The protagonist sees a different side of him — focused, under pressure. Something Jiwon does or says reveals the weight he carries. End with a moment that makes the protagonist want to know more.',
+  },
+
+  // ── Choice Point A ──
+  {
+    id: 'cp-1',
+    type: 'choice',
+    title: 'A Decision',
+    choicePointId: 'cp-1',
+    options: [
+      {
+        id: 'approach',
+        label: 'Approach him',
+        description: 'Walk up to Jiwon at the mixing desk. Say something.',
+        sceneHint: 'bold / direct',
+      },
+      {
+        id: 'follow',
+        label: 'Follow at a distance',
+        description: 'He leaves in a hurry. Follow him — see where he goes.',
+        sceneHint: 'cautious / curious',
+      },
+    ],
+  },
+
+  // ── Act 2: Approach path ──
+  {
+    id: 'beat-3a',
+    type: 'beat',
+    title: 'The Studio',
+    requires: { 'cp-1': 'approach' },
+    staticImage: '/scene-studio.jpg',
+    sceneImagePrompt: SCENE_PROMPTS.studioApproach,
+    arcBrief: 'The protagonist approaches Jiwon at the studio. What starts as small talk turns into something more personal. Jiwon lets his guard down slightly. They discover a shared connection through music. End with a moment of genuine warmth — but also a reminder of the distance between their worlds.',
+  },
+  {
+    id: 'chat-2a',
+    type: 'chat',
+    title: 'Talk to Sora',
+    requires: { 'cp-1': 'approach' },
+    characterId: 'sora',
+    maxExchanges: 5,
+  },
+
+  // ── Act 2: Follow path ──
+  {
+    id: 'beat-3b',
+    type: 'beat',
+    title: 'The Corridor',
+    requires: { 'cp-1': 'follow' },
+    staticImage: '/scene-rooftop.jpg',
+    sceneImagePrompt: SCENE_PROMPTS.corridorFollow,
+    arcBrief: 'The protagonist follows Jiwon through the academy. He leads them to an unexpected place — somewhere private, away from cameras and fans. They overhear something they weren\'t meant to. Jiwon catches them. End with a confrontation that could go either way.',
+  },
+  {
+    id: 'chat-2b',
+    type: 'chat',
+    title: 'Talk to Jiwon',
+    requires: { 'cp-1': 'follow' },
+    characterId: 'jiwon',
+    maxExchanges: 5,
+  },
+
+  // ── Choice Point B (options differ per path) ──
+  {
+    id: 'cp-2-approach',
+    type: 'choice',
+    title: 'The Moment',
+    choicePointId: 'cp-2',
+    requires: { 'cp-1': 'approach' },
+    options: [
+      {
+        id: 'confront',
+        label: 'Confront the truth',
+        description: 'Tell Jiwon what Sora told you. No more pretending.',
+        sceneHint: 'brave / vulnerable',
+      },
+      {
+        id: 'stay',
+        label: 'Stay quiet, stay close',
+        description: 'Some things are better left unsaid. Just be there.',
+        sceneHint: 'gentle / patient',
+      },
     ],
   },
   {
-    number: 3,
-    title: 'The Rooftop',
-    sceneImage: '/scene-rooftop.jpg',
-    continuationSceneImage: '/scene-elevator.jpg',
-    openingProse: 'The door swings open. You step out onto the rooftop, expecting silence.\n\nYou don\'t expect him to already be there.',
-    choices: [
-      { text: 'Step closer', trustDelta: 12 },
-      { text: 'Stay where you are', trustDelta: 5 },
+    id: 'cp-2-follow',
+    type: 'choice',
+    title: 'The Moment',
+    choicePointId: 'cp-2',
+    requires: { 'cp-1': 'follow' },
+    options: [
+      {
+        id: 'trust',
+        label: 'Trust him',
+        description: 'Tell Jiwon what you overheard. Let him explain.',
+        sceneHint: 'open / hopeful',
+      },
+      {
+        id: 'deflect',
+        label: 'Deflect and leave',
+        description: 'Pretend you didn\'t hear anything. Walk away.',
+        sceneHint: 'guarded / safe',
+      },
     ],
+  },
+
+  // ── Act 3: Four endings ──
+  {
+    id: 'ending-approach-confront',
+    type: 'beat',
+    title: 'The Confrontation',
+    requires: { 'cp-1': 'approach', 'cp-2': 'confront' },
+    staticImage: '/scene-rooftop.jpg',
+    sceneImagePrompt: SCENE_PROMPTS.rooftopConfront,
+    arcBrief: 'The protagonist confronts Jiwon on the rooftop. Raw honesty. Jiwon is shaken — nobody talks to him like this. The conversation escalates, then breaks open into something real. End with a moment of mutual recognition: they see each other clearly for the first time. Bittersweet but hopeful. The strongest emotional connection.',
+  },
+  {
+    id: 'ending-approach-stay',
+    type: 'beat',
+    title: 'The Quiet Choice',
+    requires: { 'cp-1': 'approach', 'cp-2': 'stay' },
+    staticImage: '/scene-rooftop.jpg',
+    sceneImagePrompt: SCENE_PROMPTS.rooftopStay,
+    arcBrief: 'The protagonist chooses presence over words. They sit together on the rooftop as the sun sets. Jiwon doesn\'t say much, but his body language softens. A small gesture — sharing earbuds, letting their shoulders touch. End with quiet intimacy. Nothing resolved, but something planted. Warm and tender.',
+  },
+  {
+    id: 'ending-follow-trust',
+    type: 'beat',
+    title: 'The Leap',
+    requires: { 'cp-1': 'follow', 'cp-2': 'trust' },
+    staticImage: '/scene-studio.jpg',
+    sceneImagePrompt: SCENE_PROMPTS.backstageTrust,
+    arcBrief: 'The protagonist takes a risk and tells Jiwon the truth. Backstage, after everything, Jiwon is tired of people lying to him. The honesty lands. He shares something he\'s never told anyone. End with a fragile new trust — two people who chose each other in a world that incentivizes pretending. Vulnerable and honest.',
+  },
+  {
+    id: 'ending-follow-deflect',
+    type: 'beat',
+    title: 'The Distance',
+    requires: { 'cp-1': 'follow', 'cp-2': 'deflect' },
+    staticImage: '/scene-elevator.jpg',
+    sceneImagePrompt: SCENE_PROMPTS.cafeDeflect,
+    arcBrief: 'The protagonist walks away. Later, alone in a late-night cafe, they replay what happened. Their phone buzzes — it\'s Jiwon, sending a song link with no message. End with the ache of something that could have been. Melancholic but beautiful. The connection is real but neither was brave enough.',
+  },
+
+  // ── Reveal ──
+  {
+    id: 'reveal',
+    type: 'reveal',
+    title: 'Your Story',
+    sceneImagePrompt: SCENE_PROMPTS.reveal,
   },
 ]
 
-// Arc destination per chapter — what MUST be true by the end regardless of choices.
-// User choices change the texture of how we get there, not the destination.
-export const CHAPTER_BRIEFS: Record<number, string> = {
-  1: 'By the end of this chapter, Junho and the protagonist have had their first real moment of connection — unexpected, slightly charged, not resolved. Junho has revealed one small unguarded thing about himself. The protagonist has made an impression, positive or complicated depending on the choice made.',
-  2: 'By the end of this chapter, the rehearsal has become unexpectedly personal. Something Junho does or says reveals the pressure he is under. The protagonist has crossed from observer to someone Junho is aware of. The dynamic has shifted — there is now something unspoken between them.',
-  3: 'By the end of this chapter, the rooftop scene ends with a moment of near-confession — something almost said, then pulled back. The reader should feel the weight of what wasn\'t said more than what was. This is the emotional peak of Act 1.',
+// ─── Branch router ───
+
+export function getActiveSteps(branchChoices: Record<string, string>): StoryStep[] {
+  return STORY_STEPS.filter((step) => {
+    if (!step.requires) return true
+    return Object.entries(step.requires).every(
+      ([cpId, required]) => branchChoices[cpId] === required
+    )
+  })
 }
+
+export function getTotalBeats(steps: StoryStep[]): number {
+  return steps.filter((s) => s.type === 'beat').length
+}
+
+export function getCurrentBeatNumber(steps: StoryStep[], currentStepIndex: number): number {
+  let count = 0
+  for (let i = 0; i <= currentStepIndex && i < steps.length; i++) {
+    if (steps[i].type === 'beat') count++
+  }
+  return count
+}
+
+// ─── Character bible (used in story generation prompts) ───
 
 export const CHARACTER_BIBLE = `
 STORY: The Seoul Transfer
 SETTING: Seoul Arts Academy, present day.
 
 CHARACTERS:
-- Lee Junho: Lead vocalist of NOVA, Korea's top idol group. 23 years old. Quietly intense. Doesn't show vulnerability easily. Protective once he trusts someone.
-- NOVA: K-pop group. Members include Junho (vocals), Minjae (rap), and Seobin (dance). Fictional — no real celebrity references.
+- Lee Jiwon: Lead vocalist of NOVA, Korea's top idol group. 23 years old. Quietly intense. Doesn't show vulnerability easily. Protective once he trusts someone.
+- Sora: Blue-haired trainee at the academy. 21. Energetic, sharp-witted, knows everyone. Friendly but ambitious — she's here to debut too.
+- NOVA: K-pop group. Members include Jiwon (vocals), Minjae (rap), and Seobin (dance). Fictional — no real celebrity references.
 - You (Y/N): International transfer student. Talented musician. Drawn into NOVA's world by circumstance.
 
 TONE: Cinematic K-drama romance. Slow burn. Emotionally intelligent prose. Short, punchy paragraphs. Present tense.
@@ -133,5 +328,9 @@ RULES:
 - Never name real celebrities.
 - Keep prose under 120 words per beat.
 - End each beat with a clear emotional tension or revelation.
-- Reference prior choices naturally in the narrative.
+- Reference prior choices and conversations naturally in the narrative.
 `
+
+export const CHAPTER_BRIEFS: Record<number, string> = {
+  1: 'By the end of this chapter, Jiwon and the protagonist have had their first real moment of connection — unexpected, slightly charged, not resolved. Jiwon has revealed one small unguarded thing about himself. The protagonist has made an impression, positive or complicated depending on the choice made.',
+}

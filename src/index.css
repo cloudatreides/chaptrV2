@@ -84,6 +84,43 @@ html, body {
   animation: blink 1s step-end infinite;
 }
 
+/* Chat bubbles */
+.chat-bubble {
+  @apply px-4 py-2.5 rounded-2xl text-sm leading-relaxed max-w-[80%];
+}
+.chat-bubble-user {
+  background: linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%);
+  color: white;
+  border-bottom-right-radius: 6px;
+}
+.chat-bubble-character {
+  background: rgba(26, 21, 37, 0.9);
+  border: 1px solid rgba(42, 32, 64, 0.6);
+  color: #f0ecf8;
+  border-bottom-left-radius: 6px;
+}
+
+/* Typing dots */
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+.typing-dot {
+  @apply w-1.5 h-1.5 rounded-full bg-textMuted inline-block;
+  animation: typingBounce 1.2s infinite;
+}
+
+/* Choice card */
+.choice-card {
+  @apply relative w-full text-left px-5 py-4 rounded-xl transition-all cursor-pointer;
+  background: rgba(19, 16, 28, 0.9);
+  border: 1px solid rgba(42, 32, 64, 0.6);
+}
+.choice-card:hover {
+  border-color: rgba(200, 75, 158, 0.4);
+  background: rgba(42, 21, 60, 0.5);
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 4px;
