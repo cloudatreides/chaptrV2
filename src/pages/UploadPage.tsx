@@ -1,25 +1,62 @@
 import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { Camera, Upload, Shield, ChevronLeft } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Camera, Upload, Shield, ChevronLeft, RefreshCw } from 'lucide-react'
 import { useStore } from '../store/useStore'
+import { stylizeSelfie } from '../lib/togetherAi'
 
 export function UploadPage() {
   const navigate = useNavigate()
   const setSelfieUrl = useStore((s) => s.setSelfieUrl)
   const fileRef = useRef<HTMLInputElement>(null)
-  const [preview, setPreview] = useState<string | null>(null)
+  const [originalPhoto, setOriginalPhoto] = useState<string | null>(null)
+  const [styledPhoto, setStyledPhoto] = useState<string | null>(null)
+  const [isStylizing, setIsStylizing] = useState(false)
+  const [stylizeFailed, setStylizeFailed] = useState(false)
   const [dragging, setDragging] = useState(false)
 
-  const handleFile = (file: File) => {
+  const handleFile = async (file: File) => {
     if (!file.type.startsWith('image/')) return
     const reader = new FileReader()
-    reader.onload = (e) => setPreview(e.target?.result as string)
+    reader.onload = async (e) => {
+      const dataUrl = e.target?.result as string
+      setOriginalPhoto(dataUrl)
+      setStyledPhoto(null)
+      setStylizeFailed(false)
+
+      // Auto-stylize into anime
+      setIsStylizing(true)
+      const result = await stylizeSelfie(dataUrl)
+      setIsStylizing(false)
+
+      if (result) {
+        setStyledPhoto(result)
+      } else {
+        setStylizeFailed(true)
+      }
+    }
     reader.readAsDataURL(file)
   }
 
+  const handleRetry = async () => {
+    if (!originalPhoto) return
+    setStylizeFailed(false)
+    setIsStylizing(true)
+    const result = await stylizeSelfie(originalPhoto)
+    setIsStylizing(false)
+    if (result) {
+      setStyledPhoto(result)
+    } else {
+      setStylizeFailed(true)
+    }
+  }
+
+  // Use styled version if available, otherwise original
+  const finalPhoto = styledPhoto ?? originalPhoto
+  const hasPhoto = !!originalPhoto
+
   const handleConfirm = () => {
-    if (preview) setSelfieUrl(preview)
+    if (finalPhoto) setSelfieUrl(finalPhoto)
     navigate('/story')
   }
 
@@ -51,34 +88,83 @@ export function UploadPage() {
         {/* Heading */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="text-textPrimary font-bold text-3xl mb-2">Add Your Photo</h1>
-          <p className="text-textSecondary text-base mb-8">Your face becomes the main character in every scene.</p>
+          <p className="text-textSecondary text-base mb-8">
+            {hasPhoto ? "We'll turn you into a story character." : 'Your face becomes the main character in every scene.'}
+          </p>
         </motion.div>
 
-        {/* Upload zone */}
+        {/* Upload / Preview zone */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="relative rounded-2xl overflow-hidden mb-4 cursor-pointer"
+          className="relative rounded-2xl overflow-hidden mb-4"
           style={{
-            border: `2px dashed ${dragging ? '#c84b9e' : '#2a2040'}`,
+            border: `2px dashed ${dragging ? '#c84b9e' : hasPhoto ? 'transparent' : '#2a2040'}`,
             background: '#13101c',
             transition: 'border-color 0.2s',
           }}
-          onClick={() => fileRef.current?.click()}
-          onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
-          onDragLeave={() => setDragging(false)}
-          onDrop={(e) => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f) }}
         >
-          {preview ? (
+          {hasPhoto ? (
             <div className="relative">
-              <img src={preview} alt="Your selfie" className="w-full h-64 object-cover" />
-              <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                <p className="text-white text-sm font-medium">Click to change</p>
-              </div>
+              {/* Show styled version or original while stylizing */}
+              <AnimatePresence mode="wait">
+                {isStylizing ? (
+                  <motion.div
+                    key="loading"
+                    className="w-full h-72 flex flex-col items-center justify-center gap-3"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    {/* Blurred original as background */}
+                    <div
+                      className="absolute inset-0 bg-cover bg-center"
+                      style={{ backgroundImage: `url(${originalPhoto})`, filter: 'blur(20px) brightness(0.4)', transform: 'scale(1.1)' }}
+                    />
+                    <div className="relative z-10 flex flex-col items-center gap-3">
+                      <motion.div
+                        className="w-10 h-10 rounded-full border-2 border-transparent border-t-accent"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                      />
+                      <p className="text-textPrimary text-sm font-medium">Creating your character...</p>
+                      <p className="text-textMuted text-xs">Turning your photo into anime</p>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.img
+                    key={styledPhoto ? 'styled' : 'original'}
+                    src={finalPhoto!}
+                    alt="Your character"
+                    className="w-full h-72 object-cover"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.4 }}
+                  />
+                )}
+              </AnimatePresence>
+
+              {/* Styled badge */}
+              {styledPhoto && !isStylizing && (
+                <motion.div
+                  className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+                  style={{ background: 'rgba(200,75,158,0.9)', color: 'white' }}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                >
+                  Story version
+                </motion.div>
+              )}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-12 px-6">
+            <div
+              className="flex flex-col items-center justify-center py-12 px-6 cursor-pointer"
+              onClick={() => fileRef.current?.click()}
+              onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
+              onDragLeave={() => setDragging(false)}
+              onDrop={(e) => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f) }}
+            >
               <div className="w-14 h-14 rounded-full flex items-center justify-center mb-4" style={{ background: 'rgba(200,75,158,0.12)', border: '1px solid rgba(200,75,158,0.3)' }}>
                 <Camera size={24} className="text-accent" />
               </div>
@@ -95,6 +181,34 @@ export function UploadPage() {
             </div>
           )}
         </motion.div>
+
+        {/* Actions below preview */}
+        {hasPhoto && !isStylizing && (
+          <motion.div
+            className="flex gap-2 mb-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <button
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium text-textSecondary hover:text-textPrimary transition-colors"
+              style={{ background: '#1a1525', border: '1px solid #2a2040' }}
+              onClick={() => fileRef.current?.click()}
+            >
+              <Camera size={14} />
+              Change photo
+            </button>
+            {stylizeFailed && (
+              <button
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium text-textSecondary hover:text-textPrimary transition-colors"
+                style={{ background: '#1a1525', border: '1px solid #2a2040' }}
+                onClick={handleRetry}
+              >
+                <RefreshCw size={14} />
+                Retry anime style
+              </button>
+            )}
+          </motion.div>
+        )}
 
         {/* Privacy note */}
         <motion.div
@@ -127,10 +241,10 @@ export function UploadPage() {
           <button
             className="btn-accent"
             onClick={handleConfirm}
-            disabled={!preview}
-            style={{ opacity: preview ? 1 : 0.5, cursor: preview ? 'pointer' : 'not-allowed' }}
+            disabled={!hasPhoto || isStylizing}
+            style={{ opacity: hasPhoto && !isStylizing ? 1 : 0.5, cursor: hasPhoto && !isStylizing ? 'pointer' : 'not-allowed' }}
           >
-            Use This Photo
+            {isStylizing ? 'Creating character...' : styledPhoto ? 'Enter as this character' : 'Use This Photo'}
           </button>
           <button
             className="w-full py-3 text-textSecondary text-sm hover:text-textPrimary transition-colors"
