@@ -142,7 +142,7 @@ export function StoryReaderPage() {
     setIsGeneratingScene(false)
 
     if (currentStep?.type === 'beat' && currentStep.sceneImagePrompt && !sceneImages[currentStep.id]) {
-      generateSceneImage({ prompt: currentStep.sceneImagePrompt }).then((url) => {
+      generateSceneImage({ prompt: currentStep.sceneImagePrompt, referenceImageUrl: selfieUrl }).then((url) => {
         if (url) setSceneImage(currentStep.id, url)
       })
     }
@@ -152,7 +152,7 @@ export function StoryReaderPage() {
       for (const opt of currentStep.options) {
         const key = `${currentStep.id}:${opt.id}`
         if (opt.imagePrompt && !sceneImages[key]) {
-          generateSceneImage({ prompt: opt.imagePrompt }).then((url) => {
+          generateSceneImage({ prompt: opt.imagePrompt, referenceImageUrl: selfieUrl }).then((url) => {
             if (url) setSceneImage(key, url)
           })
         }

@@ -113,7 +113,7 @@ interface Props {
 // ─── Component ───
 
 export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, storyContext, chatImagePrompt, onComplete }: Props) {
-  const { bio, loveInterest, selectedUniverse, characterState, characterPortraits, characterAffinities } = useActiveStory()
+  const { bio, loveInterest, selectedUniverse, characterState, characterPortraits, characterAffinities, selfieUrl } = useActiveStory()
   const { addChatMessage, setChatSummary, setCharacterPortrait, updateAffinity } = useStore()
 
   // Per-character state
@@ -194,7 +194,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
     // Generate intro image in parallel (chatImagePrompt overrides character default)
     const imagePrompt = chatImagePrompt ?? charData?.introImagePrompt
     if (imagePrompt) {
-      generateSceneImage({ prompt: imagePrompt, width: 768, height: 512 }).then(url => {
+      generateSceneImage({ prompt: imagePrompt, width: 768, height: 512, referenceImageUrl: selfieUrl }).then(url => {
         if (url) {
           setChatStates(prev => ({
             ...prev,

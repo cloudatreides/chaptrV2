@@ -2,17 +2,30 @@ export interface GenerateSceneParams {
   prompt: string
   width?: number
   height?: number
+  referenceImageUrl?: string | null
 }
 
-/** Generate a scene image using Together AI FLUX.1 Schnell */
+/** Generate a scene image using Together AI.
+ *  If referenceImageUrl is provided, uses FLUX.1 Kontext Pro (img2img) so the
+ *  player's stylized selfie is incorporated as the protagonist. Otherwise falls
+ *  back to FLUX.1 Schnell (text-only). */
 export async function generateSceneImage(params: GenerateSceneParams): Promise<string | null> {
-  const { prompt, width = 1024, height = 768 } = params
+  const { prompt, width = 1024, height = 768, referenceImageUrl } = params
 
-  try {
-    const response = await fetch('/api/together', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+  const useKontext = !!referenceImageUrl
+
+  const body = useKontext
+    ? {
+        model: 'black-forest-labs/FLUX.1-kontext-pro',
+        prompt: `The character shown in the reference image is the protagonist of this scene. Place them into the following scene, keeping their face, hairstyle, and appearance exactly as shown: ${prompt}`,
+        image_url: referenceImageUrl,
+        width,
+        height,
+        steps: 28,
+        n: 1,
+        response_format: 'b64_json',
+      }
+    : {
         model: 'black-forest-labs/FLUX.1-schnell',
         prompt,
         width,
@@ -20,7 +33,13 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
         steps: 4,
         n: 1,
         response_format: 'b64_json',
-      }),
+      }
+
+  try {
+    const response = await fetch('/api/together', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
     })
 
     if (!response.ok) {

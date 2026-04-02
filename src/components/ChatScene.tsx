@@ -93,7 +93,7 @@ interface Props {
 }
 
 export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3, storyContext, chatImagePrompt, onComplete }: Props) {
-  const { bio, loveInterest, selectedUniverse, characterState, characterPortraits, characterAffinities } = useActiveStory()
+  const { bio, loveInterest, selectedUniverse, characterState, characterPortraits, characterAffinities, selfieUrl } = useActiveStory()
   const { addChatMessage, setChatSummary, setCharacterPortrait, updateAffinity } = useStore()
   const affinityScore = characterAffinities[characterId] ?? 0
   const character = getCharacter(characterId, selectedUniverse) ?? CHARACTERS[characterId]
@@ -138,7 +138,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
       // Generate intro image in parallel (fire and forget)
       const imagePrompt = chatImagePrompt ?? character?.introImagePrompt
       if (imagePrompt) {
-        generateSceneImage({ prompt: imagePrompt, width: 768, height: 512 }).then((url) => {
+        generateSceneImage({ prompt: imagePrompt, width: 768, height: 512, referenceImageUrl: selfieUrl }).then((url) => {
           if (url) setIntroImage(url)
         })
       }
