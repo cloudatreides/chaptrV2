@@ -187,7 +187,13 @@ export async function generateOpeningMessage(params: OpeningMessageParams): Prom
   system += `\n\nSTORY CONTEXT: ${storyContext}`
   system += `\n\nRelationship with protagonist: ${trustLabel} trust (${trust}/100).`
   if (bio) system += `\nProtagonist personality: "${bio}"`
-  system += `\n\nIMPORTANT: You are initiating this conversation. Say something first — a greeting, a comment, a question. Keep it in character. 1-2 sentences max. This should feel natural for the moment in the story.`
+  system += `\n\nIMPORTANT: You are initiating this conversation. Say something first — a greeting, a comment, a question. Keep it in character. 1-2 sentences max. This should feel natural for the moment in the story.
+
+WRITING STYLE — MANDATORY:
+- Write ONLY dialogue. Just speak as the character.
+- NEVER use asterisks for actions (*leans forward*, *sighs*). This is a chat, not a roleplay.
+- NEVER narrate your own body language or inner thoughts.
+- No stage directions, no prose narration, no "I say softly" — just the words you'd actually say.`
 
   try {
     const response = await makeClaudeRequest(system, 'Write your opening line to the protagonist.', {
@@ -197,7 +203,8 @@ export async function generateOpeningMessage(params: OpeningMessageParams): Prom
 
     if (!response.ok) return '...'
     const data = await response.json()
-    return data.content?.[0]?.text?.trim() ?? '...'
+    const raw = data.content?.[0]?.text?.trim() ?? '...'
+    return stripMarkdown(raw)
   } catch {
     return '...'
   }
@@ -217,6 +224,12 @@ export async function* streamChatReply(params: StreamChatParams): AsyncGenerator
   system += `\n\nSTORY CONTEXT: ${storyContext}`
   system += `\n\nRelationship with protagonist: ${trustLabel} trust (${trust}/100).`
   if (bio) system += `\nProtagonist personality: "${bio}"`
+
+  system += `\n\nWRITING STYLE — MANDATORY:
+- Write ONLY dialogue. Just speak as the character.
+- NEVER use asterisks for actions (*leans forward*, *sighs*). This is a chat, not a roleplay.
+- NEVER narrate your own body language or inner thoughts.
+- No stage directions, no prose narration, no "I say softly" — just the words you'd actually say.`
 
   if (exchangeNumber >= maxExchanges) {
     system += `\n\nIMPORTANT: This is your FINAL reply in this conversation. Naturally wrap up — you're being called away, need to go, or the moment is ending. Don't be abrupt, but make it clear this exchange is closing.`
