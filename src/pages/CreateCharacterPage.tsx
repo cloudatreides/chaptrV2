@@ -1,7 +1,7 @@
 import { useRef, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronLeft, Camera, Upload, Shield, RefreshCw, Sparkles } from 'lucide-react'
+import { ChevronLeft, Camera, Shield, RefreshCw, Sparkles } from 'lucide-react'
 import Cropper from 'react-easy-crop'
 import type { Area } from 'react-easy-crop'
 import { useStore } from '../store/useStore'

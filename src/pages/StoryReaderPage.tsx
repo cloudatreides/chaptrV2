@@ -21,7 +21,11 @@ import type { StoryStep } from '../data/storyData'
 
 export function StoryReaderPage() {
   const navigate = useNavigate()
-  const { activeCharacter, progress, loveInterest, selfieUrl, bio, selectedUniverse } = useActiveStory()
+  const {
+    activeCharacter, loveInterest, selfieUrl, bio, selectedUniverse,
+    currentStepIndex, branchChoices, choiceDescriptions, characterState,
+    sceneImages, trustStatusLabel,
+  } = useActiveStory()
 
   const {
     advanceStep, setBranchChoice,
@@ -44,17 +48,17 @@ export function StoryReaderPage() {
 
   // Compute active steps based on branch choices
   const universeSteps = getStepsForUniverse(selectedUniverse)
-  const activeSteps = getActiveSteps(progress.branchChoices, universeSteps)
-  const currentStep = activeSteps[progress.currentStepIndex]
+  const activeSteps = getActiveSteps(branchChoices, universeSteps)
+  const currentStep = activeSteps[currentStepIndex]
   const totalBeats = getTotalBeats(activeSteps)
-  const currentBeatNum = currentStep?.type === 'beat' ? getCurrentBeatNumber(activeSteps, progress.currentStepIndex) : 0
+  const currentBeatNum = currentStep?.type === 'beat' ? getCurrentBeatNumber(activeSteps, currentStepIndex) : 0
 
   // Beat-specific state
   const [beatProse, setBeatProse] = useState('')
   const [hasChosenBeat, setHasChosenBeat] = useState(false)
   const abortRef = useRef<AbortController | null>(null)
 
-  const currentImage = progress.sceneImages[currentStep?.id] ?? currentStep?.staticImage ?? null
+  const currentImage = sceneImages[currentStep?.id] ?? currentStep?.staticImage ?? null
 
   const isFirstBeat = currentStep?.id === 'beat-1'
   const { displayed: openingDisplayed, done: openingDone } = useTypewriter(
@@ -73,7 +77,7 @@ export function StoryReaderPage() {
     setIsStreaming(false)
     setIsGeneratingScene(false)
 
-    if (currentStep?.type === 'beat' && currentStep.sceneImagePrompt && !progress.sceneImages[currentStep.id]) {
+    if (currentStep?.type === 'beat' && currentStep.sceneImagePrompt && !sceneImages[currentStep.id]) {
       generateSceneImage({ prompt: currentStep.sceneImagePrompt }).then((url) => {
         if (url) setSceneImage(currentStep.id, url)
       })
@@ -83,7 +87,7 @@ export function StoryReaderPage() {
       const moodMap: Record<string, AmbientMood> = { beat: 'story', chat: 'chat', choice: 'choice', reveal: 'reveal' }
       ambientAudio.setMood(moodMap[currentStep.type] ?? 'story')
     }
-  }, [progress.currentStepIndex])
+  }, [currentStepIndex])
 
   useEffect(() => {
     const unlock = () => {
@@ -118,9 +122,9 @@ export function StoryReaderPage() {
       const gen = streamBeatProse({
         beatTitle: currentStep.title ?? 'Scene',
         arcBrief: currentStep.arcBrief,
-        choiceHistory: progress.choiceDescriptions,
+        choiceHistory: choiceDescriptions,
         chatSummaries: summariesList,
-        characterState: progress.characterState,
+        characterState: characterState,
         bio,
         loveInterest,
         universeId: selectedUniverse,
@@ -159,7 +163,7 @@ export function StoryReaderPage() {
     if (currentStep?.type === 'beat' && !isFirstBeat && !hasChosenBeat && !isStreaming) {
       handleGenerateBeat()
     }
-  }, [progress.currentStepIndex, currentStep?.id])
+  }, [currentStepIndex, currentStep?.id])
 
   const handleAdvance = () => advanceStep()
 
@@ -178,8 +182,8 @@ export function StoryReaderPage() {
   if (!currentStep) return null
 
   const storyContext = `Chapter 1: The Seoul Transfer. The protagonist is a transfer student at Seoul Arts Academy. ` +
-    (progress.choiceDescriptions.length > 0
-      ? `Choices so far: ${progress.choiceDescriptions.map((c) => c.label).join(', ')}. `
+    (choiceDescriptions.length > 0
+      ? `Choices so far: ${choiceDescriptions.map((c) => c.label).join(', ')}. `
       : '') +
     (summariesList.length > 0
       ? `Previous conversations: ${summariesList.join(' ')}`
@@ -284,7 +288,7 @@ export function StoryReaderPage() {
           <div className="relative z-10 mt-auto px-5 pb-6 safe-bottom flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <p className="text-textMuted text-xs">Chapter 1 — {currentStep.title}</p>
-              <TrustIndicator trust={progress.characterState.junhoTrust} label={progress.trustStatusLabel} />
+              <TrustIndicator trust={characterState.junhoTrust} label={trustStatusLabel} />
             </div>
             {renderStepContent()}
           </div>
@@ -340,7 +344,7 @@ export function StoryReaderPage() {
               ) : (
                 <div className="mx-auto w-full max-w-[680px] px-8 pt-6 pb-10 flex flex-col gap-5">
                   <div className="flex items-center justify-between">
-                    <TrustIndicator trust={progress.characterState.junhoTrust} label={progress.trustStatusLabel} />
+                    <TrustIndicator trust={characterState.junhoTrust} label={trustStatusLabel} />
                     <p className="text-textMuted text-xs">{currentBeatNum}/{totalBeats}</p>
                   </div>
                   {renderStepContent()}

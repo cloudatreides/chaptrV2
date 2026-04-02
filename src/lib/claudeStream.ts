@@ -1,4 +1,4 @@
-import { getCharacterBible, getBibleForUniverse, resolveText } from '../data/storyData'
+import { getBibleForUniverse, resolveText } from '../data/storyData'
 import { CHARACTERS, getCharacter } from '../data/characters'
 import { getSoraSystemPrompt } from '../data/characters'
 import type { ChatMessage } from '../store/useStore'
@@ -277,7 +277,7 @@ export async function summarizeChat(params: SummarizeChatParams): Promise<string
 // ─── Reveal Signature ───
 
 export async function generateRevealSignature(params: RevealSignatureParams): Promise<string> {
-  const { chatSummaries, choiceHistory, characterState, loveInterest, universeId } = params
+  const { chatSummaries, choiceHistory, characterState, loveInterest } = params
   const trust = characterState.junhoTrust
   const liName = loveInterest === 'yuna' ? 'Yuna' : 'Jiwon'
 
