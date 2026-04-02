@@ -98,7 +98,7 @@ export function UploadPage() {
       <div className="flex flex-col flex-1 w-full max-w-[520px] mx-auto px-5">
         {/* Nav */}
         <div className="flex items-center justify-between pt-12 pb-2">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
             <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%)' }}>
               <span className="text-white font-bold text-sm">C</span>
             </div>
