@@ -17,33 +17,33 @@ interface AmbientState {
 }
 
 const MOOD_CONFIGS: Record<AmbientMood, { freqs: number[]; detune: number[]; volume: number; filterFreq: number }> = {
-  // Warm, cinematic — for story beats and narrative prose
+  // Warm lofi pad — Cmaj7 voicing, muffled and gentle
   story: {
-    freqs: [110, 164.81, 220, 329.63],  // A2, E3, A3, E4
-    detune: [0, -3, 5, -2],
-    volume: 0.06,
-    filterFreq: 800,
+    freqs: [65.41, 130.81, 164.81, 196],  // C2, C3, E3, G3
+    detune: [0, -1, 2, -1],
+    volume: 0.045,
+    filterFreq: 500,
   },
-  // Intimate, quieter — for chat conversations
+  // Soft intimate lofi — Fmaj9, barely there
   chat: {
-    freqs: [130.81, 196, 261.63],  // C3, G3, C4
-    detune: [0, -5, 3],
-    volume: 0.035,
-    filterFreq: 600,
+    freqs: [87.31, 130.81, 174.61, 196],  // F2, C3, F3, G3
+    detune: [0, -1, 1, 0],
+    volume: 0.03,
+    filterFreq: 400,
   },
-  // Tension/anticipation — for choice points
+  // Gentle anticipation — Am7, warm not tense
   choice: {
-    freqs: [146.83, 185, 220, 277.18],  // D3, F#3, A3, C#4
-    detune: [-2, 4, 0, -3],
-    volume: 0.05,
-    filterFreq: 700,
+    freqs: [110, 130.81, 164.81, 196],  // A2, C3, E3, G3
+    detune: [0, 1, -1, 0],
+    volume: 0.04,
+    filterFreq: 450,
   },
-  // Ethereal, expansive — for the reveal
+  // Dreamy, open — Cmaj9, slightly brighter
   reveal: {
-    freqs: [130.81, 196, 261.63, 392],  // C3, G3, C4, G4
-    detune: [0, -2, 3, -1],
-    volume: 0.055,
-    filterFreq: 1200,
+    freqs: [65.41, 130.81, 164.81, 293.66],  // C2, C3, E3, D4
+    detune: [0, -1, 1, -1],
+    volume: 0.04,
+    filterFreq: 600,
   },
   silent: {
     freqs: [],
@@ -173,13 +173,13 @@ class AmbientAudioManager {
     const filter = ctx.createBiquadFilter()
     filter.type = 'lowpass'
     filter.frequency.value = config.filterFreq
-    filter.Q.value = 0.7
+    filter.Q.value = 0.5
     filter.connect(this.state.masterGain!)
 
     for (let i = 0; i < config.freqs.length; i++) {
-      // Main oscillator — sine for warmth
+      // All sine waves for maximum warmth
       const osc = ctx.createOscillator()
-      osc.type = i === 0 ? 'sine' : 'triangle'
+      osc.type = 'sine'
       osc.frequency.value = config.freqs[i]
       osc.detune.value = config.detune[i] ?? 0
 
@@ -188,11 +188,11 @@ class AmbientAudioManager {
       gain.gain.setValueAtTime(0, now)
       gain.gain.linearRampToValueAtTime(config.volume / config.freqs.length, now + fadeTime)
 
-      // Slow LFO for gentle movement
+      // Very slow LFO for barely perceptible movement
       const lfo = ctx.createOscillator()
       const lfoGain = ctx.createGain()
-      lfo.frequency.value = 0.1 + (i * 0.05) // slightly different rates
-      lfoGain.gain.value = 2 + (i * 0.5) // subtle detune wobble
+      lfo.frequency.value = 0.04 + (i * 0.02) // very slow drift
+      lfoGain.gain.value = 0.8 + (i * 0.2) // minimal wobble
       lfo.connect(lfoGain)
       lfoGain.connect(osc.detune)
 
