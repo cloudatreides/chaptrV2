@@ -257,7 +257,7 @@ export function CreateCharacterPage() {
                       </div>
                     </motion.div>
                   ) : (
-                    <motion.img key="photo" src={finalPhoto!} alt="Character" className="w-full h-52 object-cover" initial={{ opacity: 0 }} animate={{ opacity: 1 }} />
+                    <motion.img key="photo" src={finalPhoto!} alt="Character" className="w-full h-auto max-h-[360px] object-contain" initial={{ opacity: 0 }} animate={{ opacity: 1 }} />
                   )}
                 </AnimatePresence>
                 {styledPhoto && !isStylizing && (
