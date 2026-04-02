@@ -142,13 +142,13 @@ export function UniversesPage() {
 
             {/* Modal */}
             <motion.div
-              className="fixed z-50 left-1/2 bottom-0 md:bottom-auto md:top-1/2 w-full max-w-md"
-              style={{ transform: 'translateX(-50%)' }}
+              className="fixed z-50 inset-0 flex items-end md:items-center justify-center pointer-events-none"
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 40 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             >
+            <div className="w-full max-w-md pointer-events-auto">
               <div
                 className="mx-4 mb-6 md:mb-0 rounded-2xl overflow-hidden"
                 style={{ background: '#13101c', border: '1px solid #2a2040' }}
@@ -190,6 +190,7 @@ export function UniversesPage() {
                   </button>
                 </div>
               </div>
+            </div>
             </motion.div>
           </>
         )}
