@@ -5,6 +5,7 @@ import { ChevronLeft, BookOpen, Lock, X } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { UNIVERSES, GENRE_FILTERS } from '../data/storyData'
 import type { Universe } from '../data/storyData'
+import { trackEvent } from '../lib/supabase'
 
 export function UniversesPage() {
   const navigate = useNavigate()
@@ -22,6 +23,7 @@ export function UniversesPage() {
     if (!selectedUniverse) return
     setSelectedUniverse(selectedUniverse.id)
     resetStory()
+    trackEvent('universe_select', { universe: selectedUniverse.id })
     navigate('/bio')
   }
 

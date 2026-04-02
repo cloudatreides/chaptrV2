@@ -1,38 +1,47 @@
 # Chaptr V2 — Current Session State
 
 ## In Progress
-- Researching selfie-in-scene image gen alternatives (fal.ai vs Replicate vs others)
+- Nothing — ready to start Approach C (Full Social Loop)
 
 ## Done This Session
-- **Fixed onboarding order**: Landing → /universes (browse freely) → /bio → selfie gate only if needed → /story
-- **Theatrical loading screen**: Replaced spinner with full "BUILDING YOUR WORLD" overlay — cycling status text, progress bar, chapter name
-- **Relationship UI**: junhoTrust now visible — trust bar + status label (e.g. "cautiously curious") in reader nav. Claude returns `{"trustDelta", "statusLabel"}` JSON after each prose beat, parsed and applied automatically.
-- **Bio selection page**: New `/bio` screen with 3 personality archetypes (The Quiet One, The Bold One, The Dreamer) + custom "write your own" option. Bio injected into Claude system prompt to shape protagonist voice.
-- **Markdown stripping**: Bold/italic stripped inline during streaming. Headers and bullets stripped via `stripMarkdown()` on final prose. Trust JSON extracted and cleaned before display.
+- **Landing page refresh**: Removed fake testimonials/social proof. Added honest value prop + feature differentiators section. Better mobile CTAs.
+- **Mobile polish**: Fixed breakpoint inconsistency (lg→md on StoryReaderPage), added dvh viewport units, iOS zoom prevention, better chat keyboard handling, consistent safe areas.
+- **Logo nav**: Chaptr logo now navigates home on all inner pages.
+- **Bug fixes**: Universe modal centering (Framer Motion transform conflict), Start Over button layout (choice-btn justify-between override).
+- **CEO Review (Approach C selected)**: Full social loop for market testing.
 
-## New Onboarding Flow
-Landing → /universes (Step 1 of 3) → /bio (Step 2 of 3) → /upload selfie gate (Step 3 of 3, skipped if selfie exists) → /story
+## Next — Approach C: Full Social Loop (BUILD THIS)
+Priority order:
+1. **Supabase edge function proxy** — wrap Anthropic + Together AI calls. Keys stay server-side. Basic rate limiting (50 plays/IP/day).
+2. **Analytics events** — Posthog free tier or Supabase table: landing_view, universe_select, bio_complete, upload_complete, story_start, chat_exchange, choice_made, reveal_reached, share_clicked.
+3. **Playthrough persistence** — Save completed playthroughs to Supabase (unique ID, choices, reveal signature, trust score, selfie reference).
+4. **Unique share URLs** — `/reveal/:id` loads saved playthrough. Visitors see reveal card without playing.
+5. **OG meta tags** — Dynamic OG image for share URLs (anime selfie + reveal text). Shows in Twitter/Discord previews.
+6. **Rate limiting** — IP-based abuse prevention on proxy.
 
-## Next
-- Selfie-in-scene photo generation (P0) — awaiting API evaluation results
-- Hero BG blurry on retina — needs 2x source image (2880×1400)
+## CEO Review Key Findings
+- **Selfie hook is the bet** — "your face in the story" is genuinely differentiated
+- **Exposed API keys** — blocks real public distribution (Supabase proxy fixes this)
+- **Zero analytics** — can't measure funnel drop-off (Posthog/Supabase logging fixes this)
+- **Share is weak** — copy-to-clipboard with no OG preview kills viral potential
+- **Cost risk** — model API costs per playthrough need estimation before scaling
+- **One story** — fine for testing, but no answer to "what's next" if hook works
 
 ## Open Issues (carried forward)
 - Hero BG blurry on retina — needs 2x source image (2880×1400)
-- Scene images are still placeholder V1 JPEGs — solved when photo gen is wired up
+- Cost modeling needed before scaling (Claude Haiku + Together AI per playthrough)
 
 ## Key Files
-- `src/lib/claudeStream.ts` — streaming + system prompt + generateChoices() + stripMarkdown + extractTrustData
-- `src/data/storyData.ts` — chapter data, CHARACTER_BIBLE, CHAPTER_BRIEFS, UNIVERSES
-- `src/store/useStore.ts` — Zustand store (selfieUrl, gems, junhoTrust, trustStatusLabel, bio, dynamicChoices)
-- `src/pages/StoryReaderPage.tsx` — main reader, choice handling, streaming, theatrical loader, trust UI
-- `src/pages/BioPage.tsx` — personality archetype selection (new)
-- `src/pages/LandingPage.tsx` — landing page (mobile + desktop)
-- `src/pages/UniversesPage.tsx` — story browser
-- `src/pages/UploadPage.tsx` — selfie upload (now step 3 of 3)
+- `src/lib/claudeStream.ts` — streaming + system prompts + generateOpeningMessage + extractTrustData
+- `src/data/storyData.ts` — step-based branching model, STORY_STEPS, getActiveSteps()
+- `src/store/useStore.ts` — Zustand store (persist, chaptr-v2-story key)
+- `src/pages/StoryReaderPage.tsx` — step-based state machine reader
+- `src/components/ChatScene.tsx` — freeform chat (mood labels, min/max exchanges, AI opener)
+- `src/pages/LandingPage.tsx` — landing page (refreshed)
+- `src/pages/RevealPage.tsx` — relationship reveal + share
 
 ## Stack
-React + Vite + TS + Tailwind v3 + Zustand + Framer Motion + Vaul + Claude Haiku (direct SSE streaming)
+React + Vite + TS + Tailwind v3 + Zustand + Framer Motion + Vaul + Claude Haiku (direct SSE) + Together AI FLUX (scenes + selfie)
 Repo: C:/Users/ASUS/projects/chaptr-v2
 GitHub: https://github.com/cloudatreides/chaptrV2
 Live: https://chaptr-v2.vercel.app

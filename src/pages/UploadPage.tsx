@@ -7,6 +7,7 @@ import type { Area } from 'react-easy-crop'
 import { useStore } from '../store/useStore'
 import { stylizeSelfie } from '../lib/togetherAi'
 import { getCroppedImg } from '../lib/cropImage'
+import { trackEvent } from '../lib/supabase'
 
 export function UploadPage() {
   const navigate = useNavigate()
@@ -85,11 +86,13 @@ export function UploadPage() {
 
   const handleConfirm = () => {
     if (finalPhoto) setSelfieUrl(finalPhoto)
+    trackEvent('upload_complete', { styled: !!styledPhoto })
     navigate('/story')
   }
 
   const handleSkip = () => {
     setSelfieUrl(null)
+    trackEvent('upload_complete', { skipped: true })
     navigate('/story')
   }
 

@@ -5,6 +5,7 @@ import { UniversesPage } from './pages/UniversesPage'
 import { BioPage } from './pages/BioPage'
 import { StoryReaderPage } from './pages/StoryReaderPage'
 import { RevealPage } from './pages/RevealPage'
+import { SharedRevealPage } from './pages/SharedRevealPage'
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
         <Route path="/bio" element={<BioPage />} />
         <Route path="/story" element={<StoryReaderPage />} />
         <Route path="/reveal" element={<RevealPage />} />
+        <Route path="/reveal/:id" element={<SharedRevealPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

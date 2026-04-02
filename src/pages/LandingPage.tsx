@@ -1,6 +1,8 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowRight, BookOpen, Sparkles, Camera, MessageCircle, GitBranch } from 'lucide-react'
+import { trackEvent } from '../lib/supabase'
 
 const STEPS = [
   {
@@ -32,6 +34,8 @@ const INTER = 'Inter, sans-serif'
 
 export function LandingPage() {
   const navigate = useNavigate()
+
+  useEffect(() => { trackEvent('landing_view') }, [])
 
   return (
     <div className="bg-bg">

@@ -5,8 +5,7 @@ import { CHARACTERS } from '../data/characters'
 import { useStore } from '../store/useStore'
 import { streamChatReply, summarizeChat, generateOpeningMessage } from '../lib/claudeStream'
 import { generateCharacterPortrait, generateSceneImage } from '../lib/togetherAi'
-
-const API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY ?? ''
+import { trackEvent } from '../lib/supabase'
 
 // Mood labels based on exchange count — feels organic, not mechanical
 function getMoodLabel(characterId: string, exchangeCount: number): string {
@@ -82,25 +81,12 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
         })
       }
 
-      if (!API_KEY) {
-        const fallback = characterId === 'jiwon'
-          ? "...hey. You're the new transfer, right?"
-          : "omg hi!! you must be new here~ I'm Sora!"
-        await new Promise((r) => setTimeout(r, 800))
-        const charMessage = { role: 'character' as const, content: fallback }
-        setLocalMessages([charMessage])
-        addChatMessage({ ...charMessage, characterId, timestamp: Date.now() })
-        setIsLoadingOpener(false)
-        return
-      }
-
       try {
         const opening = await generateOpeningMessage({
           characterId,
           storyContext,
           characterState,
           bio,
-          apiKey: API_KEY,
         })
         const charMessage = { role: 'character' as const, content: opening }
         setLocalMessages([charMessage])
@@ -134,27 +120,6 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
     setStreamedReply('')
     const newExchange = exchangeCount + 1
 
-    if (!API_KEY) {
-      // Fallback
-      const fallback = characterId === 'jiwon'
-        ? ['Hm. Interesting.', "I don't usually talk to people here.", 'You ask a lot of questions.', '...maybe.', "You're different from what I expected.", "I should go. They're waiting for me."]
-        : ['ngl this place is wild lol', 'you should totally come to the showcase!', 'wait do you know about Jiwon?? 👀', "he's not what people think~", 'trust me on this one lol', "ok I gotta run but let's talk later!!"]
-      const reply = fallback[Math.min(newExchange - 1, fallback.length - 1)]
-      await new Promise((r) => setTimeout(r, 800))
-      setStreamedReply(reply)
-      const charMessage = { role: 'character' as const, content: reply }
-      setLocalMessages((prev) => [...prev, charMessage])
-      addChatMessage({ ...charMessage, characterId, timestamp: Date.now() })
-      setStreamedReply('')
-      setIsTyping(false)
-      setExchangeCount(newExchange)
-      if (newExchange >= maxExchanges) {
-        setIsDone(true)
-        handleChatComplete([...localMessages, userMessage, charMessage])
-      }
-      return
-    }
-
     // Build full message history for Claude
     const allMessages = [...localMessages, userMessage].map((m) => ({
       ...m,
@@ -173,7 +138,6 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
         maxExchanges,
         characterState,
         bio,
-        apiKey: API_KEY,
         signal: abortRef.current.signal,
       })
 
@@ -187,6 +151,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
       addChatMessage({ ...charMessage, characterId, timestamp: Date.now() })
       setStreamedReply('')
       setExchangeCount(newExchange)
+      trackEvent('chat_exchange', { characterId, exchange: newExchange })
 
       if (newExchange >= maxExchanges) {
         setIsDone(true)
@@ -205,16 +170,11 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
 
   const handleChatComplete = async (msgs: { role: 'user' | 'character'; content: string }[]) => {
     // Summarize the conversation
-    if (API_KEY) {
-      const summary = await summarizeChat({
-        characterId,
-        messages: msgs.map((m) => ({ ...m, characterId, timestamp: 0 })),
-        apiKey: API_KEY,
-      })
-      setChatSummary(stepId, summary)
-    } else {
-      setChatSummary(stepId, `Brief conversation with ${character?.name ?? characterId}.`)
-    }
+    const summary = await summarizeChat({
+      characterId,
+      messages: msgs.map((m) => ({ ...m, characterId, timestamp: 0 })),
+    })
+    setChatSummary(stepId, summary)
   }
 
   const handleContinue = async () => {

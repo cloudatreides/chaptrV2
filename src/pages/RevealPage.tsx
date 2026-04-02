@@ -5,8 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { generateRevealSignature } from '../lib/claudeStream'
 import { generateSceneImage } from '../lib/togetherAi'
-
-const API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY ?? ''
+import { trackEvent, savePlaythrough } from '../lib/supabase'
 
 export function RevealPage() {
   const navigate = useNavigate()
@@ -14,7 +13,7 @@ export function RevealPage() {
     selfieUrl, characterState, choiceDescriptions,
     revealSignature, setRevealSignature,
     sceneImages, setSceneImage,
-    resetStory,
+    resetStory, selectedUniverse, bio, trustStatusLabel,
   } = useStore()
   const summariesList = useStore.getState().getSummariesList()
 
@@ -23,6 +22,7 @@ export function RevealPage() {
   const [showFull, setShowFull] = useState(false)
   const [bgImage, setBgImage] = useState<string | null>(sceneImages['reveal'] ?? null)
   const [copied, setCopied] = useState(false)
+  const [shareId, setShareId] = useState<string | null>(null)
 
   // Generate signature on mount
   useEffect(() => {
@@ -47,13 +47,26 @@ export function RevealPage() {
         chatSummaries: summariesList,
         choiceHistory: choiceDescriptions,
         characterState,
-        apiKey: API_KEY,
       })
 
       setRevealSignature(sig)
       await imagePromise
       setIsLoading(false)
       animateWords(sig)
+      trackEvent('reveal_reached', { trust: characterState.junhoTrust })
+
+      // Save playthrough for share URL
+      const id = await savePlaythrough({
+        universe_id: selectedUniverse ?? 'seoul-transfer',
+        choices: choiceDescriptions,
+        chat_summaries: summariesList,
+        trust_score: characterState.junhoTrust,
+        trust_label: trustStatusLabel,
+        reveal_signature: sig,
+        selfie_url: selfieUrl,
+        bio,
+      })
+      if (id) setShareId(id)
     }
 
     generate()
@@ -72,10 +85,14 @@ export function RevealPage() {
   }
 
   const handleShare = async () => {
-    const text = `"${revealSignature}"\n\n— my story with Jiwon in Chaptr\nchaptr-v2.vercel.app`
+    const shareUrl = shareId
+      ? `${window.location.origin}/s/${shareId}`
+      : 'chaptr-v2.vercel.app'
+    const text = `"${revealSignature}"\n\n— my story with Jiwon in Chaptr\n${shareUrl}`
     try {
       await navigator.clipboard.writeText(text)
       setCopied(true)
+      trackEvent('share_clicked', { method: 'clipboard', hasShareUrl: !!shareId })
       setTimeout(() => setCopied(false), 2000)
     } catch {
       // fallback

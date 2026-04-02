@@ -11,7 +11,6 @@ export interface StreamBeatParams {
   chatSummaries: string[]
   characterState: { junhoTrust: number }
   bio: string | null
-  apiKey: string
   signal?: AbortSignal
 }
 
@@ -23,21 +22,18 @@ export interface StreamChatParams {
   maxExchanges: number
   characterState: { junhoTrust: number }
   bio: string | null
-  apiKey: string
   signal?: AbortSignal
 }
 
 export interface SummarizeChatParams {
   characterId: string
   messages: ChatMessage[]
-  apiKey: string
 }
 
 export interface RevealSignatureParams {
   chatSummaries: string[]
   choiceHistory: { label: string; description: string }[]
   characterState: { junhoTrust: number }
-  apiKey: string
 }
 
 // ─── Helpers ───
@@ -92,21 +88,16 @@ async function* streamSSE(response: Response): AsyncGenerator<string> {
   }
 }
 
-function makeClaudeRequest(system: string, userMessage: string, apiKey: string, options: {
+function makeClaudeRequest(system: string, userMessage: string, options: {
   stream?: boolean
   maxTokens?: number
   temperature?: number
   signal?: AbortSignal
 } = {}) {
   const { stream = false, maxTokens = 300, temperature = 0.6, signal } = options
-  return fetch('https://api.anthropic.com/v1/messages', {
+  return fetch('/api/claude', {
     method: 'POST',
-    headers: {
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'content-type': 'application/json',
-      'anthropic-dangerous-direct-browser-access': 'true',
-    },
+    headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-haiku-4-5',
       max_tokens: maxTokens,
@@ -151,11 +142,11 @@ PROSE CONSTRAINTS:
 }
 
 export async function* streamBeatProse(params: StreamBeatParams): AsyncGenerator<string> {
-  const { beatTitle, arcBrief, apiKey, signal } = params
+  const { beatTitle, arcBrief, signal } = params
   const system = buildBeatSystemPrompt(params)
   const userMessage = `Scene: "${beatTitle}".${arcBrief ? ` Arc: ${arcBrief}` : ''} Write the continuation prose.`
 
-  const response = await makeClaudeRequest(system, userMessage, apiKey, {
+  const response = await makeClaudeRequest(system, userMessage, {
     stream: true, maxTokens: 300, temperature: 0.6, signal,
   })
 
@@ -170,11 +161,10 @@ export interface OpeningMessageParams {
   storyContext: string
   characterState: { junhoTrust: number }
   bio: string | null
-  apiKey: string
 }
 
 export async function generateOpeningMessage(params: OpeningMessageParams): Promise<string> {
-  const { characterId, storyContext, characterState, bio, apiKey } = params
+  const { characterId, storyContext, characterState, bio } = params
   const character = CHARACTERS[characterId]
   if (!character) return '...'
 
@@ -188,7 +178,7 @@ export async function generateOpeningMessage(params: OpeningMessageParams): Prom
   system += `\n\nIMPORTANT: You are initiating this conversation. Say something first — a greeting, a comment, a question. Keep it in character. 1-2 sentences max. This should feel natural for the moment in the story.`
 
   try {
-    const response = await makeClaudeRequest(system, 'Write your opening line to the protagonist.', apiKey, {
+    const response = await makeClaudeRequest(system, 'Write your opening line to the protagonist.', {
       temperature: character.chatTemperature,
       maxTokens: 80,
     })
@@ -204,7 +194,7 @@ export async function generateOpeningMessage(params: OpeningMessageParams): Prom
 // ─── Character Chat ───
 
 export async function* streamChatReply(params: StreamChatParams): AsyncGenerator<string> {
-  const { characterId, messages, storyContext, exchangeNumber, maxExchanges, characterState, bio, apiKey, signal } = params
+  const { characterId, messages, storyContext, exchangeNumber, maxExchanges, characterState, bio, signal } = params
   const character = CHARACTERS[characterId]
   if (!character) throw new Error(`Unknown character: ${characterId}`)
 
@@ -228,14 +218,9 @@ export async function* streamChatReply(params: StreamChatParams): AsyncGenerator
     content: m.content,
   }))
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
+  const response = await fetch('/api/claude', {
     method: 'POST',
-    headers: {
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'content-type': 'application/json',
-      'anthropic-dangerous-direct-browser-access': 'true',
-    },
+    headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-haiku-4-5',
       max_tokens: 150,
@@ -254,7 +239,7 @@ export async function* streamChatReply(params: StreamChatParams): AsyncGenerator
 // ─── Chat Summarization ───
 
 export async function summarizeChat(params: SummarizeChatParams): Promise<string> {
-  const { characterId, messages, apiKey } = params
+  const { characterId, messages } = params
   const character = CHARACTERS[characterId]
   const name = character?.name ?? characterId
 
@@ -266,7 +251,6 @@ export async function summarizeChat(params: SummarizeChatParams): Promise<string
     const response = await makeClaudeRequest(
       `Summarize this conversation in 1-2 sentences. Focus on: emotional tone, key topics discussed, and how the protagonist treated ${name}. Be specific and concise.`,
       transcript,
-      apiKey,
       { temperature: 0.3, maxTokens: 100 },
     )
 
@@ -281,7 +265,7 @@ export async function summarizeChat(params: SummarizeChatParams): Promise<string
 // ─── Reveal Signature ───
 
 export async function generateRevealSignature(params: RevealSignatureParams): Promise<string> {
-  const { chatSummaries, choiceHistory, characterState, apiKey } = params
+  const { chatSummaries, choiceHistory, characterState } = params
   const trust = characterState.junhoTrust
 
   const context = [
@@ -301,7 +285,6 @@ Rules:
 - No quotes around the phrase.
 - Examples of good signatures: "guarded but pulled toward you", "burned bright then distant", "saw through the charm immediately", "the one who made silence feel safe", "too honest for this world of mine"`,
       `Based on these interactions, generate the relationship signature:\n\n${context}`,
-      apiKey,
       { temperature: 0.4, maxTokens: 50 },
     )
 
