@@ -38,8 +38,7 @@ export const UNIVERSES: Universe[] = [
     genreTag: 'SUPERNATURAL HORROR',
     description: 'You inherit a crumbling estate on the edge of a dying town. Something inside the walls has been waiting for you.',
     image: '/hollow-manor.svg',
-    locked: true,
-    lockedLabel: 'SOON',
+    locked: false,
   },
   {
     id: 'the-last-signal',
@@ -48,8 +47,7 @@ export const UNIVERSES: Universe[] = [
     genreTag: 'NOIR MYSTERY',
     description: 'A missing person. A city full of liars. You have 48 hours before the only witness disappears for good.',
     image: '/last-signal.svg',
-    locked: true,
-    lockedLabel: 'SOON',
+    locked: false,
   },
   {
     id: 'edge-of-atlas',
@@ -293,8 +291,8 @@ export const STORY_STEPS: StoryStep[] = [
 
 // ─── Branch router ───
 
-export function getActiveSteps(branchChoices: Record<string, string>): StoryStep[] {
-  return STORY_STEPS.filter((step) => {
+export function getActiveSteps(branchChoices: Record<string, string>, steps: StoryStep[] = STORY_STEPS): StoryStep[] {
+  return steps.filter((step) => {
     if (!step.requires) return true
     return Object.entries(step.requires).every(
       ([cpId, required]) => branchChoices[cpId] === required
@@ -380,4 +378,29 @@ export function resolveText(text: string, preference: 'jiwon' | 'yuna' | null): 
 /** Get the character bible adjusted for love interest */
 export function getCharacterBible(preference: 'jiwon' | 'yuna' | null): string {
   return resolveText(CHARACTER_BIBLE, preference)
+}
+
+// ─── Universe-aware story loading ───
+
+import { getStoryData } from './stories'
+
+/** Get steps for a universe. Falls back to Seoul Transfer. */
+export function getStepsForUniverse(universeId: string | null): StoryStep[] {
+  const storyData = getStoryData(universeId)
+  if (storyData) return storyData.steps
+  return STORY_STEPS
+}
+
+/** Get character bible for a universe. Falls back to Seoul Transfer. */
+export function getBibleForUniverse(universeId: string | null, preference?: 'jiwon' | 'yuna' | null): string {
+  const storyData = getStoryData(universeId)
+  if (storyData) return storyData.bible
+  return getCharacterBible(preference ?? null)
+}
+
+/** Get reveal perspective label for a universe */
+export function getRevealPerspective(universeId: string | null, loveInterest?: 'jiwon' | 'yuna' | null): string {
+  const storyData = getStoryData(universeId)
+  if (storyData) return storyData.revealPerspective
+  return loveInterest === 'yuna' ? 'Yuna sees you as' : 'Jiwon sees you as'
 }

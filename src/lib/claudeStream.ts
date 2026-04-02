@@ -1,5 +1,6 @@
-import { CHARACTER_BIBLE } from '../data/storyData'
-import { CHARACTERS } from '../data/characters'
+import { getCharacterBible, getBibleForUniverse, resolveText } from '../data/storyData'
+import { CHARACTERS, getCharacter } from '../data/characters'
+import { getSoraSystemPrompt } from '../data/characters'
 import type { ChatMessage } from '../store/useStore'
 
 // ─── Types ───
@@ -11,17 +12,21 @@ export interface StreamBeatParams {
   chatSummaries: string[]
   characterState: { junhoTrust: number }
   bio: string | null
+  loveInterest: 'jiwon' | 'yuna' | null
+  universeId: string | null
   signal?: AbortSignal
 }
 
 export interface StreamChatParams {
   characterId: string
   messages: ChatMessage[]
-  storyContext: string // brief context about where we are in the story
-  exchangeNumber: number // 1-5
+  storyContext: string
+  exchangeNumber: number
   maxExchanges: number
   characterState: { junhoTrust: number }
   bio: string | null
+  loveInterest: 'jiwon' | 'yuna' | null
+  universeId: string | null
   signal?: AbortSignal
 }
 
@@ -34,6 +39,7 @@ export interface RevealSignatureParams {
   chatSummaries: string[]
   choiceHistory: { label: string; description: string }[]
   characterState: { junhoTrust: number }
+  loveInterest: 'jiwon' | 'yuna' | null
 }
 
 // ─── Helpers ───
@@ -113,9 +119,11 @@ function makeClaudeRequest(system: string, userMessage: string, options: {
 // ─── Story Beat Generation ───
 
 function buildBeatSystemPrompt(params: StreamBeatParams): string {
-  const { choiceHistory, chatSummaries, characterState, bio } = params
+  const { choiceHistory, chatSummaries, characterState, bio, loveInterest, universeId } = params
   const trust = characterState.junhoTrust
   const trustLabel = trust > 70 ? 'high' : trust > 40 ? 'moderate' : 'low'
+  const liName = loveInterest === 'yuna' ? 'Yuna' : 'Jiwon'
+  const liPronoun = loveInterest === 'yuna' ? 'she' : 'he'
 
   const historyText = choiceHistory.length > 0
     ? '\n\nPRIOR CHOICES:\n' + choiceHistory.map((c) => `- [${c.label}]: ${c.description}`).join('\n')
@@ -125,11 +133,11 @@ function buildBeatSystemPrompt(params: StreamBeatParams): string {
     ? '\n\nPRIOR CONVERSATIONS (summaries):\n' + chatSummaries.map((s, i) => `- Chat ${i + 1}: ${s}`).join('\n')
     : ''
 
-  const trustText = `\n\nCHARACTER STATE:\n- Jiwon's trust in the protagonist: ${trustLabel} (${trust}/100). At low trust, he is guarded and professional. At moderate trust, he allows small moments of openness. At high trust, he shows real vulnerability.`
+  const trustText = `\n\nCHARACTER STATE:\n- ${liName}'s trust in the protagonist: ${trustLabel} (${trust}/100). At low trust, ${liPronoun} is guarded and professional. At moderate trust, ${liPronoun} allows small moments of openness. At high trust, ${liPronoun} shows real vulnerability.`
 
   const bioText = bio ? `\n\nPROTAGONIST PERSONALITY:\n"${bio}"` : ''
 
-  return `${CHARACTER_BIBLE}${historyText}${chatText}${trustText}${bioText}
+  return `${getBibleForUniverse(universeId, loveInterest)}${historyText}${chatText}${trustText}${bioText}
 
 PROSE CONSTRAINTS:
 - Write 2–4 short paragraphs (max 120 words total).
@@ -142,9 +150,10 @@ PROSE CONSTRAINTS:
 }
 
 export async function* streamBeatProse(params: StreamBeatParams): AsyncGenerator<string> {
-  const { beatTitle, arcBrief, signal } = params
+  const { beatTitle, arcBrief, loveInterest, signal } = params
   const system = buildBeatSystemPrompt(params)
-  const userMessage = `Scene: "${beatTitle}".${arcBrief ? ` Arc: ${arcBrief}` : ''} Write the continuation prose.`
+  const resolvedArc = arcBrief ? resolveText(arcBrief, loveInterest) : undefined
+  const userMessage = `Scene: "${beatTitle}".${resolvedArc ? ` Arc: ${resolvedArc}` : ''} Write the continuation prose.`
 
   const response = await makeClaudeRequest(system, userMessage, {
     stream: true, maxTokens: 300, temperature: 0.6, signal,
@@ -161,17 +170,19 @@ export interface OpeningMessageParams {
   storyContext: string
   characterState: { junhoTrust: number }
   bio: string | null
+  loveInterest: 'jiwon' | 'yuna' | null
+  universeId: string | null
 }
 
 export async function generateOpeningMessage(params: OpeningMessageParams): Promise<string> {
-  const { characterId, storyContext, characterState, bio } = params
-  const character = CHARACTERS[characterId]
+  const { characterId, storyContext, characterState, bio, loveInterest, universeId } = params
+  const character = getCharacter(characterId, universeId)
   if (!character) return '...'
 
   const trust = characterState.junhoTrust
   const trustLabel = trust > 70 ? 'high' : trust > 40 ? 'moderate' : 'low'
 
-  let system = character.systemPrompt
+  let system = characterId === 'sora' ? getSoraSystemPrompt(loveInterest) : character.systemPrompt
   system += `\n\nSTORY CONTEXT: ${storyContext}`
   system += `\n\nRelationship with protagonist: ${trustLabel} trust (${trust}/100).`
   if (bio) system += `\nProtagonist personality: "${bio}"`
@@ -194,14 +205,14 @@ export async function generateOpeningMessage(params: OpeningMessageParams): Prom
 // ─── Character Chat ───
 
 export async function* streamChatReply(params: StreamChatParams): AsyncGenerator<string> {
-  const { characterId, messages, storyContext, exchangeNumber, maxExchanges, characterState, bio, signal } = params
-  const character = CHARACTERS[characterId]
+  const { characterId, messages, storyContext, exchangeNumber, maxExchanges, characterState, bio, loveInterest, universeId, signal } = params
+  const character = getCharacter(characterId, universeId)
   if (!character) throw new Error(`Unknown character: ${characterId}`)
 
   const trust = characterState.junhoTrust
   const trustLabel = trust > 70 ? 'high' : trust > 40 ? 'moderate' : 'low'
 
-  let system = character.systemPrompt
+  let system = characterId === 'sora' ? getSoraSystemPrompt(loveInterest) : character.systemPrompt
   system += `\n\nSTORY CONTEXT: ${storyContext}`
   system += `\n\nRelationship with protagonist: ${trustLabel} trust (${trust}/100).`
   if (bio) system += `\nProtagonist personality: "${bio}"`
@@ -265,8 +276,9 @@ export async function summarizeChat(params: SummarizeChatParams): Promise<string
 // ─── Reveal Signature ───
 
 export async function generateRevealSignature(params: RevealSignatureParams): Promise<string> {
-  const { chatSummaries, choiceHistory, characterState } = params
+  const { chatSummaries, choiceHistory, characterState, loveInterest } = params
   const trust = characterState.junhoTrust
+  const liName = loveInterest === 'yuna' ? 'Yuna' : 'Jiwon'
 
   const context = [
     ...choiceHistory.map((c) => `Choice: ${c.label} — ${c.description}`),
@@ -276,11 +288,11 @@ export async function generateRevealSignature(params: RevealSignatureParams): Pr
 
   try {
     const response = await makeClaudeRequest(
-      `You generate relationship signatures for an interactive story. Given the player's choices and conversations with Jiwon (K-pop idol), create a poetic "relationship signature" — a phrase that captures the emotional essence of their connection.
+      `You generate relationship signatures for an interactive story. Given the player's choices and conversations with ${liName} (K-pop idol), create a poetic "relationship signature" — a phrase that captures the emotional essence of their connection.
 
 Rules:
 - 6-10 words maximum.
-- Written from Jiwon's perspective about the protagonist.
+- Written from ${liName}'s perspective about the protagonist.
 - Poetic, specific, never generic.
 - No quotes around the phrase.
 - Examples of good signatures: "guarded but pulled toward you", "burned bright then distant", "saw through the charm immediately", "the one who made silence feel safe", "too honest for this world of mine"`,

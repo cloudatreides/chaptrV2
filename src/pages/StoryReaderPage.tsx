@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Menu } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
-import { STORY_STEPS, getActiveSteps, getTotalBeats, getCurrentBeatNumber, resolveLoveInterestId, resolveText } from '../data/storyData'
+import { getActiveSteps, getTotalBeats, getCurrentBeatNumber, resolveLoveInterestId, resolveText, getStepsForUniverse } from '../data/storyData'
 import { GemCounter } from '../components/GemCounter'
 import { ChoicePoint } from '../components/ChoicePoint'
 import { ChatScene } from '../components/ChatScene'
@@ -25,7 +25,7 @@ export function StoryReaderPage() {
     choiceDescriptions, addChoiceDescription,
     characterState, updateTrust,
     setTrustStatusLabel,
-    selfieUrl, bio, loveInterest,
+    selfieUrl, bio, loveInterest, selectedUniverse,
     isStreaming, setIsStreaming,
     isGeneratingScene, setIsGeneratingScene,
     sceneImages, setSceneImage,
@@ -35,7 +35,8 @@ export function StoryReaderPage() {
   const [sheetOpen, setSheetOpen] = useState(false)
 
   // Compute active steps based on branch choices
-  const activeSteps = getActiveSteps(branchChoices)
+  const universeSteps = getStepsForUniverse(selectedUniverse)
+  const activeSteps = getActiveSteps(branchChoices, universeSteps)
   const currentStep = activeSteps[currentStepIndex]
   const totalBeats = getTotalBeats(activeSteps)
   const currentBeatNum = currentStep?.type === 'beat' ? getCurrentBeatNumber(activeSteps, currentStepIndex) : 0
@@ -57,6 +58,13 @@ export function StoryReaderPage() {
 
   // Streaming typewriter for AI-generated prose
   const { displayed: streamDisplayed, isTyping, append, finish, reset: resetStream } = useStreamingTypewriter(18)
+
+  // Redirect to bio page if love interest hasn't been chosen yet
+  useEffect(() => {
+    if (!loveInterest) {
+      navigate('/bio', { replace: true })
+    }
+  }, [loveInterest])
 
   // Track story start
   useEffect(() => { trackEvent('story_start') }, [])
@@ -133,6 +141,7 @@ export function StoryReaderPage() {
         chatSummaries: summariesList,
         characterState,
         bio,
+        loveInterest,
         signal: abortRef.current.signal,
       })
 
@@ -226,14 +235,20 @@ export function StoryReaderPage() {
         )
       }
 
-      case 'choice':
+      case 'choice': {
+        const resolvedOptions = (currentStep.options ?? []).map((opt) => ({
+          ...opt,
+          label: resolveText(opt.label, loveInterest),
+          description: resolveText(opt.description, loveInterest),
+        }))
         return (
           <ChoicePoint
             title={currentStep.title ?? 'Choose'}
-            options={currentStep.options ?? []}
+            options={resolvedOptions}
             onSelect={handleBranchChoice}
           />
         )
+      }
 
       case 'beat':
         return (

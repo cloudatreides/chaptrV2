@@ -1,47 +1,46 @@
 # Chaptr V2 — Current Session State
 
 ## In Progress
-- Nothing — ready to start Approach C (Full Social Loop)
+- **Multi-universe wiring (90% done)**: Story data written for Horror (Hollow Manor) and Mystery (The Last Signal). Architecture is universe-aware. Remaining wiring:
+  - Pass `universeId` and `selectedUniverse` through call sites in `StoryReaderPage` (streamBeatProse call), `ChatScene` (streamChatReply, generateOpeningMessage calls), and `RevealPage` (generateRevealSignature, reveal perspective label)
+  - ChatScene needs to use `getCharacter()` instead of `CHARACTERS[id]` for universe-specific characters
+  - RevealPage needs `getRevealPerspective()` for the "X sees you as" label
+  - The `loveInterest` picker on BioPage should only show for Seoul Transfer (hide for horror/mystery)
+  - Need placeholder images for hollow-manor.svg and last-signal.svg in /public
 
 ## Done This Session
-- **Landing page refresh**: Removed fake testimonials/social proof. Added honest value prop + feature differentiators section. Better mobile CTAs.
-- **Mobile polish**: Fixed breakpoint inconsistency (lg→md on StoryReaderPage), added dvh viewport units, iOS zoom prevention, better chat keyboard handling, consistent safe areas.
-- **Logo nav**: Chaptr logo now navigates home on all inner pages.
-- **Bug fixes**: Universe modal centering (Framer Motion transform conflict), Start Over button layout (choice-btn justify-between override).
-- **CEO Review (Approach C selected)**: Full social loop for market testing.
+- **Approach C: Full Social Loop** — all 6 priorities complete:
+  1. API proxy: `api/claude.ts` + `api/together.ts` (Vercel Edge, keys server-side)
+  2. Analytics: `chaptr_events` Supabase table, 9 funnel events tracked
+  3. Playthrough persistence: `chaptr_playthroughs` table, auto-save on reveal
+  4. Share URLs: `/reveal/:id` (SPA) + `/s/:id` (OG-tagged for crawlers)
+  5. OG meta: `api/og.tsx` dynamic image + `api/share.ts` meta HTML
+  6. Rate limiting: deferred (not critical for testing)
+- **Multi-universe story data**: Hollow Manor (Horror) + The Last Signal (Mystery) — full step definitions, characters, bibles, scene prompts
+- **Universe-aware architecture**: `getStepsForUniverse()`, `getBibleForUniverse()`, `getCharacter()`, `getRevealPerspective()`, story registry pattern
+- **Unlocked** hollow-manor and the-last-signal in UNIVERSES array
 
-## Next — Approach C: Full Social Loop (BUILD THIS)
-Priority order:
-1. **Supabase edge function proxy** — wrap Anthropic + Together AI calls. Keys stay server-side. Basic rate limiting (50 plays/IP/day).
-2. **Analytics events** — Posthog free tier or Supabase table: landing_view, universe_select, bio_complete, upload_complete, story_start, chat_exchange, choice_made, reveal_reached, share_clicked.
-3. **Playthrough persistence** — Save completed playthroughs to Supabase (unique ID, choices, reveal signature, trust score, selfie reference).
-4. **Unique share URLs** — `/reveal/:id` loads saved playthrough. Visitors see reveal card without playing.
-5. **OG meta tags** — Dynamic OG image for share URLs (anime selfie + reveal text). Shows in Twitter/Discord previews.
-6. **Rate limiting** — IP-based abuse prevention on proxy.
+## Env Vars Needed in Vercel
+- `ANTHROPIC_API_KEY` (server-side, no VITE_ prefix)
+- `TOGETHER_API_KEY` (server-side, no VITE_ prefix)
+- `SUPABASE_ANON_KEY` (for api/og.tsx and api/share.ts)
 
-## CEO Review Key Findings
-- **Selfie hook is the bet** — "your face in the story" is genuinely differentiated
-- **Exposed API keys** — blocks real public distribution (Supabase proxy fixes this)
-- **Zero analytics** — can't measure funnel drop-off (Posthog/Supabase logging fixes this)
-- **Share is weak** — copy-to-clipboard with no OG preview kills viral potential
-- **Cost risk** — model API costs per playthrough need estimation before scaling
-- **One story** — fine for testing, but no answer to "what's next" if hook works
-
-## Open Issues (carried forward)
-- Hero BG blurry on retina — needs 2x source image (2880×1400)
-- Cost modeling needed before scaling (Claude Haiku + Together AI per playthrough)
+## Next
+- Finish universe wiring (pass universeId through remaining call sites)
+- Add placeholder universe cover images
+- Test full playthrough on each story
+- Love interest picker: hide for non-romance universes
 
 ## Key Files
-- `src/lib/claudeStream.ts` — streaming + system prompts + generateOpeningMessage + extractTrustData
-- `src/data/storyData.ts` — step-based branching model, STORY_STEPS, getActiveSteps()
-- `src/store/useStore.ts` — Zustand store (persist, chaptr-v2-story key)
-- `src/pages/StoryReaderPage.tsx` — step-based state machine reader
-- `src/components/ChatScene.tsx` — freeform chat (mood labels, min/max exchanges, AI opener)
-- `src/pages/LandingPage.tsx` — landing page (refreshed)
-- `src/pages/RevealPage.tsx` — relationship reveal + share
+- `src/data/stories/hollow-manor.ts` — Horror story data
+- `src/data/stories/the-last-signal.ts` — Mystery story data
+- `src/data/stories/index.ts` — Story registry
+- `api/claude.ts` + `api/together.ts` — API proxies
+- `api/og.tsx` + `api/share.ts` — OG image + share HTML
+- `src/lib/supabase.ts` — Supabase client, analytics, playthrough persistence
 
 ## Stack
-React + Vite + TS + Tailwind v3 + Zustand + Framer Motion + Vaul + Claude Haiku (direct SSE) + Together AI FLUX (scenes + selfie)
+React + Vite + TS + Tailwind v3 + Zustand + Framer Motion + Vaul + Claude Haiku (via proxy) + Together AI FLUX (via proxy) + Supabase
 Repo: C:/Users/ASUS/projects/chaptr-v2
 GitHub: https://github.com/cloudatreides/chaptrV2
 Live: https://chaptr-v2.vercel.app

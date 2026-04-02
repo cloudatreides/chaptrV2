@@ -1,3 +1,12 @@
+/** Get Sora's system prompt with love interest resolved */
+export function getSoraSystemPrompt(loveInterest: 'jiwon' | 'yuna' | null): string {
+  const base = CHARACTERS.sora.systemPrompt
+  if (!loveInterest || loveInterest === 'jiwon') return base
+  return base
+    .replace(/Jiwon/g, 'Yuna')
+    .replace(/NOVA/g, 'LUMINA')
+}
+
 export interface StoryCharacter {
   id: string
   name: string
@@ -102,4 +111,15 @@ RULES:
 - Show personality through word choice and rhythm, not exposition.
 - If the user is rude, get colder. If they're genuine, let a crack of warmth show.`,
   },
+}
+
+// ─── Universe-aware character lookup ───
+
+import { getStoryData } from './stories'
+
+/** Get character by ID, checking universe-specific characters first */
+export function getCharacter(characterId: string, universeId: string | null): StoryCharacter | undefined {
+  const storyData = getStoryData(universeId)
+  if (storyData?.characters[characterId]) return storyData.characters[characterId]
+  return CHARACTERS[characterId]
 }
