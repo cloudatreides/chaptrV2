@@ -163,6 +163,44 @@ export async function* streamBeatProse(params: StreamBeatParams): AsyncGenerator
   yield* streamSSE(response)
 }
 
+// ─── Character Opening Message ───
+
+export interface OpeningMessageParams {
+  characterId: string
+  storyContext: string
+  characterState: { junhoTrust: number }
+  bio: string | null
+  apiKey: string
+}
+
+export async function generateOpeningMessage(params: OpeningMessageParams): Promise<string> {
+  const { characterId, storyContext, characterState, bio, apiKey } = params
+  const character = CHARACTERS[characterId]
+  if (!character) return '...'
+
+  const trust = characterState.junhoTrust
+  const trustLabel = trust > 70 ? 'high' : trust > 40 ? 'moderate' : 'low'
+
+  let system = character.systemPrompt
+  system += `\n\nSTORY CONTEXT: ${storyContext}`
+  system += `\n\nRelationship with protagonist: ${trustLabel} trust (${trust}/100).`
+  if (bio) system += `\nProtagonist personality: "${bio}"`
+  system += `\n\nIMPORTANT: You are initiating this conversation. Say something first — a greeting, a comment, a question. Keep it in character. 1-2 sentences max. This should feel natural for the moment in the story.`
+
+  try {
+    const response = await makeClaudeRequest(system, 'Write your opening line to the protagonist.', apiKey, {
+      temperature: character.chatTemperature,
+      maxTokens: 80,
+    })
+
+    if (!response.ok) return '...'
+    const data = await response.json()
+    return data.content?.[0]?.text?.trim() ?? '...'
+  } catch {
+    return '...'
+  }
+}
+
 // ─── Character Chat ───
 
 export async function* streamChatReply(params: StreamChatParams): AsyncGenerator<string> {
@@ -180,6 +218,8 @@ export async function* streamChatReply(params: StreamChatParams): AsyncGenerator
 
   if (exchangeNumber >= maxExchanges) {
     system += `\n\nIMPORTANT: This is your FINAL reply in this conversation. Naturally wrap up — you're being called away, need to go, or the moment is ending. Don't be abrupt, but make it clear this exchange is closing.`
+  } else if (exchangeNumber >= maxExchanges - 2) {
+    system += `\n\nNOTE: The conversation is winding down. Start to naturally bring things to a close over your next replies — don't cut off abruptly, but let the energy taper.`
   }
 
   // Build messages array for multi-turn chat

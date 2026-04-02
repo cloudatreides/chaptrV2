@@ -197,7 +197,8 @@ export function StoryReaderPage() {
           <ChatScene
             stepId={currentStep.id}
             characterId={currentStep.characterId!}
-            maxExchanges={currentStep.maxExchanges ?? 5}
+            maxExchanges={currentStep.maxExchanges ?? 10}
+            minExchanges={currentStep.minExchanges ?? 3}
             storyContext={storyContext}
             onComplete={handleChatComplete}
           />

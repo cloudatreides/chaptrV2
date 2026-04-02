@@ -87,7 +87,8 @@ export interface StoryStep {
   arcBrief?: string // what must be true by end of this beat
   // Chat fields
   characterId?: string
-  maxExchanges?: number
+  maxExchanges?: number // soft cap — character wraps up naturally near this
+  minExchanges?: number // minimum before "Continue story" button appears
   // Choice fields
   choicePointId?: string
   options?: ChoiceOption[]
@@ -125,7 +126,8 @@ export const STORY_STEPS: StoryStep[] = [
     type: 'chat',
     title: 'Talk to Jiwon',
     characterId: 'jiwon',
-    maxExchanges: 5,
+    minExchanges: 3,
+    maxExchanges: 10,
   },
   {
     id: 'beat-2',
@@ -174,7 +176,8 @@ export const STORY_STEPS: StoryStep[] = [
     title: 'Talk to Sora',
     requires: { 'cp-1': 'approach' },
     characterId: 'sora',
-    maxExchanges: 5,
+    minExchanges: 3,
+    maxExchanges: 10,
   },
 
   // ── Act 2: Follow path ──
@@ -193,7 +196,8 @@ export const STORY_STEPS: StoryStep[] = [
     title: 'Talk to Jiwon',
     requires: { 'cp-1': 'follow' },
     characterId: 'jiwon',
-    maxExchanges: 5,
+    minExchanges: 3,
+    maxExchanges: 10,
   },
 
   // ── Choice Point B (options differ per path) ──
