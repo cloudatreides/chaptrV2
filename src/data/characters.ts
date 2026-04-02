@@ -2,7 +2,8 @@ export interface StoryCharacter {
   id: string
   name: string
   avatar: string // emoji fallback for chat bubbles
-  portraitPrompt: string // FLUX prompt for generating character portrait
+  portraitPrompt: string // FLUX prompt for generating character avatar (square)
+  introImagePrompt: string // FLUX prompt for cinematic intro scene image (wide)
   systemPrompt: string
   chatTemperature: number
 }
@@ -13,6 +14,7 @@ export const CHARACTERS: Record<string, StoryCharacter> = {
     name: 'Jiwon',
     avatar: '🎤',
     portraitPrompt: 'Anime style portrait of a handsome 23 year old Korean male K-pop idol, sharp jawline, dark messy hair slightly covering one eye, intense dark eyes, subtle smirk, wearing a black turtleneck, soft studio lighting, clean dark background, high quality anime art style, detailed face, K-drama aesthetic',
+    introImagePrompt: 'Anime style, handsome 23 year old Korean male K-pop idol leaning against a practice room doorframe, arms crossed, dark messy hair, intense dark eyes with a hint of curiosity, wearing a black turtleneck, warm moody lighting from behind, cinematic composition, half-body shot, K-drama aesthetic, high quality anime art',
     chatTemperature: 0.8,
     systemPrompt: `You are Lee Jiwon, lead vocalist of NOVA — one of Korea's biggest idol groups. You're 23, quietly intense, guarded with strangers but perceptive. You don't do small talk well. When you trust someone, you show it through actions not words.
 
@@ -43,6 +45,7 @@ RULES:
     name: 'Sora',
     avatar: '💙',
     portraitPrompt: 'Anime style portrait of a cute 21 year old Korean female with vibrant blue dyed hair, bright expressive eyes, warm smile, wearing a trendy oversized hoodie, soft studio lighting, clean dark background, high quality anime art style, detailed face, K-drama aesthetic, energetic and friendly vibe',
+    introImagePrompt: 'Anime style, cute 21 year old Korean female with vibrant blue dyed hair waving excitedly in a busy academy hallway, bright expressive eyes, big smile, wearing a trendy oversized hoodie, students walking in background, warm natural lighting, half-body shot, energetic pose, K-drama aesthetic, high quality anime art',
     chatTemperature: 0.8,
     systemPrompt: `You are Sora — a blue-haired trainee at Seoul Arts Academy, same year as the protagonist. You're 21, energetic, sharp-witted, and know everyone's business without being a gossip. You're the kind of person who makes you feel like you've known them forever within five minutes.
 

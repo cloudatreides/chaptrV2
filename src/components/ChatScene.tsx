@@ -4,7 +4,7 @@ import { Send, ArrowRight } from 'lucide-react'
 import { CHARACTERS } from '../data/characters'
 import { useStore } from '../store/useStore'
 import { streamChatReply, summarizeChat, generateOpeningMessage } from '../lib/claudeStream'
-import { generateCharacterPortrait } from '../lib/togetherAi'
+import { generateCharacterPortrait, generateSceneImage } from '../lib/togetherAi'
 
 const API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY ?? ''
 
@@ -42,6 +42,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
   const [exchangeCount, setExchangeCount] = useState(0)
   const [isDone, setIsDone] = useState(false)
   const [isLoadingOpener, setIsLoadingOpener] = useState(true)
+  const [introImage, setIntroImage] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const abortRef = useRef<AbortController | null>(null)
   const hasGeneratedOpener = useRef(false)
@@ -73,6 +74,13 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
 
     const generateOpener = async () => {
       setIsLoadingOpener(true)
+
+      // Generate intro image in parallel (fire and forget)
+      if (character?.introImagePrompt) {
+        generateSceneImage({ prompt: character.introImagePrompt, width: 768, height: 512 }).then((url) => {
+          if (url) setIntroImage(url)
+        })
+      }
 
       if (!API_KEY) {
         const fallback = characterId === 'jiwon'
@@ -258,22 +266,35 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
         {localMessages.map((msg, i) => (
           <motion.div
             key={i}
-            className={`flex items-end gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2 }}
           >
-            {msg.role === 'character' && (
-              <div className="w-7 h-7 rounded-full overflow-hidden shrink-0 mb-0.5" style={{ background: 'rgba(200,75,158,0.15)' }}>
-                {portrait ? (
-                  <img src={portrait} alt={character?.name} className="w-full h-full object-cover" />
-                ) : (
-                  <span className="w-full h-full flex items-center justify-center text-xs">{character?.avatar}</span>
-                )}
-              </div>
+            {/* Intro image — only on first character message */}
+            {i === 0 && msg.role === 'character' && introImage && (
+              <motion.div
+                className="w-full max-w-[320px] rounded-xl overflow-hidden mb-2"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4 }}
+              >
+                <img src={introImage} alt={character?.name} className="w-full h-auto" />
+              </motion.div>
             )}
-            <div className={`chat-bubble ${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-character'}`}>
-              {msg.content}
+            <div className={`flex items-end gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              {msg.role === 'character' && (
+                <div className="w-7 h-7 rounded-full overflow-hidden shrink-0 mb-0.5" style={{ background: 'rgba(200,75,158,0.15)' }}>
+                  {portrait ? (
+                    <img src={portrait} alt={character?.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="w-full h-full flex items-center justify-center text-xs">{character?.avatar}</span>
+                  )}
+                </div>
+              )}
+              <div className={`chat-bubble ${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-character'}`}>
+                {msg.content}
+              </div>
             </div>
           </motion.div>
         ))}
