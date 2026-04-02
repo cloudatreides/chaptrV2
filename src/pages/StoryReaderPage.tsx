@@ -274,11 +274,11 @@ export function StoryReaderPage() {
         {!isFullScreenStep && (
           <>
             {currentImage ? (
-              <div className="absolute inset-0 bg-cover bg-top transition-all duration-700" style={{ backgroundImage: `url(${currentImage})`, backgroundColor: '#1a1525' }} />
+              <div className="absolute inset-0 bg-cover bg-top transition-all duration-700 pointer-events-none" style={{ backgroundImage: `url(${currentImage})`, backgroundColor: '#1a1525' }} />
             ) : (
               <SceneFallbackGradient stepId={currentStep?.id} />
             )}
-            <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(13,10,18,0) 0%, rgba(13,10,18,0.4) 45%, rgba(13,10,18,0.95) 65%, rgba(13,10,18,1) 100%)' }} />
+            <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to bottom, rgba(13,10,18,0) 0%, rgba(13,10,18,0.4) 45%, rgba(13,10,18,0.95) 65%, rgba(13,10,18,1) 100%)' }} />
           </>
         )}
 
@@ -336,11 +336,11 @@ export function StoryReaderPage() {
             {!isFullScreenStep && (
               <div className="relative flex-none" style={{ height: '45vh' }}>
                 {currentImage ? (
-                  <div className="absolute inset-0 bg-cover bg-center transition-all duration-700" style={{ backgroundImage: `url(${currentImage})`, backgroundColor: '#1a1525' }} />
+                  <div className="absolute inset-0 bg-cover bg-center transition-all duration-700 pointer-events-none" style={{ backgroundImage: `url(${currentImage})`, backgroundColor: '#1a1525' }} />
                 ) : (
                   <SceneFallbackGradient stepId={currentStep?.id} />
                 )}
-                <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(13,10,18,0.25) 0%, rgba(13,10,18,0) 35%, rgba(13,10,18,0.9) 85%, rgba(13,10,18,1) 100%)' }} />
+                <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to bottom, rgba(13,10,18,0.25) 0%, rgba(13,10,18,0) 35%, rgba(13,10,18,0.9) 85%, rgba(13,10,18,1) 100%)' }} />
                 <AnimatePresence>
                   {isGeneratingScene && (
                     <motion.div className="absolute inset-0 z-30 flex flex-col items-center justify-center" style={{ background: 'rgba(13,10,18,0.85)' }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -499,7 +499,7 @@ const FALLBACK_GRADIENTS: Record<string, string> = {
 
 function SceneFallbackGradient({ stepId }: { stepId?: string }) {
   const gradient = FALLBACK_GRADIENTS[stepId ?? ''] ?? FALLBACK_GRADIENTS['beat-1']
-  return <div className="absolute inset-0" style={{ background: gradient }} />
+  return <div className="absolute inset-0 pointer-events-none" style={{ background: gradient }} />
 }
 
 function TrustIndicator({ trust, label }: { trust: number; label: string }) {
