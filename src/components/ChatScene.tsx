@@ -9,18 +9,25 @@ import { generateCharacterPortrait, generateSceneImage } from '../lib/togetherAi
 import { trackEvent } from '../lib/supabase'
 
 // Mood labels based on exchange count — feels organic, not mechanical
+const MOOD_STAGES: Record<string, string[]> = {
+  default: ['guarded', 'warming up', 'opening up', 'vulnerable'],
+  sora: ['curious', 'vibing', 'in the groove', 'real talk'],
+}
+
+function getMoodIndex(characterId: string, exchangeCount: number): number {
+  if (exchangeCount <= 1) return 0
+  if (exchangeCount <= 3) return 1
+  if (exchangeCount <= 6) return 2
+  return 3
+}
+
 function getMoodLabel(characterId: string, exchangeCount: number): string {
-  if (characterId === 'sora') {
-    if (exchangeCount <= 1) return 'curious'
-    if (exchangeCount <= 3) return 'vibing'
-    if (exchangeCount <= 6) return 'in the groove'
-    return 'real talk'
-  }
-  // Jiwon
-  if (exchangeCount <= 1) return 'guarded'
-  if (exchangeCount <= 3) return 'warming up'
-  if (exchangeCount <= 6) return 'opening up'
-  return 'vulnerable'
+  const stages = MOOD_STAGES[characterId] ?? MOOD_STAGES.default
+  return stages[getMoodIndex(characterId, exchangeCount)]
+}
+
+function getMoodStages(characterId: string): string[] {
+  return MOOD_STAGES[characterId] ?? MOOD_STAGES.default
 }
 
 // Personality-aware reply suggestions
@@ -247,15 +254,32 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
         </div>
         <div className="flex-1">
           <p className="text-textPrimary font-semibold text-sm">{character?.name ?? characterId}</p>
-          <motion.p
-            key={moodLabel}
-            className="text-textMuted text-xs italic"
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            {isDone ? 'Conversation ended' : moodLabel}
-          </motion.p>
+          {isDone ? (
+            <p className="text-textMuted text-xs italic">Conversation ended</p>
+          ) : (
+            <div className="flex items-center gap-1.5 mt-0.5">
+              {getMoodStages(characterId).map((stage, i) => {
+                const currentIdx = getMoodIndex(characterId, exchangeCount)
+                const isActive = i === currentIdx
+                const isPast = i < currentIdx
+                return (
+                  <div key={stage} className="flex items-center gap-1.5">
+                    {i > 0 && <div className="w-2 h-px" style={{ background: isPast ? 'rgba(200,75,158,0.5)' : 'rgba(255,255,255,0.1)' }} />}
+                    <span
+                      className="text-[10px] transition-all duration-300"
+                      style={{
+                        color: isActive ? '#e060b8' : isPast ? 'rgba(200,75,158,0.5)' : 'rgba(255,255,255,0.25)',
+                        fontWeight: isActive ? 600 : 400,
+                        fontStyle: 'italic',
+                      }}
+                    >
+                      {stage}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       </div>
 
