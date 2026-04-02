@@ -1,49 +1,28 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowRight, BookOpen, Sparkles, Star } from 'lucide-react'
+import { ArrowRight, BookOpen, Sparkles, Camera, MessageCircle, GitBranch } from 'lucide-react'
 
 const STEPS = [
   {
     num: '01',
+    icon: <Camera size={20} className="text-accent" />,
     title: 'Upload your selfie',
-    desc: 'Snap a photo and our AI transforms you into the main character — drawn into the story, literally.',
+    desc: 'AI transforms your photo into an anime character — you become the protagonist.',
     img: '/step1-upload.jpeg',
   },
   {
     num: '02',
-    title: 'Choose your world',
-    desc: 'K-pop romance, noir mystery, cosmic horror — pick a universe and step through the door.',
+    icon: <MessageCircle size={20} className="text-gem" />,
+    title: 'Chat with characters',
+    desc: 'Have real conversations with AI characters. What you say shapes their trust — and the story.',
     img: '/step2-world.jpeg',
   },
   {
     num: '03',
-    title: 'Live the story',
-    desc: 'Your choices shape every chapter. Talk to characters. Fall in love. Change the ending.',
+    icon: <GitBranch size={20} className="text-accentLight" />,
+    title: 'Shape the ending',
+    desc: 'Your choices create branching paths. 4 possible endings — each one uniquely yours.',
     img: '/step3-story.jpeg',
-  },
-]
-
-const TESTIMONIALS = [
-  {
-    name: 'Sarah K.',
-    location: 'Seoul',
-    avatar: 'https://images.unsplash.com/photo-1761118473125-861a23f326f9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200',
-    quote: 'I became the detective in my own noir thriller. I couldn\'t stop reading — my friends thought I was obsessed.',
-    stars: 5,
-  },
-  {
-    name: 'Marcus T.',
-    location: 'New York',
-    avatar: 'https://images.unsplash.com/photo-1632541400823-2a905979469a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200',
-    quote: 'Seeing my actual face inside a fantasy world felt surreal. I\'ve started three different story worlds already.',
-    stars: 5,
-  },
-  {
-    name: 'Yuki M.',
-    location: 'Tokyo',
-    avatar: 'https://images.unsplash.com/photo-1735025679651-369bc9f071ea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200',
-    quote: 'Each story felt tailor-made. Like the AI actually knows me. Chaptr is the only app I open every morning.',
-    stars: 5,
   },
 ]
 
@@ -63,7 +42,7 @@ export function LandingPage() {
       <div className="md:hidden">
 
         {/* Hero */}
-        <div className="relative h-screen flex flex-col overflow-hidden">
+        <div className="relative flex flex-col overflow-hidden" style={{ minHeight: '100svh' }}>
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: 'url(/hero-landing.jpeg)', imageRendering: 'auto' }}
@@ -71,32 +50,32 @@ export function LandingPage() {
           {/* Top vignette */}
           <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(13,11,18,0.6) 0%, rgba(13,11,18,0) 20%)' }} />
           {/* Bottom book-page fade */}
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(13,11,18,0) 0%, rgba(13,11,18,0) 50%, rgba(13,11,18,0.92) 70%, rgba(13,11,18,1) 85%)' }} />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(13,11,18,0) 0%, rgba(13,11,18,0) 45%, rgba(13,11,18,0.92) 65%, rgba(13,11,18,1) 80%)' }} />
 
           {/* Logo */}
-          <div className="relative z-10 flex items-center gap-2 px-6 pt-10">
+          <div className="relative z-10 flex items-center gap-2 px-5 pt-10 safe-top">
             <LogoMark size={34} />
             <span className="text-white font-medium text-lg" style={{ fontFamily: SG }}>chaptr</span>
           </div>
 
           {/* Hero text pinned to bottom */}
-          <div className="relative z-10 mt-auto px-6 pb-10 flex flex-col gap-5">
+          <div className="relative z-10 mt-auto px-5 pb-8 flex flex-col gap-4 safe-bottom">
             <motion.div className="flex flex-col gap-3" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
               <div className="flex items-center gap-2">
                 <BookOpen size={14} className="text-accent" />
-                <p className="text-accent/80 font-medium text-xs tracking-[2px] uppercase" style={{ fontFamily: SG }}>Chapter One Begins</p>
+                <p className="text-accent/80 font-medium text-xs tracking-[2px] uppercase" style={{ fontFamily: SG }}>AI Interactive Story</p>
               </div>
-              <h1 className="text-white font-bold" style={{ fontSize: 44, letterSpacing: -1, lineHeight: 1, fontFamily: SERIF }}>
+              <h1 className="text-white font-bold" style={{ fontSize: 40, letterSpacing: -1, lineHeight: 1, fontFamily: SERIF }}>
                 Your face.<br />Your story.
               </h1>
               <p className="text-white/60 text-sm leading-relaxed" style={{ maxWidth: 300, fontFamily: INTER }}>
-                Upload a selfie. Choose a world. Step inside an AI-generated story where you are the main character.
+                Upload a selfie. Chat with AI characters. Make choices that change the ending. Every story is uniquely yours.
               </p>
             </motion.div>
 
             <motion.button
               className="btn-accent flex items-center justify-center gap-2"
-              style={{ fontFamily: SG }}
+              style={{ fontFamily: SG, minHeight: 52 }}
               onClick={() => navigate('/universes')}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -106,14 +85,15 @@ export function LandingPage() {
               Start Your Story <ArrowRight size={18} />
             </motion.button>
 
-            <motion.div className="flex items-center justify-center gap-2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
-              <div className="flex -space-x-1.5">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="w-5 h-5 rounded-full border-2 border-bg" style={{ background: ['#c84b9e', '#8b5cf6', '#a78bfa'][i] }} />
-                ))}
-              </div>
-              <span className="text-white/30 text-xs" style={{ fontFamily: INTER }}>96.7K stories started this week</span>
-            </motion.div>
+            <motion.p
+              className="text-white/25 text-xs text-center"
+              style={{ fontFamily: INTER }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+            >
+              Free to play · No account needed · 5 min experience
+            </motion.p>
           </div>
         </div>
 
@@ -149,38 +129,61 @@ export function LandingPage() {
                     </span>
                   </div>
                 </div>
-                <div className="flex flex-col gap-1.5 p-4 pb-5">
-                  <p className="text-white font-semibold text-[15px]" style={{ fontFamily: INTER }}>{step.title}</p>
-                  <p className="text-white/40 text-xs leading-relaxed" style={{ fontFamily: INTER }}>{step.desc}</p>
+                <div className="flex items-start gap-3 p-4 pb-5">
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style={{ background: 'rgba(200,75,158,0.08)' }}>
+                    {step.icon}
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <p className="text-white font-semibold text-[15px]" style={{ fontFamily: INTER }}>{step.title}</p>
+                    <p className="text-white/40 text-xs leading-relaxed" style={{ fontFamily: INTER }}>{step.desc}</p>
+                  </div>
                 </div>
               </motion.div>
             ))}
           </div>
         </section>
 
-        {/* Mobile — Testimonials */}
+        {/* Mobile — What Makes It Different */}
         <section style={{ background: '#0A090F' }} className="pb-4">
-          <div className="flex flex-col gap-2 px-6 pt-10 pb-6">
+          <div className="flex flex-col gap-2 px-5 pt-10 pb-6">
             <div className="flex items-center gap-2 mb-1">
               <Sparkles size={12} className="text-accent/60" />
-              <p className="text-accent/60 font-semibold text-[10px] tracking-[2px] uppercase" style={{ fontFamily: INTER }}>WHAT READERS SAY</p>
+              <p className="text-accent/60 font-semibold text-[10px] tracking-[2px] uppercase" style={{ fontFamily: INTER }}>NOT JUST A VISUAL NOVEL</p>
             </div>
             <h2 className="text-white font-bold" style={{ fontSize: 26, lineHeight: 1.2, fontFamily: SERIF }}>
-              Stories that stay<br />with you
+              Stories that<br />respond to you
             </h2>
             <p className="text-white/40 text-sm leading-relaxed" style={{ fontFamily: INTER }}>
-              Real readers. Real adventures. All with their face in the story.
+              Every conversation and choice creates a story that's never been told before. Characters remember what you said. Your personality shapes how they react.
             </p>
           </div>
           <div className="flex flex-col gap-3 px-4 pb-10">
-            {TESTIMONIALS.map((t, i) => (
-              <TestimonialCard key={t.name} t={t} i={i} />
+            {[
+              { label: 'AI Characters', detail: 'Real conversations, not scripted dialogue trees' },
+              { label: 'Branching Paths', detail: '4 unique endings based on your choices' },
+              { label: 'You\'re In It', detail: 'Your face, anime-styled, as the protagonist' },
+            ].map((item, i) => (
+              <motion.div
+                key={item.label}
+                className="rounded-2xl p-4 flex items-start gap-3"
+                style={{ background: '#111016', border: '1px solid rgba(42,32,64,0.4)' }}
+                initial={{ opacity: 0, y: 14 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+              >
+                <div className="w-2 h-2 rounded-full bg-accent mt-1.5 shrink-0" />
+                <div>
+                  <p className="text-white/70 font-medium text-sm" style={{ fontFamily: INTER }}>{item.label}</p>
+                  <p className="text-white/30 text-xs mt-0.5" style={{ fontFamily: INTER }}>{item.detail}</p>
+                </div>
+              </motion.div>
             ))}
           </div>
         </section>
 
         {/* Mobile — Final CTA */}
-        <section className="px-5 py-14 flex flex-col items-center text-center gap-5" style={{ background: '#0A090F' }}>
+        <section className="px-5 py-14 flex flex-col items-center text-center gap-5 safe-bottom" style={{ background: '#0A090F' }}>
           <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(200,75,158,0.15) 0%, rgba(139,92,246,0.15) 100%)', border: '1px solid rgba(200,75,158,0.2)' }}>
             <BookOpen size={28} className="text-accent" />
           </div>
@@ -188,11 +191,12 @@ export function LandingPage() {
           <p className="text-white/40 text-sm" style={{ fontFamily: INTER, maxWidth: 280 }}>One selfie. One choice. A story that's entirely yours.</p>
           <button
             className="btn-accent flex items-center justify-center gap-2 max-w-xs"
-            style={{ fontFamily: SG }}
+            style={{ fontFamily: SG, minHeight: 52 }}
             onClick={() => navigate('/universes')}
           >
             Begin Now <ArrowRight size={18} />
           </button>
+          <p className="text-white/20 text-xs" style={{ fontFamily: INTER }}>Takes about 5 minutes</p>
         </section>
 
         <MobileFooter />
@@ -227,7 +231,7 @@ export function LandingPage() {
               <div className="flex items-center gap-8">
                 {[
                   { label: 'How It Works', id: 'how-it-works' },
-                  { label: 'Testimonials', id: 'testimonials' },
+                  { label: 'Why Chaptr', id: 'why-chaptr' },
                 ].map(({ label, id }) => (
                   <span
                     key={label}
@@ -255,7 +259,7 @@ export function LandingPage() {
                 transition={{ delay: 0.15 }}
               >
                 <BookOpen size={14} className="text-accent/70" />
-                <p className="text-accent/70 font-medium text-xs tracking-[3px] uppercase" style={{ fontFamily: SG }}>Chapter One Begins</p>
+                <p className="text-accent/70 font-medium text-xs tracking-[3px] uppercase" style={{ fontFamily: SG }}>AI Interactive Story</p>
               </motion.div>
 
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
@@ -275,10 +279,10 @@ export function LandingPage() {
 
               <motion.p
                 className="text-white/60 text-lg leading-relaxed"
-                style={{ maxWidth: 480, fontFamily: INTER, textShadow: '0 1px 12px rgba(0,0,0,0.9)' }}
+                style={{ maxWidth: 520, fontFamily: INTER, textShadow: '0 1px 12px rgba(0,0,0,0.9)' }}
                 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
               >
-                Upload a selfie. Choose a world. Step inside an AI-powered story where you are the main character.
+                Upload a selfie. Chat with AI characters. Make choices that change the ending. Every playthrough is uniquely yours.
               </motion.p>
 
               <motion.div className="flex flex-col items-center gap-4 mt-2" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
@@ -289,14 +293,7 @@ export function LandingPage() {
                 >
                   Start Your Story <ArrowRight size={18} />
                 </button>
-                <div className="flex items-center gap-3">
-                  <div className="flex -space-x-1.5">
-                    {[...Array(3)].map((_, i) => (
-                      <div key={i} className="w-5 h-5 rounded-full border-2 border-bg" style={{ background: ['#c84b9e', '#8b5cf6', '#a78bfa'][i] }} />
-                    ))}
-                  </div>
-                  <span className="text-white/30 text-sm" style={{ fontFamily: INTER }}>96.7K stories started this week</span>
-                </div>
+                <span className="text-white/25 text-sm" style={{ fontFamily: INTER }}>Free to play · No account needed · 5 min experience</span>
               </motion.div>
             </div>
           </div>
@@ -340,9 +337,14 @@ export function LandingPage() {
                       </span>
                     </div>
                   </div>
-                  <div className="flex flex-col gap-2 p-5 pb-6">
-                    <p className="text-white font-semibold text-lg" style={{ fontFamily: INTER }}>{step.title}</p>
-                    <p className="text-white/35 text-sm leading-relaxed" style={{ fontFamily: INTER }}>{step.desc}</p>
+                  <div className="flex items-start gap-3 p-5 pb-6">
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(200,75,158,0.08)' }}>
+                      {step.icon}
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <p className="text-white font-semibold text-lg" style={{ fontFamily: INTER }}>{step.title}</p>
+                      <p className="text-white/35 text-sm leading-relaxed" style={{ fontFamily: INTER }}>{step.desc}</p>
+                    </div>
                   </div>
                 </motion.div>
               ))}
@@ -350,8 +352,8 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* ── Desktop Testimonials ── */}
-        <section id="testimonials" className="pb-28" style={{ background: '#0A090F' }}>
+        {/* ── Desktop Why Chaptr ── */}
+        <section id="why-chaptr" className="pb-28" style={{ background: '#0A090F' }}>
           <div className="page-container mx-auto px-8 lg:px-20">
             {/* Divider */}
             <div className="h-px mb-24 mx-auto" style={{ background: 'linear-gradient(90deg, transparent, rgba(200,75,158,0.2), transparent)', maxWidth: 600 }} />
@@ -359,19 +361,39 @@ export function LandingPage() {
             <div className="flex flex-col items-center text-center gap-3 mb-14">
               <div className="flex items-center gap-2">
                 <Sparkles size={12} className="text-accent/50" />
-                <p className="text-accent/50 font-semibold text-[10px] tracking-[2px] uppercase" style={{ fontFamily: INTER }}>WHAT READERS SAY</p>
+                <p className="text-accent/50 font-semibold text-[10px] tracking-[2px] uppercase" style={{ fontFamily: INTER }}>NOT JUST A VISUAL NOVEL</p>
               </div>
               <h2 className="text-white font-bold" style={{ fontSize: 40, lineHeight: 1.2, fontFamily: SERIF }}>
-                Stories that stay with you
+                Stories that respond to you
               </h2>
               <p className="text-white/35 text-base" style={{ maxWidth: 480, fontFamily: INTER }}>
-                Real readers. Real adventures. Unforgettable characters — all with their face in the story.
+                Every conversation and choice creates a story that's never been told before.
               </p>
             </div>
 
             <div className="grid grid-cols-3 gap-5">
-              {TESTIMONIALS.map((t, i) => (
-                <TestimonialCard key={t.name} t={t} i={i} />
+              {[
+                { title: 'AI Characters', desc: 'Real freeform conversations, not scripted dialogue trees. Characters have personalities, moods, and memory.', icon: <MessageCircle size={20} className="text-accent" /> },
+                { title: 'Branching Paths', desc: '4 unique endings based on the choices you make. Your conversations shift the story in ways you won\'t expect.', icon: <GitBranch size={20} className="text-gem" /> },
+                { title: 'You\'re In It', desc: 'Your selfie, transformed into anime, as the main character. It\'s your face in every scene.', icon: <Camera size={20} className="text-accentLight" /> },
+              ].map((item, i) => (
+                <motion.div
+                  key={item.title}
+                  className="rounded-2xl p-6 flex flex-col gap-4"
+                  style={{ background: '#111016', border: '1px solid rgba(42,32,64,0.4)' }}
+                  initial={{ opacity: 0, y: 14 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                >
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: 'rgba(200,75,158,0.08)' }}>
+                    {item.icon}
+                  </div>
+                  <div>
+                    <p className="text-white/80 font-semibold text-base mb-1.5" style={{ fontFamily: INTER }}>{item.title}</p>
+                    <p className="text-white/35 text-sm leading-relaxed" style={{ fontFamily: INTER }}>{item.desc}</p>
+                  </div>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -401,6 +423,7 @@ export function LandingPage() {
               >
                 Begin Now <ArrowRight size={18} />
               </button>
+              <p className="text-white/20 text-xs" style={{ fontFamily: INTER }}>Takes about 5 minutes</p>
             </motion.div>
           </div>
         </section>
@@ -450,43 +473,11 @@ export function LandingPage() {
 
 /* ─── Shared components ─── */
 
-function TestimonialCard({ t, i }: { t: typeof TESTIMONIALS[0]; i: number }) {
-  return (
-    <motion.div
-      className="rounded-2xl p-5 flex flex-col gap-3"
-      style={{ background: '#111016', border: '1px solid rgba(42,32,64,0.4)' }}
-      initial={{ opacity: 0, y: 14 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: i * 0.1 }}
-    >
-      <div className="flex gap-0.5 mb-1">
-        {[...Array(t.stars)].map((_, j) => (
-          <Star key={j} size={12} className="text-accent fill-accent" />
-        ))}
-      </div>
-      <p className="text-white/50 text-sm leading-relaxed italic" style={{ fontFamily: INTER }}>"{t.quote}"</p>
-      <div className="flex items-center gap-2.5 mt-auto pt-2">
-        <img
-          src={t.avatar}
-          alt={t.name}
-          className="w-8 h-8 rounded-full object-cover shrink-0"
-          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-        />
-        <div>
-          <p className="text-white/70 font-medium text-xs" style={{ fontFamily: INTER }}>{t.name}</p>
-          <p className="text-white/25 text-[10px]" style={{ fontFamily: INTER }}>{t.location}</p>
-        </div>
-      </div>
-    </motion.div>
-  )
-}
-
 function MobileFooter() {
   return (
     <footer style={{ background: '#07060B' }}>
       <div className="h-px" style={{ background: 'rgba(42,32,64,0.3)' }} />
-      <div className="flex flex-col gap-6 px-6 py-8 pb-10">
+      <div className="flex flex-col gap-6 px-5 py-8 pb-10 safe-bottom">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
             <LogoMark size={28} small />

@@ -88,7 +88,7 @@ export function RevealPage() {
   }
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
+    <div className="relative min-h-screen min-h-dvh flex flex-col items-center justify-center overflow-hidden">
       {/* Background layers */}
       {selfieUrl && (
         <div

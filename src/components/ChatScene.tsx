@@ -28,7 +28,11 @@ export function ChatScene({ stepId, characterId, maxExchanges, storyContext, onC
   const abortRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    // Small delay to let DOM update, especially important on mobile with keyboard
+    const timer = setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }, 50)
+    return () => clearTimeout(timer)
   }, [localMessages, streamedReply])
 
   const handleSend = async () => {
@@ -231,7 +235,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, storyContext, onC
         ) : (
           <motion.div
             key="input"
-            className="px-5 pb-6 pt-3 border-t border-border safe-bottom"
+            className="px-4 pb-6 pt-3 border-t border-border safe-bottom"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
           >
@@ -242,17 +246,20 @@ export function ChatScene({ stepId, characterId, maxExchanges, storyContext, onC
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                 placeholder={`Say something to ${character?.name ?? 'them'}...`}
-                className="flex-1 bg-surfaceAlt border border-border rounded-xl px-4 py-3 text-textPrimary text-sm placeholder:text-textMuted focus:outline-none focus:border-accent transition-colors"
+                className="flex-1 bg-surfaceAlt border border-border rounded-xl px-4 py-3 text-textPrimary text-base placeholder:text-textMuted focus:outline-none focus:border-accent transition-colors"
                 disabled={isTyping}
                 autoFocus
+                enterKeyHint="send"
+                autoComplete="off"
+                autoCorrect="off"
               />
               <button
                 onClick={handleSend}
                 disabled={!input.trim() || isTyping}
-                className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-all disabled:opacity-30"
+                className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-all disabled:opacity-30"
                 style={{ background: 'linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%)' }}
               >
-                <Send size={16} className="text-white" />
+                <Send size={18} className="text-white" />
               </button>
             </div>
           </motion.div>

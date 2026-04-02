@@ -240,7 +240,7 @@ export function StoryReaderPage() {
   return (
     <div className="bg-bg min-h-screen">
       {/* ─── MOBILE ─── */}
-      <div className="lg:hidden relative min-h-screen flex flex-col">
+      <div className="md:hidden relative min-h-screen flex flex-col">
         {/* Scene image or atmospheric gradient fallback */}
         {!isFullScreenStep && (
           <>
@@ -273,7 +273,7 @@ export function StoryReaderPage() {
         </AnimatePresence>
 
         {/* Nav */}
-        <div className="relative z-10 flex items-center justify-between px-5 pt-10 pb-3 safe-top">
+        <div className="relative z-10 flex items-center justify-between px-4 pt-10 pb-3 safe-top">
           <button onClick={() => setSheetOpen(true)} className="text-textSecondary hover:text-textPrimary transition-colors">
             <Menu size={22} />
           </button>
@@ -307,7 +307,7 @@ export function StoryReaderPage() {
       </div>
 
       {/* ─── DESKTOP ─── */}
-      <div className="hidden lg:flex min-h-screen">
+      <div className="hidden md:flex min-h-screen">
         <div className="page-container flex w-full mx-auto">
           {/* Sidebar */}
           <aside

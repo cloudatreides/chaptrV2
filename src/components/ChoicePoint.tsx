@@ -9,7 +9,7 @@ interface Props {
 
 export function ChoicePoint({ title, options, onSelect }: Props) {
   return (
-    <div className="flex flex-col items-center gap-6 px-5 py-8">
+    <div className="flex flex-col items-center gap-6 px-4 py-8">
       {/* Title */}
       <motion.div
         className="text-center"

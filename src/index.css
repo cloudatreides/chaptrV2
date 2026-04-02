@@ -20,6 +20,17 @@ html, body {
 
 #root {
   min-height: 100svh;
+  min-height: 100dvh;
+}
+
+/* Prevent mobile overscroll bounce */
+html {
+  overscroll-behavior: none;
+}
+
+/* Better focus for mobile inputs */
+input:focus, textarea:focus {
+  font-size: 16px; /* Prevents iOS zoom on focus */
 }
 
 /* Page container — 1440px max-width centered */

@@ -94,8 +94,8 @@ export function UploadPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg flex flex-col">
-      <div className="flex flex-col flex-1 w-full max-w-[520px] mx-auto px-6">
+    <div className="min-h-screen min-h-dvh bg-bg flex flex-col">
+      <div className="flex flex-col flex-1 w-full max-w-[520px] mx-auto px-5">
         {/* Nav */}
         <div className="flex items-center justify-between pt-12 pb-2">
           <div className="flex items-center gap-2">
