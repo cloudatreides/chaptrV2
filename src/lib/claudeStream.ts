@@ -51,6 +51,7 @@ export function stripMarkdown(text: string): string {
     .replace(/^#{1,3}\s+.*\n?/gm, '')
     .replace(/\*{1,2}([^*]+)\*{1,2}/g, '$1')
     .replace(/^[-*]\s+/gm, '')
+    .replace(/\s*—\s*/g, ', ')
     .replace(/\n{3,}/g, '\n\n')
     .trim()
 }
@@ -85,7 +86,9 @@ async function* streamSSE(response: Response): AsyncGenerator<string> {
         const parsed = JSON.parse(data)
         if (parsed.type === 'message_stop') return
         if (parsed.type === 'content_block_delta' && parsed.delta?.type === 'text_delta') {
-          const clean = parsed.delta.text.replace(/\*{1,2}([^*]*)\*{1,2}/g, '$1')
+          const clean = parsed.delta.text
+            .replace(/\*{1,2}([^*]*)\*{1,2}/g, '$1')
+            .replace(/\s*—\s*/g, ', ')
           yield clean
         }
       } catch {
@@ -193,7 +196,8 @@ WRITING STYLE — MANDATORY:
 - Write ONLY dialogue. Just speak as the character.
 - NEVER use asterisks for actions (*leans forward*, *sighs*). This is a chat, not a roleplay.
 - NEVER narrate your own body language or inner thoughts.
-- No stage directions, no prose narration, no "I say softly" — just the words you'd actually say.`
+- No stage directions, no prose narration, no "I say softly" — just the words you'd actually say.
+- NEVER use em dashes (—). Use commas, periods, or just start a new sentence. Em dashes are an AI writing tell.`
 
   try {
     const response = await makeClaudeRequest(system, 'Write your opening line to the protagonist.', {
@@ -229,7 +233,8 @@ export async function* streamChatReply(params: StreamChatParams): AsyncGenerator
 - Write ONLY dialogue. Just speak as the character.
 - NEVER use asterisks for actions (*leans forward*, *sighs*). This is a chat, not a roleplay.
 - NEVER narrate your own body language or inner thoughts.
-- No stage directions, no prose narration, no "I say softly" — just the words you'd actually say.`
+- No stage directions, no prose narration, no "I say softly" — just the words you'd actually say.
+- NEVER use em dashes (—). Use commas, periods, or just start a new sentence. Em dashes are an AI writing tell.`
 
   if (exchangeNumber >= maxExchanges) {
     system += `\n\nIMPORTANT: This is your FINAL reply in this conversation. Naturally wrap up — you're being called away, need to go, or the moment is ending. Don't be abrupt, but make it clear this exchange is closing.`
