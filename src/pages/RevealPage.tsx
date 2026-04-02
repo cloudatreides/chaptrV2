@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Share2, RotateCcw } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
+import { useActiveStory } from '../hooks/useActiveStory'
 import { generateRevealSignature } from '../lib/claudeStream'
 import { getRevealPerspective } from '../data/storyData'
 import { generateSceneImage } from '../lib/togetherAi'
@@ -12,13 +13,18 @@ export function RevealPage() {
   const navigate = useNavigate()
   const {
     selfieUrl, characterState, choiceDescriptions,
-    revealSignature, setRevealSignature,
-    sceneImages, setSceneImage,
-    resetStory, selectedUniverse, bio, loveInterest, trustStatusLabel,
-  } = useStore()
-  const summariesList = useStore.getState().getSummariesList()
+    revealSignature: storedSignature, sceneImages,
+    selectedUniverse, bio, loveInterest, trustStatusLabel,
+    chatSummaries,
+  } = useActiveStory()
+  const { setRevealSignature, setSceneImage, resetStory } = useStore()
+  const summariesList = Object.values(chatSummaries)
 
-  const [isLoading, setIsLoading] = useState(!revealSignature)
+  const junhoTrust = characterState.junhoTrust
+  const choiceCount = choiceDescriptions.length
+  const chatCount = Object.keys(chatSummaries).length
+
+  const [isLoading, setIsLoading] = useState(!storedSignature)
   const [revealedWords, setRevealedWords] = useState<string[]>([])
   const [showFull, setShowFull] = useState(false)
   const [bgImage, setBgImage] = useState<string | null>(sceneImages['reveal'] ?? null)
@@ -27,8 +33,8 @@ export function RevealPage() {
 
   // Generate signature on mount
   useEffect(() => {
-    if (revealSignature) {
-      animateWords(revealSignature)
+    if (storedSignature) {
+      animateWords(storedSignature)
       return
     }
 
@@ -56,14 +62,14 @@ export function RevealPage() {
       await imagePromise
       setIsLoading(false)
       animateWords(sig)
-      trackEvent('reveal_reached', { trust: characterState.junhoTrust })
+      trackEvent('reveal_reached', { trust: junhoTrust })
 
       // Save playthrough for share URL
       const id = await savePlaythrough({
         universe_id: selectedUniverse ?? 'seoul-transfer',
         choices: choiceDescriptions,
         chat_summaries: summariesList,
-        trust_score: characterState.junhoTrust,
+        trust_score: junhoTrust,
         trust_label: trustStatusLabel,
         reveal_signature: sig,
         selfie_url: selfieUrl,
@@ -93,7 +99,7 @@ export function RevealPage() {
       ? `${window.location.origin}/s/${shareId}`
       : 'chaptr-v2.vercel.app'
     const liName = loveInterest === 'yuna' ? 'Yuna' : 'Jiwon'
-    const text = `"${revealSignature}"\n\n— my story with ${liName} in Chaptr\n${shareUrl}`
+    const text = `"${storedSignature}"\n\n— my story with ${liName} in Chaptr\n${shareUrl}`
     try {
       await navigator.clipboard.writeText(text)
       setCopied(true)
@@ -231,14 +237,14 @@ export function RevealPage() {
                     className="h-full rounded-full"
                     style={{ background: 'linear-gradient(90deg, #c84b9e 0%, #E879F9 100%)' }}
                     initial={{ width: 0 }}
-                    animate={{ width: `${useStore.getState().characterState.junhoTrust}%` }}
+                    animate={{ width: `${junhoTrust}%` }}
                     transition={{ duration: 1, delay: 0.5 }}
                   />
                 </div>
-                <span className="text-textMuted text-xs">{useStore.getState().trustStatusLabel}</span>
+                <span className="text-textMuted text-xs">{trustStatusLabel}</span>
               </div>
               <p className="text-textMuted text-xs">
-                {choiceDescriptions.length} choices made · {Object.keys(useStore.getState().chatSummaries).length} conversations
+                {choiceCount} choices made · {chatCount} conversations
               </p>
             </motion.div>
           </>

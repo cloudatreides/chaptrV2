@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Send, ArrowRight } from 'lucide-react'
 import { CHARACTERS, getCharacter } from '../data/characters'
 import { useStore } from '../store/useStore'
+import { useActiveStory } from '../hooks/useActiveStory'
 import { streamChatReply, summarizeChat, generateOpeningMessage } from '../lib/claudeStream'
 import { generateCharacterPortrait, generateSceneImage } from '../lib/togetherAi'
 import { trackEvent } from '../lib/supabase'
@@ -32,7 +33,8 @@ interface Props {
 }
 
 export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3, storyContext, onComplete }: Props) {
-  const { addChatMessage, setChatSummary, characterState, bio, loveInterest, selectedUniverse, characterPortraits, setCharacterPortrait } = useStore()
+  const { bio, loveInterest, selectedUniverse, characterState, characterPortraits } = useActiveStory()
+  const { addChatMessage, setChatSummary, setCharacterPortrait } = useStore()
   const character = getCharacter(characterId, selectedUniverse) ?? CHARACTERS[characterId]
   const [localMessages, setLocalMessages] = useState<{ role: 'user' | 'character'; content: string }[]>([])
   const [input, setInput] = useState('')

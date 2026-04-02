@@ -14,115 +14,238 @@ export interface CharacterState {
   junhoTrust: number
 }
 
-interface StoreState {
-  // Onboarding
+export interface PlayerCharacter {
+  id: string
+  name: string
+  gender: 'male' | 'female'
   selfieUrl: string | null
-  setSelfieUrl: (url: string | null) => void
+  bio: string | null
+  createdAt: number
+}
 
-  // Universe
+export interface StoryProgress {
+  currentStepIndex: number
+  branchChoices: Record<string, string>
+  chatHistory: ChatMessage[]
+  chatSummaries: Record<string, string>
+  choiceDescriptions: { label: string; description: string }[]
+  characterState: CharacterState
+  trustStatusLabel: string
+  revealSignature: string | null
+  sceneImages: Record<string, string>
+  characterPortraits: Record<string, string>
+}
+
+export const DEFAULT_PROGRESS: StoryProgress = {
+  currentStepIndex: 0,
+  branchChoices: {},
+  chatHistory: [],
+  chatSummaries: {},
+  choiceDescriptions: [],
+  characterState: { junhoTrust: 50 },
+  trustStatusLabel: 'strangers',
+  revealSignature: null,
+  sceneImages: {},
+  characterPortraits: {},
+}
+
+function freshProgress(): StoryProgress {
+  return JSON.parse(JSON.stringify(DEFAULT_PROGRESS))
+}
+
+// ─── Store interface ───
+
+interface StoreState {
+  // ── Player characters (max 3) ──
+  characters: PlayerCharacter[]
+  activeCharacterId: string | null
+  createCharacter: (char: Omit<PlayerCharacter, 'id' | 'createdAt'>) => string
+  deleteCharacter: (id: string) => void
+  setActiveCharacter: (id: string) => void
+  updateCharacter: (id: string, updates: Partial<Pick<PlayerCharacter, 'name' | 'gender' | 'selfieUrl' | 'bio'>>) => void
+
+  // ── Universe ──
   selectedUniverse: string | null
   setSelectedUniverse: (id: string) => void
 
-  // Bio / personality
-  bio: string | null
-  setBio: (bio: string | null) => void
+  // ── Story progress (keyed by characterId:universeId) ──
+  storyProgress: Record<string, StoryProgress>
 
-  // Love interest preference
-  loveInterest: 'jiwon' | 'yuna' | null
-  setLoveInterest: (id: 'jiwon' | 'yuna') => void
+  // ── Progress actions (operate on active character+universe slot) ──
+  setCurrentStepIndex: (i: number) => void
+  advanceStep: () => void
+  setBranchChoice: (choicePointId: string, optionId: string) => void
+  addChatMessage: (msg: ChatMessage) => void
+  setChatSummary: (stepId: string, summary: string) => void
+  getSummariesList: () => string[]
+  addChoiceDescription: (desc: { label: string; description: string }) => void
+  updateTrust: (delta: number) => void
+  setTrustStatusLabel: (label: string) => void
+  setRevealSignature: (sig: string) => void
+  setSceneImage: (stepId: string, url: string) => void
+  setCharacterPortrait: (characterId: string, url: string) => void
 
-  // Gems
+  // ── Gems ──
   gemBalance: number
   spendGems: (amount: number) => boolean
 
-  // ── V2 Step-based story progression ──
-  currentStepIndex: number
-  setCurrentStepIndex: (i: number) => void
-  advanceStep: () => void
-
-  // Branch choices: { 'cp-1': 'approach', 'cp-2': 'confront' }
-  branchChoices: Record<string, string>
-  setBranchChoice: (choicePointId: string, optionId: string) => void
-
-  // Chat history (all messages across all chat scenes)
-  chatHistory: ChatMessage[]
-  addChatMessage: (msg: ChatMessage) => void
-
-  // Chat summaries keyed by chat step id: { 'chat-1': 'summary text' }
-  chatSummaries: Record<string, string>
-  setChatSummary: (stepId: string, summary: string) => void
-
-  // Ordered summaries for prompt context
-  getSummariesList: () => string[]
-
-  // Choice history for prompt context: [{ label, description }]
-  choiceDescriptions: { label: string; description: string }[]
-  addChoiceDescription: (desc: { label: string; description: string }) => void
-
-  // Character state
-  characterState: CharacterState
-  trustStatusLabel: string
-  updateTrust: (delta: number) => void
-  setTrustStatusLabel: (label: string) => void
-
-  // Reveal
-  revealSignature: string | null
-  setRevealSignature: (sig: string) => void
-
-  // Scene images cache: { stepId: dataUrl }
-  sceneImages: Record<string, string>
-  setSceneImage: (stepId: string, url: string) => void
-
-  // Character portrait cache: { characterId: dataUrl }
-  characterPortraits: Record<string, string>
-  setCharacterPortrait: (characterId: string, url: string) => void
-
-  // Current beat streaming state
+  // ── Streaming state (ephemeral, not per-character) ──
   isStreaming: boolean
   setIsStreaming: (v: boolean) => void
   isGeneratingScene: boolean
   setIsGeneratingScene: (v: boolean) => void
 
-  // Reset
+  // ── Reset ──
   resetStory: () => void
 
-  // ── Legacy compat (used by some components) ──
+  // ── Legacy compat ──
   currentChapter: number
   currentBeat: number
   choices: { chapter: number; chapterTitle: string; text: string }[]
 }
 
-const INITIAL_STORY_STATE = {
-  currentStepIndex: 0,
-  branchChoices: {} as Record<string, string>,
-  chatHistory: [] as ChatMessage[],
-  chatSummaries: {} as Record<string, string>,
-  choiceDescriptions: [] as { label: string; description: string }[],
-  characterState: { junhoTrust: 50 },
-  trustStatusLabel: 'strangers',
-  revealSignature: null as string | null,
-  sceneImages: {} as Record<string, string>,
-  characterPortraits: {} as Record<string, string>,
-  isStreaming: false,
-  isGeneratingScene: false,
+// ─── Progress key helper ───
+
+function progressKey(characterId: string | null, universeId: string | null): string | null {
+  if (!characterId || !universeId) return null
+  return `${characterId}:${universeId}`
 }
+
+function getProgress(state: { storyProgress: Record<string, StoryProgress>; activeCharacterId: string | null; selectedUniverse: string | null }): StoryProgress {
+  const key = progressKey(state.activeCharacterId, state.selectedUniverse)
+  if (!key) return DEFAULT_PROGRESS
+  return state.storyProgress[key] ?? DEFAULT_PROGRESS
+}
+
+function updateProgress(
+  state: { storyProgress: Record<string, StoryProgress>; activeCharacterId: string | null; selectedUniverse: string | null },
+  updater: (p: StoryProgress) => Partial<StoryProgress>,
+): { storyProgress: Record<string, StoryProgress> } {
+  const key = progressKey(state.activeCharacterId, state.selectedUniverse)
+  if (!key) return { storyProgress: state.storyProgress }
+  const current = state.storyProgress[key] ?? freshProgress()
+  const updates = updater(current)
+  return {
+    storyProgress: {
+      ...state.storyProgress,
+      [key]: { ...current, ...updates },
+    },
+  }
+}
+
+// ─── Store ───
 
 export const useStore = create<StoreState>()(
   persist(
     (set, get) => ({
-      // Onboarding
-      selfieUrl: null,
-      setSelfieUrl: (url) => set({ selfieUrl: url }),
+      // ── Player characters ──
+      characters: [],
+      activeCharacterId: null,
 
+      createCharacter: (char) => {
+        const id = crypto.randomUUID()
+        const newChar: PlayerCharacter = { ...char, id, createdAt: Date.now() }
+        set((s) => ({
+          characters: [...s.characters, newChar],
+          activeCharacterId: id,
+        }))
+        return id
+      },
+
+      deleteCharacter: (id) => set((s) => {
+        const newProgress = { ...s.storyProgress }
+        // Remove all progress entries for this character
+        for (const key of Object.keys(newProgress)) {
+          if (key.startsWith(`${id}:`)) delete newProgress[key]
+        }
+        return {
+          characters: s.characters.filter((c) => c.id !== id),
+          activeCharacterId: s.activeCharacterId === id ? null : s.activeCharacterId,
+          storyProgress: newProgress,
+        }
+      }),
+
+      setActiveCharacter: (id) => set({ activeCharacterId: id }),
+
+      updateCharacter: (id, updates) => set((s) => ({
+        characters: s.characters.map((c) => c.id === id ? { ...c, ...updates } : c),
+      })),
+
+      // ── Universe ──
       selectedUniverse: null,
       setSelectedUniverse: (id) => set({ selectedUniverse: id }),
 
-      bio: null,
-      setBio: (bio) => set({ bio }),
+      // ── Story progress ──
+      storyProgress: {},
 
-      loveInterest: null,
-      setLoveInterest: (id) => set({ loveInterest: id }),
+      setCurrentStepIndex: (i) => set((s) => updateProgress(s, () => ({ currentStepIndex: i }))),
 
+      advanceStep: () => set((s) => {
+        const p = getProgress(s)
+        return updateProgress(s, () => ({ currentStepIndex: p.currentStepIndex + 1 }))
+      }),
+
+      setBranchChoice: (cpId, optionId) => set((s) => {
+        const p = getProgress(s)
+        return updateProgress(s, () => ({
+          branchChoices: { ...p.branchChoices, [cpId]: optionId },
+        }))
+      }),
+
+      addChatMessage: (msg) => set((s) => {
+        const p = getProgress(s)
+        return updateProgress(s, () => ({
+          chatHistory: [...p.chatHistory, msg],
+        }))
+      }),
+
+      setChatSummary: (stepId, summary) => set((s) => {
+        const p = getProgress(s)
+        return updateProgress(s, () => ({
+          chatSummaries: { ...p.chatSummaries, [stepId]: summary },
+        }))
+      }),
+
+      getSummariesList: () => {
+        const p = getProgress(get())
+        return Object.values(p.chatSummaries)
+      },
+
+      addChoiceDescription: (desc) => set((s) => {
+        const p = getProgress(s)
+        return updateProgress(s, () => ({
+          choiceDescriptions: [...p.choiceDescriptions, desc],
+        }))
+      }),
+
+      updateTrust: (delta) => set((s) => {
+        const p = getProgress(s)
+        return updateProgress(s, () => ({
+          characterState: {
+            junhoTrust: Math.max(0, Math.min(100, p.characterState.junhoTrust + delta)),
+          },
+        }))
+      }),
+
+      setTrustStatusLabel: (label) => set((s) => updateProgress(s, () => ({ trustStatusLabel: label }))),
+
+      setRevealSignature: (sig) => set((s) => updateProgress(s, () => ({ revealSignature: sig }))),
+
+      setSceneImage: (stepId, url) => set((s) => {
+        const p = getProgress(s)
+        return updateProgress(s, () => ({
+          sceneImages: { ...p.sceneImages, [stepId]: url },
+        }))
+      }),
+
+      setCharacterPortrait: (characterId, url) => set((s) => {
+        const p = getProgress(s)
+        return updateProgress(s, () => ({
+          characterPortraits: { ...p.characterPortraits, [characterId]: url },
+        }))
+      }),
+
+      // ── Gems ──
       gemBalance: 50,
       spendGems: (amount) => {
         const { gemBalance } = get()
@@ -131,77 +254,26 @@ export const useStore = create<StoreState>()(
         return true
       },
 
-      // V2 Step progression
-      ...INITIAL_STORY_STATE,
-
-      currentStepIndex: 0,
-      setCurrentStepIndex: (i) => set({ currentStepIndex: i }),
-      advanceStep: () => set((s) => ({ currentStepIndex: s.currentStepIndex + 1 })),
-
-      branchChoices: {},
-      setBranchChoice: (cpId, optionId) => set((s) => ({
-        branchChoices: { ...s.branchChoices, [cpId]: optionId },
-      })),
-
-      chatHistory: [],
-      addChatMessage: (msg) => set((s) => ({ chatHistory: [...s.chatHistory, msg] })),
-
-      chatSummaries: {},
-      setChatSummary: (stepId, summary) => set((s) => ({
-        chatSummaries: { ...s.chatSummaries, [stepId]: summary },
-      })),
-
-      getSummariesList: () => {
-        const sums = get().chatSummaries
-        return Object.values(sums)
-      },
-
-      choiceDescriptions: [],
-      addChoiceDescription: (desc) => set((s) => ({
-        choiceDescriptions: [...s.choiceDescriptions, desc],
-      })),
-
-      characterState: { junhoTrust: 50 },
-      trustStatusLabel: 'strangers',
-      updateTrust: (delta) => set((s) => ({
-        characterState: {
-          junhoTrust: Math.max(0, Math.min(100, s.characterState.junhoTrust + delta)),
-        },
-      })),
-      setTrustStatusLabel: (label) => set({ trustStatusLabel: label }),
-
-      revealSignature: null,
-      setRevealSignature: (sig) => set({ revealSignature: sig }),
-
-      sceneImages: {},
-      setSceneImage: (stepId, url) => set((s) => ({
-        sceneImages: { ...s.sceneImages, [stepId]: url },
-      })),
-
-      characterPortraits: {},
-      setCharacterPortrait: (characterId, url) => set((s) => ({
-        characterPortraits: { ...s.characterPortraits, [characterId]: url },
-      })),
-
+      // ── Streaming (ephemeral) ──
       isStreaming: false,
       setIsStreaming: (v) => set({ isStreaming: v }),
       isGeneratingScene: false,
       setIsGeneratingScene: (v) => set({ isGeneratingScene: v }),
 
-      resetStory: () => set({
-        ...INITIAL_STORY_STATE,
-        currentStepIndex: 0,
-        branchChoices: {},
-        chatHistory: [],
-        chatSummaries: {},
-        choiceDescriptions: [],
-        characterState: { junhoTrust: 50 },
-        trustStatusLabel: 'strangers',
-        revealSignature: null,
-        sceneImages: {},
-        isStreaming: false,
-        isGeneratingScene: false,
-      }),
+      // ── Reset (active character+universe only) ──
+      resetStory: () => {
+        const s = get()
+        const key = progressKey(s.activeCharacterId, s.selectedUniverse)
+        if (!key) return
+        set({
+          storyProgress: {
+            ...s.storyProgress,
+            [key]: freshProgress(),
+          },
+          isStreaming: false,
+          isGeneratingScene: false,
+        })
+      },
 
       // Legacy compat
       currentChapter: 1,
@@ -210,23 +282,64 @@ export const useStore = create<StoreState>()(
     }),
     {
       name: 'chaptr-v2-story',
+      version: 2,
+      migrate: (persisted: any, version: number) => {
+        if (version < 2 && persisted) {
+          // Migrate from flat store to multi-character
+          const charId = crypto.randomUUID()
+          const gender = persisted.loveInterest === 'yuna' ? 'male' as const : 'female' as const
+          const universeId = persisted.selectedUniverse || 'seoul-transfer'
+
+          const character: PlayerCharacter = {
+            id: charId,
+            name: 'Player',
+            gender,
+            selfieUrl: persisted.selfieUrl ?? null,
+            bio: persisted.bio ?? null,
+            createdAt: Date.now(),
+          }
+
+          const progress: StoryProgress = {
+            currentStepIndex: persisted.currentStepIndex ?? 0,
+            branchChoices: persisted.branchChoices ?? {},
+            chatHistory: persisted.chatHistory ?? [],
+            chatSummaries: persisted.chatSummaries ?? {},
+            choiceDescriptions: persisted.choiceDescriptions ?? [],
+            characterState: persisted.characterState ?? { junhoTrust: 50 },
+            trustStatusLabel: persisted.trustStatusLabel ?? 'strangers',
+            revealSignature: persisted.revealSignature ?? null,
+            sceneImages: persisted.sceneImages ?? {},
+            characterPortraits: persisted.characterPortraits ?? {},
+          }
+
+          // Only create character if there was any meaningful state
+          const hasState = persisted.selfieUrl || persisted.bio || persisted.loveInterest ||
+            persisted.currentStepIndex > 0 || Object.keys(persisted.branchChoices ?? {}).length > 0
+
+          return {
+            characters: hasState ? [character] : [],
+            activeCharacterId: hasState ? charId : null,
+            selectedUniverse: persisted.selectedUniverse ?? null,
+            storyProgress: hasState ? { [`${charId}:${universeId}`]: progress } : {},
+            gemBalance: persisted.gemBalance ?? 50,
+          }
+        }
+        return persisted
+      },
       partialize: (s) => ({
-        selfieUrl: s.selfieUrl,
+        characters: s.characters,
+        activeCharacterId: s.activeCharacterId,
         selectedUniverse: s.selectedUniverse,
-        bio: s.bio,
-        loveInterest: s.loveInterest,
+        storyProgress: s.storyProgress,
         gemBalance: s.gemBalance,
-        currentStepIndex: s.currentStepIndex,
-        branchChoices: s.branchChoices,
-        chatHistory: s.chatHistory,
-        chatSummaries: s.chatSummaries,
-        choiceDescriptions: s.choiceDescriptions,
-        characterState: s.characterState,
-        trustStatusLabel: s.trustStatusLabel,
-        revealSignature: s.revealSignature,
-        sceneImages: s.sceneImages,
-        characterPortraits: s.characterPortraits,
       }),
     }
   )
 )
+
+// ─── Exported helpers for consumers ───
+
+/** Get the active progress for the current character+universe */
+export function getActiveProgress(state: StoreState): StoryProgress {
+  return getProgress(state)
+}

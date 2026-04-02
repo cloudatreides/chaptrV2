@@ -1,18 +1,16 @@
 import { RotateCcw } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
+import { useActiveStory } from '../hooks/useActiveStory'
 import { CHARACTERS } from '../data/characters'
-import { resolveLoveInterestId } from '../data/storyData'
+import { resolveLoveInterestId, UNIVERSES } from '../data/storyData'
 
 export function YourStorySidebar() {
   const navigate = useNavigate()
-  const choiceDescriptions = useStore((s) => s.choiceDescriptions)
-  const chatSummaries = useStore((s) => s.chatSummaries)
-  const junhoTrust = useStore((s) => s.characterState.junhoTrust)
-  const trustLabel = useStore((s) => s.trustStatusLabel)
-  const selfieUrl = useStore((s) => s.selfieUrl)
+  const { selfieUrl, loveInterest, choiceDescriptions, chatSummaries, characterState, trustStatusLabel, selectedUniverse, activeCharacter } = useActiveStory()
   const resetStory = useStore((s) => s.resetStory)
-  const loveInterest = useStore((s) => s.loveInterest)
+  const junhoTrust = characterState.junhoTrust
+  const trustLabel = trustStatusLabel
   const liName = loveInterest === 'yuna' ? 'Yuna' : 'Jiwon'
 
   const summaryEntries = Object.entries(chatSummaries)
@@ -26,14 +24,14 @@ export function YourStorySidebar() {
             <img src={selfieUrl} alt="You" className="w-full h-full object-cover" />
           </div>
           <div>
-            <p className="text-textPrimary text-xs font-semibold">You (Y/N)</p>
+            <p className="text-textPrimary text-xs font-semibold">{activeCharacter?.name ?? 'You'}</p>
             <p className="text-textMuted text-xs">Main character</p>
           </div>
         </div>
       )}
 
       {/* Universe label */}
-      <p className="text-textMuted text-xs font-semibold uppercase tracking-widest mb-3">The Seoul Transfer</p>
+      <p className="text-textMuted text-xs font-semibold uppercase tracking-widest mb-3">{UNIVERSES.find((u) => u.id === selectedUniverse)?.title ?? 'Your Story'}</p>
 
       {/* Trust bar */}
       <div className="mb-4 space-y-1">

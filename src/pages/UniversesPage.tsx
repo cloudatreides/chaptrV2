@@ -10,7 +10,6 @@ import { trackEvent } from '../lib/supabase'
 export function UniversesPage() {
   const navigate = useNavigate()
   const setSelectedUniverse = useStore((s) => s.setSelectedUniverse)
-  const resetStory = useStore((s) => s.resetStory)
   const [activeFilter, setActiveFilter] = useState('ALL')
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [selectedUniverse, setSelected] = useState<Universe | null>(null)
@@ -22,9 +21,8 @@ export function UniversesPage() {
   const handleBegin = () => {
     if (!selectedUniverse) return
     setSelectedUniverse(selectedUniverse.id)
-    resetStory()
     trackEvent('universe_select', { universe: selectedUniverse.id })
-    navigate('/bio')
+    navigate('/characters')
   }
 
   return (
