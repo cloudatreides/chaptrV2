@@ -14,9 +14,9 @@ export function UniversesPage() {
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [selectedUniverse, setSelected] = useState<Universe | null>(null)
 
-  const filtered = UNIVERSES.filter(
-    (u) => activeFilter === 'ALL' || u.genre === activeFilter
-  )
+  const filtered = UNIVERSES
+    .filter((u) => activeFilter === 'ALL' || u.genre === activeFilter)
+    .sort((a, b) => Number(a.locked) - Number(b.locked))
 
   const handleBegin = () => {
     if (!selectedUniverse) return
