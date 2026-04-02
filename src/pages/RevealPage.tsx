@@ -4,6 +4,7 @@ import { Share2, RotateCcw } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { generateRevealSignature } from '../lib/claudeStream'
+import { getRevealPerspective } from '../data/storyData'
 import { generateSceneImage } from '../lib/togetherAi'
 import { trackEvent, savePlaythrough } from '../lib/supabase'
 
@@ -13,7 +14,7 @@ export function RevealPage() {
     selfieUrl, characterState, choiceDescriptions,
     revealSignature, setRevealSignature,
     sceneImages, setSceneImage,
-    resetStory, selectedUniverse, bio, trustStatusLabel,
+    resetStory, selectedUniverse, bio, loveInterest, trustStatusLabel,
   } = useStore()
   const summariesList = useStore.getState().getSummariesList()
 
@@ -47,6 +48,8 @@ export function RevealPage() {
         chatSummaries: summariesList,
         choiceHistory: choiceDescriptions,
         characterState,
+        loveInterest,
+        universeId: selectedUniverse,
       })
 
       setRevealSignature(sig)
@@ -65,6 +68,7 @@ export function RevealPage() {
         reveal_signature: sig,
         selfie_url: selfieUrl,
         bio,
+        love_interest: loveInterest,
       })
       if (id) setShareId(id)
     }
@@ -88,7 +92,8 @@ export function RevealPage() {
     const shareUrl = shareId
       ? `${window.location.origin}/s/${shareId}`
       : 'chaptr-v2.vercel.app'
-    const text = `"${revealSignature}"\n\n— my story with Jiwon in Chaptr\n${shareUrl}`
+    const liName = loveInterest === 'yuna' ? 'Yuna' : 'Jiwon'
+    const text = `"${revealSignature}"\n\n— my story with ${liName} in Chaptr\n${shareUrl}`
     try {
       await navigator.clipboard.writeText(text)
       setCopied(true)
@@ -152,7 +157,7 @@ export function RevealPage() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.1 }}
             >
-              Jiwon sees you as
+              {getRevealPerspective(selectedUniverse, loveInterest)}
             </motion.p>
 
             {/* Selfie */}

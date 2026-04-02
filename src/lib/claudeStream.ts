@@ -40,6 +40,7 @@ export interface RevealSignatureParams {
   choiceHistory: { label: string; description: string }[]
   characterState: { junhoTrust: number }
   loveInterest: 'jiwon' | 'yuna' | null
+  universeId: string | null
 }
 
 // ─── Helpers ───
@@ -276,7 +277,7 @@ export async function summarizeChat(params: SummarizeChatParams): Promise<string
 // ─── Reveal Signature ───
 
 export async function generateRevealSignature(params: RevealSignatureParams): Promise<string> {
-  const { chatSummaries, choiceHistory, characterState, loveInterest } = params
+  const { chatSummaries, choiceHistory, characterState, loveInterest, universeId } = params
   const trust = characterState.junhoTrust
   const liName = loveInterest === 'yuna' ? 'Yuna' : 'Jiwon'
 

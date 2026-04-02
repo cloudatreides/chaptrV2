@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Send, ArrowRight } from 'lucide-react'
-import { CHARACTERS } from '../data/characters'
+import { CHARACTERS, getCharacter } from '../data/characters'
 import { useStore } from '../store/useStore'
 import { streamChatReply, summarizeChat, generateOpeningMessage } from '../lib/claudeStream'
 import { generateCharacterPortrait, generateSceneImage } from '../lib/togetherAi'
@@ -32,8 +32,8 @@ interface Props {
 }
 
 export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3, storyContext, onComplete }: Props) {
-  const character = CHARACTERS[characterId]
-  const { addChatMessage, setChatSummary, characterState, bio, characterPortraits, setCharacterPortrait } = useStore()
+  const { addChatMessage, setChatSummary, characterState, bio, loveInterest, selectedUniverse, characterPortraits, setCharacterPortrait } = useStore()
+  const character = getCharacter(characterId, selectedUniverse) ?? CHARACTERS[characterId]
   const [localMessages, setLocalMessages] = useState<{ role: 'user' | 'character'; content: string }[]>([])
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
@@ -87,6 +87,8 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
           storyContext,
           characterState,
           bio,
+          loveInterest,
+          universeId: selectedUniverse,
         })
         const charMessage = { role: 'character' as const, content: opening }
         setLocalMessages([charMessage])
@@ -138,6 +140,8 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
         maxExchanges,
         characterState,
         bio,
+        loveInterest,
+        universeId: selectedUniverse,
         signal: abortRef.current.signal,
       })
 

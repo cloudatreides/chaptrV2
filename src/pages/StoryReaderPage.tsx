@@ -142,6 +142,7 @@ export function StoryReaderPage() {
         characterState,
         bio,
         loveInterest,
+        universeId: selectedUniverse,
         signal: abortRef.current.signal,
       })
 
