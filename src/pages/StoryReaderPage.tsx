@@ -12,8 +12,9 @@ import { YourStorySidebar } from '../components/YourStorySidebar'
 import { streamBeatProse, extractTrustData } from '../lib/claudeStream'
 import { generateSceneImage } from '../lib/togetherAi'
 import { useStreamingTypewriter, useTypewriter } from '../hooks/useTypewriter'
-
-const API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY ?? ''
+import { AudioToggle } from '../components/AudioToggle'
+import { ambientAudio } from '../lib/ambientAudio'
+import type { AmbientMood } from '../lib/ambientAudio'
 
 export function StoryReaderPage() {
   const navigate = useNavigate()
@@ -70,7 +71,30 @@ export function StoryReaderPage() {
         if (url) setSceneImage(currentStep.id, url)
       })
     }
+
+    // Set ambient audio mood based on step type
+    if (currentStep?.type) {
+      const moodMap: Record<string, AmbientMood> = { beat: 'story', chat: 'chat', choice: 'choice', reveal: 'reveal' }
+      ambientAudio.setMood(moodMap[currentStep.type] ?? 'story')
+    }
   }, [currentStepIndex])
+
+  // Unlock audio on first user click (browser requirement)
+  useEffect(() => {
+    const unlock = () => {
+      ambientAudio.unlock()
+      if (!ambientAudio.isMuted) {
+        const moodMap: Record<string, AmbientMood> = { beat: 'story', chat: 'chat', choice: 'choice', reveal: 'reveal' }
+        ambientAudio.setMood(moodMap[currentStep?.type ?? 'beat'] ?? 'story')
+      }
+      document.removeEventListener('click', unlock)
+    }
+    document.addEventListener('click', unlock, { once: true })
+    return () => {
+      document.removeEventListener('click', unlock)
+      ambientAudio.stop()
+    }
+  }, [])
 
   // Navigate to reveal when we hit the reveal step
   useEffect(() => {
@@ -95,16 +119,6 @@ export function StoryReaderPage() {
     setIsStreaming(true)
     resetStream()
 
-    if (!API_KEY) {
-      const fallback = 'The moment stretches between you like a held breath. Something has shifted — you can feel it in the way the air hums.\n\nNeither of you looks away.'
-      append(fallback)
-      finish()
-      setBeatProse(fallback)
-      setIsStreaming(false)
-      setHasChosenBeat(true)
-      return
-    }
-
     abortRef.current = new AbortController()
     try {
       let fullProse = ''
@@ -115,7 +129,6 @@ export function StoryReaderPage() {
         chatSummaries: summariesList,
         characterState,
         bio,
-        apiKey: API_KEY,
         signal: abortRef.current.signal,
       })
 
@@ -280,6 +293,7 @@ export function StoryReaderPage() {
           </button>
           <ProgressBar current={currentBeatNum} total={totalBeats} />
           <div className="flex items-center gap-2">
+            <AudioToggle />
             {selfieUrl && (
               <div className="w-8 h-8 rounded-full overflow-hidden border-2 shrink-0" style={{ borderColor: '#c84b9e' }}>
                 <img src={selfieUrl} alt="You" className="w-full h-full object-cover" />
@@ -351,6 +365,7 @@ export function StoryReaderPage() {
                   <p className="text-textMuted text-xs uppercase tracking-widest">Chapter 1 — {currentStep.title}</p>
                   <ProgressBar current={currentBeatNum} total={totalBeats} />
                   <div className="flex items-center gap-3">
+                    <AudioToggle />
                     {selfieUrl && <div className="w-8 h-8 rounded-full overflow-hidden border-2 shrink-0" style={{ borderColor: '#c84b9e' }}><img src={selfieUrl} alt="You" className="w-full h-full object-cover" /></div>}
                     <GemCounter />
                   </div>
