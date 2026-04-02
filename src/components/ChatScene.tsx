@@ -41,33 +41,45 @@ function detectPersonality(bio: string | null): PersonalityType {
 
 const SUGGESTIONS: Record<PersonalityType, Record<string, string[]>> = {
   quiet: {
-    opening: ["I'm just passing through.", "...go on.", "You seem like you have a lot on your mind."],
-    mid: ["Tell me more.", "I noticed that too.", "Take your time."],
-    deep: ["I think I understand.", "You don't have to explain.", "I'm not going anywhere."],
+    opening: ["I'm just passing through.", "...go on.", "You seem like you have a lot on your mind.", "I'll just listen.", "Don't mind me.", "Sorry — I didn't mean to stare."],
+    mid: ["Tell me more.", "I noticed that too.", "Take your time.", "That's a lot to carry.", "I've been thinking about what you said.", "You don't have to talk about it if you don't want to."],
+    deep: ["I think I understand.", "You don't have to explain.", "I'm not going anywhere.", "I see you.", "We don't have to figure it out right now.", "I'm glad you told me."],
   },
   bold: {
-    opening: ["So, what's really going on here?", "Cut the small talk.", "I've heard about you."],
-    mid: ["That doesn't add up.", "Prove it.", "What are you not telling me?"],
-    deep: ["I need the truth. Now.", "I'm not afraid of this.", "Let's stop pretending."],
+    opening: ["So, what's really going on here?", "Cut the small talk.", "I've heard about you.", "You don't seem like everyone else here.", "Alright, impress me.", "I have a feeling about you."],
+    mid: ["That doesn't add up.", "Prove it.", "What are you not telling me?", "I'm calling your bluff.", "You're holding back.", "Say that again — slower."],
+    deep: ["I need the truth. Now.", "I'm not afraid of this.", "Let's stop pretending.", "I didn't come this far to back down.", "You know I'm right.", "No more games."],
   },
   dreamer: {
-    opening: ["This place feels different.", "I had a feeling I'd end up here.", "There's something in the air..."],
-    mid: ["What does that remind you of?", "I keep thinking about that.", "It's almost like it was meant to happen."],
-    deep: ["Do you ever feel like you're part of something bigger?", "I think we both know what this is.", "Some things don't need words."],
+    opening: ["This place feels different.", "I had a feeling I'd end up here.", "There's something in the air...", "Have we met before?", "I keep getting this feeling...", "The light here is different."],
+    mid: ["What does that remind you of?", "I keep thinking about that.", "It's almost like it was meant to happen.", "Do you believe in signs?", "I dreamed about something like this.", "Tell me what you see when you close your eyes."],
+    deep: ["Do you ever feel like you're part of something bigger?", "I think we both know what this is.", "Some things don't need words.", "Maybe this is exactly where we're supposed to be.", "I don't want to wake up from this.", "What if this is the real version?"],
   },
   custom: {
-    opening: ["Hey.", "Tell me about yourself.", "What's on your mind?"],
-    mid: ["That's interesting.", "Keep going.", "I wasn't expecting that."],
-    deep: ["I trust you.", "What happens next?", "I want to understand."],
+    opening: ["Hey.", "Tell me about yourself.", "What's on your mind?", "I'm curious about you.", "So... what now?", "This is new for me."],
+    mid: ["That's interesting.", "Keep going.", "I wasn't expecting that.", "Really?", "Makes sense actually.", "Huh. I didn't think of it that way."],
+    deep: ["I trust you.", "What happens next?", "I want to understand.", "I'm glad I'm here.", "Whatever happens, I'm in.", "I don't regret any of this."],
   },
+}
+
+function pickRandom(arr: string[], count: number, seed: number): string[] {
+  const shuffled = [...arr]
+  // Simple seeded shuffle so same exchangeCount gives consistent picks
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.abs((seed * 31 + i * 7) % (i + 1))
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled.slice(0, count)
 }
 
 function getSuggestions(bio: string | null, exchangeCount: number): string[] {
   const type = detectPersonality(bio)
   const pool = SUGGESTIONS[type]
-  if (exchangeCount <= 1) return pool.opening
-  if (exchangeCount <= 4) return pool.mid
-  return pool.deep
+  let tier: string[]
+  if (exchangeCount <= 1) tier = pool.opening
+  else if (exchangeCount <= 4) tier = pool.mid
+  else tier = pool.deep
+  return pickRandom(tier, 3, exchangeCount)
 }
 
 interface Props {
