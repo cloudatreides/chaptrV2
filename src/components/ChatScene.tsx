@@ -76,8 +76,8 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
 
       if (!API_KEY) {
         const fallback = characterId === 'jiwon'
-          ? '...hey. You're the new transfer, right?'
-          : 'omg hi!! you must be new here~ I'm Sora!'
+          ? "...hey. You're the new transfer, right?"
+          : "omg hi!! you must be new here~ I'm Sora!"
         await new Promise((r) => setTimeout(r, 800))
         const charMessage = { role: 'character' as const, content: fallback }
         setLocalMessages([charMessage])
@@ -129,8 +129,8 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
     if (!API_KEY) {
       // Fallback
       const fallback = characterId === 'jiwon'
-        ? ['Hm. Interesting.', "I don't usually talk to people here.", 'You ask a lot of questions.', '...maybe.', 'You're different from what I expected.', "I should go. They're waiting for me."]
-        : ['ngl this place is wild lol', 'you should totally come to the showcase!', 'wait do you know about Jiwon?? 👀', 'he's not what people think~', 'trust me on this one lol', "ok I gotta run but let's talk later!!"]
+        ? ['Hm. Interesting.', "I don't usually talk to people here.", 'You ask a lot of questions.', '...maybe.', "You're different from what I expected.", "I should go. They're waiting for me."]
+        : ['ngl this place is wild lol', 'you should totally come to the showcase!', 'wait do you know about Jiwon?? 👀', "he's not what people think~", 'trust me on this one lol', "ok I gotta run but let's talk later!!"]
       const reply = fallback[Math.min(newExchange - 1, fallback.length - 1)]
       await new Promise((r) => setTimeout(r, 800))
       setStreamedReply(reply)
