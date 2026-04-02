@@ -74,10 +74,11 @@ interface Props {
   maxExchanges: number
   minExchanges?: number
   storyContext: string
+  chatImagePrompt?: string
   onComplete: () => void
 }
 
-export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3, storyContext, onComplete }: Props) {
+export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3, storyContext, chatImagePrompt, onComplete }: Props) {
   const { bio, loveInterest, selectedUniverse, characterState, characterPortraits } = useActiveStory()
   const { addChatMessage, setChatSummary, setCharacterPortrait } = useStore()
   const character = getCharacter(characterId, selectedUniverse) ?? CHARACTERS[characterId]
@@ -86,7 +87,6 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
   const [isTyping, setIsTyping] = useState(false)
   const [streamedReply, setStreamedReply] = useState('')
   const [exchangeCount, setExchangeCount] = useState(0)
-  const [isDone, setIsDone] = useState(false)
   const [isLoadingOpener, setIsLoadingOpener] = useState(true)
   const [introImage, setIntroImage] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -121,8 +121,9 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
       setIsLoadingOpener(true)
 
       // Generate intro image in parallel (fire and forget)
-      if (character?.introImagePrompt) {
-        generateSceneImage({ prompt: character.introImagePrompt, width: 768, height: 512 }).then((url) => {
+      const imagePrompt = chatImagePrompt ?? character?.introImagePrompt
+      if (imagePrompt) {
+        generateSceneImage({ prompt: imagePrompt, width: 768, height: 512 }).then((url) => {
           if (url) setIntroImage(url)
         })
       }
@@ -153,7 +154,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
   }, [])
 
   const handleSend = async () => {
-    if (!input.trim() || isTyping || isDone) return
+    if (!input.trim() || isTyping) return
 
     const userMsg = input.trim()
     setInput('')
@@ -203,10 +204,6 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
       setExchangeCount(newExchange)
       trackEvent('chat_exchange', { characterId, exchange: newExchange })
 
-      if (newExchange >= maxExchanges) {
-        setIsDone(true)
-        handleChatComplete([...localMessages, userMessage, charMessage])
-      }
     } catch (e) {
       if (e instanceof Error && e.name !== 'AbortError') {
         const fallback = { role: 'character' as const, content: '...' }
@@ -229,9 +226,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
 
   const handleContinue = async () => {
     // Summarize what we have so far, then advance
-    if (!isDone) {
-      await handleChatComplete(localMessages)
-    }
+    await handleChatComplete(localMessages)
     onComplete()
   }
 
@@ -248,10 +243,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
         </div>
         <div className="flex-1">
           <p className="text-textPrimary font-semibold text-sm">{character?.name ?? characterId}</p>
-          {isDone ? (
-            <p className="text-textMuted text-xs italic">Conversation ended</p>
-          ) : (
-            <div className="flex items-center gap-1.5 mt-0.5">
+          <div className="flex items-center gap-1.5 mt-0.5">
               {getMoodStages(characterId).map((stage, i) => {
                 const currentIdx = getMoodIndex(characterId, exchangeCount)
                 const isActive = i === currentIdx
@@ -273,7 +265,6 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
                 )
               })}
             </div>
-          )}
         </div>
       </div>
 
@@ -368,14 +359,12 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
       <div className="px-4 pb-6 pt-3 border-t border-border safe-bottom space-y-2">
         {/* Continue story button — appears after minExchanges */}
         <AnimatePresence>
-          {(canContinue || isDone) && (
+          {canContinue && (
             <motion.button
               className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all"
               style={{
-                background: isDone
-                  ? 'linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%)'
-                  : 'rgba(200,75,158,0.12)',
-                color: isDone ? '#fff' : '#c84b9e',
+                background: 'rgba(200,75,158,0.12)',
+                color: '#c84b9e',
               }}
               onClick={handleContinue}
               initial={{ opacity: 0, height: 0, marginBottom: 0 }}
@@ -389,7 +378,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
         </AnimatePresence>
 
         {/* Suggestion chips — personality-aware */}
-        {!isDone && !isTyping && !isLoadingOpener && !input && (
+        {!isTyping && !isLoadingOpener && !input && (
           <motion.div
             className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide"
             initial={{ opacity: 0, y: 6 }}
@@ -415,9 +404,8 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
           </motion.div>
         )}
 
-        {/* Chat input — hidden when fully done */}
-        {!isDone && (
-          <div className="flex gap-2">
+        {/* Chat input */}
+        <div className="flex gap-2">
             <input
               type="text"
               value={input}
@@ -440,7 +428,6 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
               <Send size={18} className="text-white" />
             </button>
           </div>
-        )}
       </div>
     </div>
   )

@@ -239,7 +239,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
   // ─── Send message ───
 
   const handleSend = async () => {
-    if (!input.trim() || isTyping || activeState.isDone) return
+    if (!input.trim() || isTyping) return
 
     const userMsg = input.trim()
     setInput('')
@@ -298,17 +298,11 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
           ...prev[activeCharId],
           messages: [...newMessages, charMessage],
           exchangeCount: newExchange,
-          isDone: newExchange >= maxEx,
         },
       }))
       addChatMessage({ ...charMessage, characterId: activeCharId, timestamp: Date.now() })
       setStreamedReply('')
       trackEvent('chat_exchange', { characterId: activeCharId, exchange: newExchange, isScene: true })
-
-      // Auto-summarize if maxed out
-      if (newExchange >= maxEx) {
-        handleSummarize(activeCharId, [...newMessages, charMessage])
-      }
     } catch (e) {
       if (e instanceof Error && e.name !== 'AbortError') {
         const fallback = { role: 'character' as const, content: '...' }
@@ -355,7 +349,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
     // Summarize all conversations that haven't been summarized yet
     for (const sc of characters) {
       const state = chatStates[sc.characterId]
-      if (state && state.messages.length > 0 && !state.isDone) {
+      if (state && state.messages.length > 0) {
         await handleSummarize(sc.characterId, state.messages)
       }
     }
@@ -438,10 +432,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
           )}
         </div>
         <div className="flex items-center gap-1.5 flex-1">
-          {activeState.isDone ? (
-            <p className="text-textMuted text-xs italic">Conversation ended</p>
-          ) : (
-            moodStages.map((stage, i) => {
+          {moodStages.map((stage, i) => {
               const isActiveMood = i === currentMoodIdx
               const isPast = i < currentMoodIdx
               return (
@@ -461,8 +452,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
                   </span>
                 </div>
               )
-            })
-          )}
+            })}
         </div>
       </div>
 
@@ -576,7 +566,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
         </AnimatePresence>
 
         {/* Suggestion chips */}
-        {!activeState.isDone && !isTyping && !activeState.isLoadingOpener && !input && (
+        {!isTyping && !activeState.isLoadingOpener && !input && (
           <motion.div
             className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide"
             initial={{ opacity: 0, y: 6 }}
@@ -601,8 +591,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
         )}
 
         {/* Chat input */}
-        {!activeState.isDone && (
-          <div className="flex gap-2">
+        <div className="flex gap-2">
             <input
               type="text"
               value={input}
@@ -625,7 +614,6 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
               <Send size={18} className="text-white" />
             </button>
           </div>
-        )}
       </div>
     </div>
   )
