@@ -7,6 +7,7 @@ import { StoryReaderPage } from './pages/StoryReaderPage'
 import { RevealPage } from './pages/RevealPage'
 import { FreeChatPage } from './pages/FreeChatPage'
 import { SharedRevealPage } from './pages/SharedRevealPage'
+import { QuestPage } from './pages/QuestPage'
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
         <Route path="/story" element={<StoryReaderPage />} />
         <Route path="/reveal" element={<RevealPage />} />
         <Route path="/free-chat" element={<FreeChatPage />} />
+        <Route path="/quest/:questId" element={<QuestPage />} />
         <Route path="/reveal/:id" element={<SharedRevealPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

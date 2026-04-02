@@ -20,7 +20,10 @@ import type { AmbientMood } from '../lib/ambientAudio'
 import { trackEvent } from '../lib/supabase'
 import { getPingsForUniverse } from '../data/pings'
 import { PingNotification } from '../components/PingNotification'
+import { getQuestsForUniverse } from '../data/quests'
+import { QuestUnlockToast } from '../components/QuestUnlockToast'
 import type { PingDef } from '../data/pings'
+import type { QuestDef } from '../data/quests'
 import type { StoryStep, SceneCharacter } from '../data/storyData'
 
 export function StoryReaderPage() {
@@ -43,6 +46,7 @@ export function StoryReaderPage() {
 
   const [sheetOpen, setSheetOpen] = useState(false)
   const [activePing, setActivePing] = useState<PingDef | null>(null)
+  const [questToast, setQuestToast] = useState<QuestDef | null>(null)
   const prevStepIndexRef = useRef(currentStepIndex)
 
   // Redirect if no active character
@@ -105,6 +109,28 @@ export function StoryReaderPage() {
     if (pending && !activePing) {
       // Delay slightly so the new step renders first
       setTimeout(() => setActivePing(pending), 1500)
+    }
+
+    // Check for quest unlocks
+    const quests = getQuestsForUniverse(selectedUniverse)
+    const { markQuestNotified } = useStore.getState()
+    const prog = useStore.getState().storyProgress
+    const key = `${useStore.getState().activeCharacterId}:${selectedUniverse}`
+    const currentProgress = key ? prog[key] : undefined
+    const notified = currentProgress?.notifiedQuests ?? []
+
+    const newQuest = quests.find(q => {
+      if (notified.includes(q.id)) return false
+      if (currentProgress?.questProgress[q.id]?.completed) return false
+      const charId = q.characterId === 'jiwon'
+        ? (loveInterest === 'yuna' ? 'yuna' : 'jiwon')
+        : q.characterId
+      return (characterAffinities[charId] ?? 0) >= q.affinityGate
+    })
+
+    if (newQuest && !questToast) {
+      markQuestNotified(newQuest.id)
+      setTimeout(() => setQuestToast(newQuest), pending ? 3000 : 1500)
     }
   }, [currentStepIndex])
 
@@ -457,6 +483,16 @@ export function StoryReaderPage() {
           onDismiss={() => setActivePing(null)}
         />
       )}
+
+      {/* Quest unlock toast */}
+      <AnimatePresence>
+        {questToast && (
+          <QuestUnlockToast
+            quest={questToast}
+            onDismiss={() => setQuestToast(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   )
 }

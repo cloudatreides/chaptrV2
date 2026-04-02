@@ -1,13 +1,15 @@
-import { RotateCcw } from 'lucide-react'
+import { RotateCcw, Sparkles } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { useActiveStory } from '../hooks/useActiveStory'
-import { CHARACTERS } from '../data/characters'
+import { CHARACTERS, getCharacter } from '../data/characters'
 import { resolveLoveInterestId, UNIVERSES } from '../data/storyData'
+import { getQuestsForUniverse } from '../data/quests'
+import { getAffinityTier } from '../lib/affinity'
 
 export function YourStorySidebar() {
   const navigate = useNavigate()
-  const { selfieUrl, loveInterest, choiceDescriptions, chatSummaries, characterState, trustStatusLabel, selectedUniverse, activeCharacter, primaryNpcName } = useActiveStory()
+  const { selfieUrl, loveInterest, choiceDescriptions, chatSummaries, characterState, trustStatusLabel, selectedUniverse, activeCharacter, primaryNpcName, characterAffinities, questProgress } = useActiveStory()
   const resetStory = useStore((s) => s.resetStory)
   const junhoTrust = characterState.junhoTrust
   const trustLabel = trustStatusLabel
@@ -83,6 +85,39 @@ export function YourStorySidebar() {
             })}
           </div>
         )}
+
+        {/* Side Stories */}
+        {(() => {
+          const quests = getQuestsForUniverse(selectedUniverse)
+          const unlocked = quests.filter(q => {
+            const charId = q.characterId === 'jiwon' ? resolveLoveInterestId(loveInterest) : q.characterId
+            return (characterAffinities[charId] ?? 0) >= q.affinityGate
+          })
+          if (unlocked.length === 0) return null
+          return (
+            <div className="space-y-1.5">
+              <p className="text-textMuted text-[10px] uppercase tracking-widest">Side Stories</p>
+              {unlocked.map(q => {
+                const qp = questProgress[q.id]
+                const charId = q.characterId === 'jiwon' ? resolveLoveInterestId(loveInterest) : q.characterId
+                const char = getCharacter(charId, selectedUniverse) ?? CHARACTERS[charId]
+                return (
+                  <button
+                    key={q.id}
+                    className="flex items-start gap-2 w-full text-left hover:bg-surfaceAlt rounded-lg px-1.5 py-1 -mx-1.5 transition-colors"
+                    onClick={() => navigate(`/quest/${q.id}`)}
+                  >
+                    <span className="text-xs shrink-0 mt-0.5">{char?.avatar ?? '✨'}</span>
+                    <div>
+                      <p className="text-textSecondary text-xs">{q.title}</p>
+                      <p className="text-textMuted text-[10px]">{qp?.completed ? 'Completed' : 'Available'}</p>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          )
+        })()}
 
         {choiceDescriptions.length === 0 && summaryEntries.length === 0 && (
           <p className="text-textMuted text-xs italic">Your story is just beginning...</p>

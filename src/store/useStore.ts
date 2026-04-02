@@ -36,6 +36,8 @@ export interface StoryProgress {
   characterPortraits: Record<string, string>
   characterAffinities: Record<string, number>
   seenPings: string[]
+  questProgress: Record<string, { currentStep: number; completed: boolean; summary: string | null }>
+  notifiedQuests: string[] // quests whose unlock has been shown
 }
 
 export const DEFAULT_PROGRESS: StoryProgress = {
@@ -51,6 +53,8 @@ export const DEFAULT_PROGRESS: StoryProgress = {
   characterPortraits: {},
   characterAffinities: {},
   seenPings: [],
+  questProgress: {},
+  notifiedQuests: [],
 }
 
 function freshProgress(): StoryProgress {
@@ -90,6 +94,9 @@ interface StoreState {
   setCharacterPortrait: (characterId: string, url: string) => void
   updateAffinity: (characterId: string, delta: number) => void
   markPingSeen: (pingId: string) => void
+  advanceQuest: (questId: string) => void
+  completeQuest: (questId: string, summary: string) => void
+  markQuestNotified: (questId: string) => void
 
   // ── Gems ──
   gemBalance: number
@@ -270,6 +277,40 @@ export const useStore = create<StoreState>()(
         }))
       }),
 
+      advanceQuest: (questId) => set((s) => {
+        const p = getProgress(s)
+        const current = p.questProgress[questId] ?? { currentStep: 0, completed: false, summary: null }
+        return updateProgress(s, () => ({
+          questProgress: {
+            ...p.questProgress,
+            [questId]: { ...current, currentStep: current.currentStep + 1 },
+          },
+        }))
+      }),
+
+      completeQuest: (questId, summary) => set((s) => {
+        const p = getProgress(s)
+        return updateProgress(s, () => ({
+          questProgress: {
+            ...p.questProgress,
+            [questId]: { currentStep: 999, completed: true, summary },
+          },
+          // Add quest summary to chat summaries so it feeds into main story context
+          chatSummaries: {
+            ...p.chatSummaries,
+            [`quest:${questId}`]: summary,
+          },
+        }))
+      }),
+
+      markQuestNotified: (questId) => set((s) => {
+        const p = getProgress(s)
+        if (p.notifiedQuests.includes(questId)) return {}
+        return updateProgress(s, () => ({
+          notifiedQuests: [...p.notifiedQuests, questId],
+        }))
+      }),
+
       // ── Gems ──
       gemBalance: 50,
       spendGems: (amount) => {
@@ -337,6 +378,8 @@ export const useStore = create<StoreState>()(
             characterPortraits: persisted.characterPortraits ?? {},
             characterAffinities: persisted.characterAffinities ?? {},
             seenPings: persisted.seenPings ?? [],
+            questProgress: persisted.questProgress ?? {},
+            notifiedQuests: persisted.notifiedQuests ?? [],
           }
 
           // Only create character if there was any meaningful state
