@@ -107,6 +107,9 @@ const SCENE_PROMPTS = {
   backstageTrust: 'Anime style, backstage area after a concert, warm string lights, costumes hanging, two people sharing a quiet moment among the chaos, trust and vulnerability, soft golden glow',
   cafeDeflect: 'Anime style, a quiet late-night cafe in Seoul, rain on windows, one person sitting alone looking at their phone, melancholic blue lighting, beautiful but lonely atmosphere',
   reveal: 'Anime style, ethereal dream-like scene, two silhouettes connected by glowing threads of light, abstract Seoul cityscape in background, cosmic purple and pink tones, emotional, beautiful',
+  practiceHall: 'Anime style, a bright practice room hallway at Seoul Arts Academy, glass windows showing dancers inside, a blue-haired girl leaning against the wall talking to someone, cherry blossoms visible through skylights, warm afternoon light',
+  afterHours: 'Anime style, empty recording studio late at night, a piano in warm spotlight, sheet music scattered, Seoul city lights through the window, two people close together at the piano bench, intimate and vulnerable',
+  soraRooftop: 'Anime style, academy rooftop at sunset, a blue-haired girl sitting on the railing looking at the city, warm golden light, wind in her hair, a mix of cheerfulness and hidden ambition, K-drama aesthetic',
 }
 
 export const STORY_STEPS: StoryStep[] = [
@@ -125,6 +128,21 @@ export const STORY_STEPS: StoryStep[] = [
     type: 'chat',
     title: 'Talk to Jiwon',
     characterId: 'jiwon',
+    minExchanges: 3,
+    maxExchanges: 10,
+  },
+  {
+    id: 'beat-1b',
+    type: 'beat',
+    title: 'The Practice Rooms',
+    sceneImagePrompt: SCENE_PROMPTS.practiceHall,
+    arcBrief: 'The protagonist settles into academy life. Between classes, they pass the practice rooms. Through one glass window, NOVA is rehearsing. Jiwon at the center, commanding but distant. The other members laugh between takes. Jiwon doesn\'t. A blue-haired girl appears beside the protagonist. She grins like they\'re already friends. Sora knows things: who to avoid, which rooms have the best acoustics, why Jiwon doesn\'t eat in the cafeteria. End with Sora saying something knowing: "He noticed you, by the way. In the elevator. He doesn\'t usually notice anyone."',
+  },
+  {
+    id: 'chat-1b',
+    type: 'chat',
+    title: 'Talk to Sora',
+    characterId: 'sora',
     minExchanges: 3,
     maxExchanges: 10,
   },
@@ -181,6 +199,23 @@ export const STORY_STEPS: StoryStep[] = [
     minExchanges: 3,
     maxExchanges: 10,
   },
+  {
+    id: 'beat-4a',
+    type: 'beat',
+    title: 'After Hours',
+    requires: { 'cp-1': 'approach' },
+    sceneImagePrompt: SCENE_PROMPTS.afterHours,
+    arcBrief: 'Late evening. The academy is emptying out. The protagonist is in a practice room alone when Jiwon appears in the doorway. He doesn\'t explain why he\'s there. They end up talking about music, then about pressure, then about the gap between who you are and who people need you to be. Jiwon plays something on the piano. Something he wrote, not a NOVA track. Vulnerable and unfinished. He stops halfway. "Nobody has heard that." The moment hangs. End with his phone buzzing. His manager, reality pulling him back.',
+  },
+  {
+    id: 'chat-3a',
+    type: 'chat',
+    title: 'Talk to Jiwon',
+    requires: { 'cp-1': 'approach' },
+    characterId: 'jiwon',
+    minExchanges: 3,
+    maxExchanges: 10,
+  },
 
   // ── Act 2: Follow path ──
   {
@@ -198,6 +233,23 @@ export const STORY_STEPS: StoryStep[] = [
     title: 'Talk to Jiwon',
     requires: { 'cp-1': 'follow' },
     characterId: 'jiwon',
+    minExchanges: 3,
+    maxExchanges: 10,
+  },
+  {
+    id: 'beat-4b',
+    type: 'beat',
+    title: 'Sora Knows',
+    requires: { 'cp-1': 'follow' },
+    sceneImagePrompt: SCENE_PROMPTS.soraRooftop,
+    arcBrief: 'The next day. Sora finds the protagonist on the academy rooftop. She already knows about the confrontation with Jiwon. "Word travels fast when an idol raises his voice." She sits down uninvited. Between jokes and gossip, she tells the protagonist something real: Jiwon\'s contract renewal is in two weeks. The label wants him to cut ties with anyone who could become a scandal. "He pushes people away before they get close enough to be used against him. It\'s not personal." She pauses. "Or maybe it is. That\'s for you to figure out." End with the protagonist seeing Jiwon across the campus. He looks away first.',
+  },
+  {
+    id: 'chat-3b',
+    type: 'chat',
+    title: 'Talk to Sora',
+    requires: { 'cp-1': 'follow' },
+    characterId: 'sora',
     minExchanges: 3,
     maxExchanges: 10,
   },

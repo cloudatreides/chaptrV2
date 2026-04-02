@@ -16,6 +16,10 @@ const SCENES = {
   trustWarning: 'Dark gothic illustration, a caretaker leading someone away from a manor at dawn, fog lifting, both walking toward a village in the distance, the manor silhouette behind them like a crouching beast, bittersweet escape',
   goDeeper: 'Dark gothic illustration, a person standing at the threshold of a dark passage beneath a manor, walls covered in strange symbols, cold air rushing outward, they are stepping forward into the unknown, terrifying and awe-inspiring',
   reveal: 'Dark gothic illustration, ethereal scene of a crumbling manor dissolving into mist, a single figure standing in a beam of moonlight, ghostly threads connecting them to the walls, haunting purple and blue tones, beautiful and terrifying',
+  tour: 'Dark gothic illustration, daytime interior of a decaying manor, dust floating in shafts of pale light from tall windows, a grand dining room with a table set for one, cobwebs on crystal chandeliers, faded wallpaper peeling at edges, beautiful decay',
+  maeArrival: 'Dark gothic illustration, a young woman with short dark hair and glasses standing at the entrance of a crumbling manor, holding a leather satchel of documents, overcast sky behind her, wind catching her scarf, determined expression',
+  wallsChange: 'Dark gothic illustration, a long hallway in an old manor where portraits have subtly changed expression, a door now on the wrong side of the hall, daylight through windows making the wrongness worse not better, deeply unsettling',
+  ellisQuarters: 'Dark gothic illustration, a small obsessively tidy room in a manor attic, narrow bed perfectly made, a shelf of identical leather journals spanning decades, a window overlooking dead gardens, a photograph face-down on a nightstand, lonely and secretive',
 }
 
 // ─── Characters ───
@@ -129,6 +133,28 @@ export const HOLLOW_MANOR_STEPS: StoryStep[] = [
     maxExchanges: 10,
   },
   {
+    id: 'hm-beat-1b',
+    type: 'beat',
+    title: 'The Tour',
+    sceneImagePrompt: SCENES.tour,
+    arcBrief: 'Morning. Ellis gives the protagonist a tour of the manor. It should be reassuring by daylight but it isn\'t. A dining table set for one with fresh flowers nobody arranged. A hallway where the wallpaper pattern breaks and reforms. A locked door Ellis walks past without acknowledging. He narrates with rehearsed ease until something slips: "The manor likes you." He corrects himself. "I mean to say, it suits you." End with the protagonist finding scratch marks on the inside of their bedroom door. From the inside. As if someone was trying to get out.',
+  },
+  {
+    id: 'hm-beat-1c',
+    type: 'beat',
+    title: 'The Historian',
+    sceneImagePrompt: SCENES.maeArrival,
+    arcBrief: 'A knock at the front door. Mae Chen, satchel stuffed with photocopied records. She says she\'s researching the manor\'s history for the county archives. She\'s direct, slightly pushy, and clearly knows more about this place than she should. She asks whether the protagonist has noticed anything unusual. End with Mae saying something that stops the protagonist cold: "The last three people who inherited this place are all gone. Not dead. Gone."',
+  },
+  {
+    id: 'hm-chat-1c',
+    type: 'chat',
+    title: 'Talk to Mae',
+    characterId: 'mae',
+    minExchanges: 3,
+    maxExchanges: 10,
+  },
+  {
     id: 'hm-beat-2',
     type: 'beat',
     title: 'The First Night',
@@ -179,6 +205,23 @@ export const HOLLOW_MANOR_STEPS: StoryStep[] = [
     minExchanges: 3,
     maxExchanges: 10,
   },
+  {
+    id: 'hm-beat-4a',
+    type: 'beat',
+    title: 'The Walls Remember',
+    requires: { 'hm-cp-1': 'open' },
+    sceneImagePrompt: SCENES.wallsChange,
+    arcBrief: 'The protagonist returns to the hidden room. The photographs have changed. Faces have shifted position. One frame that was empty now holds a photograph of the protagonist, taken from inside the manor, through a window they don\'t remember standing near. Mae\'s research confirms a pattern: every owner appears in the collection before their third night. The manor doesn\'t haunt people. It collects them. Absorbs them. And it has already started with the protagonist. End with the protagonist noticing their reflection in a hallway mirror looks slightly wrong. It blinks a half-second late.',
+  },
+  {
+    id: 'hm-chat-3a',
+    type: 'chat',
+    title: 'Talk to Ellis',
+    requires: { 'hm-cp-1': 'open' },
+    characterId: 'ellis',
+    minExchanges: 3,
+    maxExchanges: 10,
+  },
 
   // ── Act 2: Search path ──
   {
@@ -195,6 +238,23 @@ export const HOLLOW_MANOR_STEPS: StoryStep[] = [
     title: 'Talk to Ellis',
     requires: { 'hm-cp-1': 'search' },
     characterId: 'ellis',
+    minExchanges: 3,
+    maxExchanges: 10,
+  },
+  {
+    id: 'hm-beat-4b',
+    type: 'beat',
+    title: 'Ellis\'s Quarters',
+    requires: { 'hm-cp-1': 'search' },
+    sceneImagePrompt: SCENES.ellisQuarters,
+    arcBrief: 'While Ellis is out, the protagonist explores his quarters in the attic. A small, obsessively tidy room. A shelf of identical leather journals spanning decades, one for every year. The recent entries are scattered, urgent. One reads: "It is getting stronger. The new one arrives Tuesday." A photograph face-down on the nightstand. The protagonist turns it over: a young couple, 1970s. The woman looks like the protagonist\'s grandmother. Ellis is in the photograph. He hasn\'t aged. End with Ellis\'s footsteps on the attic stairs.',
+  },
+  {
+    id: 'hm-chat-3b',
+    type: 'chat',
+    title: 'Talk to Mae',
+    requires: { 'hm-cp-1': 'search' },
+    characterId: 'mae',
     minExchanges: 3,
     maxExchanges: 10,
   },

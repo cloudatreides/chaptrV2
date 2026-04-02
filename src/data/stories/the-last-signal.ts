@@ -16,6 +16,9 @@ const SCENES = {
   tellAll: 'Noir illustration, a woman and a man in a late-night diner booth, coffee cups between them, she is crying silently while he slides a photograph across the table, warm interior light against cold rain outside, emotional devastation',
   protect: 'Noir illustration, a man walking alone down a rain-soaked city street at night, coat collar up, carrying a file folder, leaving a truth behind, city lights reflecting in puddles, lonely and determined, cinematic melancholy',
   reveal: 'Noir illustration, ethereal scene of city lights dissolving into rain and mist, a silhouette standing under a single streetlight, threads of evidence and memory swirling around them, moody purple and amber tones, beautiful and haunting',
+  records: 'Noir illustration, a desk covered in bank statements and phone records, red circles and connecting lines drawn in marker, a coffee cup leaving rings on paper, rain outside, a whiteboard with timeline of events, investigative atmosphere',
+  backroom: 'Noir illustration, a back room behind a pawnshop, a hard drive sitting on a table under a single bulb, two people staring at photographs spread around it, tense discovery moment, smoke in the air, dangerous knowledge',
+  voiceMemo: 'Noir illustration, a person wearing headphones at a desk, eyes closed, listening to something painful, a USB drive plugged into a laptop, the screen reflecting on their face in the dark, emotional and heavy, rain on window',
 }
 
 // ─── Characters ───
@@ -131,6 +134,13 @@ export const LAST_SIGNAL_STEPS: StoryStep[] = [
     maxExchanges: 10,
   },
   {
+    id: 'ls-beat-1b',
+    type: 'beat',
+    title: 'The Digital Trail',
+    sceneImagePrompt: SCENES.records,
+    arcBrief: 'Back at the office. The protagonist pulls Karim\'s records. Bank statements show normal spending that stops dead three days ago. But there\'s a pattern in the weeks before: cash withdrawals, increasing in size. $200, $500, $1,200, $3,000. All from different ATMs across the city. Someone paying off a debt or buying their way out of something. His social media went quiet a week before he vanished. Last post: a photo of the city skyline at dawn. No caption. His phone pinged three cell towers the night he disappeared, moving east, then nothing. End with the protagonist realizing Karim saw this coming.',
+  },
+  {
     id: 'ls-beat-2',
     type: 'beat',
     title: 'The Apartment',
@@ -181,6 +191,23 @@ export const LAST_SIGNAL_STEPS: StoryStep[] = [
     minExchanges: 3,
     maxExchanges: 10,
   },
+  {
+    id: 'ls-beat-4a',
+    type: 'beat',
+    title: 'The Backroom',
+    requires: { 'ls-cp-1': 'money' },
+    sceneImagePrompt: SCENES.backroom,
+    arcBrief: 'Dex takes the protagonist to the backroom. What Karim pawned isn\'t jewelry or electronics. It\'s a hard drive. Dex hasn\'t looked at it. "Karim said if someone comes looking, give it to them. If the wrong someone comes, destroy it." The hard drive has encrypted files and one unlocked folder: photographs of transactions, meetings in parking garages, cash changing hands. People with real power. A city councilman. A developer. Someone in a police uniform. End with the protagonist understanding why Karim ran. And why the apartment was already tossed when they got there.',
+  },
+  {
+    id: 'ls-chat-3a',
+    type: 'chat',
+    title: 'Talk to Noor',
+    requires: { 'ls-cp-1': 'money' },
+    characterId: 'noor',
+    minExchanges: 3,
+    maxExchanges: 10,
+  },
 
   // ── Act 2: Witness path ──
   {
@@ -197,6 +224,23 @@ export const LAST_SIGNAL_STEPS: StoryStep[] = [
     title: 'Talk to Noor',
     requires: { 'ls-cp-1': 'witness' },
     characterId: 'noor',
+    minExchanges: 3,
+    maxExchanges: 10,
+  },
+  {
+    id: 'ls-beat-4b',
+    type: 'beat',
+    title: 'The Voice Memo',
+    requires: { 'ls-cp-1': 'witness' },
+    sceneImagePrompt: SCENES.voiceMemo,
+    arcBrief: 'The protagonist opens the USB at their office. Most files are encrypted, but one folder isn\'t. Timestamped photographs of transactions, meetings, cash exchanges. And a voice memo. Karim\'s voice, steady but scared: "If you are hearing this, I could not get out clean. The drive has everything. Names, dates, amounts. I thought documenting it would protect me. It didn\'t." A pause. "Tell Noor I didn\'t choose this. And don\'t trust the police. Not all of them." End with the weight of knowing exactly what happened and understanding that finding Karim might put more people in danger.',
+  },
+  {
+    id: 'ls-chat-3b',
+    type: 'chat',
+    title: 'Talk to Dex',
+    requires: { 'ls-cp-1': 'witness' },
+    characterId: 'dex',
     minExchanges: 3,
     maxExchanges: 10,
   },
