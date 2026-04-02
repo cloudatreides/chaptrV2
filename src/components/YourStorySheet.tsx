@@ -115,7 +115,8 @@ export function YourStorySheet({ open, onClose }: Props) {
           {/* Footer */}
           <div className="px-5 pb-6 pt-3 border-t border-border">
             <button
-              className="choice-btn justify-center gap-2 w-full"
+              className="w-full flex items-center justify-center gap-2 px-4 py-4 rounded-xl text-textPrimary text-sm font-medium transition-all"
+              style={{ background: 'rgba(26, 21, 37, 0.85)', border: '1px solid rgba(42, 32, 64, 0.8)' }}
               onClick={() => { resetStory(); onClose(); navigate('/story') }}
             >
               <RotateCcw size={16} className="text-textSecondary" />
