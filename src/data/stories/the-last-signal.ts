@@ -4,21 +4,21 @@ import type { StoryCharacter } from '../characters'
 // ─── Scene Prompts ───
 
 const SCENES = {
-  office: 'Noir illustration, a dimly lit private investigator office at night, rain streaking the window, desk cluttered with case files, a single desk lamp casting warm amber light, city lights through venetian blinds, moody cinematic atmosphere',
-  noorMeeting: 'Noir illustration, a woman sitting across a desk in a PI office, controlled desperation on her face, holding a photograph, rain shadows on the wall, warm and cold lighting contrast, tense intimate atmosphere',
-  apartment: 'Noir illustration, a ransacked apartment with drawers pulled out and papers scattered, rain-soaked city visible through an open window, a single lamp knocked over still glowing on the floor, crime scene atmosphere, moody blue and amber tones',
-  pawnshop: 'Noir illustration, a cluttered pawnshop interior at night, neon signs reflecting through rain-streaked windows, glass cases filled with watches and jewelry, a man behind the counter with a knowing smile, smoky atmospheric lighting',
-  neighborDoor: 'Noir illustration, a dark apartment hallway, one door slightly open with warm light spilling out, an elderly woman peering through the chain lock, rain sounds from a window at the end, intimate and suspicious atmosphere',
-  dexBack: 'Noir illustration, a back room behind a pawnshop, poker table with files spread on it, two people leaning in close talking in low voices, single hanging bulb, smoke curling, secrets being traded, intimate noir atmosphere',
-  noorCar: 'Noir illustration, two people sitting in a parked car at night in the rain, city lights reflecting on the wet windshield, emotional conversation, the woman gripping the steering wheel, tension and vulnerability, cinematic',
-  pressHard: 'Noir illustration, confrontation in a pawnshop backroom, one person standing over another seated, finger pointing, tension at breaking point, single harsh light casting dramatic shadows, dangerous atmosphere',
-  takeDeal: 'Noir illustration, two people shaking hands across a desk covered in photographs and cash, uneasy alliance, neon light from outside casting colored shadows, morally grey atmosphere, cinematic noir',
-  tellAll: 'Noir illustration, a woman and a man in a late-night diner booth, coffee cups between them, she is crying silently while he slides a photograph across the table, warm interior light against cold rain outside, emotional devastation',
-  protect: 'Noir illustration, a man walking alone down a rain-soaked city street at night, coat collar up, carrying a file folder, leaving a truth behind, city lights reflecting in puddles, lonely and determined, cinematic melancholy',
-  reveal: 'Noir illustration, ethereal scene of city lights dissolving into rain and mist, a silhouette standing under a single streetlight, threads of evidence and memory swirling around them, moody purple and amber tones, beautiful and haunting',
-  records: 'Noir illustration, a desk covered in bank statements and phone records, red circles and connecting lines drawn in marker, a coffee cup leaving rings on paper, rain outside, a whiteboard with timeline of events, investigative atmosphere',
-  backroom: 'Noir illustration, a back room behind a pawnshop, a hard drive sitting on a table under a single bulb, two people staring at photographs spread around it, tense discovery moment, smoke in the air, dangerous knowledge',
-  voiceMemo: 'Noir illustration, a person wearing headphones at a desk, eyes closed, listening to something painful, a USB drive plugged into a laptop, the screen reflecting on their face in the dark, emotional and heavy, rain on window',
+  office: 'Noir illustration, a private investigator sitting at a cluttered desk at night, rain streaking the window, case files spread out, desk lamp casting warm amber light, city lights through venetian blinds, focused expression, moody cinematic',
+  noorMeeting: 'Noir illustration, a Middle Eastern woman with dark hair pulled back sitting across from a PI in a dim office, controlled desperation on her face, holding a photograph of a young man, rain shadows on the wall, tense intimate atmosphere',
+  apartment: 'Noir illustration, a PI standing in a ransacked apartment examining evidence, drawers pulled out, papers scattered, rain-soaked city through an open window, flashlight in hand, detective at work, moody blue and amber tones',
+  pawnshop: 'Noir illustration, a charming 35 year old man with stubble leaning on a glass counter in a cluttered pawnshop, knowing smirk, a PI standing across from him, neon signs through rain-streaked windows, smoky atmospheric lighting',
+  neighborDoor: 'Noir illustration, an elderly woman peering through a door chain lock at a PI in a dark apartment hallway, warm light spilling from her apartment, rain sounds from a window, suspicious and intimate atmosphere',
+  dexBack: 'Noir illustration, two men leaning across a poker table in a pawnshop backroom, files spread between them, one charming with stubble, one serious, single hanging bulb, smoke curling, secrets being traded',
+  noorCar: 'Noir illustration, a Middle Eastern woman and a PI sitting in a parked car at night in the rain, city lights on the wet windshield, she grips the steering wheel, emotional vulnerability, cinematic',
+  pressHard: 'Noir illustration, a PI standing over a seated man with stubble in a pawnshop backroom, finger pointing, confrontation at breaking point, single harsh light casting dramatic shadows, dangerous',
+  takeDeal: 'Noir illustration, a man with stubble and a PI shaking hands across a desk covered in photographs, uneasy alliance, neon light casting colored shadows, morally grey atmosphere, cinematic noir',
+  tellAll: 'Noir illustration, a Middle Eastern woman and a PI in a late-night diner booth, coffee between them, she cries silently while he slides a photograph across the table, warm light against cold rain outside, devastating',
+  protect: 'Noir illustration, a PI walking alone down a rain-soaked city street at night, coat collar up, carrying a file folder, leaving a truth behind, city lights reflecting in puddles, lonely and determined',
+  reveal: 'Noir illustration, ethereal scene of city lights dissolving into rain and mist, a silhouette standing under a single streetlight, threads of evidence and memory swirling around them, moody purple and amber tones, haunting',
+  records: 'Noir illustration, a PI hunched over a desk covered in bank statements and phone records, red circles drawn in marker, coffee cup rings on paper, rain outside, connecting the dots, investigative focus',
+  backroom: 'Noir illustration, a PI and a man with stubble staring at photographs spread around a hard drive on a table, single bulb overhead, tense discovery moment, smoke in the air, dangerous knowledge',
+  voiceMemo: 'Noir illustration, a PI wearing headphones at a desk, eyes closed, listening to something painful, a USB drive plugged into a laptop, screen reflecting on their face in the dark, emotional, rain on window',
 }
 
 // ─── Characters ───

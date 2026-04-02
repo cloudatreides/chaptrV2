@@ -73,6 +73,7 @@ export interface ChoiceOption {
   description: string
   sceneHint: string // mood hint shown on card
   consequenceHint?: string // 1-sentence preview of what happens
+  imagePrompt?: string // per-option preview image
 }
 
 export interface StoryStep {
@@ -97,19 +98,19 @@ export interface StoryStep {
 
 // Scene image prompts for FLUX.1 Schnell — each describes a distinct mood/location
 const SCENE_PROMPTS = {
-  arrival: 'Anime style, a lone figure standing in front of a gleaming modern entertainment building at night in Seoul, cherry blossoms falling, neon signs reflecting on wet pavement, cinematic lighting, dramatic atmosphere',
-  elevator: 'Anime style, inside a sleek modern elevator, warm amber lighting, two silhouettes facing each other, city lights visible through glass walls, intimate tension, cinematic',
-  rehearsal: 'Anime style, spacious dance practice room with mirror walls, warm spotlight on center stage, music equipment scattered, Seoul skyline through floor-to-ceiling windows at dusk',
-  studioApproach: 'Anime style, recording studio interior, mixing console glowing with colorful lights, soundproof walls, intimate warm lighting, two people close together at the desk, creative atmosphere',
-  corridorFollow: 'Anime style, long dimly lit corridor in a modern building, one figure walking ahead casting a long shadow, mysterious blue-tinted lighting, doors along both sides',
-  rooftopConfront: 'Anime style, dramatic rooftop confrontation scene at night, two figures facing each other with city lights sprawling behind them, wind blowing, emotional tension, neon-lit Seoul skyline',
-  rooftopStay: 'Anime style, peaceful rooftop at golden hour, two people sitting side by side at the edge looking at sunset over Seoul, warm colors, quiet intimacy, cherry blossoms on the breeze',
-  backstageTrust: 'Anime style, backstage area after a concert, warm string lights, costumes hanging, two people sharing a quiet moment among the chaos, trust and vulnerability, soft golden glow',
-  cafeDeflect: 'Anime style, a quiet late-night cafe in Seoul, rain on windows, one person sitting alone looking at their phone, melancholic blue lighting, beautiful but lonely atmosphere',
+  arrival: 'Anime style, a young person standing in front of a gleaming modern entertainment building at night in Seoul, looking up in awe, cherry blossoms falling, neon signs reflecting on wet pavement, cinematic lighting, first day energy',
+  elevator: 'Anime style, inside a sleek modern elevator, a handsome Korean male idol with dark messy hair in a black turtleneck facing a young person, both surprised, city lights through glass walls, intimate tension, K-drama moment',
+  rehearsal: 'Anime style, a handsome Korean male idol with dark messy hair dancing intensely in a practice room with mirror walls, warm spotlight, focused expression, sweat on his brow, Seoul skyline through windows at dusk, other dancers in background',
+  studioApproach: 'Anime style, recording studio interior, a handsome Korean male idol with dark hair sitting at a mixing console, looking up as someone approaches, warm colorful lighting, intimate creative atmosphere, K-drama aesthetic',
+  corridorFollow: 'Anime style, a handsome Korean male idol with dark messy hair walking quickly down a dimly lit corridor, coat flowing, a figure following at a distance in the shadows, mysterious blue-tinted lighting, tension',
+  rooftopConfront: 'Anime style, two young people facing each other on a rooftop at night, one with dark messy hair looking intense, wind blowing, city lights sprawling behind them, emotional confrontation, K-drama climax',
+  rooftopStay: 'Anime style, two young people sitting side by side on a rooftop edge at golden hour looking at sunset over Seoul, shoulders almost touching, warm colors, quiet intimacy, cherry blossoms on the breeze',
+  backstageTrust: 'Anime style, backstage after a concert, a young idol with dark hair sitting on a case sharing earbuds with someone, warm string lights, costumes hanging around them, vulnerable trust, soft golden glow',
+  cafeDeflect: 'Anime style, a young person sitting alone in a quiet late-night cafe in Seoul, rain on windows, looking at their phone with a conflicted expression, melancholic blue lighting, beautiful but lonely',
   reveal: 'Anime style, ethereal dream-like scene, two silhouettes connected by glowing threads of light, abstract Seoul cityscape in background, cosmic purple and pink tones, emotional, beautiful',
-  practiceHall: 'Anime style, a bright practice room hallway at Seoul Arts Academy, glass windows showing dancers inside, a blue-haired girl leaning against the wall talking to someone, cherry blossoms visible through skylights, warm afternoon light',
-  afterHours: 'Anime style, empty recording studio late at night, a piano in warm spotlight, sheet music scattered, Seoul city lights through the window, two people close together at the piano bench, intimate and vulnerable',
-  soraRooftop: 'Anime style, academy rooftop at sunset, a blue-haired girl sitting on the railing looking at the city, warm golden light, wind in her hair, a mix of cheerfulness and hidden ambition, K-drama aesthetic',
+  practiceHall: 'Anime style, a girl with vibrant blue dyed hair in an oversized hoodie leaning against a practice room window talking animatedly to a young person, bright academy hallway, cherry blossoms through skylights, warm afternoon light',
+  afterHours: 'Anime style, a handsome Korean male idol with dark hair playing piano in a dim studio late at night, a young person sitting beside him listening, sheet music scattered, Seoul city lights through the window, intimate and vulnerable',
+  soraRooftop: 'Anime style, a girl with vibrant blue hair sitting on an academy rooftop railing talking to a young person, sunset over Seoul, warm golden light, wind in her hair, cheerful but with a hint of seriousness, K-drama aesthetic',
 }
 
 export const STORY_STEPS: StoryStep[] = [
@@ -169,6 +170,7 @@ export const STORY_STEPS: StoryStep[] = [
         description: 'Walk up to Jiwon at the mixing desk. Say something.',
         sceneHint: 'bold / direct',
         consequenceHint: 'Your directness could disarm him — or make him shut down completely.',
+        imagePrompt: SCENE_PROMPTS.studioApproach,
       },
       {
         id: 'follow',
@@ -176,6 +178,7 @@ export const STORY_STEPS: StoryStep[] = [
         description: 'He leaves in a hurry. Follow him — see where he goes.',
         sceneHint: 'cautious / curious',
         consequenceHint: 'You\'ll see a side of him he hides from everyone — but if he catches you...',
+        imagePrompt: SCENE_PROMPTS.corridorFollow,
       },
     ],
   },
