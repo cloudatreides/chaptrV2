@@ -3,6 +3,7 @@ import { X, RotateCcw } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { CHARACTERS } from '../data/characters'
+import { resolveLoveInterestId } from '../data/storyData'
 
 interface Props {
   open: boolean
@@ -17,6 +18,8 @@ export function YourStorySheet({ open, onClose }: Props) {
   const trustLabel = useStore((s) => s.trustStatusLabel)
   const selfieUrl = useStore((s) => s.selfieUrl)
   const resetStory = useStore((s) => s.resetStory)
+  const loveInterest = useStore((s) => s.loveInterest)
+  const liName = loveInterest === 'yuna' ? 'Yuna' : 'Jiwon'
 
   const summaryEntries = Object.entries(chatSummaries)
 
@@ -54,7 +57,7 @@ export function YourStorySheet({ open, onClose }: Props) {
           {/* Trust bar */}
           <div className="px-5 pb-4 space-y-1">
             <div className="flex items-center justify-between">
-              <span className="text-textMuted text-xs">Jiwon</span>
+              <span className="text-textMuted text-xs">{liName}</span>
               <span className="text-textMuted text-xs">{junhoTrust}/100</span>
             </div>
             <div className="h-1 rounded-full bg-border overflow-hidden">
@@ -92,7 +95,7 @@ export function YourStorySheet({ open, onClose }: Props) {
               <div className="space-y-2">
                 <p className="text-textMuted text-[10px] uppercase tracking-widest">Conversations</p>
                 {summaryEntries.map(([stepId, summary]) => {
-                  const charId = stepId.includes('2a') ? 'sora' : 'jiwon'
+                  const charId = stepId.includes('2a') ? 'sora' : resolveLoveInterestId(loveInterest)
                   const char = CHARACTERS[charId]
                   return (
                     <div key={stepId} className="flex items-start gap-2">

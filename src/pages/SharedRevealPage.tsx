@@ -92,7 +92,7 @@ export function SharedRevealPage() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.1 }}
         >
-          Jiwon sees them as
+          They see you as
         </motion.p>
 
         {/* Selfie */}

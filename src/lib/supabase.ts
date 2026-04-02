@@ -40,6 +40,7 @@ export interface PlaythroughData {
   reveal_signature: string | null
   selfie_url: string | null
   bio: string | null
+  love_interest?: 'jiwon' | 'yuna' | null
 }
 
 export async function savePlaythrough(data: PlaythroughData): Promise<string | null> {

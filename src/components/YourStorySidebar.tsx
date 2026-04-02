@@ -2,6 +2,7 @@ import { RotateCcw } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { CHARACTERS } from '../data/characters'
+import { resolveLoveInterestId } from '../data/storyData'
 
 export function YourStorySidebar() {
   const navigate = useNavigate()
@@ -11,6 +12,8 @@ export function YourStorySidebar() {
   const trustLabel = useStore((s) => s.trustStatusLabel)
   const selfieUrl = useStore((s) => s.selfieUrl)
   const resetStory = useStore((s) => s.resetStory)
+  const loveInterest = useStore((s) => s.loveInterest)
+  const liName = loveInterest === 'yuna' ? 'Yuna' : 'Jiwon'
 
   const summaryEntries = Object.entries(chatSummaries)
 
@@ -35,7 +38,7 @@ export function YourStorySidebar() {
       {/* Trust bar */}
       <div className="mb-4 space-y-1">
         <div className="flex items-center justify-between">
-          <span className="text-textMuted text-xs">Jiwon</span>
+          <span className="text-textMuted text-xs">{liName}</span>
           <span className="text-textMuted text-xs">{junhoTrust}/100</span>
         </div>
         <div className="h-1 rounded-full bg-border overflow-hidden">
@@ -70,8 +73,8 @@ export function YourStorySidebar() {
           <div className="space-y-1.5">
             <p className="text-textMuted text-[10px] uppercase tracking-widest">Conversations</p>
             {summaryEntries.map(([stepId, summary]) => {
-              // Extract character from step id (e.g. 'chat-1' -> jiwon, 'chat-2a' -> sora)
-              const charId = stepId.includes('2a') ? 'sora' : 'jiwon'
+              // Extract character from step id (e.g. 'chat-1' -> love interest, 'chat-2a' -> sora)
+              const charId = stepId.includes('2a') ? 'sora' : resolveLoveInterestId(loveInterest)
               const char = CHARACTERS[charId]
               return (
                 <div key={stepId} className="flex items-start gap-2">
