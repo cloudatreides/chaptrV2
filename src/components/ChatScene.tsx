@@ -258,11 +258,20 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
         {localMessages.map((msg, i) => (
           <motion.div
             key={i}
-            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            className={`flex items-end gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2 }}
           >
+            {msg.role === 'character' && (
+              <div className="w-7 h-7 rounded-full overflow-hidden shrink-0 mb-0.5" style={{ background: 'rgba(200,75,158,0.15)' }}>
+                {portrait ? (
+                  <img src={portrait} alt={character?.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="w-full h-full flex items-center justify-center text-xs">{character?.avatar}</span>
+                )}
+              </div>
+            )}
             <div className={`chat-bubble ${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-character'}`}>
               {msg.content}
             </div>
@@ -271,7 +280,14 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
 
         {/* Streaming reply */}
         {isTyping && streamedReply && (
-          <motion.div className="flex justify-start" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <motion.div className="flex items-end gap-2 justify-start" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <div className="w-7 h-7 rounded-full overflow-hidden shrink-0 mb-0.5" style={{ background: 'rgba(200,75,158,0.15)' }}>
+              {portrait ? (
+                <img src={portrait} alt={character?.name} className="w-full h-full object-cover" />
+              ) : (
+                <span className="w-full h-full flex items-center justify-center text-xs">{character?.avatar}</span>
+              )}
+            </div>
             <div className="chat-bubble chat-bubble-character">
               {streamedReply}
               <span className="cursor-blink text-accent ml-0.5">|</span>
@@ -281,7 +297,14 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
 
         {/* Typing indicator */}
         {isTyping && !streamedReply && (
-          <motion.div className="flex justify-start" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <motion.div className="flex items-end gap-2 justify-start" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <div className="w-7 h-7 rounded-full overflow-hidden shrink-0 mb-0.5" style={{ background: 'rgba(200,75,158,0.15)' }}>
+              {portrait ? (
+                <img src={portrait} alt={character?.name} className="w-full h-full object-cover" />
+              ) : (
+                <span className="w-full h-full flex items-center justify-center text-xs">{character?.avatar}</span>
+              )}
+            </div>
             <div className="chat-bubble chat-bubble-character flex gap-1">
               <span className="typing-dot" style={{ animationDelay: '0ms' }} />
               <span className="typing-dot" style={{ animationDelay: '150ms' }} />
