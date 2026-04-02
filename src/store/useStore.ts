@@ -69,6 +69,10 @@ interface StoreState {
   sceneImages: Record<string, string>
   setSceneImage: (stepId: string, url: string) => void
 
+  // Character portrait cache: { characterId: dataUrl }
+  characterPortraits: Record<string, string>
+  setCharacterPortrait: (characterId: string, url: string) => void
+
   // Current beat streaming state
   isStreaming: boolean
   setIsStreaming: (v: boolean) => void
@@ -94,6 +98,7 @@ const INITIAL_STORY_STATE = {
   trustStatusLabel: 'strangers',
   revealSignature: null as string | null,
   sceneImages: {} as Record<string, string>,
+  characterPortraits: {} as Record<string, string>,
   isStreaming: false,
   isGeneratingScene: false,
 }
@@ -166,6 +171,11 @@ export const useStore = create<StoreState>()(
         sceneImages: { ...s.sceneImages, [stepId]: url },
       })),
 
+      characterPortraits: {},
+      setCharacterPortrait: (characterId, url) => set((s) => ({
+        characterPortraits: { ...s.characterPortraits, [characterId]: url },
+      })),
+
       isStreaming: false,
       setIsStreaming: (v) => set({ isStreaming: v }),
       isGeneratingScene: false,
@@ -207,6 +217,7 @@ export const useStore = create<StoreState>()(
         trustStatusLabel: s.trustStatusLabel,
         revealSignature: s.revealSignature,
         sceneImages: s.sceneImages,
+        characterPortraits: s.characterPortraits,
       }),
     }
   )

@@ -4,6 +4,7 @@ import { Send, ArrowRight } from 'lucide-react'
 import { CHARACTERS } from '../data/characters'
 import { useStore } from '../store/useStore'
 import { streamChatReply, summarizeChat, generateOpeningMessage } from '../lib/claudeStream'
+import { generateCharacterPortrait } from '../lib/togetherAi'
 
 const API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY ?? ''
 
@@ -33,7 +34,7 @@ interface Props {
 
 export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3, storyContext, onComplete }: Props) {
   const character = CHARACTERS[characterId]
-  const { addChatMessage, setChatSummary, characterState, bio } = useStore()
+  const { addChatMessage, setChatSummary, characterState, bio, characterPortraits, setCharacterPortrait } = useStore()
   const [localMessages, setLocalMessages] = useState<{ role: 'user' | 'character'; content: string }[]>([])
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
@@ -47,6 +48,15 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
 
   const canContinue = exchangeCount >= minExchanges && !isTyping
   const moodLabel = getMoodLabel(characterId, exchangeCount)
+  const portrait = characterPortraits[characterId] ?? null
+
+  // Generate character portrait if not cached
+  useEffect(() => {
+    if (portrait || !character?.portraitPrompt) return
+    generateCharacterPortrait(character.portraitPrompt).then((url) => {
+      if (url) setCharacterPortrait(characterId, url)
+    })
+  }, [characterId])
 
   // Auto-scroll on new messages
   useEffect(() => {
@@ -211,8 +221,12 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center gap-3 px-5 py-4 border-b border-border">
-        <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg" style={{ background: 'rgba(200,75,158,0.15)' }}>
-          {character?.avatar ?? '💬'}
+        <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg overflow-hidden shrink-0" style={{ background: 'rgba(200,75,158,0.15)' }}>
+          {portrait ? (
+            <img src={portrait} alt={character?.name} className="w-full h-full object-cover" />
+          ) : (
+            character?.avatar ?? '💬'
+          )}
         </div>
         <div className="flex-1">
           <p className="text-textPrimary font-semibold text-sm">{character?.name ?? characterId}</p>
