@@ -46,7 +46,7 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
   }
 }
 
-/** Stylize a selfie into an anime-style portrait using FLUX.1 depth (img2img) */
+/** Stylize a selfie into an anime-style portrait using FLUX.1 Kontext (img2img) */
 export async function stylizeSelfie(selfieDataUrl: string): Promise<string | null> {
   if (!TOGETHER_API_KEY) return null
 
@@ -58,12 +58,12 @@ export async function stylizeSelfie(selfieDataUrl: string): Promise<string | nul
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'black-forest-labs/FLUX.1.1-pro',
-        prompt: 'Anime style portrait, beautiful K-drama character illustration, soft studio lighting, clean background, expressive eyes, detailed hair, high quality anime art style, same pose and facial features as reference',
+        model: 'black-forest-labs/FLUX.1-kontext-pro',
+        prompt: 'Transform this photo into an anime-style portrait illustration. Keep the exact same person, face, gender, facial features, glasses if present, hairstyle, and expression. Apply a clean anime art style with soft studio lighting, expressive eyes, and detailed hair. Clean simple background.',
         image_url: selfieDataUrl,
         width: 768,
         height: 768,
-        steps: 20,
+        steps: 28,
         n: 1,
         response_format: 'b64_json',
       }),
