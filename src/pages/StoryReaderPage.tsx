@@ -127,6 +127,7 @@ export function StoryReaderPage() {
         chatSummaries: summariesList,
         characterState: characterState,
         bio,
+        playerName: activeCharacter?.name ?? null,
         loveInterest,
         universeId: selectedUniverse,
         signal: abortRef.current.signal,
@@ -234,6 +235,8 @@ export function StoryReaderPage() {
             options={resolvedOptions}
             onSelect={handleBranchChoice}
             sceneImage={sceneImages[currentStep.id] ?? null}
+            playerName={activeCharacter?.name ?? null}
+            playerAvatar={selfieUrl}
           />
         )
       }
@@ -252,6 +255,8 @@ export function StoryReaderPage() {
             hasChosenBeat={hasChosenBeat}
             beatProse={beatProse}
             onContinue={handleAdvance}
+            playerName={activeCharacter?.name ?? null}
+            playerAvatar={selfieUrl}
           />
         )
 
@@ -389,12 +394,33 @@ interface BeatContentProps {
   hasChosenBeat: boolean
   beatProse: string
   onContinue: () => void
+  playerName: string | null
+  playerAvatar: string | null
 }
 
-function BeatContent({ step: _step, isFirstBeat, openingDisplayed, openingDone, streamDisplayed, isTyping, isStreaming, isGeneratingScene, hasChosenBeat, beatProse, onContinue }: BeatContentProps) {
+function BeatContent({ step: _step, isFirstBeat, openingDisplayed, openingDone, streamDisplayed, isTyping, isStreaming, isGeneratingScene, hasChosenBeat, beatProse, onContinue, playerName, playerAvatar }: BeatContentProps) {
   const proseText = streamDisplayed || beatProse
   return (
     <div className="space-y-4">
+      {/* Player character card */}
+      {(playerAvatar || playerName) && (
+        <motion.div
+          className="flex items-center gap-3 py-2"
+          initial={{ opacity: 0, x: -12 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          {playerAvatar && (
+            <div className="w-10 h-10 rounded-full overflow-hidden border-2 shrink-0" style={{ borderColor: '#c84b9e' }}>
+              <img src={playerAvatar} alt={playerName ?? 'You'} className="w-full h-full object-cover" />
+            </div>
+          )}
+          <div>
+            <p className="text-textPrimary text-sm font-semibold">{playerName ?? 'You'}</p>
+            <p className="text-textMuted text-xs">Main character</p>
+          </div>
+        </motion.div>
+      )}
       <div className="space-y-3 min-h-[80px]">
         {isFirstBeat ? (
           <p className="text-textPrimary text-base lg:text-lg leading-relaxed whitespace-pre-line">

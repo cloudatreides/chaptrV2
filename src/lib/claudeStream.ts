@@ -12,6 +12,7 @@ export interface StreamBeatParams {
   chatSummaries: string[]
   characterState: { junhoTrust: number }
   bio: string | null
+  playerName: string | null
   loveInterest: 'jiwon' | 'yuna' | null
   universeId: string | null
   signal?: AbortSignal
@@ -123,7 +124,7 @@ function makeClaudeRequest(system: string, userMessage: string, options: {
 // ─── Story Beat Generation ───
 
 function buildBeatSystemPrompt(params: StreamBeatParams): string {
-  const { choiceHistory, chatSummaries, characterState, bio, loveInterest, universeId } = params
+  const { choiceHistory, chatSummaries, characterState, bio, playerName, loveInterest, universeId } = params
   const trust = characterState.junhoTrust
   const trustLabel = trust > 70 ? 'high' : trust > 40 ? 'moderate' : 'low'
   const liName = loveInterest === 'yuna' ? 'Yuna' : 'Jiwon'
@@ -140,8 +141,9 @@ function buildBeatSystemPrompt(params: StreamBeatParams): string {
   const trustText = `\n\nCHARACTER STATE:\n- ${liName}'s trust in the protagonist: ${trustLabel} (${trust}/100). At low trust, ${liPronoun} is guarded and professional. At moderate trust, ${liPronoun} allows small moments of openness. At high trust, ${liPronoun} shows real vulnerability.`
 
   const bioText = bio ? `\n\nPROTAGONIST PERSONALITY:\n"${bio}"` : ''
+  const nameText = playerName ? `\n\nPROTAGONIST NAME: ${playerName}. Use their name occasionally in dialogue and narration (e.g. when other characters address them). Don't overuse it — mix "you" and "${playerName}" naturally.` : ''
 
-  return `${getBibleForUniverse(universeId, loveInterest)}${historyText}${chatText}${trustText}${bioText}
+  return `${getBibleForUniverse(universeId, loveInterest)}${historyText}${chatText}${trustText}${bioText}${nameText}
 
 PROSE CONSTRAINTS:
 - Write 2–4 short paragraphs (max 120 words total).

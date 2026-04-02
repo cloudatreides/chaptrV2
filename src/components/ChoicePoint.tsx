@@ -6,6 +6,8 @@ interface Props {
   options: ChoiceOption[]
   onSelect: (optionId: string) => void
   sceneImage?: string | null
+  playerName?: string | null
+  playerAvatar?: string | null
 }
 
 function ChoiceCard({ option, index, onSelect }: { option: ChoiceOption; index: number; onSelect: (id: string) => void }) {
@@ -62,18 +64,25 @@ function ChoiceCard({ option, index, onSelect }: { option: ChoiceOption; index: 
   )
 }
 
-export function ChoicePoint({ title, options, onSelect, sceneImage }: Props) {
+export function ChoicePoint({ title, options, onSelect, sceneImage, playerName, playerAvatar }: Props) {
   return (
     <div className="flex flex-col items-center gap-6 px-4 py-8">
-      {/* Title */}
+      {/* Player avatar + title */}
       <motion.div
-        className="text-center"
+        className="flex flex-col items-center gap-3"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <p className="text-textMuted text-xs uppercase tracking-[3px] mb-2">Your choice</p>
-        <h2 className="text-textPrimary font-semibold text-xl">{title}</h2>
+        {playerAvatar && (
+          <div className="w-14 h-14 rounded-full overflow-hidden border-2 shrink-0" style={{ borderColor: '#c84b9e' }}>
+            <img src={playerAvatar} alt={playerName ?? 'You'} className="w-full h-full object-cover" />
+          </div>
+        )}
+        <div className="text-center">
+          <p className="text-textMuted text-xs uppercase tracking-[3px] mb-2">{playerName ? `${playerName}'s choice` : 'Your choice'}</p>
+          <h2 className="text-textPrimary font-semibold text-xl">{title}</h2>
+        </div>
       </motion.div>
 
       {/* Choice cards with inline scene image between them */}
