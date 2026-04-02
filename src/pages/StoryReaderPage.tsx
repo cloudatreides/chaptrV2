@@ -119,6 +119,7 @@ export function StoryReaderPage() {
     abortRef.current = new AbortController()
     try {
       let fullProse = ''
+      let jsonBuffer = '' // hold back trailing { that might be trust JSON
       const gen = streamBeatProse({
         beatTitle: currentStep.title ?? 'Scene',
         arcBrief: currentStep.arcBrief,
@@ -132,8 +133,23 @@ export function StoryReaderPage() {
       })
 
       for await (const chunk of gen) {
-        append(chunk)
         fullProse += chunk
+        const text = jsonBuffer + chunk
+        const braceIdx = text.lastIndexOf('{')
+        if (braceIdx >= 0) {
+          // Show text before potential JSON, buffer the rest
+          const safe = text.slice(0, braceIdx)
+          if (safe) append(safe)
+          jsonBuffer = text.slice(braceIdx)
+        } else {
+          append(text)
+          jsonBuffer = ''
+        }
+      }
+
+      // Flush buffer if it's not trust JSON
+      if (jsonBuffer && !jsonBuffer.includes('"trustDelta"')) {
+        append(jsonBuffer)
       }
       finish()
 
@@ -141,11 +157,10 @@ export function StoryReaderPage() {
       if (trustDelta !== 0) updateTrust(trustDelta)
       if (statusLabel) setTrustStatusLabel(statusLabel)
 
-      if (cleanProse !== fullProse) {
-        resetStream()
-        append(cleanProse)
-        finish()
-      }
+      // Always reset to clean prose (strips any remaining artifacts)
+      resetStream()
+      append(cleanProse)
+      finish()
 
       setBeatProse(cleanProse)
     } catch (e) {
@@ -218,6 +233,7 @@ export function StoryReaderPage() {
             title={currentStep.title ?? 'Choose'}
             options={resolvedOptions}
             onSelect={handleBranchChoice}
+            sceneImage={sceneImages[currentStep.id] ?? null}
           />
         )
       }
