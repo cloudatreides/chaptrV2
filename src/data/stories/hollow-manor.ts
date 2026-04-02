@@ -176,6 +176,7 @@ export const HOLLOW_MANOR_STEPS: StoryStep[] = [
         description: 'The light is cold but steady. Something is down there. You need to know.',
         sceneHint: 'brave / reckless',
         consequenceHint: 'What\'s behind the door has been waiting for someone like you.',
+        imagePrompt: SCENES.roomBelow,
       },
       {
         id: 'search',
@@ -183,6 +184,7 @@ export const HOLLOW_MANOR_STEPS: StoryStep[] = [
         description: 'Ellis knows this house. If that door wasn\'t there before, he\'ll know why.',
         sceneHint: 'cautious / suspicious',
         consequenceHint: 'Ellis has answers — but he may not want you asking the right questions.',
+        imagePrompt: SCENES.gardenNight,
       },
     ],
   },
@@ -274,6 +276,7 @@ export const HOLLOW_MANOR_STEPS: StoryStep[] = [
         description: 'Mae\'s research confirms it. The room has answers. You\'re going back.',
         sceneHint: 'determined / dangerous',
         consequenceHint: 'The manor rewards the brave — or consumes them. No one comes back unchanged.',
+        imagePrompt: SCENES.returnAlone,
       },
       {
         id: 'seal',
@@ -281,6 +284,7 @@ export const HOLLOW_MANOR_STEPS: StoryStep[] = [
         description: 'Whatever is down there — lock it away. Some doors should stay closed.',
         sceneHint: 'protective / final',
         consequenceHint: 'You\'ll sleep easier tonight. But the house has other doors.',
+        imagePrompt: SCENES.sealRoom,
       },
     ],
   },
@@ -298,6 +302,7 @@ export const HOLLOW_MANOR_STEPS: StoryStep[] = [
         description: 'He says to leave before the third night. He looks terrified. Maybe listen.',
         sceneHint: 'wise / surrendering',
         consequenceHint: 'Leaving means safety — but you\'ll never know what the house wanted from you.',
+        imagePrompt: SCENES.trustWarning,
       },
       {
         id: 'go-deeper',
@@ -305,6 +310,7 @@ export const HOLLOW_MANOR_STEPS: StoryStep[] = [
         description: 'Ellis has been lying since you arrived. Time to find out what he\'s protecting.',
         sceneHint: 'defiant / fearless',
         consequenceHint: 'The truth is buried here. So is everything else that tried to find it.',
+        imagePrompt: SCENES.goDeeper,
       },
     ],
   },

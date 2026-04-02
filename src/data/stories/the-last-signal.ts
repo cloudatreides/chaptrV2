@@ -162,6 +162,7 @@ export const LAST_SIGNAL_STEPS: StoryStep[] = [
         description: 'Malone\'s Pawn & Trade. Someone there knew Karim. Follow the money.',
         sceneHint: 'pragmatic / direct',
         consequenceHint: 'Money always talks — but the people holding it decide what it says.',
+        imagePrompt: SCENES.pawnshop,
       },
       {
         id: 'witness',
@@ -169,6 +170,7 @@ export const LAST_SIGNAL_STEPS: StoryStep[] = [
         description: 'An unsent text with just an address. Someone Karim wanted to reach. Or warn.',
         sceneHint: 'instinct / risky',
         consequenceHint: 'Karim wanted someone to find this. The question is whether you\'re the right someone.',
+        imagePrompt: SCENES.neighborDoor,
       },
     ],
   },
@@ -260,6 +262,7 @@ export const LAST_SIGNAL_STEPS: StoryStep[] = [
         description: 'He\'s holding back. Karim trusted him with something. Time to find out what.',
         sceneHint: 'aggressive / risky',
         consequenceHint: 'Push too hard and he\'ll clam up — or worse, you\'ll find out why Karim was scared.',
+        imagePrompt: SCENES.pressHard,
       },
       {
         id: 'deal',
@@ -267,6 +270,7 @@ export const LAST_SIGNAL_STEPS: StoryStep[] = [
         description: 'Dex knows this world better than you. Play his game. Get what you can.',
         sceneHint: 'strategic / compromise',
         consequenceHint: 'You\'ll get what you need. But deals with Dex always cost more than they seem.',
+        imagePrompt: SCENES.takeDeal,
       },
     ],
   },
@@ -284,6 +288,7 @@ export const LAST_SIGNAL_STEPS: StoryStep[] = [
         description: 'She deserves to know. The USB, the note, all of it. Even if it breaks her.',
         sceneHint: 'honest / painful',
         consequenceHint: 'The truth will break something between them. But lies would break something in you.',
+        imagePrompt: SCENES.tellAll,
       },
       {
         id: 'protect',
@@ -291,6 +296,7 @@ export const LAST_SIGNAL_STEPS: StoryStep[] = [
         description: 'Some of what Karim was involved in would destroy her. Shield her. Solve it yourself.',
         sceneHint: 'protective / paternalistic',
         consequenceHint: 'You\'ll carry this alone. That\'s either noble or arrogant — time will tell.',
+        imagePrompt: SCENES.protect,
       },
     ],
   },

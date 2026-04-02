@@ -77,10 +77,22 @@ export function StoryReaderPage() {
     setIsStreaming(false)
     setIsGeneratingScene(false)
 
-    if ((currentStep?.type === 'beat' || currentStep?.type === 'choice') && currentStep.sceneImagePrompt && !sceneImages[currentStep.id]) {
+    if (currentStep?.type === 'beat' && currentStep.sceneImagePrompt && !sceneImages[currentStep.id]) {
       generateSceneImage({ prompt: currentStep.sceneImagePrompt }).then((url) => {
         if (url) setSceneImage(currentStep.id, url)
       })
+    }
+
+    // Generate per-option images for choice steps
+    if (currentStep?.type === 'choice' && currentStep.options) {
+      for (const opt of currentStep.options) {
+        const key = `${currentStep.id}:${opt.id}`
+        if (opt.imagePrompt && !sceneImages[key]) {
+          generateSceneImage({ prompt: opt.imagePrompt }).then((url) => {
+            if (url) setSceneImage(key, url)
+          })
+        }
+      }
     }
 
     if (currentStep?.type) {
@@ -229,12 +241,17 @@ export function StoryReaderPage() {
           description: resolveText(opt.description, loveInterest),
           consequenceHint: opt.consequenceHint ? resolveText(opt.consequenceHint, loveInterest) : undefined,
         }))
+        const optImages: Record<string, string> = {}
+        for (const opt of currentStep.options ?? []) {
+          const img = sceneImages[`${currentStep.id}:${opt.id}`]
+          if (img) optImages[opt.id] = img
+        }
         return (
           <ChoicePoint
             title={currentStep.title ?? 'Choose'}
             options={resolvedOptions}
             onSelect={handleBranchChoice}
-            sceneImage={sceneImages[currentStep.id] ?? null}
+            optionImages={optImages}
             playerName={activeCharacter?.name ?? null}
             playerAvatar={selfieUrl}
           />

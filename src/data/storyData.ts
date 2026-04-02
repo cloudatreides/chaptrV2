@@ -272,6 +272,7 @@ export const STORY_STEPS: StoryStep[] = [
         description: 'Tell Jiwon what Sora told you. No more pretending.',
         sceneHint: 'brave / vulnerable',
         consequenceHint: 'Raw honesty could shatter everything — or finally make it real.',
+        imagePrompt: SCENE_PROMPTS.rooftopConfront,
       },
       {
         id: 'stay',
@@ -279,6 +280,7 @@ export const STORY_STEPS: StoryStep[] = [
         description: 'Some things are better left unsaid. Just be there.',
         sceneHint: 'gentle / patient',
         consequenceHint: 'Silence speaks too. Sometimes presence is the braver choice.',
+        imagePrompt: SCENE_PROMPTS.rooftopStay,
       },
     ],
   },
@@ -296,6 +298,7 @@ export const STORY_STEPS: StoryStep[] = [
         description: 'Tell Jiwon what you overheard. Let him explain.',
         sceneHint: 'open / hopeful',
         consequenceHint: 'A leap of faith — he might catch you, or you might fall alone.',
+        imagePrompt: SCENE_PROMPTS.backstageTrust,
       },
       {
         id: 'deflect',
@@ -303,6 +306,7 @@ export const STORY_STEPS: StoryStep[] = [
         description: 'Pretend you didn\'t hear anything. Walk away.',
         sceneHint: 'guarded / safe',
         consequenceHint: 'Safe, but you\'ll carry the weight of what you didn\'t say.',
+        imagePrompt: SCENE_PROMPTS.cafeDeflect,
       },
     ],
   },

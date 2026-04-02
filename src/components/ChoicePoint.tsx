@@ -5,16 +5,16 @@ interface Props {
   title: string
   options: ChoiceOption[]
   onSelect: (optionId: string) => void
-  sceneImage?: string | null
+  optionImages?: Record<string, string> // optionId → image URL
   playerName?: string | null
   playerAvatar?: string | null
 }
 
-function ChoiceCard({ option, index, onSelect }: { option: ChoiceOption; index: number; onSelect: (id: string) => void }) {
+function ChoiceCard({ option, index, onSelect, image }: { option: ChoiceOption; index: number; onSelect: (id: string) => void; image?: string }) {
   return (
     <motion.button
       key={option.id}
-      className="choice-card group"
+      className="choice-card group overflow-hidden"
       initial={{ opacity: 0, x: index === 0 ? -20 : 20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.4, delay: 0.2 + index * 0.15 }}
@@ -22,6 +22,14 @@ function ChoiceCard({ option, index, onSelect }: { option: ChoiceOption; index: 
       whileTap={{ scale: 0.98 }}
       onClick={() => onSelect(option.id)}
     >
+      {/* Per-option preview image */}
+      {image && (
+        <div className="relative -mx-5 -mt-4 mb-3 h-[100px] overflow-hidden">
+          <img src={image} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to bottom, rgba(19,16,28,0) 30%, rgba(19,16,28,0.9) 100%)' }} />
+        </div>
+      )}
+
       {/* Gradient accent bar */}
       <div
         className="absolute top-0 left-0 w-1 h-full rounded-l-xl"
@@ -64,7 +72,7 @@ function ChoiceCard({ option, index, onSelect }: { option: ChoiceOption; index: 
   )
 }
 
-export function ChoicePoint({ title, options, onSelect, sceneImage, playerName, playerAvatar }: Props) {
+export function ChoicePoint({ title, options, onSelect, optionImages, playerName, playerAvatar }: Props) {
   return (
     <div className="flex flex-col items-center gap-6 px-4 py-8">
       {/* Player avatar + title */}
@@ -85,38 +93,17 @@ export function ChoicePoint({ title, options, onSelect, sceneImage, playerName, 
         </div>
       </motion.div>
 
-      {/* Choice cards with inline scene image between them */}
+      {/* Choice cards with per-option images */}
       <div className="w-full max-w-[500px] flex flex-col gap-3">
-        {options.length >= 1 && (
-          <ChoiceCard option={options[0]} index={0} onSelect={onSelect} />
-        )}
-
-        {/* Inline scene image divider */}
-        {sceneImage && (
-          <motion.div
-            className="relative w-full rounded-xl overflow-hidden border border-border/30"
-            style={{ height: '140px' }}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.35 }}
-          >
-            <img
-              src={sceneImage}
-              alt=""
-              className="w-full h-full object-cover"
-            />
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                background: 'linear-gradient(180deg, rgba(13,10,18,0.2) 0%, rgba(13,10,18,0.5) 100%)',
-              }}
-            />
-          </motion.div>
-        )}
-
-        {options.length >= 2 && (
-          <ChoiceCard option={options[1]} index={1} onSelect={onSelect} />
-        )}
+        {options.map((option, i) => (
+          <ChoiceCard
+            key={option.id}
+            option={option}
+            index={i}
+            onSelect={onSelect}
+            image={optionImages?.[option.id]}
+          />
+        ))}
       </div>
 
       {/* Subtle hint */}
