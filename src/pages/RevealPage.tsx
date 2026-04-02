@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Share2, RotateCcw } from 'lucide-react'
+import { Share2, RotateCcw, MessageCircle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { useActiveStory } from '../hooks/useActiveStory'
 import { generateRevealSignature } from '../lib/claudeStream'
+import { getAffinityTier } from '../lib/affinity'
+import { getCharacter, CHARACTERS } from '../data/characters'
 import { getRevealPerspective } from '../data/storyData'
 import { generateSceneImage } from '../lib/togetherAi'
 import { trackEvent, savePlaythrough } from '../lib/supabase'
@@ -15,7 +17,7 @@ export function RevealPage() {
     selfieUrl, characterState, choiceDescriptions,
     revealSignature: storedSignature, sceneImages,
     selectedUniverse, bio, loveInterest, trustStatusLabel,
-    chatSummaries,
+    chatSummaries, characterAffinities,
   } = useActiveStory()
   const { setRevealSignature, setSceneImage, resetStory } = useStore()
   const summariesList = Object.values(chatSummaries)
@@ -216,6 +218,14 @@ export function RevealPage() {
               </button>
 
               <button
+                onClick={() => navigate('/free-chat')}
+                className="flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium text-textSecondary text-sm border border-border hover:border-accent hover:text-textPrimary transition-all"
+              >
+                <MessageCircle size={16} />
+                Keep talking
+              </button>
+
+              <button
                 onClick={handleReplay}
                 className="flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium text-textSecondary text-sm border border-border hover:border-accent hover:text-textPrimary transition-all"
               >
@@ -246,6 +256,20 @@ export function RevealPage() {
               <p className="text-textMuted text-xs">
                 {choiceCount} choices made · {chatCount} conversations
               </p>
+              {Object.keys(characterAffinities).length > 0 && (
+                <div className="flex items-center gap-4 mt-3">
+                  {Object.entries(characterAffinities).map(([charId, score]) => {
+                    const charData = getCharacter(charId, selectedUniverse) ?? CHARACTERS[charId]
+                    const tier = getAffinityTier(score)
+                    return (
+                      <div key={charId} className="flex items-center gap-1.5">
+                        <span className="text-textMuted text-[10px]">{charData?.name ?? charId}</span>
+                        <span className="text-[10px] font-medium" style={{ color: tier.color }}>{tier.label}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
             </motion.div>
           </>
         )}

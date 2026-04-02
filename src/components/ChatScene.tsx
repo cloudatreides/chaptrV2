@@ -7,6 +7,8 @@ import { useActiveStory } from '../hooks/useActiveStory'
 import { streamChatReply, summarizeChat, generateOpeningMessage } from '../lib/claudeStream'
 import { generateCharacterPortrait, generateSceneImage } from '../lib/togetherAi'
 import { trackEvent } from '../lib/supabase'
+import { getAffinityGrowth } from '../lib/affinity'
+import { AffinityBadge } from './AffinityBadge'
 
 // Mood labels based on exchange count — feels organic, not mechanical
 const MOOD_STAGES: Record<string, string[]> = {
@@ -79,8 +81,9 @@ interface Props {
 }
 
 export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3, storyContext, chatImagePrompt, onComplete }: Props) {
-  const { bio, loveInterest, selectedUniverse, characterState, characterPortraits } = useActiveStory()
-  const { addChatMessage, setChatSummary, setCharacterPortrait } = useStore()
+  const { bio, loveInterest, selectedUniverse, characterState, characterPortraits, characterAffinities } = useActiveStory()
+  const { addChatMessage, setChatSummary, setCharacterPortrait, updateAffinity } = useStore()
+  const affinityScore = characterAffinities[characterId] ?? 0
   const character = getCharacter(characterId, selectedUniverse) ?? CHARACTERS[characterId]
   const [localMessages, setLocalMessages] = useState<{ role: 'user' | 'character'; content: string }[]>([])
   const [input, setInput] = useState('')
@@ -136,6 +139,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
           bio,
           loveInterest,
           universeId: selectedUniverse,
+          affinityScore,
         })
         const charMessage = { role: 'character' as const, content: opening }
         setLocalMessages([charMessage])
@@ -190,6 +194,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
         loveInterest,
         universeId: selectedUniverse,
         signal: abortRef.current.signal,
+        affinityScore,
       })
 
       for await (const chunk of gen) {
@@ -202,6 +207,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
       addChatMessage({ ...charMessage, characterId, timestamp: Date.now() })
       setStreamedReply('')
       setExchangeCount(newExchange)
+      updateAffinity(characterId, getAffinityGrowth(newExchange))
       trackEvent('chat_exchange', { characterId, exchange: newExchange })
 
     } catch (e) {
@@ -242,7 +248,10 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
           )}
         </div>
         <div className="flex-1">
-          <p className="text-textPrimary font-semibold text-sm">{character?.name ?? characterId}</p>
+          <div className="flex items-center gap-2">
+            <p className="text-textPrimary font-semibold text-sm">{character?.name ?? characterId}</p>
+            <AffinityBadge score={affinityScore} size="sm" />
+          </div>
           <div className="flex items-center gap-1.5 mt-0.5">
               {getMoodStages(characterId).map((stage, i) => {
                 const currentIdx = getMoodIndex(characterId, exchangeCount)

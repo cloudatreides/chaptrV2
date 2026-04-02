@@ -7,6 +7,8 @@ import { useActiveStory } from '../hooks/useActiveStory'
 import { streamChatReply, summarizeChat, generateOpeningMessage } from '../lib/claudeStream'
 import { generateCharacterPortrait, generateSceneImage } from '../lib/togetherAi'
 import { trackEvent } from '../lib/supabase'
+import { getAffinityGrowth } from '../lib/affinity'
+import { AffinityBadge } from './AffinityBadge'
 import type { SceneCharacter } from '../data/storyData'
 
 // ─── Mood stages (reused from ChatScene) ───
@@ -100,8 +102,8 @@ interface Props {
 // ─── Component ───
 
 export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, storyContext, chatImagePrompt, onComplete }: Props) {
-  const { bio, loveInterest, selectedUniverse, characterState, characterPortraits } = useActiveStory()
-  const { addChatMessage, setChatSummary, setCharacterPortrait } = useStore()
+  const { bio, loveInterest, selectedUniverse, characterState, characterPortraits, characterAffinities } = useActiveStory()
+  const { addChatMessage, setChatSummary, setCharacterPortrait, updateAffinity } = useStore()
 
   // Per-character state
   const [chatStates, setChatStates] = useState<Record<string, CharChatState>>(() => {
@@ -201,6 +203,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
       loveInterest,
       universeId: selectedUniverse,
       sceneContext: sceneCtx || undefined,
+      affinityScore: characterAffinities[activeCharId] ?? 0,
     }).then(opening => {
       const charMessage = { role: 'character' as const, content: opening }
       setChatStates(prev => ({
@@ -285,6 +288,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
         universeId: selectedUniverse,
         signal: abortRef.current.signal,
         sceneContext: sceneCtx || undefined,
+        affinityScore: characterAffinities[activeCharId] ?? 0,
       })
 
       for await (const chunk of gen) {
@@ -304,6 +308,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
       }))
       addChatMessage({ ...charMessage, characterId: activeCharId, timestamp: Date.now() })
       setStreamedReply('')
+      updateAffinity(activeCharId, getAffinityGrowth(newExchange))
       trackEvent('chat_exchange', { characterId: activeCharId, exchange: newExchange, isScene: true })
     } catch (e) {
       if (e instanceof Error && e.name !== 'AbortError') {
@@ -400,9 +405,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
               </div>
               <div className="flex flex-col items-start">
                 <span className="text-textPrimary text-sm font-medium">{charData?.name ?? sc.characterId}</span>
-                <span className="text-[10px]" style={{ color: hasTalked ? 'rgba(200,75,158,0.7)' : 'rgba(255,255,255,0.3)' }}>
-                  {hasTalked ? `${exchangeCount} exchange${exchangeCount !== 1 ? 's' : ''}` : 'tap to talk'}
-                </span>
+                <AffinityBadge score={characterAffinities[sc.characterId] ?? 0} size="sm" />
               </div>
               {/* Active indicator bar */}
               {isActive && (

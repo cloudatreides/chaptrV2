@@ -34,6 +34,7 @@ export interface StoryProgress {
   revealSignature: string | null
   sceneImages: Record<string, string>
   characterPortraits: Record<string, string>
+  characterAffinities: Record<string, number>
 }
 
 export const DEFAULT_PROGRESS: StoryProgress = {
@@ -47,6 +48,7 @@ export const DEFAULT_PROGRESS: StoryProgress = {
   revealSignature: null,
   sceneImages: {},
   characterPortraits: {},
+  characterAffinities: {},
 }
 
 function freshProgress(): StoryProgress {
@@ -84,6 +86,7 @@ interface StoreState {
   setRevealSignature: (sig: string) => void
   setSceneImage: (stepId: string, url: string) => void
   setCharacterPortrait: (characterId: string, url: string) => void
+  updateAffinity: (characterId: string, delta: number) => void
 
   // ── Gems ──
   gemBalance: number
@@ -245,6 +248,17 @@ export const useStore = create<StoreState>()(
         }))
       }),
 
+      updateAffinity: (characterId, delta) => set((s) => {
+        const p = getProgress(s)
+        const current = p.characterAffinities[characterId] ?? 0
+        return updateProgress(s, () => ({
+          characterAffinities: {
+            ...p.characterAffinities,
+            [characterId]: Math.max(0, Math.min(100, current + delta)),
+          },
+        }))
+      }),
+
       // ── Gems ──
       gemBalance: 50,
       spendGems: (amount) => {
@@ -310,6 +324,7 @@ export const useStore = create<StoreState>()(
             revealSignature: persisted.revealSignature ?? null,
             sceneImages: persisted.sceneImages ?? {},
             characterPortraits: persisted.characterPortraits ?? {},
+            characterAffinities: persisted.characterAffinities ?? {},
           }
 
           // Only create character if there was any meaningful state
