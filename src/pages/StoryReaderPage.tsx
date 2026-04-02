@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Menu } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
-import { STORY_STEPS, getActiveSteps, getTotalBeats, getCurrentBeatNumber } from '../data/storyData'
+import { STORY_STEPS, getActiveSteps, getTotalBeats, getCurrentBeatNumber, resolveLoveInterestId, resolveText } from '../data/storyData'
 import { GemCounter } from '../components/GemCounter'
 import { ChoicePoint } from '../components/ChoicePoint'
 import { ChatScene } from '../components/ChatScene'
@@ -15,6 +15,7 @@ import { useStreamingTypewriter, useTypewriter } from '../hooks/useTypewriter'
 import { AudioToggle } from '../components/AudioToggle'
 import { ambientAudio } from '../lib/ambientAudio'
 import type { AmbientMood } from '../lib/ambientAudio'
+import { trackEvent } from '../lib/supabase'
 
 export function StoryReaderPage() {
   const navigate = useNavigate()
@@ -24,7 +25,7 @@ export function StoryReaderPage() {
     choiceDescriptions, addChoiceDescription,
     characterState, updateTrust,
     setTrustStatusLabel,
-    selfieUrl, bio,
+    selfieUrl, bio, loveInterest,
     isStreaming, setIsStreaming,
     isGeneratingScene, setIsGeneratingScene,
     sceneImages, setSceneImage,
@@ -50,12 +51,15 @@ export function StoryReaderPage() {
   // Typewriter for opening prose (beat-1 only)
   const isFirstBeat = currentStep?.id === 'beat-1'
   const { displayed: openingDisplayed, done: openingDone } = useTypewriter(
-    isFirstBeat ? (currentStep?.openingProse ?? '') : '',
+    isFirstBeat ? resolveText(currentStep?.openingProse ?? '', loveInterest) : '',
     20,
   )
 
   // Streaming typewriter for AI-generated prose
   const { displayed: streamDisplayed, isTyping, append, finish, reset: resetStream } = useStreamingTypewriter(18)
+
+  // Track story start
+  useEffect(() => { trackEvent('story_start') }, [])
 
   // Reset state when step changes
   useEffect(() => {
@@ -180,6 +184,7 @@ export function StoryReaderPage() {
 
     setBranchChoice(currentStep.choicePointId, optionId)
     addChoiceDescription({ label: option.label, description: option.description })
+    trackEvent('choice_made', { choicePoint: currentStep.choicePointId, option: optionId })
 
     // After setting branch choice, we need to recompute active steps and advance
     // The step index advances by 1 in the new filtered list
@@ -205,17 +210,21 @@ export function StoryReaderPage() {
   // ── Render based on step type ──
   const renderStepContent = () => {
     switch (currentStep.type) {
-      case 'chat':
+      case 'chat': {
+        // Resolve character: swap jiwon→yuna if that's the preference, keep sora as-is
+        const rawCharId = currentStep.characterId!
+        const chatCharId = rawCharId === 'jiwon' ? resolveLoveInterestId(loveInterest) : rawCharId
         return (
           <ChatScene
             stepId={currentStep.id}
-            characterId={currentStep.characterId!}
+            characterId={chatCharId}
             maxExchanges={currentStep.maxExchanges ?? 10}
             minExchanges={currentStep.minExchanges ?? 3}
             storyContext={storyContext}
             onComplete={handleChatComplete}
           />
         )
+      }
 
       case 'choice':
         return (

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ChevronLeft, Sparkles } from 'lucide-react'
 import { useStore } from '../store/useStore'
+import { trackEvent } from '../lib/supabase'
 
 const ARCHETYPES = [
   {
@@ -22,23 +23,46 @@ const ARCHETYPES = [
   },
 ]
 
+const LOVE_INTERESTS = [
+  {
+    id: 'jiwon' as const,
+    name: 'Jiwon',
+    label: 'Lee Jiwon',
+    desc: 'Lead vocalist of NOVA. Quietly intense, guarded, perceptive.',
+    emoji: '🎤',
+  },
+  {
+    id: 'yuna' as const,
+    name: 'Yuna',
+    label: 'Kang Yuna',
+    desc: 'Lead vocalist of LUMINA. Sharp-witted, magnetic, guarded.',
+    emoji: '🎵',
+  },
+]
+
 export function BioPage() {
   const navigate = useNavigate()
   const selfieUrl = useStore((s) => s.selfieUrl)
   const setBio = useStore((s) => s.setBio)
+  const setLoveInterest = useStore((s) => s.setLoveInterest)
   const [selected, setSelected] = useState<string | null>(null)
   const [custom, setCustom] = useState('')
   const [isCustom, setIsCustom] = useState(false)
+  const [chosenInterest, setChosenInterest] = useState<'jiwon' | 'yuna' | null>(null)
 
-  const canContinue = isCustom ? custom.trim().length > 10 : selected !== null
+  const canContinue = chosenInterest !== null && (isCustom ? custom.trim().length > 10 : selected !== null)
 
   const handleContinue = () => {
+    if (chosenInterest) setLoveInterest(chosenInterest)
+
     if (isCustom) {
       setBio(custom.trim())
     } else {
       const archetype = ARCHETYPES.find((a) => a.id === selected)
       if (archetype) setBio(archetype.bio)
     }
+
+    trackEvent('bio_complete', { type: isCustom ? 'custom' : selected, loveInterest: chosenInterest })
 
     if (selfieUrl) {
       navigate('/story')
@@ -66,9 +90,32 @@ export function BioPage() {
           Back
         </button>
 
+        {/* Love interest picker */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+          <h1 className="text-textPrimary font-bold text-3xl mb-1">Your Story</h1>
+          <p className="text-textSecondary text-base mb-4">Who catches your eye at Seoul Arts Academy?</p>
+          <div className="grid grid-cols-2 gap-3">
+            {LOVE_INTERESTS.map((li) => (
+              <button
+                key={li.id}
+                className="text-left p-4 rounded-xl transition-all"
+                style={{
+                  background: chosenInterest === li.id ? 'rgba(200,75,158,0.12)' : '#13101c',
+                  border: chosenInterest === li.id ? '1px solid rgba(200,75,158,0.6)' : '1px solid #2a2040',
+                }}
+                onClick={() => setChosenInterest(li.id)}
+              >
+                <span className="text-2xl mb-2 block">{li.emoji}</span>
+                <p className="text-textPrimary font-semibold text-sm">{li.label}</p>
+                <p className="text-textMuted text-xs mt-1 leading-relaxed">{li.desc}</p>
+              </button>
+            ))}
+          </div>
+        </motion.div>
+
         {/* Heading */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="text-textPrimary font-bold text-3xl mb-1">Who Are You?</h1>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          <h2 className="text-textPrimary font-bold text-xl mb-1">Who Are You?</h2>
           <p className="text-textSecondary text-base mb-6">Pick a personality. It shapes how characters react to you.</p>
         </motion.div>
 

@@ -27,6 +27,10 @@ interface StoreState {
   bio: string | null
   setBio: (bio: string | null) => void
 
+  // Love interest preference
+  loveInterest: 'jiwon' | 'yuna' | null
+  setLoveInterest: (id: 'jiwon' | 'yuna') => void
+
   // Gems
   gemBalance: number
   spendGems: (amount: number) => boolean
@@ -115,6 +119,9 @@ export const useStore = create<StoreState>()(
 
       bio: null,
       setBio: (bio) => set({ bio }),
+
+      loveInterest: null,
+      setLoveInterest: (id) => set({ loveInterest: id }),
 
       gemBalance: 50,
       spendGems: (amount) => {
@@ -207,6 +214,7 @@ export const useStore = create<StoreState>()(
         selfieUrl: s.selfieUrl,
         selectedUniverse: s.selectedUniverse,
         bio: s.bio,
+        loveInterest: s.loveInterest,
         gemBalance: s.gemBalance,
         currentStepIndex: s.currentStepIndex,
         branchChoices: s.branchChoices,

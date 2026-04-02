@@ -338,3 +338,46 @@ RULES:
 export const CHAPTER_BRIEFS: Record<number, string> = {
   1: 'By the end of this chapter, Jiwon and the protagonist have had their first real moment of connection — unexpected, slightly charged, not resolved. Jiwon has revealed one small unguarded thing about himself. The protagonist has made an impression, positive or complicated depending on the choice made.',
 }
+
+// ─── Love interest resolution ───
+
+const SWAP_MAP: Record<string, Record<string, string>> = {
+  yuna: {
+    'Jiwon': 'Yuna',
+    'jiwon': 'yuna',
+    'Lee Jiwon': 'Kang Yuna',
+    'NOVA': 'LUMINA',
+    ' he ': ' she ',
+    ' He ': ' She ',
+    ' him ': ' her ',
+    ' Him ': ' Her ',
+    ' his ': ' her ',
+    ' His ': ' Her ',
+    ' himself': ' herself',
+    'lead vocalist of NOVA': 'lead vocalist of LUMINA',
+    "He looks": "She looks",
+    "he catches": "she catches",
+  },
+}
+
+/** Resolve which character ID to use for the main love interest */
+export function resolveLoveInterestId(preference: 'jiwon' | 'yuna' | null): string {
+  return preference === 'yuna' ? 'yuna' : 'jiwon'
+}
+
+/** Swap gendered text when love interest is Yuna */
+export function resolveText(text: string, preference: 'jiwon' | 'yuna' | null): string {
+  if (!preference || preference === 'jiwon') return text
+  const swaps = SWAP_MAP[preference]
+  if (!swaps) return text
+  let result = text
+  for (const [from, to] of Object.entries(swaps)) {
+    result = result.split(from).join(to)
+  }
+  return result
+}
+
+/** Get the character bible adjusted for love interest */
+export function getCharacterBible(preference: 'jiwon' | 'yuna' | null): string {
+  return resolveText(CHARACTER_BIBLE, preference)
+}
