@@ -230,6 +230,7 @@ export function StoryReaderPage() {
             maxExchanges={currentStep.maxExchanges ?? 10}
             minExchanges={currentStep.minExchanges ?? 3}
             storyContext={storyContext}
+            chatImagePrompt={currentStep.chatImagePrompt}
             onComplete={handleChatComplete}
           />
         )
@@ -270,6 +271,7 @@ export function StoryReaderPage() {
             characters={resolvedSceneChars}
             minCharactersTalkedTo={currentStep.minCharactersTalkedTo ?? 1}
             storyContext={storyContext}
+            chatImagePrompt={currentStep.chatImagePrompt}
             onComplete={handleChatComplete}
           />
         )

@@ -131,6 +131,7 @@ export const HOLLOW_MANOR_STEPS: StoryStep[] = [
     characterId: 'ellis',
     minExchanges: 3,
     maxExchanges: 10,
+    chatImagePrompt: SCENES.foyer,
   },
   {
     id: 'hm-beat-1b',
@@ -153,6 +154,7 @@ export const HOLLOW_MANOR_STEPS: StoryStep[] = [
     characterId: 'mae',
     minExchanges: 3,
     maxExchanges: 10,
+    chatImagePrompt: SCENES.maeStudy,
   },
   {
     id: 'hm-beat-2',
@@ -206,6 +208,7 @@ export const HOLLOW_MANOR_STEPS: StoryStep[] = [
     characterId: 'mae',
     minExchanges: 3,
     maxExchanges: 10,
+    chatImagePrompt: SCENES.roomBelow,
   },
   {
     id: 'hm-beat-4a',
@@ -223,6 +226,7 @@ export const HOLLOW_MANOR_STEPS: StoryStep[] = [
     characterId: 'ellis',
     minExchanges: 3,
     maxExchanges: 10,
+    chatImagePrompt: SCENES.ellisConfront,
   },
 
   // ── Act 2: Search path ──
@@ -242,6 +246,7 @@ export const HOLLOW_MANOR_STEPS: StoryStep[] = [
     characterId: 'ellis',
     minExchanges: 3,
     maxExchanges: 10,
+    chatImagePrompt: SCENES.gardenNight,
   },
   {
     id: 'hm-beat-4b',
@@ -259,6 +264,7 @@ export const HOLLOW_MANOR_STEPS: StoryStep[] = [
     characterId: 'mae',
     minExchanges: 3,
     maxExchanges: 10,
+    chatImagePrompt: SCENES.maeStudy,
   },
 
   // ── Choice Point B ──

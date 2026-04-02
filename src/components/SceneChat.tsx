@@ -93,12 +93,13 @@ interface Props {
   characters: SceneCharacter[]
   minCharactersTalkedTo?: number
   storyContext: string
+  chatImagePrompt?: string
   onComplete: () => void
 }
 
 // ─── Component ───
 
-export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, storyContext, onComplete }: Props) {
+export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, storyContext, chatImagePrompt, onComplete }: Props) {
   const { bio, loveInterest, selectedUniverse, characterState, characterPortraits } = useActiveStory()
   const { addChatMessage, setChatSummary, setCharacterPortrait } = useStore()
 
@@ -177,9 +178,10 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
       [activeCharId]: { ...prev[activeCharId], isLoadingOpener: true },
     }))
 
-    // Generate intro image in parallel
-    if (charData?.introImagePrompt) {
-      generateSceneImage({ prompt: charData.introImagePrompt, width: 768, height: 512 }).then(url => {
+    // Generate intro image in parallel (chatImagePrompt overrides character default)
+    const imagePrompt = chatImagePrompt ?? charData?.introImagePrompt
+    if (imagePrompt) {
+      generateSceneImage({ prompt: imagePrompt, width: 768, height: 512 }).then(url => {
         if (url) {
           setChatStates(prev => ({
             ...prev,

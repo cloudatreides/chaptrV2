@@ -127,6 +127,7 @@ export const LAST_SIGNAL_STEPS: StoryStep[] = [
   },
   {
     id: 'ls-chat-1',
+    chatImagePrompt: SCENES.noorMeeting,
     type: 'chat',
     title: 'Talk to Noor',
     characterId: 'noor',
@@ -186,6 +187,7 @@ export const LAST_SIGNAL_STEPS: StoryStep[] = [
   },
   {
     id: 'ls-chat-2a',
+    chatImagePrompt: SCENES.pawnshop,
     type: 'chat',
     title: 'Talk to Dex',
     requires: { 'ls-cp-1': 'money' },
@@ -203,6 +205,7 @@ export const LAST_SIGNAL_STEPS: StoryStep[] = [
   },
   {
     id: 'ls-chat-3a',
+    chatImagePrompt: SCENES.noorCar,
     type: 'chat',
     title: 'Talk to Noor',
     requires: { 'ls-cp-1': 'money' },
@@ -222,6 +225,7 @@ export const LAST_SIGNAL_STEPS: StoryStep[] = [
   },
   {
     id: 'ls-chat-2b',
+    chatImagePrompt: SCENES.neighborDoor,
     type: 'chat',
     title: 'Talk to Noor',
     requires: { 'ls-cp-1': 'witness' },
@@ -239,6 +243,7 @@ export const LAST_SIGNAL_STEPS: StoryStep[] = [
   },
   {
     id: 'ls-chat-3b',
+    chatImagePrompt: SCENES.dexBack,
     type: 'chat',
     title: 'Talk to Dex',
     requires: { 'ls-cp-1': 'witness' },

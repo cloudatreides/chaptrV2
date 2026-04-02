@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ChevronLeft, Plus, Trash2, User } from 'lucide-react'
 import { useStore } from '../store/useStore'
+import { getStoryData } from '../data/stories'
 
 const MAX_CHARACTERS = 3
 
@@ -87,9 +88,15 @@ export function CharacterSelectPage() {
                     <p className="text-textPrimary font-semibold text-sm truncate">{char.name}</p>
                     <span className="text-textMuted text-xs">{char.gender === 'male' ? '♂' : '♀'}</span>
                   </div>
-                  <p className="text-textMuted text-xs mt-0.5">
-                    Partner: {char.gender === 'male' ? 'Yuna' : 'Jiwon'}
-                  </p>
+                  {(() => {
+                    const sd = getStoryData(selectedUniverse)
+                    if (sd) return null // non-romance stories don't show partner
+                    return (
+                      <p className="text-textMuted text-xs mt-0.5">
+                        Partner: {char.gender === 'male' ? 'Yuna' : 'Jiwon'}
+                      </p>
+                    )
+                  })()}
                 </div>
 
                 {/* Progress badge */}

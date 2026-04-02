@@ -96,6 +96,7 @@ export interface StoryStep {
   characterId?: string
   maxExchanges?: number // soft cap — character wraps up naturally near this
   minExchanges?: number // minimum before "Continue story" button appears
+  chatImagePrompt?: string // FLUX prompt for chat header image (overrides character introImagePrompt)
   // Scene fields (multi-character chat)
   sceneCharacters?: SceneCharacter[]
   minCharactersTalkedTo?: number // how many characters must be talked to before advancing
@@ -141,6 +142,7 @@ export const STORY_STEPS: StoryStep[] = [
     characterId: 'jiwon',
     minExchanges: 3,
     maxExchanges: 10,
+    chatImagePrompt: SCENE_PROMPTS.elevator,
   },
   {
     id: 'beat-1b',
@@ -153,6 +155,7 @@ export const STORY_STEPS: StoryStep[] = [
     id: 'scene-1',
     type: 'scene',
     title: 'Practice Rooms',
+    chatImagePrompt: SCENE_PROMPTS.practiceHall,
     sceneCharacters: [
       { characterId: 'sora', minExchanges: 2, maxExchanges: 8, required: true },
       { characterId: 'jiwon', minExchanges: 1, maxExchanges: 8, required: false },
@@ -210,6 +213,7 @@ export const STORY_STEPS: StoryStep[] = [
     type: 'scene',
     title: 'After the Studio',
     requires: { 'cp-1': 'approach' },
+    chatImagePrompt: SCENE_PROMPTS.afterHours,
     sceneCharacters: [
       { characterId: 'sora', minExchanges: 2, maxExchanges: 8, required: false },
       { characterId: 'jiwon', minExchanges: 2, maxExchanges: 8, required: true },
@@ -232,6 +236,7 @@ export const STORY_STEPS: StoryStep[] = [
     type: 'scene',
     title: 'After the Confrontation',
     requires: { 'cp-1': 'follow' },
+    chatImagePrompt: SCENE_PROMPTS.corridorFollow,
     sceneCharacters: [
       { characterId: 'jiwon', minExchanges: 2, maxExchanges: 8, required: true },
       { characterId: 'sora', minExchanges: 1, maxExchanges: 8, required: false },
