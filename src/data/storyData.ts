@@ -72,6 +72,7 @@ export interface ChoiceOption {
   label: string
   description: string
   sceneHint: string // mood hint shown on card
+  consequenceHint?: string // 1-sentence preview of what happens
 }
 
 export interface StoryStep {
@@ -142,18 +143,21 @@ export const STORY_STEPS: StoryStep[] = [
     type: 'choice',
     title: 'A Decision',
     choicePointId: 'cp-1',
+    sceneImagePrompt: SCENE_PROMPTS.rehearsal,
     options: [
       {
         id: 'approach',
         label: 'Approach him',
         description: 'Walk up to Jiwon at the mixing desk. Say something.',
         sceneHint: 'bold / direct',
+        consequenceHint: 'Your directness could disarm him — or make him shut down completely.',
       },
       {
         id: 'follow',
         label: 'Follow at a distance',
         description: 'He leaves in a hurry. Follow him — see where he goes.',
         sceneHint: 'cautious / curious',
+        consequenceHint: 'You\'ll see a side of him he hides from everyone — but if he catches you...',
       },
     ],
   },
@@ -205,18 +209,21 @@ export const STORY_STEPS: StoryStep[] = [
     title: 'The Moment',
     choicePointId: 'cp-2',
     requires: { 'cp-1': 'approach' },
+    sceneImagePrompt: SCENE_PROMPTS.rooftopConfront,
     options: [
       {
         id: 'confront',
         label: 'Confront the truth',
         description: 'Tell Jiwon what Sora told you. No more pretending.',
         sceneHint: 'brave / vulnerable',
+        consequenceHint: 'Raw honesty could shatter everything — or finally make it real.',
       },
       {
         id: 'stay',
         label: 'Stay quiet, stay close',
         description: 'Some things are better left unsaid. Just be there.',
         sceneHint: 'gentle / patient',
+        consequenceHint: 'Silence speaks too. Sometimes presence is the braver choice.',
       },
     ],
   },
@@ -226,18 +233,21 @@ export const STORY_STEPS: StoryStep[] = [
     title: 'The Moment',
     choicePointId: 'cp-2',
     requires: { 'cp-1': 'follow' },
+    sceneImagePrompt: SCENE_PROMPTS.backstageTrust,
     options: [
       {
         id: 'trust',
         label: 'Trust him',
         description: 'Tell Jiwon what you overheard. Let him explain.',
         sceneHint: 'open / hopeful',
+        consequenceHint: 'A leap of faith — he might catch you, or you might fall alone.',
       },
       {
         id: 'deflect',
         label: 'Deflect and leave',
         description: 'Pretend you didn\'t hear anything. Walk away.',
         sceneHint: 'guarded / safe',
+        consequenceHint: 'Safe, but you\'ll carry the weight of what you didn\'t say.',
       },
     ],
   },

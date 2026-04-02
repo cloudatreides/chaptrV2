@@ -60,6 +60,17 @@ export function ChoicePoint({ title, options, onSelect }: Props) {
                 </span>
               </div>
               <p className="text-textSecondary text-sm leading-relaxed">{option.description}</p>
+              {option.consequenceHint && (
+                <motion.p
+                  className="text-xs italic leading-relaxed mt-0.5"
+                  style={{ color: i === 0 ? 'rgba(224,96,184,0.7)' : 'rgba(167,139,250,0.7)' }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 + i * 0.15 }}
+                >
+                  {option.consequenceHint}
+                </motion.p>
+              )}
             </div>
           </motion.button>
         ))}

@@ -77,7 +77,7 @@ export function StoryReaderPage() {
     setIsStreaming(false)
     setIsGeneratingScene(false)
 
-    if (currentStep?.type === 'beat' && currentStep.sceneImagePrompt && !sceneImages[currentStep.id]) {
+    if ((currentStep?.type === 'beat' || currentStep?.type === 'choice') && currentStep.sceneImagePrompt && !sceneImages[currentStep.id]) {
       generateSceneImage({ prompt: currentStep.sceneImagePrompt }).then((url) => {
         if (url) setSceneImage(currentStep.id, url)
       })
@@ -211,6 +211,7 @@ export function StoryReaderPage() {
           ...opt,
           label: resolveText(opt.label, loveInterest),
           description: resolveText(opt.description, loveInterest),
+          consequenceHint: opt.consequenceHint ? resolveText(opt.consequenceHint, loveInterest) : undefined,
         }))
         return (
           <ChoicePoint
@@ -243,7 +244,7 @@ export function StoryReaderPage() {
     }
   }
 
-  const isFullScreenStep = currentStep.type === 'chat' || currentStep.type === 'choice'
+  const isFullScreenStep = currentStep.type === 'chat'
 
   return (
     <div className="bg-bg min-h-screen">
