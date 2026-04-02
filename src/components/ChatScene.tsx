@@ -23,6 +23,49 @@ function getMoodLabel(characterId: string, exchangeCount: number): string {
   return 'vulnerable'
 }
 
+// Personality-aware reply suggestions
+type PersonalityType = 'quiet' | 'bold' | 'dreamer' | 'custom'
+
+function detectPersonality(bio: string | null): PersonalityType {
+  if (!bio) return 'bold'
+  const lower = bio.toLowerCase()
+  if (lower.includes('quiet') || lower.includes('listen')) return 'quiet'
+  if (lower.includes('bold') || lower.includes('say what i think') || lower.includes('go after it')) return 'bold'
+  if (lower.includes('dreamer') || lower.includes('notice things') || lower.includes('half in my head')) return 'dreamer'
+  return 'custom'
+}
+
+const SUGGESTIONS: Record<PersonalityType, Record<string, string[]>> = {
+  quiet: {
+    opening: ["I'm just passing through.", "...go on.", "You seem like you have a lot on your mind."],
+    mid: ["Tell me more.", "I noticed that too.", "Take your time."],
+    deep: ["I think I understand.", "You don't have to explain.", "I'm not going anywhere."],
+  },
+  bold: {
+    opening: ["So, what's really going on here?", "Cut the small talk.", "I've heard about you."],
+    mid: ["That doesn't add up.", "Prove it.", "What are you not telling me?"],
+    deep: ["I need the truth. Now.", "I'm not afraid of this.", "Let's stop pretending."],
+  },
+  dreamer: {
+    opening: ["This place feels different.", "I had a feeling I'd end up here.", "There's something in the air..."],
+    mid: ["What does that remind you of?", "I keep thinking about that.", "It's almost like it was meant to happen."],
+    deep: ["Do you ever feel like you're part of something bigger?", "I think we both know what this is.", "Some things don't need words."],
+  },
+  custom: {
+    opening: ["Hey.", "Tell me about yourself.", "What's on your mind?"],
+    mid: ["That's interesting.", "Keep going.", "I wasn't expecting that."],
+    deep: ["I trust you.", "What happens next?", "I want to understand."],
+  },
+}
+
+function getSuggestions(bio: string | null, exchangeCount: number): string[] {
+  const type = detectPersonality(bio)
+  const pool = SUGGESTIONS[type]
+  if (exchangeCount <= 1) return pool.opening
+  if (exchangeCount <= 4) return pool.mid
+  return pool.deep
+}
+
 interface Props {
   stepId: string
   characterId: string
@@ -326,6 +369,33 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
             </motion.button>
           )}
         </AnimatePresence>
+
+        {/* Suggestion chips — personality-aware */}
+        {!isDone && !isTyping && !isLoadingOpener && !input && (
+          <motion.div
+            className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25 }}
+          >
+            {getSuggestions(bio, exchangeCount).map((suggestion) => (
+              <button
+                key={suggestion}
+                className="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap hover:brightness-125"
+                style={{
+                  background: 'rgba(200,75,158,0.1)',
+                  border: '1px solid rgba(200,75,158,0.2)',
+                  color: 'rgba(200,75,158,0.8)',
+                }}
+                onClick={() => {
+                  setInput(suggestion)
+                }}
+              >
+                {suggestion}
+              </button>
+            ))}
+          </motion.div>
+        )}
 
         {/* Chat input — hidden when fully done */}
         {!isDone && (
