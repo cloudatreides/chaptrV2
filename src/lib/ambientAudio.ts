@@ -89,13 +89,29 @@ class AmbientAudioManager {
     return this.state.ctx
   }
 
+  private unlocked = false
+
   /** Must be called from a user gesture (click/tap) to unlock audio */
   unlock(): void {
     this.ensureContext()
+    if (!this.unlocked) {
+      this.unlocked = true
+      // If a mood was queued before unlock, start it now
+      if (this.state.currentMood !== 'silent' && !this.state.isMuted) {
+        const mood = this.state.currentMood
+        this.state.currentMood = 'silent' // reset so crossfadeTo doesn't skip
+        this.crossfadeTo(mood)
+      }
+    }
   }
 
   setMood(mood: AmbientMood): void {
     if (mood === this.state.currentMood) return
+    // Before user gesture, just record the mood — don't create audio nodes
+    if (!this.unlocked) {
+      this.state.currentMood = mood
+      return
+    }
     this.crossfadeTo(mood)
   }
 
