@@ -18,6 +18,9 @@ import { AudioToggle } from '../components/AudioToggle'
 import { ambientAudio } from '../lib/ambientAudio'
 import type { AmbientMood } from '../lib/ambientAudio'
 import { trackEvent } from '../lib/supabase'
+import { getPingsForUniverse } from '../data/pings'
+import { PingNotification } from '../components/PingNotification'
+import type { PingDef } from '../data/pings'
 import type { StoryStep, SceneCharacter } from '../data/storyData'
 
 export function StoryReaderPage() {
@@ -25,7 +28,7 @@ export function StoryReaderPage() {
   const {
     activeCharacter, loveInterest, selfieUrl, bio, selectedUniverse,
     currentStepIndex, branchChoices, choiceDescriptions, characterState,
-    sceneImages, trustStatusLabel,
+    sceneImages, trustStatusLabel, characterAffinities, seenPings,
   } = useActiveStory()
 
   const {
@@ -39,6 +42,8 @@ export function StoryReaderPage() {
   const summariesList = useStore.getState().getSummariesList()
 
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [activePing, setActivePing] = useState<PingDef | null>(null)
+  const prevStepIndexRef = useRef(currentStepIndex)
 
   // Redirect if no active character
   useEffect(() => {
@@ -70,6 +75,38 @@ export function StoryReaderPage() {
   const { displayed: streamDisplayed, isTyping, append, finish, reset: resetStream } = useStreamingTypewriter(18)
 
   useEffect(() => { trackEvent('story_start') }, [])
+
+  // ─── Ping evaluation — check for character pings after step transitions ───
+  useEffect(() => {
+    if (currentStepIndex <= prevStepIndexRef.current) {
+      prevStepIndexRef.current = currentStepIndex
+      return
+    }
+    prevStepIndexRef.current = currentStepIndex
+
+    // The step that just completed is the previous one
+    const prevStep = activeSteps[currentStepIndex - 1]
+    if (!prevStep) return
+
+    const pings = getPingsForUniverse(selectedUniverse)
+    const pending = pings.find(p => {
+      if (seenPings.includes(p.id)) return false
+      // Match afterStep against the step ID or choicePointId
+      if (p.afterStep !== prevStep.id && p.afterStep !== prevStep.choicePointId) return false
+      // Check affinity gate
+      const resolvedCharId = p.characterId === 'jiwon'
+        ? (loveInterest === 'yuna' ? 'yuna' : 'jiwon')
+        : p.characterId
+      const affinity = characterAffinities[resolvedCharId] ?? 0
+      if (p.affinityMin && affinity < p.affinityMin) return false
+      return true
+    })
+
+    if (pending && !activePing) {
+      // Delay slightly so the new step renders first
+      setTimeout(() => setActivePing(pending), 1500)
+    }
+  }, [currentStepIndex])
 
   useEffect(() => {
     setBeatProse('')
@@ -412,6 +449,14 @@ export function StoryReaderPage() {
           </div>
         </div>
       </div>
+
+      {/* Character ping notifications */}
+      {activePing && (
+        <PingNotification
+          ping={activePing}
+          onDismiss={() => setActivePing(null)}
+        />
+      )}
     </div>
   )
 }

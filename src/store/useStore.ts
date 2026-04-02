@@ -35,6 +35,7 @@ export interface StoryProgress {
   sceneImages: Record<string, string>
   characterPortraits: Record<string, string>
   characterAffinities: Record<string, number>
+  seenPings: string[]
 }
 
 export const DEFAULT_PROGRESS: StoryProgress = {
@@ -49,6 +50,7 @@ export const DEFAULT_PROGRESS: StoryProgress = {
   sceneImages: {},
   characterPortraits: {},
   characterAffinities: {},
+  seenPings: [],
 }
 
 function freshProgress(): StoryProgress {
@@ -87,6 +89,7 @@ interface StoreState {
   setSceneImage: (stepId: string, url: string) => void
   setCharacterPortrait: (characterId: string, url: string) => void
   updateAffinity: (characterId: string, delta: number) => void
+  markPingSeen: (pingId: string) => void
 
   // ── Gems ──
   gemBalance: number
@@ -259,6 +262,14 @@ export const useStore = create<StoreState>()(
         }))
       }),
 
+      markPingSeen: (pingId) => set((s) => {
+        const p = getProgress(s)
+        if (p.seenPings.includes(pingId)) return {}
+        return updateProgress(s, () => ({
+          seenPings: [...p.seenPings, pingId],
+        }))
+      }),
+
       // ── Gems ──
       gemBalance: 50,
       spendGems: (amount) => {
@@ -325,6 +336,7 @@ export const useStore = create<StoreState>()(
             sceneImages: persisted.sceneImages ?? {},
             characterPortraits: persisted.characterPortraits ?? {},
             characterAffinities: persisted.characterAffinities ?? {},
+            seenPings: persisted.seenPings ?? [],
           }
 
           // Only create character if there was any meaningful state
