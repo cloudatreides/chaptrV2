@@ -29,6 +29,7 @@ export interface StreamChatParams {
   loveInterest: 'jiwon' | 'yuna' | null
   universeId: string | null
   signal?: AbortSignal
+  sceneContext?: string // context from other character conversations in the same scene
 }
 
 export interface SummarizeChatParams {
@@ -178,10 +179,11 @@ export interface OpeningMessageParams {
   bio: string | null
   loveInterest: 'jiwon' | 'yuna' | null
   universeId: string | null
+  sceneContext?: string // context from other character conversations in the same scene
 }
 
 export async function generateOpeningMessage(params: OpeningMessageParams): Promise<string> {
-  const { characterId, storyContext, characterState, bio, loveInterest, universeId } = params
+  const { characterId, storyContext, characterState, bio, loveInterest, universeId, sceneContext } = params
   const character = getCharacter(characterId, universeId)
   if (!character) return '...'
 
@@ -192,6 +194,7 @@ export async function generateOpeningMessage(params: OpeningMessageParams): Prom
   system += `\n\nSTORY CONTEXT: ${storyContext}`
   system += `\n\nRelationship with protagonist: ${trustLabel} trust (${trust}/100).`
   if (bio) system += `\nProtagonist personality: "${bio}"`
+  if (sceneContext) system += `\n\n${sceneContext}`
   system += `\n\nIMPORTANT: You are initiating this conversation. Say something first — a greeting, a comment, a question. Keep it in character. 1-2 sentences max. This should feel natural for the moment in the story.
 
 WRITING STYLE — MANDATORY:
@@ -219,7 +222,7 @@ WRITING STYLE — MANDATORY:
 // ─── Character Chat ───
 
 export async function* streamChatReply(params: StreamChatParams): AsyncGenerator<string> {
-  const { characterId, messages, storyContext, exchangeNumber, maxExchanges, characterState, bio, loveInterest, universeId, signal } = params
+  const { characterId, messages, storyContext, exchangeNumber, maxExchanges, characterState, bio, loveInterest, universeId, signal, sceneContext } = params
   const character = getCharacter(characterId, universeId)
   if (!character) throw new Error(`Unknown character: ${characterId}`)
 
@@ -230,6 +233,7 @@ export async function* streamChatReply(params: StreamChatParams): AsyncGenerator
   system += `\n\nSTORY CONTEXT: ${storyContext}`
   system += `\n\nRelationship with protagonist: ${trustLabel} trust (${trust}/100).`
   if (bio) system += `\nProtagonist personality: "${bio}"`
+  if (sceneContext) system += `\n\n${sceneContext}`
 
   system += `\n\nWRITING STYLE — MANDATORY:
 - Write ONLY dialogue. Just speak as the character.

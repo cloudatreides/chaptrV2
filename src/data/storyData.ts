@@ -65,7 +65,7 @@ export const GENRE_FILTERS = ['ALL', 'ROMANCE', 'HORROR', 'MYSTERY', 'ADVENTURE'
 
 // ─── V2 Step-based story model ───
 
-export type StepType = 'beat' | 'chat' | 'choice' | 'reveal'
+export type StepType = 'beat' | 'chat' | 'choice' | 'reveal' | 'scene'
 
 export interface ChoiceOption {
   id: string
@@ -74,6 +74,13 @@ export interface ChoiceOption {
   sceneHint: string // mood hint shown on card
   consequenceHint?: string // 1-sentence preview of what happens
   imagePrompt?: string // per-option preview image
+}
+
+export interface SceneCharacter {
+  characterId: string
+  minExchanges?: number
+  maxExchanges?: number
+  required?: boolean // must talk to this character before advancing
 }
 
 export interface StoryStep {
@@ -89,6 +96,9 @@ export interface StoryStep {
   characterId?: string
   maxExchanges?: number // soft cap — character wraps up naturally near this
   minExchanges?: number // minimum before "Continue story" button appears
+  // Scene fields (multi-character chat)
+  sceneCharacters?: SceneCharacter[]
+  minCharactersTalkedTo?: number // how many characters must be talked to before advancing
   // Choice fields
   choicePointId?: string
   options?: ChoiceOption[]
@@ -140,12 +150,14 @@ export const STORY_STEPS: StoryStep[] = [
     arcBrief: 'The protagonist settles into academy life. Between classes, they pass the practice rooms. Through one glass window, NOVA is rehearsing. Jiwon at the center, commanding but distant. The other members laugh between takes. Jiwon doesn\'t. A blue-haired girl appears beside the protagonist. She grins like they\'re already friends. Sora knows things: who to avoid, which rooms have the best acoustics, why Jiwon doesn\'t eat in the cafeteria. End with Sora saying something knowing: "He noticed you, by the way. In the elevator. He doesn\'t usually notice anyone."',
   },
   {
-    id: 'chat-1b',
-    type: 'chat',
-    title: 'Talk to Sora',
-    characterId: 'sora',
-    minExchanges: 3,
-    maxExchanges: 10,
+    id: 'scene-1',
+    type: 'scene',
+    title: 'Practice Rooms',
+    sceneCharacters: [
+      { characterId: 'sora', minExchanges: 2, maxExchanges: 8, required: true },
+      { characterId: 'jiwon', minExchanges: 1, maxExchanges: 8, required: false },
+    ],
+    minCharactersTalkedTo: 1,
   },
   {
     id: 'beat-2',
@@ -194,30 +206,15 @@ export const STORY_STEPS: StoryStep[] = [
     arcBrief: 'The protagonist approaches Jiwon at the studio. What starts as small talk turns into something more personal. Jiwon lets his guard down slightly. They discover a shared connection through music. End with a moment of genuine warmth — but also a reminder of the distance between their worlds.',
   },
   {
-    id: 'chat-2a',
-    type: 'chat',
-    title: 'Talk to Sora',
+    id: 'scene-2a',
+    type: 'scene',
+    title: 'After the Studio',
     requires: { 'cp-1': 'approach' },
-    characterId: 'sora',
-    minExchanges: 3,
-    maxExchanges: 10,
-  },
-  {
-    id: 'beat-4a',
-    type: 'beat',
-    title: 'After Hours',
-    requires: { 'cp-1': 'approach' },
-    sceneImagePrompt: SCENE_PROMPTS.afterHours,
-    arcBrief: 'Late evening. The academy is emptying out. The protagonist is in a practice room alone when Jiwon appears in the doorway. He doesn\'t explain why he\'s there. They end up talking about music, then about pressure, then about the gap between who you are and who people need you to be. Jiwon plays something on the piano. Something he wrote, not a NOVA track. Vulnerable and unfinished. He stops halfway. "Nobody has heard that." The moment hangs. End with his phone buzzing. His manager, reality pulling him back.',
-  },
-  {
-    id: 'chat-3a',
-    type: 'chat',
-    title: 'Talk to Jiwon',
-    requires: { 'cp-1': 'approach' },
-    characterId: 'jiwon',
-    minExchanges: 3,
-    maxExchanges: 10,
+    sceneCharacters: [
+      { characterId: 'sora', minExchanges: 2, maxExchanges: 8, required: false },
+      { characterId: 'jiwon', minExchanges: 2, maxExchanges: 8, required: true },
+    ],
+    minCharactersTalkedTo: 1,
   },
 
   // ── Act 2: Follow path ──
@@ -231,30 +228,15 @@ export const STORY_STEPS: StoryStep[] = [
     arcBrief: 'The protagonist follows Jiwon through the academy. He leads them to an unexpected place — somewhere private, away from cameras and fans. They overhear something they weren\'t meant to. Jiwon catches them. End with a confrontation that could go either way.',
   },
   {
-    id: 'chat-2b',
-    type: 'chat',
-    title: 'Talk to Jiwon',
+    id: 'scene-2b',
+    type: 'scene',
+    title: 'After the Confrontation',
     requires: { 'cp-1': 'follow' },
-    characterId: 'jiwon',
-    minExchanges: 3,
-    maxExchanges: 10,
-  },
-  {
-    id: 'beat-4b',
-    type: 'beat',
-    title: 'Sora Knows',
-    requires: { 'cp-1': 'follow' },
-    sceneImagePrompt: SCENE_PROMPTS.soraRooftop,
-    arcBrief: 'The next day. Sora finds the protagonist on the academy rooftop. She already knows about the confrontation with Jiwon. "Word travels fast when an idol raises his voice." She sits down uninvited. Between jokes and gossip, she tells the protagonist something real: Jiwon\'s contract renewal is in two weeks. The label wants him to cut ties with anyone who could become a scandal. "He pushes people away before they get close enough to be used against him. It\'s not personal." She pauses. "Or maybe it is. That\'s for you to figure out." End with the protagonist seeing Jiwon across the campus. He looks away first.',
-  },
-  {
-    id: 'chat-3b',
-    type: 'chat',
-    title: 'Talk to Sora',
-    requires: { 'cp-1': 'follow' },
-    characterId: 'sora',
-    minExchanges: 3,
-    maxExchanges: 10,
+    sceneCharacters: [
+      { characterId: 'jiwon', minExchanges: 2, maxExchanges: 8, required: true },
+      { characterId: 'sora', minExchanges: 1, maxExchanges: 8, required: false },
+    ],
+    minCharactersTalkedTo: 1,
   },
 
   // ── Choice Point B (options differ per path) ──
@@ -422,8 +404,6 @@ const SWAP_MAP: Record<string, Record<string, string>> = {
     ' His ': ' Her ',
     ' himself': ' herself',
     'lead vocalist of NOVA': 'lead vocalist of LUMINA',
-    "He looks": "She looks",
-    "he catches": "she catches",
   },
 }
 

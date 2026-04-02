@@ -14,16 +14,11 @@ const MOOD_STAGES: Record<string, string[]> = {
   sora: ['curious', 'vibing', 'in the groove', 'real talk'],
 }
 
-function getMoodIndex(characterId: string, exchangeCount: number): number {
+function getMoodIndex(_characterId: string, exchangeCount: number): number {
   if (exchangeCount <= 1) return 0
   if (exchangeCount <= 3) return 1
   if (exchangeCount <= 6) return 2
   return 3
-}
-
-function getMoodLabel(characterId: string, exchangeCount: number): string {
-  const stages = MOOD_STAGES[characterId] ?? MOOD_STAGES.default
-  return stages[getMoodIndex(characterId, exchangeCount)]
 }
 
 function getMoodStages(characterId: string): string[] {
@@ -99,7 +94,6 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
   const hasGeneratedOpener = useRef(false)
 
   const canContinue = exchangeCount >= minExchanges && !isTyping
-  const moodLabel = getMoodLabel(characterId, exchangeCount)
   const portrait = characterPortraits[characterId] ?? null
 
   // Generate character portrait if not cached

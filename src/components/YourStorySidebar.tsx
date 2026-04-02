@@ -7,11 +7,11 @@ import { resolveLoveInterestId, UNIVERSES } from '../data/storyData'
 
 export function YourStorySidebar() {
   const navigate = useNavigate()
-  const { selfieUrl, loveInterest, choiceDescriptions, chatSummaries, characterState, trustStatusLabel, selectedUniverse, activeCharacter } = useActiveStory()
+  const { selfieUrl, loveInterest, choiceDescriptions, chatSummaries, characterState, trustStatusLabel, selectedUniverse, activeCharacter, primaryNpcName } = useActiveStory()
   const resetStory = useStore((s) => s.resetStory)
   const junhoTrust = characterState.junhoTrust
   const trustLabel = trustStatusLabel
-  const liName = loveInterest === 'yuna' ? 'Yuna' : 'Jiwon'
+  const liName = primaryNpcName
 
   const summaryEntries = Object.entries(chatSummaries)
 
@@ -77,7 +77,7 @@ export function YourStorySidebar() {
               return (
                 <div key={stepId} className="flex items-start gap-2">
                   <span className="text-xs shrink-0 mt-0.5">{char?.avatar ?? '💬'}</span>
-                  <p className="text-textSecondary text-xs leading-relaxed">{summary}</p>
+                  <p className="text-textSecondary text-xs leading-relaxed">{summary.replace(/^#\s*Summary\s*/i, '')}</p>
                 </div>
               )
             })}

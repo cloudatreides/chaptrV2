@@ -13,11 +13,11 @@ interface Props {
 
 export function YourStorySheet({ open, onClose }: Props) {
   const navigate = useNavigate()
-  const { selfieUrl, loveInterest, choiceDescriptions, chatSummaries, characterState, trustStatusLabel, activeCharacter } = useActiveStory()
+  const { selfieUrl, loveInterest, choiceDescriptions, chatSummaries, characterState, trustStatusLabel, activeCharacter, primaryNpcName } = useActiveStory()
   const resetStory = useStore((s) => s.resetStory)
   const junhoTrust = characterState.junhoTrust
   const trustLabel = trustStatusLabel
-  const liName = loveInterest === 'yuna' ? 'Yuna' : 'Jiwon'
+  const liName = primaryNpcName
 
   const summaryEntries = Object.entries(chatSummaries)
 
@@ -100,7 +100,7 @@ export function YourStorySheet({ open, onClose }: Props) {
                       <span className="text-sm shrink-0">{char?.avatar ?? '💬'}</span>
                       <div>
                         <p className="text-textPrimary text-sm font-medium">{char?.name ?? charId}</p>
-                        <p className="text-textSecondary text-xs leading-relaxed">{summary}</p>
+                        <p className="text-textSecondary text-xs leading-relaxed">{summary.replace(/^#\s*Summary\s*/i, '')}</p>
                       </div>
                     </div>
                   )

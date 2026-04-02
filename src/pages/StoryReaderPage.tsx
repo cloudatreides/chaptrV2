@@ -8,6 +8,7 @@ import { getActiveSteps, getTotalBeats, getCurrentBeatNumber, resolveLoveInteres
 import { GemCounter } from '../components/GemCounter'
 import { ChoicePoint } from '../components/ChoicePoint'
 import { ChatScene } from '../components/ChatScene'
+import { SceneChat } from '../components/SceneChat'
 import { YourStorySheet } from '../components/YourStorySheet'
 import { YourStorySidebar } from '../components/YourStorySidebar'
 import { streamBeatProse, extractTrustData } from '../lib/claudeStream'
@@ -17,7 +18,7 @@ import { AudioToggle } from '../components/AudioToggle'
 import { ambientAudio } from '../lib/ambientAudio'
 import type { AmbientMood } from '../lib/ambientAudio'
 import { trackEvent } from '../lib/supabase'
-import type { StoryStep } from '../data/storyData'
+import type { StoryStep, SceneCharacter } from '../data/storyData'
 
 export function StoryReaderPage() {
   const navigate = useNavigate()
@@ -96,7 +97,7 @@ export function StoryReaderPage() {
     }
 
     if (currentStep?.type) {
-      const moodMap: Record<string, AmbientMood> = { beat: 'story', chat: 'chat', choice: 'choice', reveal: 'reveal' }
+      const moodMap: Record<string, AmbientMood> = { beat: 'story', chat: 'chat', scene: 'chat', choice: 'choice', reveal: 'reveal' }
       ambientAudio.setMood(moodMap[currentStep.type] ?? 'story')
     }
   }, [currentStepIndex])
@@ -105,7 +106,7 @@ export function StoryReaderPage() {
     const unlock = () => {
       ambientAudio.unlock()
       if (!ambientAudio.isMuted) {
-        const moodMap: Record<string, AmbientMood> = { beat: 'story', chat: 'chat', choice: 'choice', reveal: 'reveal' }
+        const moodMap: Record<string, AmbientMood> = { beat: 'story', chat: 'chat', scene: 'chat', choice: 'choice', reveal: 'reveal' }
         ambientAudio.setMood(moodMap[currentStep?.type ?? 'beat'] ?? 'story')
       }
       document.removeEventListener('click', unlock)
@@ -258,6 +259,22 @@ export function StoryReaderPage() {
         )
       }
 
+      case 'scene': {
+        const resolvedSceneChars: SceneCharacter[] = (currentStep.sceneCharacters ?? []).map(sc => ({
+          ...sc,
+          characterId: sc.characterId === 'jiwon' ? resolveLoveInterestId(loveInterest) : sc.characterId,
+        }))
+        return (
+          <SceneChat
+            stepId={currentStep.id}
+            characters={resolvedSceneChars}
+            minCharactersTalkedTo={currentStep.minCharactersTalkedTo ?? 1}
+            storyContext={storyContext}
+            onComplete={handleChatComplete}
+          />
+        )
+      }
+
       case 'beat':
         return (
           <BeatContent
@@ -282,7 +299,7 @@ export function StoryReaderPage() {
     }
   }
 
-  const isFullScreenStep = currentStep.type === 'chat'
+  const isFullScreenStep = currentStep.type === 'chat' || currentStep.type === 'scene'
 
   return (
     <div className="bg-bg min-h-screen">

@@ -1,5 +1,6 @@
 import { useStore, DEFAULT_PROGRESS } from '../store/useStore'
 import type { PlayerCharacter } from '../store/useStore'
+import { getStoryData } from '../data/stories'
 
 export function useActiveStory() {
   const characters = useStore((s) => s.characters)
@@ -19,6 +20,12 @@ export function useActiveStory() {
   const selfieUrl = activeCharacter?.selfieUrl ?? null
   const bio = activeCharacter?.bio ?? null
 
+  // Universe-aware primary NPC name for trust bar
+  const storyData = getStoryData(selectedUniverse)
+  const primaryNpcName = storyData
+    ? storyData.characters[storyData.primaryCharacterId]?.name ?? 'Unknown'
+    : loveInterest === 'yuna' ? 'Yuna' : 'Jiwon'
+
   return {
     // Character
     activeCharacter,
@@ -26,6 +33,7 @@ export function useActiveStory() {
     bio,
     loveInterest,
     selectedUniverse,
+    primaryNpcName,
     // Progress (spread flat for easy destructuring)
     ...progress,
   }
