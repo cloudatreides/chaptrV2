@@ -7,7 +7,7 @@ import type { Area } from 'react-easy-crop'
 import { useStore } from '../store/useStore'
 import { stylizeSelfie } from '../lib/togetherAi'
 import { getCroppedImg } from '../lib/cropImage'
-import { trackEvent } from '../lib/supabase'
+import { trackEvent, uploadSelfieToStorage } from '../lib/supabase'
 
 const ARCHETYPES = [
   {
@@ -51,6 +51,9 @@ export function CreateCharacterPage() {
   const [styledPhoto, setStyledPhoto] = useState<string | null>(null)
   const [isStylizing, setIsStylizing] = useState(false)
   const [stylizeFailed, setStylizeFailed] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadedSelfieUrl, setUploadedSelfieUrl] = useState<string | null>(null)
+  const uploadIdRef = useRef(crypto.randomUUID())
   const [dragging, setDragging] = useState(false)
 
   const onCropComplete = useCallback((_: Area, croppedPixels: Area) => {
@@ -62,7 +65,7 @@ export function CreateCharacterPage() {
   const hasPhoto = !!originalPhoto
   const finalPhoto = styledPhoto ?? originalPhoto
   const bio = isCustom ? custom.trim() : ARCHETYPES.find((a) => a.id === selectedArch)?.bio ?? null
-  const canCreate = name.trim().length > 0 && gender !== null && !isStylizing && !isCropping
+  const canCreate = name.trim().length > 0 && gender !== null && !isStylizing && !isCropping && !isUploading
 
   // ── Handlers ──
 
@@ -77,6 +80,8 @@ export function CreateCharacterPage() {
       setOriginalPhoto(null)
       setStyledPhoto(null)
       setStylizeFailed(false)
+      setUploadedSelfieUrl(null)
+      uploadIdRef.current = crypto.randomUUID()
     }
     reader.readAsDataURL(file)
   }
@@ -89,8 +94,15 @@ export function CreateCharacterPage() {
     setIsStylizing(true)
     const result = await stylizeSelfie(cropped)
     setIsStylizing(false)
-    if (result) setStyledPhoto(result)
-    else setStylizeFailed(true)
+    if (result) {
+      setStyledPhoto(result)
+      setIsUploading(true)
+      const url = await uploadSelfieToStorage(result, uploadIdRef.current)
+      setUploadedSelfieUrl(url)
+      setIsUploading(false)
+    } else {
+      setStylizeFailed(true)
+    }
   }
 
   const handleRetry = async () => {
@@ -99,8 +111,15 @@ export function CreateCharacterPage() {
     setIsStylizing(true)
     const result = await stylizeSelfie(originalPhoto)
     setIsStylizing(false)
-    if (result) setStyledPhoto(result)
-    else setStylizeFailed(true)
+    if (result) {
+      setStyledPhoto(result)
+      setIsUploading(true)
+      const url = await uploadSelfieToStorage(result, uploadIdRef.current)
+      setUploadedSelfieUrl(url)
+      setIsUploading(false)
+    } else {
+      setStylizeFailed(true)
+    }
   }
 
   const handleCreate = () => {
@@ -108,7 +127,7 @@ export function CreateCharacterPage() {
     createCharacter({
       name: name.trim(),
       gender: gender!,
-      selfieUrl: finalPhoto ?? null,
+      selfieUrl: uploadedSelfieUrl ?? finalPhoto ?? null,
       bio: bio || null,
     })
     trackEvent('character_created', { gender, hasPhoto: !!finalPhoto, hasBio: !!bio })
@@ -294,7 +313,7 @@ export function CreateCharacterPage() {
 
           <div className="flex items-start gap-2 px-3 py-2 rounded-xl" style={{ background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.15)' }}>
             <Shield size={12} className="text-gem shrink-0 mt-0.5" />
-            <p className="text-textSecondary text-[11px]">Your photo is never stored beyond your session.</p>
+            <p className="text-textSecondary text-[11px]">Your anime-style photo is stored to personalise story scenes. Your original photo is never saved.</p>
           </div>
         </motion.div>
 
@@ -308,7 +327,7 @@ export function CreateCharacterPage() {
             disabled={!canCreate}
             style={{ opacity: canCreate ? 1 : 0.5, cursor: canCreate ? 'pointer' : 'not-allowed' }}
           >
-            {isStylizing ? 'Stylizing photo...' : 'Create Character'}
+            {isStylizing ? 'Stylizing photo...' : isUploading ? 'Uploading photo...' : 'Create Character'}
           </button>
         </div>
       </div>

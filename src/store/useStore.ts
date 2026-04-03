@@ -38,6 +38,7 @@ export interface StoryProgress {
   seenPings: string[]
   questProgress: Record<string, { currentStep: number; completed: boolean; summary: string | null }>
   notifiedQuests: string[] // quests whose unlock has been shown
+  characterMemories: Record<string, string[]> // characterId → memorable facts (max 10 per char)
 }
 
 export const DEFAULT_PROGRESS: StoryProgress = {
@@ -55,6 +56,7 @@ export const DEFAULT_PROGRESS: StoryProgress = {
   seenPings: [],
   questProgress: {},
   notifiedQuests: [],
+  characterMemories: {},
 }
 
 function freshProgress(): StoryProgress {
@@ -97,6 +99,7 @@ interface StoreState {
   advanceQuest: (questId: string) => void
   completeQuest: (questId: string, summary: string) => void
   markQuestNotified: (questId: string) => void
+  addCharacterMemory: (characterId: string, memory: string) => void
 
   // ── Gems ──
   gemBalance: number
@@ -311,6 +314,17 @@ export const useStore = create<StoreState>()(
         }))
       }),
 
+      addCharacterMemory: (characterId, memory) => set((s) => {
+        const p = getProgress(s)
+        const existing = p.characterMemories[characterId] ?? []
+        if (existing.includes(memory)) return {}
+        // Cap at 10 memories per character
+        const updated = [...existing, memory].slice(-10)
+        return updateProgress(s, () => ({
+          characterMemories: { ...p.characterMemories, [characterId]: updated },
+        }))
+      }),
+
       // ── Gems ──
       gemBalance: 50,
       spendGems: (amount) => {
@@ -380,6 +394,7 @@ export const useStore = create<StoreState>()(
             seenPings: persisted.seenPings ?? [],
             questProgress: persisted.questProgress ?? {},
             notifiedQuests: persisted.notifiedQuests ?? [],
+            characterMemories: persisted.characterMemories ?? {},
           }
 
           // Only create character if there was any meaningful state
