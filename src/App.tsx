@@ -11,6 +11,8 @@ import { RevealPage } from './pages/RevealPage'
 import { FreeChatPage } from './pages/FreeChatPage'
 import { SharedRevealPage } from './pages/SharedRevealPage'
 import { QuestPage } from './pages/QuestPage'
+import { TermsPage } from './pages/TermsPage'
+import { PrivacyPage } from './pages/PrivacyPage'
 
 export default function App() {
   return (
@@ -18,6 +20,8 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
           {/* SharedRevealPage is public — shareable links work without auth */}
           <Route path="/reveal/:id" element={<SharedRevealPage />} />
           <Route path="/" element={<LandingPage />} />

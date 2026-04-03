@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
 const SERIF = "'Playfair Display', Georgia, serif"
@@ -57,8 +58,11 @@ export function LoginPage() {
           Continue with Google
         </motion.button>
 
-        <p className="text-textMuted text-xs text-center">
-          By continuing, you agree to our terms of service.
+        <p className="text-textMuted text-xs text-center leading-relaxed">
+          By continuing, you agree to our{' '}
+          <Link to="/terms" className="underline hover:text-textSecondary transition-colors">Terms of Service</Link>
+          {' '}and{' '}
+          <Link to="/privacy" className="underline hover:text-textSecondary transition-colors">Privacy Policy</Link>.
         </p>
       </motion.div>
     </div>

@@ -130,7 +130,7 @@ export const STORY_STEPS: StoryStep[] = [
     type: 'beat',
     title: 'First Day',
     staticImage: '/scene-elevator.jpg',
-    sceneImagePrompt: SCENE_PROMPTS.arrival,
+    sceneImagePrompt: SCENE_PROMPTS.elevator,
     openingProse: 'The elevator doors slide open. Standing in front of you is Lee Jiwon — the lead vocalist of NOVA. He looks as surprised as you are.\n\nNeither of you speaks. The city hums forty floors below.\n\nThen the doors start to close, and he catches them with one hand.',
     arcBrief: 'First encounter with Jiwon. Establish the spark of something — surprise, curiosity, tension. End with an unresolved moment.',
   },
