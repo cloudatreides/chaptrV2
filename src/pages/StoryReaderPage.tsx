@@ -632,11 +632,12 @@ function SceneFallbackGradient({ stepId }: { stepId?: string }) {
 
 function TrustIndicator({ trust, label }: { trust: number; label: string }) {
   return (
-    <div className="flex items-center gap-2">
-      <div className="w-16 h-1.5 rounded-full bg-border overflow-hidden">
+    <div className="flex items-center gap-1.5">
+      <span style={{ color: '#c84b9e', fontSize: 11 }}>♥</span>
+      <div className="w-14 h-1 rounded-full bg-border overflow-hidden">
         <motion.div className="h-full rounded-full" style={{ background: 'linear-gradient(90deg, #c84b9e 0%, #E879F9 100%)' }} animate={{ width: `${trust}%` }} transition={{ duration: 0.6, ease: 'easeOut' }} />
       </div>
-      <span className="text-textMuted text-[10px] whitespace-nowrap">{label}</span>
+      <span className="text-textMuted text-[10px] whitespace-nowrap italic">{label}</span>
     </div>
   )
 }
