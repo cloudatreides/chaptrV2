@@ -125,11 +125,12 @@ export function YourStorySidebar() {
 
       {/* Replay */}
       <button
-        className="choice-btn justify-center gap-2 mt-4"
+        className="w-full flex items-center justify-center gap-2 mt-4 px-4 py-4 rounded-xl text-textPrimary text-sm font-medium transition-all"
+        style={{ background: 'rgba(26, 21, 37, 0.85)', border: '1px solid rgba(42, 32, 64, 0.8)' }}
         onClick={() => { resetStory(); navigate('/story') }}
       >
         <RotateCcw size={14} className="text-textSecondary" />
-        <span className="text-sm">Start over</span>
+        <span>Start over</span>
       </button>
     </div>
   )
