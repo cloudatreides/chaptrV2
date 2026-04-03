@@ -28,8 +28,7 @@ export const UNIVERSES: Universe[] = [
     genreTag: 'ANIME ROMANCE',
     description: 'Follow your heart at a prestigious academy beneath the cherry blossoms.',
     image: '/sakura.jpg',
-    locked: true,
-    lockedLabel: 'SOON',
+    locked: false,
   },
   {
     id: 'hollow-manor',
@@ -56,8 +55,7 @@ export const UNIVERSES: Universe[] = [
     genreTag: 'EPIC ADVENTURE',
     description: 'The map ends here. Beyond it, three lost civilisations and the one artefact that could rewrite history.',
     image: '/edge-of-atlas.svg',
-    locked: true,
-    lockedLabel: 'SOON',
+    locked: false,
   },
 ]
 
