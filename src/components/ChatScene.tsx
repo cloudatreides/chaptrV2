@@ -272,10 +272,10 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
     generateOpener()
   }, [])
 
-  const handleSend = async () => {
-    if (!input.trim() || isTyping) return
+  const handleSend = async (overrideText?: string) => {
+    const userMsg = (overrideText ?? input).trim()
+    if (!userMsg || isTyping) return
 
-    const userMsg = input.trim()
     setInput('')
 
     // Add user message
@@ -526,9 +526,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
                   border: '1px solid rgba(200,75,158,0.2)',
                   color: 'rgba(200,75,158,0.8)',
                 }}
-                onClick={() => {
-                  setInput(suggestion)
-                }}
+                onClick={() => handleSend(suggestion)}
               >
                 {suggestion}
               </button>
@@ -552,7 +550,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
               autoCorrect="off"
             />
             <button
-              onClick={handleSend}
+              onClick={() => handleSend()}
               disabled={!input.trim() || isTyping || isLoadingOpener}
               className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-all disabled:opacity-30"
               style={{ background: 'linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%)' }}
