@@ -18,6 +18,21 @@ const MOOD_STAGES: Record<string, string[]> = {
   sora: ['curious', 'vibing', 'in the groove', 'real talk'],
 }
 
+const MOOD_TOOLTIPS: Record<string, { desc: string; hint: string }[]> = {
+  default: [
+    { desc: 'Still figuring you out. Every word is being weighed.', hint: 'Keep talking — show genuine interest.' },
+    { desc: 'The walls are coming down, slowly.', hint: 'Ask questions. Be consistent.' },
+    { desc: 'Real thoughts are starting to surface.', hint: 'Stay present. Don\'t push too hard.' },
+    { desc: 'Fully open. This is rare for them.', hint: 'You\'ve earned this.' },
+  ],
+  sora: [
+    { desc: 'Intrigued but testing you.', hint: 'Match her energy. Be playful.' },
+    { desc: 'She\'s feeling it. Conversation flows naturally.', hint: 'Keep up the momentum.' },
+    { desc: 'You two are in sync. She\'s being real.', hint: 'Go deeper. She can handle it.' },
+    { desc: 'No filter left. This is pure Sora.', hint: 'You made it here. Don\'t overthink it.' },
+  ],
+}
+
 function getMoodIndex(_characterId: string, exchangeCount: number): number {
   if (exchangeCount <= 1) return 0
   if (exchangeCount <= 3) return 1
@@ -27,6 +42,89 @@ function getMoodIndex(_characterId: string, exchangeCount: number): number {
 
 function getMoodStages(characterId: string): string[] {
   return MOOD_STAGES[characterId] ?? MOOD_STAGES.default
+}
+
+function getMoodTooltips(characterId: string): { desc: string; hint: string }[] {
+  return MOOD_TOOLTIPS[characterId] ?? MOOD_TOOLTIPS.default
+}
+
+function MoodStage({ stage, isActive, isPast, showDivider, tooltip }: {
+  stage: string
+  isActive: boolean
+  isPast: boolean
+  showDivider: boolean
+  tooltip: { desc: string; hint: string }
+}) {
+  const [hovered, setHovered] = useState(false)
+
+  return (
+    <div className="flex items-center gap-1.5 relative">
+      {showDivider && (
+        <div className="w-2 h-px" style={{ background: isPast ? 'rgba(200,75,158,0.5)' : 'rgba(255,255,255,0.1)' }} />
+      )}
+      <div
+        className="relative"
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+      >
+        {isActive ? (
+          <motion.span
+            className="text-[10px] italic font-semibold cursor-default"
+            style={{ color: '#e060b8', display: 'inline-block' }}
+            animate={{ scale: [1, 1.12, 1] }}
+            transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            {stage}
+          </motion.span>
+        ) : (
+          <span
+            className="text-[10px] italic cursor-default transition-colors duration-300"
+            style={{
+              color: isPast ? 'rgba(200,75,158,0.5)' : 'rgba(255,255,255,0.25)',
+              fontWeight: 400,
+            }}
+          >
+            {stage}
+          </span>
+        )}
+
+        <AnimatePresence>
+          {hovered && (
+            <motion.div
+              initial={{ opacity: 0, y: 6, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 6, scale: 0.95 }}
+              transition={{ duration: 0.15 }}
+              className="absolute bottom-full left-1/2 mb-2 z-50 pointer-events-none"
+              style={{ transform: 'translateX(-50%)' }}
+            >
+              <div
+                className="rounded-xl px-3 py-2.5 text-left w-44 shadow-xl"
+                style={{
+                  background: 'rgba(19,16,28,0.97)',
+                  border: '1px solid rgba(200,75,158,0.25)',
+                  backdropFilter: 'blur(12px)',
+                }}
+              >
+                <p className="text-[10px] text-textPrimary leading-relaxed mb-1.5">{tooltip.desc}</p>
+                <p className="text-[9px] italic" style={{ color: '#e060b8' }}>{tooltip.hint}</p>
+                <div
+                  className="absolute left-1/2 -bottom-1.5"
+                  style={{
+                    transform: 'translateX(-50%)',
+                    width: 0, height: 0,
+                    borderLeft: '5px solid transparent',
+                    borderRight: '5px solid transparent',
+                    borderTop: '6px solid rgba(19,16,28,0.97)',
+                  }}
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  )
 }
 
 // ─── Suggestion chips ───
@@ -462,26 +560,20 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
         </div>
         <div className="flex items-center gap-1.5 flex-1">
           {moodStages.map((stage, i) => {
-              const isActiveMood = i === currentMoodIdx
-              const isPast = i < currentMoodIdx
-              return (
-                <div key={stage} className="flex items-center gap-1.5">
-                  {i > 0 && (
-                    <div className="w-2 h-px" style={{ background: isPast ? 'rgba(200,75,158,0.5)' : 'rgba(255,255,255,0.1)' }} />
-                  )}
-                  <span
-                    className="text-[10px] transition-all duration-300"
-                    style={{
-                      color: isActiveMood ? '#e060b8' : isPast ? 'rgba(200,75,158,0.5)' : 'rgba(255,255,255,0.25)',
-                      fontWeight: isActiveMood ? 600 : 400,
-                      fontStyle: 'italic',
-                    }}
-                  >
-                    {stage}
-                  </span>
-                </div>
-              )
-            })}
+            const isActiveMood = i === currentMoodIdx
+            const isPast = i < currentMoodIdx
+            const tooltip = getMoodTooltips(activeCharId)[i]
+            return (
+              <MoodStage
+                key={stage}
+                stage={stage}
+                isActive={isActiveMood}
+                isPast={isPast}
+                showDivider={i > 0}
+                tooltip={tooltip}
+              />
+            )
+          })}
         </div>
       </div>
 
