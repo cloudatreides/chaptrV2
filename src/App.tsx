@@ -20,7 +20,7 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           {/* SharedRevealPage is public — shareable links work without auth */}
           <Route path="/reveal/:id" element={<SharedRevealPage />} />
-          <Route path="/" element={<ProtectedRoute><LandingPage /></ProtectedRoute>} />
+          <Route path="/" element={<LandingPage />} />
           <Route path="/universes" element={<ProtectedRoute><UniversesPage /></ProtectedRoute>} />
           <Route path="/characters" element={<ProtectedRoute><CharacterSelectPage /></ProtectedRoute>} />
           <Route path="/create-character" element={<ProtectedRoute><CreateCharacterPage /></ProtectedRoute>} />

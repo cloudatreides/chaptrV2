@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, BookOpen, Sparkles, Camera, MessageCircle, GitBranch } from 'lucide-react'
 import { trackEvent } from '../lib/supabase'
@@ -540,6 +541,15 @@ function ChatDemo({ compact }: { compact?: boolean }) {
 
 export function LandingPage() {
   const navigate = useNavigate()
+  const { session, signInWithGoogle } = useAuth()
+
+  function handleCTA() {
+    if (session) {
+      navigate('/universes')
+    } else {
+      signInWithGoogle()
+    }
+  }
 
   useEffect(() => { trackEvent('landing_view') }, [])
 
@@ -587,7 +597,7 @@ export function LandingPage() {
             <motion.button
               className="btn-accent flex items-center justify-center gap-2"
               style={{ fontFamily: SG, minHeight: 52 }}
-              onClick={() => navigate('/universes')}
+              onClick={handleCTA}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35 }}
@@ -703,7 +713,7 @@ export function LandingPage() {
           <button
             className="btn-accent flex items-center justify-center gap-2 max-w-xs"
             style={{ fontFamily: SG, minHeight: 52 }}
-            onClick={() => navigate('/universes')}
+            onClick={handleCTA}
           >
             Begin Now <ArrowRight size={18} />
           </button>
@@ -754,7 +764,7 @@ export function LandingPage() {
                 <button
                   className="text-white text-sm font-semibold px-5 py-2 rounded-lg transition-all hover:opacity-90"
                   style={{ background: 'linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%)' }}
-                  onClick={() => navigate('/universes')}
+                  onClick={handleCTA}
                 >
                   Start Reading
                 </button>
@@ -791,7 +801,7 @@ export function LandingPage() {
                   <button
                     className="self-start flex items-center justify-center gap-2.5 text-white font-semibold text-base transition-all hover:scale-[1.02] hover:shadow-lg"
                     style={{ height: 54, paddingLeft: 36, paddingRight: 36, borderRadius: 14, background: 'linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%)', fontFamily: SG }}
-                    onClick={() => navigate('/universes')}
+                    onClick={handleCTA}
                   >
                     Start Your Story <ArrowRight size={18} />
                   </button>
@@ -932,7 +942,7 @@ export function LandingPage() {
               <button
                 className="flex items-center justify-center gap-2.5 text-white font-semibold text-base transition-all hover:scale-[1.02]"
                 style={{ height: 54, paddingLeft: 36, paddingRight: 36, borderRadius: 14, background: 'linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%)', fontFamily: SG }}
-                onClick={() => navigate('/universes')}
+                onClick={handleCTA}
               >
                 Begin Now <ArrowRight size={18} />
               </button>
