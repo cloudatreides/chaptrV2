@@ -69,7 +69,16 @@ export function StoryReaderPage() {
   const [hasChosenBeat, setHasChosenBeat] = useState(false)
   const abortRef = useRef<AbortController | null>(null)
 
-  const currentImage = sceneImages[currentStep?.id] ?? currentStep?.staticImage ?? null
+  const currentImages: string[] = (() => {
+    if (!currentStep) return []
+    if (currentStep.sceneImagePrompts?.length) {
+      return currentStep.sceneImagePrompts
+        .map((_, i) => sceneImages[`${currentStep.id}:${i}`])
+        .filter(Boolean) as string[]
+    }
+    const single = sceneImages[currentStep.id] ?? currentStep.staticImage
+    return single ? [single] : []
+  })()
 
   const isFirstBeat = currentStep?.id === 'beat-1'
   const { displayed: openingDisplayed, done: openingDone } = useTypewriter(
@@ -142,10 +151,21 @@ export function StoryReaderPage() {
     setIsStreaming(false)
     setIsGeneratingScene(false)
 
-    if (currentStep?.type === 'beat' && currentStep.sceneImagePrompt && !sceneImages[currentStep.id]) {
-      generateSceneImage({ prompt: currentStep.sceneImagePrompt, referenceImageUrl: selfieUrl }).then((url) => {
-        if (url) setSceneImage(currentStep.id, url)
-      })
+    if (currentStep?.type === 'beat') {
+      if (currentStep.sceneImagePrompts?.length) {
+        currentStep.sceneImagePrompts.forEach((prompt, i) => {
+          const key = `${currentStep.id}:${i}`
+          if (!sceneImages[key]) {
+            generateSceneImage({ prompt, referenceImageUrl: selfieUrl }).then((url) => {
+              if (url) setSceneImage(key, url)
+            })
+          }
+        })
+      } else if (currentStep.sceneImagePrompt && !sceneImages[currentStep.id]) {
+        generateSceneImage({ prompt: currentStep.sceneImagePrompt, referenceImageUrl: selfieUrl }).then((url) => {
+          if (url) setSceneImage(currentStep.id, url)
+        })
+      }
     }
 
     // Generate per-option images for choice steps
@@ -383,8 +403,8 @@ export function StoryReaderPage() {
       <div className="md:hidden relative min-h-screen flex flex-col">
         {!isFullScreenStep && (
           <>
-            {currentImage ? (
-              <div className="absolute inset-0 bg-cover bg-top transition-all duration-700 pointer-events-none" style={{ backgroundImage: `url(${currentImage})`, backgroundColor: '#1a1525' }} />
+            {currentImages.length > 0 ? (
+              <SceneCarousel images={currentImages} stepId={currentStep?.id ?? ''} />
             ) : (
               <SceneFallbackGradient stepId={currentStep?.id} />
             )}
@@ -445,8 +465,8 @@ export function StoryReaderPage() {
           <div className="flex-1 flex flex-col h-screen overflow-hidden">
             {!isFullScreenStep && (
               <div className="relative flex-none" style={{ height: '45vh' }}>
-                {currentImage ? (
-                  <div className="absolute inset-0 bg-cover bg-center transition-all duration-700 pointer-events-none" style={{ backgroundImage: `url(${currentImage})`, backgroundColor: '#1a1525' }} />
+                {currentImages.length > 0 ? (
+                  <SceneCarousel images={currentImages} stepId={currentStep?.id ?? ''} />
                 ) : (
                   <SceneFallbackGradient stepId={currentStep?.id} />
                 )}
@@ -610,6 +630,63 @@ function TheatricalLoader({ title }: { title: string }) {
         <motion.div className="h-full rounded-full" style={{ background: 'linear-gradient(90deg, #c84b9e 0%, #8b5cf6 100%)' }} initial={{ width: '5%' }} animate={{ width: '90%' }} transition={{ duration: 6, ease: 'easeOut' }} />
       </div>
       <p className="text-textMuted text-xs mt-1">{title} — Seoul Arts Academy</p>
+    </div>
+  )
+}
+
+function SceneCarousel({ images, stepId }: { images: string[]; stepId: string }) {
+  const [index, setIndex] = useState(0)
+
+  useEffect(() => { setIndex(0) }, [stepId])
+
+  useEffect(() => {
+    if (images.length <= 1) return
+    const timer = setInterval(() => setIndex((i) => (i + 1) % images.length), 2500)
+    return () => clearInterval(timer)
+  }, [images.length, stepId])
+
+  return (
+    <div className="absolute inset-0">
+      <AnimatePresence mode="sync">
+        <motion.div
+          key={`${stepId}-${index}`}
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${images[index]})`, backgroundColor: '#1a1525' }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.7 }}
+        />
+      </AnimatePresence>
+
+      {images.length > 1 && (
+        <>
+          <button
+            className="absolute left-0 top-0 w-1/2 h-2/3 z-10 cursor-pointer"
+            style={{ background: 'transparent' }}
+            onClick={() => setIndex((i) => (i - 1 + images.length) % images.length)}
+            aria-label="Previous image"
+          />
+          <button
+            className="absolute right-0 top-0 w-1/2 h-2/3 z-10 cursor-pointer"
+            style={{ background: 'transparent' }}
+            onClick={() => setIndex((i) => (i + 1) % images.length)}
+            aria-label="Next image"
+          />
+          <div className="absolute bottom-3 left-0 right-0 z-20 flex justify-center gap-1.5 pointer-events-none">
+            {images.map((_, i) => (
+              <button
+                key={i}
+                className={`rounded-full transition-all duration-300 pointer-events-auto ${
+                  i === index ? 'w-3 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/40'
+                }`}
+                onClick={(e) => { e.stopPropagation(); setIndex(i) }}
+                aria-label={`Image ${i + 1}`}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   )
 }

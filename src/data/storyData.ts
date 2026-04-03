@@ -88,6 +88,7 @@ export interface StoryStep {
   // Beat fields
   openingProse?: string // only for first beat or static opening
   sceneImagePrompt?: string // Together AI FLUX.1 prompt
+  sceneImagePrompts?: string[] // multiple prompts for carousel (overrides sceneImagePrompt)
   staticImage?: string // fallback
   arcBrief?: string // what must be true by end of this beat
   // Chat fields
@@ -118,6 +119,16 @@ const SCENE_PROMPTS = {
   backstageTrust: 'Anime style, backstage after a concert, a young idol with dark hair sitting on a case sharing earbuds with someone, warm string lights, costumes hanging around them, vulnerable trust, soft golden glow',
   cafeDeflect: 'Anime style, a young person sitting alone in a quiet late-night cafe in Seoul, rain on windows, looking at their phone with a conflicted expression, melancholic blue lighting, beautiful but lonely',
   reveal: 'Anime style, ethereal dream-like scene, two silhouettes connected by glowing threads of light, abstract Seoul cityscape in background, cosmic purple and pink tones, emotional, beautiful',
+  // Alt angles
+  elevatorAlt: 'Anime style, close-up reflection in elevator glass doors, a Korean male idol with dark hair and a young person standing side by side, city skyline mirrored behind them, electric silence, warm interior light',
+  rehearsalAlt: 'Anime style, wide shot of a practice room at dusk, a Korean idol alone at the mirror doing a slow spin, his reflection multiplied, cherry blossoms visible through floor-to-ceiling windows, moody and cinematic',
+  practiceHallAlt: 'Anime style, blue-haired girl in an oversized hoodie grinning at the protagonist, academy hallway with golden afternoon light streaming in, other students blurred in background, warm and energetic',
+  studioApproachAlt: 'Anime style, close-up of mixing console knobs and glowing screens, a Korean idol\'s hand hovering over the board, recording booth glass beyond, warm amber light, music creation atmosphere',
+  corridorFollowAlt: 'Anime style, POV shot down a dark entertainment agency corridor, a tall figure in a black coat disappearing around the corner, ceiling lights casting long shadows, tension and mystery',
+  rooftopConfrontAlt: 'Anime style, overhead shot of two people on a Seoul rooftop at night, city lights like a galaxy below them, wind-blown hair, the space between them charged with unspoken feeling',
+  backstageTrustAlt: 'Anime style, tight shot of two people sharing earbuds, both looking at the same phone screen, stage lights warm and golden behind them, private world within the chaos backstage',
+  cafeDeflectAlt: 'Anime style, rain-streaked Seoul street seen through a cafe window at night, neon reflections in puddles, warm interior versus cold exterior, contemplative and melancholic',
+  rooftopStayAlt: 'Anime style, two silhouettes leaning against a rooftop railing at golden hour, Seoul stretching endlessly behind them, soft warm light, comfortable silence, something quietly beginning',
   practiceHall: 'Anime style, a girl with vibrant blue dyed hair in an oversized hoodie leaning against a practice room window talking animatedly to a young person, bright academy hallway, cherry blossoms through skylights, warm afternoon light',
   afterHours: 'Anime style, a handsome Korean male idol with dark hair playing piano in a dim studio late at night, a young person sitting beside him listening, sheet music scattered, Seoul city lights through the window, intimate and vulnerable',
   soraRooftop: 'Anime style, a girl with vibrant blue hair sitting on an academy rooftop railing talking to a young person, sunset over Seoul, warm golden light, wind in her hair, cheerful but with a hint of seriousness, K-drama aesthetic',
@@ -130,7 +141,7 @@ export const STORY_STEPS: StoryStep[] = [
     type: 'beat',
     title: 'First Day',
     staticImage: '/scene-elevator.jpg',
-    sceneImagePrompt: SCENE_PROMPTS.elevator,
+    sceneImagePrompts: [SCENE_PROMPTS.elevator, SCENE_PROMPTS.elevatorAlt],
     openingProse: 'The elevator doors slide open. Standing in front of you is Lee Jiwon — the lead vocalist of NOVA. He looks as surprised as you are.\n\nNeither of you speaks. The city hums forty floors below.\n\nThen the doors start to close, and he catches them with one hand.',
     arcBrief: 'First encounter with Jiwon. Establish the spark of something — surprise, curiosity, tension. End with an unresolved moment.',
   },
@@ -147,7 +158,7 @@ export const STORY_STEPS: StoryStep[] = [
     id: 'beat-1b',
     type: 'beat',
     title: 'The Practice Rooms',
-    sceneImagePrompt: SCENE_PROMPTS.practiceHall,
+    sceneImagePrompts: [SCENE_PROMPTS.practiceHall, SCENE_PROMPTS.practiceHallAlt],
     arcBrief: 'The protagonist settles into academy life. Between classes, they pass the practice rooms. Through one glass window, NOVA is rehearsing. Jiwon at the center, commanding but distant. The other members laugh between takes. Jiwon doesn\'t. A blue-haired girl appears beside the protagonist. She grins like they\'re already friends. Sora knows things: who to avoid, which rooms have the best acoustics, why Jiwon doesn\'t eat in the cafeteria. End with Sora saying something knowing: "He noticed you, by the way. In the elevator. He doesn\'t usually notice anyone."',
   },
   {
@@ -166,7 +177,7 @@ export const STORY_STEPS: StoryStep[] = [
     type: 'beat',
     title: 'The Rehearsal',
     staticImage: '/scene-studio.jpg',
-    sceneImagePrompt: SCENE_PROMPTS.rehearsal,
+    sceneImagePrompts: [SCENE_PROMPTS.rehearsal, SCENE_PROMPTS.rehearsalAlt],
     arcBrief: 'The next day at the academy. Jiwon is rehearsing. The protagonist sees a different side of him — focused, under pressure. Something Jiwon does or says reveals the weight he carries. End with a moment that makes the protagonist want to know more.',
   },
 
@@ -204,7 +215,7 @@ export const STORY_STEPS: StoryStep[] = [
     title: 'The Studio',
     requires: { 'cp-1': 'approach' },
     staticImage: '/scene-studio.jpg',
-    sceneImagePrompt: SCENE_PROMPTS.studioApproach,
+    sceneImagePrompts: [SCENE_PROMPTS.studioApproach, SCENE_PROMPTS.studioApproachAlt],
     arcBrief: 'The protagonist approaches Jiwon at the studio. What starts as small talk turns into something more personal. Jiwon lets his guard down slightly. They discover a shared connection through music. End with a moment of genuine warmth — but also a reminder of the distance between their worlds.',
   },
   {
@@ -227,7 +238,7 @@ export const STORY_STEPS: StoryStep[] = [
     title: 'The Corridor',
     requires: { 'cp-1': 'follow' },
     staticImage: '/scene-rooftop.jpg',
-    sceneImagePrompt: SCENE_PROMPTS.corridorFollow,
+    sceneImagePrompts: [SCENE_PROMPTS.corridorFollow, SCENE_PROMPTS.corridorFollowAlt],
     arcBrief: 'The protagonist follows Jiwon through the academy. He leads them to an unexpected place — somewhere private, away from cameras and fans. They overhear something they weren\'t meant to. Jiwon catches them. End with a confrontation that could go either way.',
   },
   {
@@ -304,7 +315,7 @@ export const STORY_STEPS: StoryStep[] = [
     title: 'The Confrontation',
     requires: { 'cp-1': 'approach', 'cp-2': 'confront' },
     staticImage: '/scene-rooftop.jpg',
-    sceneImagePrompt: SCENE_PROMPTS.rooftopConfront,
+    sceneImagePrompts: [SCENE_PROMPTS.rooftopConfront, SCENE_PROMPTS.rooftopConfrontAlt],
     arcBrief: 'The protagonist confronts Jiwon on the rooftop. Raw honesty. Jiwon is shaken — nobody talks to him like this. The conversation escalates, then breaks open into something real. End with a moment of mutual recognition: they see each other clearly for the first time. Bittersweet but hopeful. The strongest emotional connection.',
   },
   {
@@ -313,7 +324,7 @@ export const STORY_STEPS: StoryStep[] = [
     title: 'The Quiet Choice',
     requires: { 'cp-1': 'approach', 'cp-2': 'stay' },
     staticImage: '/scene-rooftop.jpg',
-    sceneImagePrompt: SCENE_PROMPTS.rooftopStay,
+    sceneImagePrompts: [SCENE_PROMPTS.rooftopStay, SCENE_PROMPTS.rooftopStayAlt],
     arcBrief: 'The protagonist chooses presence over words. They sit together on the rooftop as the sun sets. Jiwon doesn\'t say much, but his body language softens. A small gesture — sharing earbuds, letting their shoulders touch. End with quiet intimacy. Nothing resolved, but something planted. Warm and tender.',
   },
   {
@@ -322,7 +333,7 @@ export const STORY_STEPS: StoryStep[] = [
     title: 'The Leap',
     requires: { 'cp-1': 'follow', 'cp-2': 'trust' },
     staticImage: '/scene-studio.jpg',
-    sceneImagePrompt: SCENE_PROMPTS.backstageTrust,
+    sceneImagePrompts: [SCENE_PROMPTS.backstageTrust, SCENE_PROMPTS.backstageTrustAlt],
     arcBrief: 'The protagonist takes a risk and tells Jiwon the truth. Backstage, after everything, Jiwon is tired of people lying to him. The honesty lands. He shares something he\'s never told anyone. End with a fragile new trust — two people who chose each other in a world that incentivizes pretending. Vulnerable and honest.',
   },
   {
@@ -331,7 +342,7 @@ export const STORY_STEPS: StoryStep[] = [
     title: 'The Distance',
     requires: { 'cp-1': 'follow', 'cp-2': 'deflect' },
     staticImage: '/scene-elevator.jpg',
-    sceneImagePrompt: SCENE_PROMPTS.cafeDeflect,
+    sceneImagePrompts: [SCENE_PROMPTS.cafeDeflect, SCENE_PROMPTS.cafeDeflectAlt],
     arcBrief: 'The protagonist walks away. Later, alone in a late-night cafe, they replay what happened. Their phone buzzes — it\'s Jiwon, sending a song link with no message. End with the ache of something that could have been. Melancholic but beautiful. The connection is real but neither was brave enough.',
   },
 

@@ -1,7 +1,7 @@
 # Chaptr V2 — Current Session State
 
 ## In Progress
-- Scene image carousel (HALF DONE — stopped at context limit)
+- Nothing active
 
 ## Done This Session
 - Google Auth via Supabase (LoginPage, AuthContext, ProtectedRoute)
@@ -18,36 +18,30 @@
 - Selfie reference restored in scene generation (user character appears in scenes)
 - Missing public assets committed (sora-portrait.png, step1-anime.png, step1-selfie.jpeg)
 - TermsPage + PrivacyPage created (were blocking Vercel build)
+- **Scene image carousel — COMPLETE**
+  - All 9 beats now use `sceneImagePrompts: [primary, alt]` arrays
+  - Generation logic updated: each prompt stored as `${stepId}:0`, `${stepId}:1`
+  - `SceneCarousel` component: AnimatePresence crossfade, 2500ms auto-advance
+  - Dot indicators (pill-style active, circle inactive), clickable
+  - Left/right half-screen click zones for prev/next
+  - Carousel resets on step change, cleans up interval
+  - Both mobile (full-screen bg) and desktop (45vh panel) use carousel
 
-## Next — Scene Image Carousel (RESUME HERE)
-Half-implemented. Here's what's done vs remaining:
-
-### Done:
-- Added `sceneImagePrompts?: string[]` to StoryStep interface in storyData.ts
-- Added alt-angle prompts for all scenes in SCENE_PROMPTS (elevatorAlt, rehearsalAlt, etc.)
-- Updated beat-1 to use `sceneImagePrompts: [elevator, elevatorAlt]`
-
-### Still needed:
-1. Update ALL remaining beats to use `sceneImagePrompts: [primary, alt]` array
-2. In StoryReaderPage.tsx — update generation logic:
-   - If `sceneImagePrompts` exists, loop through array and generate each
-   - Store as `${stepId}:0`, `${stepId}:1`, etc.
-   - `currentImages` becomes array: `sceneImagePrompts.map((_, i) => sceneImages[\`${stepId}:${i}\`])`
-3. Build carousel UI in the beat background:
-   - `carouselIndex` state, auto-advance every 2500ms via useEffect
-   - Framer Motion `AnimatePresence` fade between images
-   - Dot indicators bottom-left, clickable
-   - Touch/click prev/next
+## Next Priorities (from PROJECT.md)
+1. Immersive choice UX — scene backdrop + consequence hints
+2. Test full playthrough on Horror + Mystery universes
+3. Cost modeling before scaling
+4. Hero BG blurry on retina — needs 2x source
 
 ## Key Files
 - `src/store/useStore.ts` — multi-character Zustand store
 - `src/hooks/useActiveStory.ts` — derived state hook
 - `src/lib/claudeStream.ts` — streaming prose + chat + memory extraction
 - `src/lib/affinity.ts` — tier definitions
-- `src/data/storyData.ts` — STORY_STEPS, SCENE_PROMPTS (carousel prompts added)
+- `src/data/storyData.ts` — STORY_STEPS, SCENE_PROMPTS (all beats now carousel)
 - `src/components/ChatScene.tsx` — single-character chat + mood stages
 - `src/components/SceneChat.tsx` — multi-character scene chat
-- `src/pages/StoryReaderPage.tsx` — main reader (needs carousel logic)
+- `src/pages/StoryReaderPage.tsx` — main reader (SceneCarousel wired in)
 - `src/contexts/AuthContext.tsx` — Supabase auth session
 - `src/pages/LoginPage.tsx` — Google sign-in page
 - `src/components/ProtectedRoute.tsx` — auth guard + sign out button
