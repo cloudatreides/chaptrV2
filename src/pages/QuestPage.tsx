@@ -7,7 +7,7 @@ import { useActiveStory } from '../hooks/useActiveStory'
 import { getQuestById } from '../data/quests'
 import { resolveLoveInterestId } from '../data/storyData'
 import { ChatScene } from '../components/ChatScene'
-import { streamBeatProse, extractTrustData, summarizeChat } from '../lib/claudeStream'
+import { streamBeatProse, extractTrustData } from '../lib/claudeStream'
 import { useStreamingTypewriter } from '../hooks/useTypewriter'
 import { trackEvent } from '../lib/supabase'
 
@@ -20,7 +20,7 @@ export function QuestPage() {
     loveInterest, bio, selectedUniverse, characterState,
     choiceDescriptions, chatSummaries, questProgress, activeCharacter,
   } = useActiveStory()
-  const { advanceQuest, completeQuest, updateTrust, setTrustStatusLabel, addChatMessage } = useStore()
+  const { advanceQuest, updateTrust, setTrustStatusLabel } = useStore()
   const summariesList = Object.values(chatSummaries)
 
   const progress = questId ? questProgress[questId] : undefined

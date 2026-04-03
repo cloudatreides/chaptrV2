@@ -124,7 +124,7 @@ export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, 
 
     // Build message history: user-only messages as 'user', everything else as 'assistant'
     const claudeMessages = newMessages.map(m => ({
-      role: m.role === 'user' ? 'user' as const : 'assistant' as const,
+      role: m.role === 'user' ? 'user' as const : 'character' as const,
       content: m.content,
       characterId: m.characterId ?? 'user',
       timestamp: Date.now(),

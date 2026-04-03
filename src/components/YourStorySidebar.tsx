@@ -1,11 +1,10 @@
-import { RotateCcw, Sparkles } from 'lucide-react'
+import { RotateCcw } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { useActiveStory } from '../hooks/useActiveStory'
 import { CHARACTERS, getCharacter } from '../data/characters'
 import { resolveLoveInterestId, UNIVERSES } from '../data/storyData'
 import { getQuestsForUniverse } from '../data/quests'
-import { getAffinityTier } from '../lib/affinity'
 
 export function YourStorySidebar() {
   const navigate = useNavigate()

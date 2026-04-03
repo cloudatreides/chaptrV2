@@ -357,10 +357,6 @@ export function FreeChatPage() {
           const charData = getCharacter(id, selectedUniverse) ?? CHARACTERS[id]
           const charPortrait = characterPortraits[id] ?? null
           const isActive = id === activeCharId
-          const charState = chatStates[id]
-          const exchangeCount = charState?.exchangeCount ?? 0
-          const hasTalked = exchangeCount > 0
-
           return (
             <button
               key={id}
