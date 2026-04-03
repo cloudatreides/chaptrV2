@@ -583,7 +583,7 @@ export function LandingPage() {
             <motion.div className="flex flex-col gap-3" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
               <div className="flex items-center gap-2">
                 <BookOpen size={14} className="text-accent" />
-                <p className="text-accent/80 font-medium text-xs tracking-[2px] uppercase" style={{ fontFamily: SG }}>AI Interactive Story</p>
+                <p className="text-white/90 font-medium text-xs tracking-[2px] uppercase" style={{ fontFamily: SG, textShadow: '0 1px 8px rgba(0,0,0,0.8)' }}>AI Interactive Story</p>
               </div>
               <TypewriterHeadline fontSize={40} style={{ lineHeight: 1 }} />
               <p className="text-white/60 text-sm leading-relaxed" style={{ maxWidth: 300, fontFamily: INTER }}>
@@ -781,8 +781,8 @@ export function LandingPage() {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.15 }}
                 >
-                  <BookOpen size={14} className="text-accent/70" />
-                  <p className="text-accent/70 font-medium text-xs tracking-[3px] uppercase" style={{ fontFamily: SG }}>AI Interactive Story</p>
+                  <BookOpen size={14} className="text-accent" />
+                  <p className="text-white/90 font-medium text-xs tracking-[3px] uppercase" style={{ fontFamily: SG, textShadow: '0 1px 8px rgba(0,0,0,0.8)' }}>AI Interactive Story</p>
                 </motion.div>
 
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}>
