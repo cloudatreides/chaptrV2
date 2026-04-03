@@ -1,6 +1,7 @@
-import { RotateCcw } from 'lucide-react'
+import { RotateCcw, LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
+import { useAuth } from '../contexts/AuthContext'
 import { useActiveStory } from '../hooks/useActiveStory'
 import { CHARACTERS, getCharacter } from '../data/characters'
 import { resolveLoveInterestId, UNIVERSES } from '../data/storyData'
@@ -10,6 +11,7 @@ export function YourStorySidebar() {
   const navigate = useNavigate()
   const { selfieUrl, loveInterest, choiceDescriptions, chatSummaries, characterState, trustStatusLabel, selectedUniverse, activeCharacter, primaryNpcName, characterAffinities, questProgress } = useActiveStory()
   const resetStory = useStore((s) => s.resetStory)
+  const { signOut } = useAuth()
   const junhoTrust = characterState.junhoTrust
   const trustLabel = trustStatusLabel
   const liName = primaryNpcName
@@ -131,6 +133,14 @@ export function YourStorySidebar() {
       >
         <RotateCcw size={14} className="text-textSecondary" />
         <span>Start over</span>
+      </button>
+      <button
+        className="w-full flex items-center justify-center gap-2 mt-2 px-4 py-3 rounded-xl text-textMuted text-sm font-medium transition-all hover:text-textSecondary"
+        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+        onClick={signOut}
+      >
+        <LogOut size={13} />
+        <span>Sign out</span>
       </button>
     </div>
   )
