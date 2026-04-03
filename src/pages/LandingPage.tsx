@@ -551,7 +551,7 @@ export function LandingPage() {
     }
   }
 
-  useEffect(() => { trackEvent('landing_view') }, [])
+  // trackEvent('landing_view') — disabled until chaptr_events table is created in Supabase
 
   return (
     <div className="bg-bg">
@@ -613,7 +613,7 @@ export function LandingPage() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
             >
-              Free to play · No account needed · 5 min experience
+              Free to play · Sign in with Google · 5 min experience
             </motion.p>
           </div>
         </div>
@@ -805,7 +805,7 @@ export function LandingPage() {
                   >
                     Start Your Story <ArrowRight size={18} />
                   </button>
-                  <span className="text-white/25 text-sm" style={{ fontFamily: INTER }}>Free to play · No account needed · 5 min experience</span>
+                  <span className="text-white/25 text-sm" style={{ fontFamily: INTER }}>Free to play · Sign in with Google · 5 min experience</span>
                 </motion.div>
               </div>
 
