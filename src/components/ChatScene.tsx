@@ -4,7 +4,7 @@ import { Send, ArrowRight } from 'lucide-react'
 import { CHARACTERS, getCharacter } from '../data/characters'
 import { useStore } from '../store/useStore'
 import { useActiveStory } from '../hooks/useActiveStory'
-import { streamChatReply, summarizeChat, generateOpeningMessage } from '../lib/claudeStream'
+import { streamChatReply, summarizeChat, generateOpeningMessage, extractMemories } from '../lib/claudeStream'
 import { generateCharacterPortrait, generateSceneImage } from '../lib/togetherAi'
 import { trackEvent } from '../lib/supabase'
 import { getAffinityGrowth } from '../lib/affinity'
@@ -93,8 +93,8 @@ interface Props {
 }
 
 export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3, storyContext, chatImagePrompt, onComplete }: Props) {
-  const { bio, loveInterest, selectedUniverse, characterState, characterPortraits, characterAffinities, selfieUrl } = useActiveStory()
-  const { addChatMessage, setChatSummary, setCharacterPortrait, updateAffinity } = useStore()
+  const { bio, loveInterest, selectedUniverse, characterState, characterPortraits, characterAffinities, characterMemories, selfieUrl } = useActiveStory()
+  const { addChatMessage, setChatSummary, setCharacterPortrait, updateAffinity, addCharacterMemory } = useStore()
   const affinityScore = characterAffinities[characterId] ?? 0
   const character = getCharacter(characterId, selectedUniverse) ?? CHARACTERS[characterId]
   const [localMessages, setLocalMessages] = useState<{ role: 'user' | 'character'; content: string }[]>([])
@@ -135,12 +135,16 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
     const generateOpener = async () => {
       setIsLoadingOpener(true)
 
-      // Generate intro image in parallel (fire and forget)
-      const imagePrompt = chatImagePrompt ?? character?.introImagePrompt
-      if (imagePrompt) {
-        generateSceneImage({ prompt: imagePrompt, width: 768, height: 512, referenceImageUrl: selfieUrl }).then((url) => {
-          if (url) setIntroImage(url)
-        })
+      // Show user's selfie as intro image, or fall back to generated scene
+      if (selfieUrl) {
+        setIntroImage(selfieUrl)
+      } else {
+        const imagePrompt = chatImagePrompt ?? character?.introImagePrompt
+        if (imagePrompt) {
+          generateSceneImage({ prompt: imagePrompt, width: 768, height: 512 }).then((url) => {
+            if (url) setIntroImage(url)
+          })
+        }
       }
 
       try {
@@ -152,6 +156,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
           loveInterest,
           universeId: selectedUniverse,
           affinityScore,
+          characterMemories: characterMemories[characterId] ?? [],
         })
         const charMessage = { role: 'character' as const, content: opening }
         setLocalMessages([charMessage])
@@ -207,6 +212,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
         universeId: selectedUniverse,
         signal: abortRef.current.signal,
         affinityScore,
+        characterMemories: characterMemories[characterId] ?? [],
       })
 
       for await (const chunk of gen) {
@@ -221,6 +227,17 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
       setExchangeCount(newExchange)
       updateAffinity(characterId, getAffinityGrowth(newExchange))
       trackEvent('chat_exchange', { characterId, exchange: newExchange })
+
+      // Extract memories every 2nd exchange (fire-and-forget)
+      if (newExchange % 2 === 0) {
+        const msgsForExtraction = [
+          ...allMessages,
+          { role: 'character' as const, content: fullReply, characterId, timestamp: Date.now() },
+        ]
+        extractMemories({ characterId, messages: msgsForExtraction })
+          .then((facts) => facts.forEach((f) => addCharacterMemory(characterId, f)))
+          .catch(() => {})
+      }
 
     } catch (e) {
       if (e instanceof Error && e.name !== 'AbortError') {

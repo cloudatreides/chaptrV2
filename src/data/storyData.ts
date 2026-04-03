@@ -100,6 +100,7 @@ export interface StoryStep {
   // Scene fields (multi-character chat)
   sceneCharacters?: SceneCharacter[]
   minCharactersTalkedTo?: number // how many characters must be talked to before advancing
+  groupChat?: boolean // if true, renders as unified group thread instead of tabbed scene
   // Choice fields
   choicePointId?: string
   options?: ChoiceOption[]

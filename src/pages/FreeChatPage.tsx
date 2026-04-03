@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { getCharacter, CHARACTERS } from '../data/characters'
 import { useStore } from '../store/useStore'
 import { useActiveStory } from '../hooks/useActiveStory'
-import { streamChatReply, generateOpeningMessage } from '../lib/claudeStream'
+import { streamChatReply, generateOpeningMessage, extractMemories } from '../lib/claudeStream'
 import { generateCharacterPortrait } from '../lib/togetherAi'
 import { getStoryData } from '../data/stories'
 import { trackEvent } from '../lib/supabase'
@@ -110,10 +110,10 @@ function buildPlaythroughContext(
 export function FreeChatPage() {
   const navigate = useNavigate()
   const {
-    bio, loveInterest, selectedUniverse, characterState, characterPortraits,
+    bio, loveInterest, selectedUniverse, characterState, characterPortraits, characterAffinities, characterMemories,
     chatSummaries, choiceDescriptions, trustStatusLabel, revealSignature,
   } = useActiveStory()
-  const { addChatMessage, setCharacterPortrait, updateAffinity } = useStore()
+  const { addChatMessage, setCharacterPortrait, updateAffinity, addCharacterMemory } = useStore()
 
   const characterIds = getUniverseCharacterIds(selectedUniverse, loveInterest)
 
@@ -201,6 +201,7 @@ export function FreeChatPage() {
       universeId: selectedUniverse,
       sceneContext: sceneCtx || undefined,
       affinityScore: characterAffinities[activeCharId] ?? 0,
+      characterMemories: characterMemories[activeCharId] ?? [],
     }).then(opening => {
       const charMessage = { role: 'character' as const, content: opening }
       setChatStates(prev => ({
@@ -282,6 +283,7 @@ export function FreeChatPage() {
         signal: abortRef.current.signal,
         sceneContext: sceneCtx || undefined,
         affinityScore: characterAffinities[activeCharId] ?? 0,
+        characterMemories: characterMemories[activeCharId] ?? [],
       })
 
       for await (const chunk of gen) {
@@ -303,6 +305,17 @@ export function FreeChatPage() {
       setStreamedReply('')
       updateAffinity(activeCharId, getAffinityGrowth(newExchange))
       trackEvent('free_chat_exchange', { characterId: activeCharId, exchange: newExchange })
+
+      // Extract memories every 2nd exchange (fire-and-forget)
+      if (newExchange % 2 === 0) {
+        const msgsForExtraction = [
+          ...allMessages,
+          { role: 'character' as const, content: fullReply, characterId: activeCharId, timestamp: Date.now() },
+        ]
+        extractMemories({ characterId: activeCharId, messages: msgsForExtraction })
+          .then((facts) => facts.forEach((f) => addCharacterMemory(activeCharId, f)))
+          .catch(() => {})
+      }
     } catch (e) {
       if (e instanceof Error && e.name !== 'AbortError') {
         const fallback = { role: 'character' as const, content: '...' }

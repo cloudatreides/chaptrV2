@@ -9,6 +9,7 @@ import { GemCounter } from '../components/GemCounter'
 import { ChoicePoint } from '../components/ChoicePoint'
 import { ChatScene } from '../components/ChatScene'
 import { SceneChat } from '../components/SceneChat'
+import { GroupChatScene } from '../components/GroupChatScene'
 import { YourStorySheet } from '../components/YourStorySheet'
 import { YourStorySidebar } from '../components/YourStorySidebar'
 import { streamBeatProse, extractTrustData } from '../lib/claudeStream'
@@ -328,6 +329,16 @@ export function StoryReaderPage() {
           ...sc,
           characterId: sc.characterId === 'jiwon' ? resolveLoveInterestId(loveInterest) : sc.characterId,
         }))
+        if (currentStep.groupChat) {
+          return (
+            <GroupChatScene
+              stepId={currentStep.id}
+              characters={resolvedSceneChars}
+              storyContext={storyContext}
+              onComplete={handleChatComplete}
+            />
+          )
+        }
         return (
           <SceneChat
             stepId={currentStep.id}

@@ -4,7 +4,7 @@ import { Send, ArrowRight } from 'lucide-react'
 import { getCharacter, CHARACTERS } from '../data/characters'
 import { useStore } from '../store/useStore'
 import { useActiveStory } from '../hooks/useActiveStory'
-import { streamChatReply, summarizeChat, generateOpeningMessage } from '../lib/claudeStream'
+import { streamChatReply, summarizeChat, generateOpeningMessage, extractMemories } from '../lib/claudeStream'
 import { generateCharacterPortrait, generateSceneImage } from '../lib/togetherAi'
 import { trackEvent } from '../lib/supabase'
 import { getAffinityGrowth } from '../lib/affinity'
@@ -113,8 +113,8 @@ interface Props {
 // ─── Component ───
 
 export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, storyContext, chatImagePrompt, onComplete }: Props) {
-  const { bio, loveInterest, selectedUniverse, characterState, characterPortraits, characterAffinities, selfieUrl } = useActiveStory()
-  const { addChatMessage, setChatSummary, setCharacterPortrait, updateAffinity } = useStore()
+  const { bio, loveInterest, selectedUniverse, characterState, characterPortraits, characterAffinities, characterMemories, selfieUrl } = useActiveStory()
+  const { addChatMessage, setChatSummary, setCharacterPortrait, updateAffinity, addCharacterMemory } = useStore()
 
   // Per-character state
   const [chatStates, setChatStates] = useState<Record<string, CharChatState>>(() => {
@@ -215,6 +215,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
       universeId: selectedUniverse,
       sceneContext: sceneCtx || undefined,
       affinityScore: characterAffinities[activeCharId] ?? 0,
+      characterMemories: characterMemories[activeCharId] ?? [],
     }).then(opening => {
       const charMessage = { role: 'character' as const, content: opening }
       setChatStates(prev => ({
@@ -300,6 +301,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
         signal: abortRef.current.signal,
         sceneContext: sceneCtx || undefined,
         affinityScore: characterAffinities[activeCharId] ?? 0,
+        characterMemories: characterMemories[activeCharId] ?? [],
       })
 
       for await (const chunk of gen) {
@@ -321,6 +323,17 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
       setStreamedReply('')
       updateAffinity(activeCharId, getAffinityGrowth(newExchange))
       trackEvent('chat_exchange', { characterId: activeCharId, exchange: newExchange, isScene: true })
+
+      // Extract memories every 2nd exchange (fire-and-forget)
+      if (newExchange % 2 === 0) {
+        const msgsForExtraction = [
+          ...allMessages,
+          { role: 'character' as const, content: fullReply, characterId: activeCharId, timestamp: Date.now() },
+        ]
+        extractMemories({ characterId: activeCharId, messages: msgsForExtraction })
+          .then((facts) => facts.forEach((f) => addCharacterMemory(activeCharId, f)))
+          .catch(() => {})
+      }
     } catch (e) {
       if (e instanceof Error && e.name !== 'AbortError') {
         const fallback = { role: 'character' as const, content: '...' }
