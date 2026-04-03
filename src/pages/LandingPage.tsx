@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, BookOpen, Sparkles, Camera, MessageCircle, GitBranch } from 'lucide-react'
-import { trackEvent } from '../lib/supabase'
+
 
 const STEPS: { num: string; icon: React.ReactNode; title: string; desc: string; img: string; widget?: 'morph' | 'universes' | 'choices' }[] = [
   {
