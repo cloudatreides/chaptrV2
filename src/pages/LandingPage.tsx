@@ -96,8 +96,8 @@ function CharAvatar({ size = 28 }: { size?: number }) {
       style={{ width: size, height: size, background: 'rgba(200,75,158,0.15)' }}
     >
       <img
-        src="/sora-portrait.png"
-        alt="Sora"
+        src="/jiwon-portrait.png"
+        alt="Jiwon"
         className="w-full h-full object-cover"
       />
     </div>
@@ -240,7 +240,7 @@ function ChoiceCards({ height, className }: { height: number; className?: string
   const [chosen, setChosen] = useState<0 | 1 | null>(null)
 
   const choices = [
-    { text: 'Trust her', hint: 'Let her in. See what happens.', color: '#c84b9e', rgb: '200,75,158' },
+    { text: 'Trust him', hint: 'Let him in. See what happens.', color: '#c84b9e', rgb: '200,75,158' },
     { text: 'Walk away', hint: 'Keep your distance. For now.', color: '#8b5cf6', rgb: '139,92,246' },
   ]
 
@@ -312,9 +312,9 @@ function StepImage({ step, height, className }: { step: typeof STEPS[number]; he
 // ─── Live Chat Demo ───
 
 const CHAT_SCRIPT = [
-  { role: 'character' as const, name: 'Sora', text: 'hey~ you\'re the new transfer student, right? i\'ve been curious about you.' },
-  { role: 'user' as const, name: 'You', text: 'Maybe. What have you heard?' },
-  { role: 'character' as const, name: 'Sora', text: 'enough to know you\'re not boring. that\'s rare around here.' },
+  { role: 'character' as const, name: 'Jiwon', text: '...you\'re the transfer student. I didn\'t think you\'d actually show up.' },
+  { role: 'user' as const, name: 'You', text: 'Were you waiting for me?' },
+  { role: 'character' as const, name: 'Jiwon', text: '...don\'t read into it. I just noticed, that\'s all.' },
 ]
 
 function ChatDemo({ compact }: { compact?: boolean }) {
@@ -412,12 +412,12 @@ function ChatDemo({ compact }: { compact?: boolean }) {
       <div className="flex items-center gap-2 px-3 py-2 border-b border-white/5">
         <CharAvatar size={compact ? 26 : 32} />
         <div>
-          <p className="text-white/80 text-xs font-medium" style={{ fontFamily: INTER }}>Sora</p>
+          <p className="text-white/80 text-xs font-medium" style={{ fontFamily: INTER }}>Jiwon</p>
           <p className="text-white/25 text-[10px]" style={{ fontFamily: INTER }}>Seoul Transfer · Romance</p>
         </div>
         {/* Mood stages like the app */}
         <div className="ml-auto flex items-center gap-1.5">
-          {['curious', 'vibing'].map((stage, i) => (
+          {['guarded', 'warming up'].map((stage, i) => (
             <span
               key={stage}
               className="text-[9px] italic"
@@ -449,7 +449,7 @@ function ChatDemo({ compact }: { compact?: boolean }) {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.4 }}
                 >
-                  <img src="/sora-portrait.png" alt="Sora" className="w-full h-full object-cover object-center" />
+                  <img src="/jiwon-portrait.png" alt="Jiwon" className="w-full h-full object-cover object-center" />
                 </motion.div>
               )}
               <div className={`flex items-end gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
