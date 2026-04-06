@@ -10,7 +10,7 @@ const STEPS: { num: string; icon: React.ReactNode; title: string; desc: string; 
     num: '01',
     icon: <Camera size={20} className="text-accent" />,
     title: 'Upload your selfie',
-    desc: 'AI transforms your photo into an anime character — you become the protagonist.',
+    desc: 'AI transforms your photo into an anime character. You become the protagonist.',
     img: '/step1-upload.jpeg',
     widget: 'morph',
   },
