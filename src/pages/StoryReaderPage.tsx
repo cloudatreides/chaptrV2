@@ -18,6 +18,8 @@ import { useStreamingTypewriter, useTypewriter } from '../hooks/useTypewriter'
 import { AudioToggle } from '../components/AudioToggle'
 import { ambientAudio } from '../lib/ambientAudio'
 import type { AmbientMood } from '../lib/ambientAudio'
+import { COMMUNITY_STATS } from '../data/communityStats'
+import { ShareMomentToast } from '../components/ShareMomentToast'
 import { trackEvent } from '../lib/supabase'
 import { getPingsForUniverse } from '../data/pings'
 import { PingNotification } from '../components/PingNotification'
@@ -280,23 +282,45 @@ export function StoryReaderPage() {
     }
   }, [currentStepIndex, currentStep?.id])
 
+  const universeTitle = UNIVERSES.find(u => u.id === selectedUniverse)?.title ?? 'The Seoul Transfer'
+
   const handleAdvance = () => advanceStep()
+
+  const [choiceResult, setChoiceResult] = useState<{ choicePointId: string; selectedOptionId: string } | null>(null)
+  const [shareMoment, setShareMoment] = useState<{ label: string; universe: string } | null>(null)
 
   const handleBranchChoice = (optionId: string) => {
     if (!currentStep || currentStep.type !== 'choice') return
     const option = currentStep.options?.find((o) => o.id === optionId)
     if (!option || !currentStep.choicePointId) return
+
+    // Handle premium gem cost
+    if (option.premium && option.gemCost) {
+      const success = useStore.getState().spendGems(option.gemCost)
+      if (!success) return
+    }
+
     setBranchChoice(currentStep.choicePointId, optionId)
     addChoiceDescription({ label: option.label, description: option.description })
-    trackEvent('choice_made', { choicePoint: currentStep.choicePointId, option: optionId })
-    setTimeout(() => advanceStep(), 300)
+    trackEvent('choice_made', { choicePoint: currentStep.choicePointId, option: optionId, premium: !!option.premium })
+
+    // Show community stats + share toast
+    setChoiceResult({ choicePointId: currentStep.choicePointId, selectedOptionId: optionId })
+    setShareMoment({ label: option.label, universe: universeTitle })
+
+    setTimeout(() => {
+      setChoiceResult(null)
+      advanceStep()
+    }, 3500)
+
+    // Auto-dismiss share toast after 8s
+    setTimeout(() => setShareMoment(null), 8000)
   }
 
   const handleChatComplete = () => advanceStep()
 
   if (!currentStep) return null
 
-  const universeTitle = UNIVERSES.find(u => u.id === selectedUniverse)?.title ?? 'The Seoul Transfer'
   const universeDesc = UNIVERSES.find(u => u.id === selectedUniverse)?.description ?? 'The protagonist is a transfer student at Seoul Arts Academy.'
   const storyContext = `Chapter 1: ${universeTitle}. ${universeDesc} ` +
     (choiceDescriptions.length > 0
@@ -346,6 +370,9 @@ export function StoryReaderPage() {
             playerName={activeCharacter?.name ?? null}
             playerAvatar={selfieUrl}
             sceneBackdrop={backdrop}
+            communityStats={choiceResult ? COMMUNITY_STATS[choiceResult.choicePointId] : undefined}
+            selectedOptionId={choiceResult?.selectedOptionId ?? null}
+            showStats={!!choiceResult}
           />
         )
       }
@@ -530,6 +557,17 @@ export function StoryReaderPage() {
           <QuestUnlockToast
             quest={questToast}
             onDismiss={() => setQuestToast(null)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Share moment toast after choice */}
+      <AnimatePresence>
+        {shareMoment && (
+          <ShareMomentToast
+            optionLabel={shareMoment.label}
+            universeName={shareMoment.universe}
+            onDismiss={() => setShareMoment(null)}
           />
         )}
       </AnimatePresence>

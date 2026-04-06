@@ -32,7 +32,8 @@ interface Props {
 
 export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, storyContext, onComplete }: Props) {
   const { bio, loveInterest, selectedUniverse, characterState, characterPortraits, characterAffinities, characterMemories } = useActiveStory()
-  const { addChatMessage, setCharacterPortrait, updateAffinity, addCharacterMemory } = useStore()
+  const { addChatMessage, setCharacterPortrait, updateAffinity, addCharacterMemory, globalAffinities, playthroughHistory } = useStore()
+  const previousPlaythroughs = playthroughHistory.filter((pt) => pt.universeId === selectedUniverse)
 
   const [messages, setMessages] = useState<GroupMessage[]>([])
   const [input, setInput] = useState('')
@@ -154,6 +155,8 @@ export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, 
         sceneContext: groupCtx,
         affinityScore: characterAffinities[primaryCharId] ?? 0,
         characterMemories: characterMemories[primaryCharId] ?? [],
+        globalAffinityScore: globalAffinities[primaryCharId] ?? 0,
+        previousPlaythroughs,
       })
 
       for await (const chunk of gen) {

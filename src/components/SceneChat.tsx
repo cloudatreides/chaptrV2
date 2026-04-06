@@ -212,7 +212,8 @@ interface Props {
 
 export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, storyContext, chatImagePrompt, onComplete }: Props) {
   const { activeCharacter, bio, loveInterest, selectedUniverse, characterState, characterPortraits, characterAffinities, characterMemories, selfieUrl } = useActiveStory()
-  const { addChatMessage, setChatSummary, setCharacterPortrait, updateAffinity, addCharacterMemory } = useStore()
+  const { addChatMessage, setChatSummary, setCharacterPortrait, updateAffinity, addCharacterMemory, globalAffinities, playthroughHistory } = useStore()
+  const previousPlaythroughs = playthroughHistory.filter((pt) => pt.universeId === selectedUniverse)
 
   // Per-character state
   const [chatStates, setChatStates] = useState<Record<string, CharChatState>>(() => {
@@ -319,6 +320,8 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
       sceneContext: sceneCtx || undefined,
       affinityScore: characterAffinities[activeCharId] ?? 0,
       characterMemories: characterMemories[activeCharId] ?? [],
+      globalAffinityScore: globalAffinities[activeCharId] ?? 0,
+      previousPlaythroughs,
     }).then(opening => {
       const charMessage = { role: 'character' as const, content: opening }
       setChatStates(prev => ({
@@ -405,6 +408,8 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
         sceneContext: sceneCtx || undefined,
         affinityScore: characterAffinities[activeCharId] ?? 0,
         characterMemories: characterMemories[activeCharId] ?? [],
+        globalAffinityScore: globalAffinities[activeCharId] ?? 0,
+        previousPlaythroughs,
       })
 
       for await (const chunk of gen) {

@@ -72,6 +72,8 @@ export interface ChoiceOption {
   sceneHint: string // mood hint shown on card
   consequenceHint?: string // 1-sentence preview of what happens
   imagePrompt?: string // per-option preview image
+  premium?: boolean // gem-gated option
+  gemCost?: number // cost in gems
 }
 
 export interface SceneCharacter {
@@ -206,7 +208,39 @@ export const STORY_STEPS: StoryStep[] = [
         consequenceHint: 'You\'ll see a side of him he hides from everyone — but if he catches you...',
         imagePrompt: SCENE_PROMPTS.corridorFollow,
       },
+      {
+        id: 'crash',
+        label: 'Crash the rehearsal',
+        description: 'Walk in like you belong. Take a seat in the front row.',
+        sceneHint: 'reckless / unforgettable',
+        consequenceHint: 'They\'ll either throw you out or never forget your face.',
+        imagePrompt: SCENE_PROMPTS.rehearsal,
+        premium: true,
+        gemCost: 15,
+      },
     ],
+  },
+
+  // ── Act 2: Crash path (premium — merges into approach) ──
+  {
+    id: 'beat-3-crash',
+    type: 'beat',
+    title: 'The Crash',
+    requires: { 'cp-1': 'crash' },
+    sceneImagePrompts: [SCENE_PROMPTS.rehearsal, SCENE_PROMPTS.rehearsalAlt],
+    arcBrief: 'The protagonist walks straight into NOVA\'s rehearsal and sits in the front row. Everyone stops. Sora\'s jaw drops. The choreographer starts yelling. But Jiwon — Jiwon laughs. It\'s the first time anyone has seen him laugh in weeks. He waves off the choreographer: "Let them stay." The rehearsal continues with the protagonist watching from five feet away. Jiwon performs differently with someone watching who doesn\'t work for the label. After, he approaches: "Nobody does that." End with electric tension — this was either the bravest or stupidest thing they\'ve ever done.',
+  },
+  {
+    id: 'scene-crash',
+    type: 'scene',
+    title: 'After the Crash',
+    requires: { 'cp-1': 'crash' },
+    chatImagePrompt: SCENE_PROMPTS.rehearsal,
+    sceneCharacters: [
+      { characterId: 'jiwon', minExchanges: 2, maxExchanges: 8, required: true },
+      { characterId: 'sora', minExchanges: 1, maxExchanges: 8, required: false },
+    ],
+    minCharactersTalkedTo: 1,
   },
 
   // ── Act 2: Approach path ──
@@ -272,6 +306,32 @@ export const STORY_STEPS: StoryStep[] = [
 
   // ── Choice Point B (options differ per path) ──
   {
+    id: 'cp-2-crash',
+    type: 'choice',
+    title: 'The Moment',
+    choicePointId: 'cp-2',
+    requires: { 'cp-1': 'crash' },
+    sceneImagePrompt: SCENE_PROMPTS.rooftopConfront,
+    options: [
+      {
+        id: 'confront',
+        label: 'Confront the truth',
+        description: 'Tell Jiwon what Sora told you. No more pretending.',
+        sceneHint: 'brave / vulnerable',
+        consequenceHint: 'Raw honesty could shatter everything — or finally make it real.',
+        imagePrompt: SCENE_PROMPTS.rooftopConfront,
+      },
+      {
+        id: 'stay',
+        label: 'Stay quiet, stay close',
+        description: 'Some things are better left unsaid. Just be there.',
+        sceneHint: 'gentle / patient',
+        consequenceHint: 'Silence speaks too. Sometimes presence is the braver choice.',
+        imagePrompt: SCENE_PROMPTS.rooftopStay,
+      },
+    ],
+  },
+  {
     id: 'cp-2-approach',
     type: 'choice',
     title: 'The Moment',
@@ -322,6 +382,26 @@ export const STORY_STEPS: StoryStep[] = [
         imagePrompt: SCENE_PROMPTS.cafeDeflect,
       },
     ],
+  },
+
+  // ── Act 3: Crash path endings (reuse approach endings with crash cp-1) ──
+  {
+    id: 'ending-crash-confront',
+    type: 'beat',
+    title: 'The Confrontation',
+    requires: { 'cp-1': 'crash', 'cp-2': 'confront' },
+    staticImage: '/scene-rooftop.jpg',
+    sceneImagePrompts: [SCENE_PROMPTS.rooftopConfront, SCENE_PROMPTS.rooftopConfrontAlt],
+    arcBrief: 'After crashing the rehearsal and earning Jiwon\'s attention in the most chaotic way possible, the protagonist confronts him on the rooftop. "I didn\'t walk in there for attention. I walked in because I wanted to see you without the mask." Jiwon is stunned. Nobody has ever been this reckless AND this honest. The conversation breaks open something real. End with the strongest emotional connection — forged through audacity and truth.',
+  },
+  {
+    id: 'ending-crash-stay',
+    type: 'beat',
+    title: 'The Quiet Choice',
+    requires: { 'cp-1': 'crash', 'cp-2': 'stay' },
+    staticImage: '/scene-rooftop.jpg',
+    sceneImagePrompts: [SCENE_PROMPTS.rooftopStay, SCENE_PROMPTS.rooftopStayAlt],
+    arcBrief: 'After the chaos of crashing the rehearsal, the protagonist chooses silence. They sit together on the rooftop. The contrast is striking — the person who was bold enough to crash a private rehearsal is now gentle enough to just be present. Jiwon notices. "You\'re full of contradictions." A small smile. End with quiet intimacy — the loudest entrance leading to the softest moment.',
   },
 
   // ── Act 3: Four endings ──

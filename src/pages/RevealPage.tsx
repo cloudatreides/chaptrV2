@@ -19,7 +19,8 @@ export function RevealPage() {
     selectedUniverse, bio, loveInterest, trustStatusLabel,
     chatSummaries, characterAffinities,
   } = useActiveStory()
-  const { setRevealSignature, setSceneImage, resetStory } = useStore()
+  const { setRevealSignature, setSceneImage, resetStory, addPlaythroughRecord } = useStore()
+  const activeCharacterId = useStore((s) => s.activeCharacterId)
   const summariesList = Object.values(chatSummaries)
 
   const junhoTrust = characterState.junhoTrust
@@ -61,6 +62,19 @@ export function RevealPage() {
       })
 
       setRevealSignature(sig)
+
+      // Record playthrough for cross-story memory
+      if (activeCharacterId) {
+        addPlaythroughRecord({
+          universeId: selectedUniverse ?? 'seoul-transfer',
+          characterId: activeCharacterId,
+          choices: choiceDescriptions,
+          signature: sig,
+          completedAt: Date.now(),
+          trustScore: junhoTrust,
+        })
+      }
+
       await imagePromise
       setIsLoading(false)
       animateWords(sig)

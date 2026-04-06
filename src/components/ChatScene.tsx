@@ -196,8 +196,10 @@ interface Props {
 
 export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3, storyContext, chatImagePrompt, onComplete }: Props) {
   const { activeCharacter, bio, loveInterest, selectedUniverse, characterState, characterPortraits, characterAffinities, characterMemories, selfieUrl } = useActiveStory()
-  const { addChatMessage, setChatSummary, setCharacterPortrait, updateAffinity, addCharacterMemory } = useStore()
+  const { addChatMessage, setChatSummary, setCharacterPortrait, updateAffinity, addCharacterMemory, globalAffinities, playthroughHistory } = useStore()
   const affinityScore = characterAffinities[characterId] ?? 0
+  const globalAffinityScore = globalAffinities[characterId] ?? 0
+  const previousPlaythroughs = playthroughHistory.filter((pt) => pt.universeId === selectedUniverse)
   const character = getCharacter(characterId, selectedUniverse) ?? CHARACTERS[characterId]
   const [localMessages, setLocalMessages] = useState<{ role: 'user' | 'character'; content: string }[]>([])
   const [input, setInput] = useState('')
@@ -260,6 +262,8 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
           universeId: selectedUniverse,
           affinityScore,
           characterMemories: characterMemories[characterId] ?? [],
+          globalAffinityScore,
+          previousPlaythroughs,
         })
         const charMessage = { role: 'character' as const, content: opening }
         setLocalMessages([charMessage])
@@ -316,6 +320,8 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
         signal: abortRef.current.signal,
         affinityScore,
         characterMemories: characterMemories[characterId] ?? [],
+        globalAffinityScore,
+        previousPlaythroughs,
       })
 
       for await (const chunk of gen) {

@@ -2,7 +2,7 @@ import { getBibleForUniverse, resolveText } from '../data/storyData'
 import { CHARACTERS, getCharacter } from '../data/characters'
 import { getSoraSystemPrompt } from '../data/characters'
 import { getAffinityTier } from './affinity'
-import type { ChatMessage } from '../store/useStore'
+import type { ChatMessage, PlaythroughRecord } from '../store/useStore'
 
 // ─── Types ───
 
@@ -17,6 +17,7 @@ export interface StreamBeatParams {
   loveInterest: 'jiwon' | 'yuna' | null
   universeId: string | null
   signal?: AbortSignal
+  previousPlaythroughs?: PlaythroughRecord[]
 }
 
 export interface StreamChatParams {
@@ -33,6 +34,8 @@ export interface StreamChatParams {
   sceneContext?: string // context from other character conversations in the same scene
   affinityScore?: number // per-character affinity level (0-100)
   characterMemories?: string[] // memorable facts protagonist has shared with this character
+  globalAffinityScore?: number // lifetime affinity across all playthroughs
+  previousPlaythroughs?: PlaythroughRecord[]
 }
 
 export interface SummarizeChatParams {
@@ -103,6 +106,24 @@ async function* streamSSE(response: Response): AsyncGenerator<string> {
   }
 }
 
+/** Build optional prompt additions for cross-playthrough memory */
+function buildMemoryPrompt(globalAffinityScore?: number, previousPlaythroughs?: PlaythroughRecord[]): string {
+  let extra = ''
+  if (globalAffinityScore && globalAffinityScore > 0) {
+    const tier = getAffinityTier(globalAffinityScore)
+    extra += `\n\nCROSS-STORY BOND: You've interacted with the protagonist across multiple stories. Your lifetime connection is at "${tier.label}" level (${globalAffinityScore}/100). You feel a sense of familiarity, like meeting an old friend in a new life.`
+  }
+  if (previousPlaythroughs && previousPlaythroughs.length > 0) {
+    const recent = previousPlaythroughs.slice(-3)
+    const summaries = recent.map((pt) => {
+      const choiceLabels = pt.choices.map((c) => c.label).join(', ')
+      return `- Choices: ${choiceLabels}${pt.signature ? `. Ending: "${pt.signature}"` : ''}`
+    }).join('\n')
+    extra += `\n\nPREVIOUS PLAYTHROUGHS: The player has completed this story before.\n${summaries}\nYou may reference this naturally, e.g. "You chose differently this time..." or "Last time you trusted me." Only when it feels organic, never forced.`
+  }
+  return extra
+}
+
 function makeClaudeRequest(system: string, userMessage: string, options: {
   stream?: boolean
   maxTokens?: number
@@ -128,7 +149,7 @@ function makeClaudeRequest(system: string, userMessage: string, options: {
 // ─── Story Beat Generation ───
 
 function buildBeatSystemPrompt(params: StreamBeatParams): string {
-  const { choiceHistory, chatSummaries, characterState, bio, playerName, loveInterest, universeId } = params
+  const { choiceHistory, chatSummaries, characterState, bio, playerName, loveInterest, universeId, previousPlaythroughs } = params
   const trust = characterState.junhoTrust
   const trustLabel = trust > 70 ? 'high' : trust > 40 ? 'moderate' : 'low'
   const liName = loveInterest === 'yuna' ? 'Yuna' : 'Jiwon'
@@ -147,7 +168,9 @@ function buildBeatSystemPrompt(params: StreamBeatParams): string {
   const bioText = bio ? `\n\nPROTAGONIST PERSONALITY:\n"${bio}"` : ''
   const nameText = playerName ? `\n\nPROTAGONIST NAME: ${playerName}. Use their name occasionally in dialogue and narration (e.g. when other characters address them). Don't overuse it — mix "you" and "${playerName}" naturally.` : ''
 
-  return `${getBibleForUniverse(universeId, loveInterest)}${historyText}${chatText}${trustText}${bioText}${nameText}
+  const memoryText = buildMemoryPrompt(undefined, previousPlaythroughs)
+
+  return `${getBibleForUniverse(universeId, loveInterest)}${historyText}${chatText}${trustText}${bioText}${nameText}${memoryText}
 
 PROSE CONSTRAINTS:
 - Write 2–4 short paragraphs (max 120 words total).
@@ -185,10 +208,12 @@ export interface OpeningMessageParams {
   sceneContext?: string // context from other character conversations in the same scene
   affinityScore?: number // per-character affinity level (0-100)
   characterMemories?: string[] // memorable facts protagonist has shared with this character
+  globalAffinityScore?: number
+  previousPlaythroughs?: PlaythroughRecord[]
 }
 
 export async function generateOpeningMessage(params: OpeningMessageParams): Promise<string> {
-  const { characterId, storyContext, characterState, bio, loveInterest, universeId, sceneContext, affinityScore, characterMemories } = params
+  const { characterId, storyContext, characterState, bio, loveInterest, universeId, sceneContext, affinityScore, characterMemories, globalAffinityScore, previousPlaythroughs } = params
   const character = getCharacter(characterId, universeId)
   if (!character) return '...'
 
@@ -207,6 +232,7 @@ export async function generateOpeningMessage(params: OpeningMessageParams): Prom
     system += `\n\nTHINGS THE PROTAGONIST HAS SHARED WITH YOU:\n${characterMemories.map(m => `- ${m}`).join('\n')}\nYou remember these. Weave them in naturally if relevant — don't force it.`
   }
   if (sceneContext) system += `\n\n${sceneContext}`
+  system += buildMemoryPrompt(globalAffinityScore, previousPlaythroughs)
   system += `\n\nIMPORTANT: You are initiating this conversation. Say something first — a greeting, a comment, a question. Keep it in character. 1-2 sentences max. This should feel natural for the moment in the story.
 
 WRITING STYLE — MANDATORY:
@@ -234,7 +260,7 @@ WRITING STYLE — MANDATORY:
 // ─── Character Chat ───
 
 export async function* streamChatReply(params: StreamChatParams): AsyncGenerator<string> {
-  const { characterId, messages, storyContext, exchangeNumber, maxExchanges, characterState, bio, loveInterest, universeId, signal, sceneContext, affinityScore, characterMemories } = params
+  const { characterId, messages, storyContext, exchangeNumber, maxExchanges, characterState, bio, loveInterest, universeId, signal, sceneContext, affinityScore, characterMemories, globalAffinityScore, previousPlaythroughs } = params
   const character = getCharacter(characterId, universeId)
   if (!character) throw new Error(`Unknown character: ${characterId}`)
 
@@ -253,6 +279,7 @@ export async function* streamChatReply(params: StreamChatParams): AsyncGenerator
     system += `\n\nTHINGS THE PROTAGONIST HAS SHARED WITH YOU:\n${characterMemories.map(m => `- ${m}`).join('\n')}\nYou remember these. Weave them in naturally if relevant — don't force it.`
   }
   if (sceneContext) system += `\n\n${sceneContext}`
+  system += buildMemoryPrompt(globalAffinityScore, previousPlaythroughs)
 
   system += `\n\nWRITING STYLE — MANDATORY:
 - Write ONLY dialogue. Just speak as the character.

@@ -14,6 +14,25 @@ export interface CharacterState {
   junhoTrust: number
 }
 
+export interface PlaythroughRecord {
+  universeId: string
+  characterId: string // player character ID
+  choices: { label: string; description: string }[]
+  signature: string | null
+  completedAt: number
+  trustScore: number
+}
+
+export interface AmbientPing {
+  id: string
+  characterId: string
+  universeId: string
+  message: string
+  timestamp: number
+  read: boolean
+  replies: ChatMessage[]
+}
+
 export interface PlayerCharacter {
   id: string
   name: string
@@ -100,6 +119,23 @@ interface StoreState {
   completeQuest: (questId: string, summary: string) => void
   markQuestNotified: (questId: string) => void
   addCharacterMemory: (characterId: string, memory: string) => void
+
+  // ── Global affinity (persists across playthroughs) ──
+  globalAffinities: Record<string, number>
+  updateGlobalAffinity: (characterId: string, newScore: number) => void
+
+  // ── Playthrough history (cross-playthrough memory) ──
+  playthroughHistory: PlaythroughRecord[]
+  addPlaythroughRecord: (record: PlaythroughRecord) => void
+
+  // ── Ambient pings (outside-story character messages) ──
+  ambientPings: AmbientPing[]
+  lastSessionTimestamp: number
+  addAmbientPing: (ping: AmbientPing) => void
+  markAmbientPingRead: (pingId: string) => void
+  addAmbientPingReply: (pingId: string, msg: ChatMessage) => void
+  dismissAmbientPing: (pingId: string) => void
+  updateLastSessionTimestamp: () => void
 
   // ── Gems ──
   gemBalance: number
@@ -264,12 +300,20 @@ export const useStore = create<StoreState>()(
       updateAffinity: (characterId, delta) => set((s) => {
         const p = getProgress(s)
         const current = p.characterAffinities[characterId] ?? 0
-        return updateProgress(s, () => ({
-          characterAffinities: {
-            ...p.characterAffinities,
-            [characterId]: Math.max(0, Math.min(100, current + delta)),
+        const newScore = Math.max(0, Math.min(100, current + delta))
+        const globalCurrent = s.globalAffinities[characterId] ?? 0
+        return {
+          ...updateProgress(s, () => ({
+            characterAffinities: {
+              ...p.characterAffinities,
+              [characterId]: newScore,
+            },
+          })),
+          globalAffinities: {
+            ...s.globalAffinities,
+            [characterId]: Math.max(globalCurrent, newScore),
           },
-        }))
+        }
       }),
 
       markPingSeen: (pingId) => set((s) => {
@@ -325,6 +369,40 @@ export const useStore = create<StoreState>()(
         }))
       }),
 
+      // ── Global affinity ──
+      globalAffinities: {},
+      updateGlobalAffinity: (characterId, newScore) => set((s) => ({
+        globalAffinities: {
+          ...s.globalAffinities,
+          [characterId]: Math.max(s.globalAffinities[characterId] ?? 0, newScore),
+        },
+      })),
+
+      // ── Playthrough history ──
+      playthroughHistory: [],
+      addPlaythroughRecord: (record) => set((s) => ({
+        playthroughHistory: [...s.playthroughHistory, record].slice(-50),
+      })),
+
+      // ── Ambient pings ──
+      ambientPings: [],
+      lastSessionTimestamp: Date.now(),
+      addAmbientPing: (ping) => set((s) => ({
+        ambientPings: [...s.ambientPings, ping],
+      })),
+      markAmbientPingRead: (pingId) => set((s) => ({
+        ambientPings: s.ambientPings.map((p) => p.id === pingId ? { ...p, read: true } : p),
+      })),
+      addAmbientPingReply: (pingId, msg) => set((s) => ({
+        ambientPings: s.ambientPings.map((p) =>
+          p.id === pingId ? { ...p, replies: [...p.replies, msg] } : p
+        ),
+      })),
+      dismissAmbientPing: (pingId) => set((s) => ({
+        ambientPings: s.ambientPings.filter((p) => p.id !== pingId),
+      })),
+      updateLastSessionTimestamp: () => set({ lastSessionTimestamp: Date.now() }),
+
       // ── Gems ──
       gemBalance: 50,
       spendGems: (amount) => {
@@ -362,7 +440,7 @@ export const useStore = create<StoreState>()(
     }),
     {
       name: 'chaptr-v2-story',
-      version: 2,
+      version: 3,
       migrate: (persisted: any, version: number) => {
         if (version < 2 && persisted) {
           // Migrate from flat store to multi-character
@@ -409,6 +487,12 @@ export const useStore = create<StoreState>()(
             gemBalance: persisted.gemBalance ?? 50,
           }
         }
+        if (version < 3 && persisted) {
+          persisted.globalAffinities = persisted.globalAffinities ?? {}
+          persisted.playthroughHistory = persisted.playthroughHistory ?? []
+          persisted.ambientPings = persisted.ambientPings ?? []
+          persisted.lastSessionTimestamp = persisted.lastSessionTimestamp ?? Date.now()
+        }
         return persisted
       },
       partialize: (s) => ({
@@ -417,6 +501,10 @@ export const useStore = create<StoreState>()(
         selectedUniverse: s.selectedUniverse,
         storyProgress: s.storyProgress,
         gemBalance: s.gemBalance,
+        globalAffinities: s.globalAffinities,
+        playthroughHistory: s.playthroughHistory,
+        ambientPings: s.ambientPings,
+        lastSessionTimestamp: s.lastSessionTimestamp,
       }),
     }
   )
