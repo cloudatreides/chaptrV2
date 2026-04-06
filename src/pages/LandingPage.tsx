@@ -111,13 +111,13 @@ function SelfieMorph({ height, className }: { height: number; className?: string
     <div className={`relative w-full overflow-hidden ${className ?? ''}`} style={{ height, backgroundColor: '#1a1525' }}>
       {/* "Selfie" layer — real photo */}
       <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: 'url(/step1-selfie.jpeg)' }}
+        className="absolute inset-0 bg-cover"
+        style={{ backgroundImage: 'url(/step1-selfie.jpeg)', backgroundPosition: 'center 20%' }}
       />
       {/* "Anime" layer — AI-transformed version, fades in over selfie */}
       <motion.div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: 'url(/step1-anime.png)' }}
+        className="absolute inset-0 bg-cover"
+        style={{ backgroundImage: 'url(/step1-anime.png)', backgroundPosition: 'center 20%' }}
         animate={{ opacity: [0, 0, 1, 1, 0, 0] }}
         transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', times: [0, 0.15, 0.4, 0.6, 0.85, 1] }}
       />
