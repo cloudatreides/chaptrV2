@@ -656,7 +656,7 @@ export function LandingPage() {
                   </div>
                   <div className="flex flex-col gap-1">
                     <p className="text-white font-semibold text-[15px]" style={{ fontFamily: INTER }}>{step.title}</p>
-                    <p className="text-white/40 text-xs leading-relaxed" style={{ fontFamily: INTER }}>{step.desc}</p>
+                    <p className="text-white/40 text-[13px] leading-relaxed" style={{ fontFamily: INTER }}>{step.desc}</p>
                   </div>
                 </div>
               </motion.div>
@@ -696,7 +696,7 @@ export function LandingPage() {
                 <div className="w-2 h-2 rounded-full bg-accent mt-1.5 shrink-0" />
                 <div>
                   <p className="text-white/70 font-medium text-sm" style={{ fontFamily: INTER }}>{item.label}</p>
-                  <p className="text-white/30 text-xs mt-0.5" style={{ fontFamily: INTER }}>{item.detail}</p>
+                  <p className="text-white/30 text-[13px] mt-0.5" style={{ fontFamily: INTER }}>{item.detail}</p>
                 </div>
               </motion.div>
             ))}
@@ -762,8 +762,8 @@ export function LandingPage() {
                   >{label}</span>
                 ))}
                 <button
-                  className="text-white text-sm font-semibold px-5 py-2 rounded-lg transition-all hover:opacity-90"
-                  style={{ background: 'linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%)' }}
+                  className="text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-all hover:opacity-90"
+                  style={{ background: 'linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%)', minHeight: 44 }}
                   onClick={handleCTA}
                 >
                   Start Reading
