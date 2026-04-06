@@ -12,10 +12,22 @@
 html, body {
   background-color: #0d0a12;
   color: #f0ecf8;
+  color-scheme: dark;
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+}
+
+/* Focus-visible ring for keyboard navigation */
+:focus-visible {
+  outline: 2px solid #c84b9e;
+  outline-offset: 2px;
+}
+
+button:focus-visible, a:focus-visible, [role="button"]:focus-visible {
+  outline: 2px solid #c84b9e;
+  outline-offset: 2px;
 }
 
 #root {
