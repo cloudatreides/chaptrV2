@@ -54,7 +54,7 @@ input:focus, textarea:focus {
 
 /* Accent gradient button */
 .btn-accent {
-  @apply w-full py-4 rounded-2xl font-semibold text-white text-base tracking-wide transition-opacity;
+  @apply w-full py-4 rounded-xl font-semibold text-white text-base tracking-wide transition-opacity;
   background: linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%);
 }
 .btn-accent:hover {

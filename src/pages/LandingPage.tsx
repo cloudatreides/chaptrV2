@@ -800,7 +800,7 @@ export function LandingPage() {
                 <motion.div className="flex flex-col gap-3" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
                   <button
                     className="self-start flex items-center justify-center gap-2.5 text-white font-semibold text-base transition-all hover:scale-[1.02] hover:shadow-lg"
-                    style={{ height: 54, paddingLeft: 36, paddingRight: 36, borderRadius: 14, background: 'linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%)', fontFamily: SG }}
+                    style={{ height: 54, paddingLeft: 36, paddingRight: 36, borderRadius: 12, background: 'linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%)', fontFamily: SG }}
                     onClick={handleCTA}
                   >
                     Start Your Story <ArrowRight size={18} />
@@ -941,7 +941,7 @@ export function LandingPage() {
               </p>
               <button
                 className="flex items-center justify-center gap-2.5 text-white font-semibold text-base transition-all hover:scale-[1.02]"
-                style={{ height: 54, paddingLeft: 36, paddingRight: 36, borderRadius: 14, background: 'linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%)', fontFamily: SG }}
+                style={{ height: 54, paddingLeft: 36, paddingRight: 36, borderRadius: 12, background: 'linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%)', fontFamily: SG }}
                 onClick={handleCTA}
               >
                 Begin Now <ArrowRight size={18} />
