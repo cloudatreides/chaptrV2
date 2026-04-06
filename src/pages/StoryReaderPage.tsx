@@ -4,7 +4,7 @@ import { Menu } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { useActiveStory } from '../hooks/useActiveStory'
-import { getActiveSteps, getTotalBeats, getCurrentBeatNumber, resolveLoveInterestId, resolveText, getStepsForUniverse } from '../data/storyData'
+import { getActiveSteps, getTotalBeats, getCurrentBeatNumber, resolveLoveInterestId, resolveText, getStepsForUniverse, UNIVERSES } from '../data/storyData'
 import { GemCounter } from '../components/GemCounter'
 import { ChoicePoint } from '../components/ChoicePoint'
 import { ChatScene } from '../components/ChatScene'
@@ -294,7 +294,9 @@ export function StoryReaderPage() {
 
   if (!currentStep) return null
 
-  const storyContext = `Chapter 1: The Seoul Transfer. The protagonist is a transfer student at Seoul Arts Academy. ` +
+  const universeTitle = UNIVERSES.find(u => u.id === selectedUniverse)?.title ?? 'The Seoul Transfer'
+  const universeDesc = UNIVERSES.find(u => u.id === selectedUniverse)?.description ?? 'The protagonist is a transfer student at Seoul Arts Academy.'
+  const storyContext = `Chapter 1: ${universeTitle}. ${universeDesc} ` +
     (choiceDescriptions.length > 0
       ? `Choices so far: ${choiceDescriptions.map((c) => c.label).join(', ')}. `
       : '') +

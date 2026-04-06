@@ -51,7 +51,7 @@ export const UNIVERSES: Universe[] = [
   {
     id: 'edge-of-atlas',
     title: 'Edge of Atlas',
-    genre: 'EPIC ADVENTURE',
+    genre: 'ADVENTURE',
     genreTag: 'EPIC ADVENTURE',
     description: 'The map ends here. Beyond it, three lost civilisations and the one artefact that could rewrite history.',
     image: '/edge-of-atlas.svg',
