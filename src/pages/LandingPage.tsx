@@ -743,7 +743,7 @@ export function LandingPage() {
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{
-              backgroundImage: 'url(/hero-desktop.png)',
+              backgroundImage: 'image-set(url(/hero-desktop.png) 1x, url(/hero-desktop@2x.jpg) 2x)',
               imageRendering: 'auto',
             }}
           />
