@@ -336,6 +336,7 @@ export function StoryReaderPage() {
           const img = sceneImages[`${currentStep.id}:${opt.id}`]
           if (img) optImages[opt.id] = img
         }
+        const backdrop = sceneImages[currentStep.id] ?? null
         return (
           <ChoicePoint
             title={currentStep.title ?? 'Choose'}
@@ -344,6 +345,7 @@ export function StoryReaderPage() {
             optionImages={optImages}
             playerName={activeCharacter?.name ?? null}
             playerAvatar={selfieUrl}
+            sceneBackdrop={backdrop}
           />
         )
       }
