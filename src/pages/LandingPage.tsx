@@ -312,9 +312,9 @@ function StepImage({ step, height, className }: { step: typeof STEPS[number]; he
 // ─── Live Chat Demo ───
 
 const CHAT_SCRIPT = [
-  { role: 'character' as const, name: 'Jiwon', text: '...you\'re the transfer student. I didn\'t think you\'d actually show up.' },
-  { role: 'user' as const, name: 'You', text: 'Were you waiting for me?' },
-  { role: 'character' as const, name: 'Jiwon', text: '...don\'t read into it. I just noticed, that\'s all.' },
+  { role: 'character' as const, name: 'Jiwon', text: 'you\'re the new transfer student, right? ...I was hoping I\'d run into you.' },
+  { role: 'user' as const, name: 'You', text: 'You were looking for me?' },
+  { role: 'character' as const, name: 'Jiwon', text: 'maybe. is that so hard to believe?' },
 ]
 
 function ChatDemo({ compact }: { compact?: boolean }) {
