@@ -11,6 +11,7 @@ import { RevealPage } from './pages/RevealPage'
 import { FreeChatPage } from './pages/FreeChatPage'
 import { SharedRevealPage } from './pages/SharedRevealPage'
 import { QuestPage } from './pages/QuestPage'
+import { HomePage } from './pages/HomePage'
 import { TermsPage } from './pages/TermsPage'
 import { PrivacyPage } from './pages/PrivacyPage'
 
@@ -25,6 +26,7 @@ export default function App() {
           {/* SharedRevealPage is public — shareable links work without auth */}
           <Route path="/reveal/:id" element={<SharedRevealPage />} />
           <Route path="/" element={<LandingPage />} />
+          <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
           <Route path="/universes" element={<ProtectedRoute><UniversesPage /></ProtectedRoute>} />
           <Route path="/characters" element={<ProtectedRoute><CharacterSelectPage /></ProtectedRoute>} />
           <Route path="/create-character" element={<ProtectedRoute><CreateCharacterPage /></ProtectedRoute>} />

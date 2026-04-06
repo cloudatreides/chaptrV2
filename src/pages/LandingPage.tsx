@@ -545,7 +545,7 @@ export function LandingPage() {
 
   function handleCTA() {
     if (session) {
-      navigate('/universes')
+      navigate('/home')
     } else {
       signInWithGoogle()
     }
