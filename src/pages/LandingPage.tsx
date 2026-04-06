@@ -613,7 +613,7 @@ export function LandingPage() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
             >
-              Free to play · Sign in with Google · 5 min experience
+              Free to play · No downloads · New story every time
             </motion.p>
           </div>
         </div>
@@ -805,7 +805,7 @@ export function LandingPage() {
                   >
                     Start Your Story <ArrowRight size={18} />
                   </button>
-                  <span className="text-white/25 text-sm" style={{ fontFamily: INTER }}>Free to play · Sign in with Google · 5 min experience</span>
+                  <span className="text-white/25 text-sm" style={{ fontFamily: INTER }}>Free to play · No downloads · New story every time</span>
                 </motion.div>
               </div>
 
