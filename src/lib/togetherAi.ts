@@ -4,16 +4,16 @@ export interface GenerateSceneParams {
   height?: number
   referenceImageUrl?: string | null
   protagonistGender?: 'male' | 'female'
+  includesProtagonist?: boolean
 }
 
 /** Generate a scene image using Together AI.
- *  If referenceImageUrl is provided, uses FLUX.1 Kontext Pro (img2img) so the
- *  player's stylized selfie is incorporated as the protagonist. Otherwise falls
- *  back to FLUX.1 Schnell (text-only). */
+ *  Uses Kontext Pro (img2img, $0.20) only when the protagonist is visible in the
+ *  scene AND a selfie reference exists. Otherwise uses Schnell ($0.04). */
 export async function generateSceneImage(params: GenerateSceneParams): Promise<string | null> {
-  const { prompt, width = 768, height = 576, referenceImageUrl, protagonistGender } = params
+  const { prompt, width = 768, height = 576, referenceImageUrl, protagonistGender, includesProtagonist = true } = params
 
-  const useKontext = !!referenceImageUrl
+  const useKontext = !!referenceImageUrl && includesProtagonist
 
   // Replace generic "a young person" with gender-specific description
   const genderedPrompt = protagonistGender
