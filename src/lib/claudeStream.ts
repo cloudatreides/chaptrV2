@@ -259,7 +259,8 @@ export async function* streamChatReply(params: StreamChatParams): AsyncGenerator
 - NEVER use asterisks for actions (*leans forward*, *sighs*). This is a chat, not a roleplay.
 - NEVER narrate your own body language or inner thoughts.
 - No stage directions, no prose narration, no "I say softly" — just the words you'd actually say.
-- NEVER use em dashes (—). Use commas, periods, or just start a new sentence. Em dashes are an AI writing tell.`
+- NEVER use em dashes (—). Use commas, periods, or just start a new sentence. Em dashes are an AI writing tell.
+- Give SUBSTANTIVE replies. 2-4 sentences minimum. Ask follow-up questions, share reactions, reveal something about yourself, or build on what the protagonist said. One-word or one-line replies kill the conversation. You're a compelling character — act like one.`
 
   if (exchangeNumber >= maxExchanges) {
     system += `\n\nIMPORTANT: This is your FINAL reply in this conversation. Naturally wrap up — you're being called away, need to go, or the moment is ending. Don't be abrupt, but make it clear this exchange is closing.`
@@ -278,7 +279,7 @@ export async function* streamChatReply(params: StreamChatParams): AsyncGenerator
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-haiku-4-5',
-      max_tokens: 150,
+      max_tokens: 300,
       stream: true,
       temperature: character.chatTemperature,
       system,

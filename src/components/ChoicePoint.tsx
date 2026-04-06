@@ -30,7 +30,7 @@ function ChoiceCard({ option, index, onSelect, image }: { option: ChoiceOption; 
     >
       {/* Image layer */}
       {image ? (
-        <div className="relative h-[160px] w-full overflow-hidden">
+        <div className="relative h-[220px] w-full overflow-hidden">
           <img
             src={image}
             alt=""
@@ -39,7 +39,7 @@ function ChoiceCard({ option, index, onSelect, image }: { option: ChoiceOption; 
           {/* Gradient: image visible at top, dark at bottom for text */}
           <div
             className="absolute inset-0"
-            style={{ background: 'linear-gradient(to bottom, rgba(13,10,18,0.1) 0%, rgba(13,10,18,0.85) 70%, rgba(13,10,18,0.97) 100%)' }}
+            style={{ background: 'linear-gradient(to bottom, rgba(13,10,18,0) 0%, rgba(13,10,18,0.6) 50%, rgba(13,10,18,0.97) 100%)' }}
           />
         </div>
       ) : (
@@ -52,8 +52,8 @@ function ChoiceCard({ option, index, onSelect, image }: { option: ChoiceOption; 
 
       {/* Text content — overlaid on image bottom */}
       <div
-        className="px-5 pb-4"
-        style={{ marginTop: image ? '-48px' : '0', position: 'relative' }}
+        className="px-5 pb-5"
+        style={{ marginTop: image ? '-56px' : '0', position: 'relative' }}
       >
         {/* Scene hint tag */}
         {option.sceneHint && (
@@ -65,7 +65,7 @@ function ChoiceCard({ option, index, onSelect, image }: { option: ChoiceOption; 
           </span>
         )}
 
-        <p className="text-white font-semibold text-base leading-snug group-hover:text-white transition-colors mb-1">
+        <p className="text-white font-semibold text-lg leading-snug group-hover:text-white transition-colors mb-1">
           {option.label}
         </p>
         <p className="text-sm leading-relaxed" style={{ color: 'rgba(240,236,248,0.65)' }}>
@@ -73,7 +73,7 @@ function ChoiceCard({ option, index, onSelect, image }: { option: ChoiceOption; 
         </p>
         {option.consequenceHint && (
           <motion.p
-            className="text-xs italic mt-1.5"
+            className="text-xs italic mt-2"
             style={{ color: `${accentLight}b0` }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -95,7 +95,7 @@ function ChoiceCard({ option, index, onSelect, image }: { option: ChoiceOption; 
 
 export function ChoicePoint({ title, options, onSelect, optionImages, playerName, playerAvatar }: Props) {
   return (
-    <div className="flex flex-col items-center gap-6 px-4 py-8">
+    <div className="flex flex-col items-center justify-center gap-8 px-4 min-h-[calc(100vh-80px)]">
       {/* Player avatar + title */}
       <motion.div
         className="flex flex-col items-center gap-3"
@@ -104,12 +104,12 @@ export function ChoicePoint({ title, options, onSelect, optionImages, playerName
         transition={{ duration: 0.5 }}
       >
           {playerAvatar ? (
-          <div className="w-12 h-12 rounded-full overflow-hidden border-2 shrink-0" style={{ borderColor: '#c84b9e' }}>
+          <div className="w-14 h-14 rounded-full overflow-hidden border-2 shrink-0" style={{ borderColor: '#c84b9e' }}>
             <img src={playerAvatar} alt={playerName ?? 'You'} className="w-full h-full object-cover" />
           </div>
         ) : (
           <div
-            className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold shrink-0"
+            className="w-12 h-12 rounded-full flex items-center justify-center text-sm font-semibold shrink-0"
             style={{ background: 'rgba(200,75,158,0.15)', border: '1px solid rgba(200,75,158,0.3)', color: '#e060b8' }}
           >
             {playerName?.[0]?.toUpperCase() ?? '?'}
@@ -117,12 +117,12 @@ export function ChoicePoint({ title, options, onSelect, optionImages, playerName
         )}
         <div className="text-center">
           <p className="text-textMuted text-xs uppercase tracking-[3px] mb-1.5">{playerName ? `${playerName}'s choice` : 'Your choice'}</p>
-          <h2 className="text-textPrimary font-semibold text-xl">{title}</h2>
+          <h2 className="text-textPrimary font-semibold text-2xl">{title}</h2>
         </div>
       </motion.div>
 
       {/* Choice cards with per-option images */}
-      <div className="w-full max-w-[500px] flex flex-col gap-3">
+      <div className="w-full max-w-[500px] flex flex-col gap-4">
         {options.map((option, i) => (
           <ChoiceCard
             key={option.id}

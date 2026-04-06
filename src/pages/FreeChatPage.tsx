@@ -33,9 +33,9 @@ function getMoodStages(characterId: string): string[] {
 // ─── Free chat suggestion chips ───
 
 const FREE_SUGGESTIONS = {
-  opening: ["So... what now?", "I've been thinking about everything.", "Miss me?"],
-  mid: ["Tell me something I don't know.", "What would you do differently?", "Be honest with me."],
-  deep: ["What are you afraid of?", "Do you trust me?", "What do you actually want?"],
+  opening: ["Hey, it's good to see you again.", "I've been thinking about you.", "I missed talking to you."],
+  mid: ["Tell me something about yourself.", "What's been on your mind lately?", "I love getting to know you."],
+  deep: ["You mean a lot to me.", "I feel like I can tell you anything.", "What does this mean to you?"],
 }
 
 function getFreeSuggestions(exchangeCount: number): string[] {

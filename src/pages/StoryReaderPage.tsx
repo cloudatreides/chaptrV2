@@ -151,18 +151,20 @@ export function StoryReaderPage() {
     setIsStreaming(false)
     setIsGeneratingScene(false)
 
+    const gender = activeCharacter?.gender
+
     if (currentStep?.type === 'beat') {
       if (currentStep.sceneImagePrompts?.length) {
         currentStep.sceneImagePrompts.forEach((prompt, i) => {
           const key = `${currentStep.id}:${i}`
           if (!sceneImages[key]) {
-            generateSceneImage({ prompt, referenceImageUrl: selfieUrl }).then((url) => {
+            generateSceneImage({ prompt, referenceImageUrl: selfieUrl, protagonistGender: gender }).then((url) => {
               if (url) setSceneImage(key, url)
             })
           }
         })
       } else if (currentStep.sceneImagePrompt && !sceneImages[currentStep.id]) {
-        generateSceneImage({ prompt: currentStep.sceneImagePrompt, referenceImageUrl: selfieUrl }).then((url) => {
+        generateSceneImage({ prompt: currentStep.sceneImagePrompt, referenceImageUrl: selfieUrl, protagonistGender: gender }).then((url) => {
           if (url) setSceneImage(currentStep.id, url)
         })
       }
@@ -173,7 +175,7 @@ export function StoryReaderPage() {
       for (const opt of currentStep.options) {
         const key = `${currentStep.id}:${opt.id}`
         if (opt.imagePrompt && !sceneImages[key]) {
-          generateSceneImage({ prompt: opt.imagePrompt, referenceImageUrl: selfieUrl }).then((url) => {
+          generateSceneImage({ prompt: opt.imagePrompt, referenceImageUrl: selfieUrl, protagonistGender: gender }).then((url) => {
             if (url) setSceneImage(key, url)
           })
         }

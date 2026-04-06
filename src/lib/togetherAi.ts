@@ -3,6 +3,7 @@ export interface GenerateSceneParams {
   width?: number
   height?: number
   referenceImageUrl?: string | null
+  protagonistGender?: 'male' | 'female'
 }
 
 /** Generate a scene image using Together AI.
@@ -10,29 +11,34 @@ export interface GenerateSceneParams {
  *  player's stylized selfie is incorporated as the protagonist. Otherwise falls
  *  back to FLUX.1 Schnell (text-only). */
 export async function generateSceneImage(params: GenerateSceneParams): Promise<string | null> {
-  const { prompt, width = 1024, height = 768, referenceImageUrl } = params
+  const { prompt, width = 768, height = 576, referenceImageUrl, protagonistGender } = params
 
   const useKontext = !!referenceImageUrl
+
+  // Replace generic "a young person" with gender-specific description
+  const genderedPrompt = protagonistGender
+    ? prompt.replace(/a young person/gi, protagonistGender === 'female' ? 'a young woman' : 'a young man')
+    : prompt
 
   const body = useKontext
     ? {
         model: 'black-forest-labs/FLUX.1-kontext-pro',
-        prompt: `The character shown in the reference image is the protagonist of this scene. Place them into the following scene, keeping their face, hairstyle, and appearance exactly as shown: ${prompt}`,
+        prompt: `The character shown in the reference image is the protagonist of this scene. The protagonist is ${protagonistGender === 'female' ? 'female' : 'male'}. Place them into the following scene, keeping their face, gender, hairstyle, and appearance exactly as shown: ${genderedPrompt}`,
         image_url: referenceImageUrl,
         width,
         height,
-        steps: 28,
+        steps: 20,
         n: 1,
-        response_format: 'b64_json',
+        response_format: 'url',
       }
     : {
         model: 'black-forest-labs/FLUX.1-schnell',
-        prompt,
+        prompt: genderedPrompt,
         width,
         height,
         steps: 4,
         n: 1,
-        response_format: 'b64_json',
+        response_format: 'url',
       }
 
   try {
@@ -48,10 +54,11 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
     }
 
     const data = await response.json()
+    const url = data.data?.[0]?.url
+    if (url) return url
     const b64 = data.data?.[0]?.b64_json
-    if (!b64) return null
-
-    return `data:image/png;base64,${b64}`
+    if (b64) return `data:image/png;base64,${b64}`
+    return null
   } catch (e) {
     console.error('Scene generation failed:', e)
     return null
@@ -71,7 +78,7 @@ export async function generateCharacterPortrait(prompt: string): Promise<string 
         height: 512,
         steps: 4,
         n: 1,
-        response_format: 'b64_json',
+        response_format: 'url',
       }),
     })
 
@@ -81,10 +88,11 @@ export async function generateCharacterPortrait(prompt: string): Promise<string 
     }
 
     const data = await response.json()
+    const url = data.data?.[0]?.url
+    if (url) return url
     const b64 = data.data?.[0]?.b64_json
-    if (!b64) return null
-
-    return `data:image/png;base64,${b64}`
+    if (b64) return `data:image/png;base64,${b64}`
+    return null
   } catch (e) {
     console.error('Portrait generation failed:', e)
     return null
@@ -103,9 +111,9 @@ export async function stylizeSelfie(selfieDataUrl: string): Promise<string | nul
         image_url: selfieDataUrl,
         width: 768,
         height: 768,
-        steps: 28,
+        steps: 20,
         n: 1,
-        response_format: 'b64_json',
+        response_format: 'url',
       }),
     })
 
@@ -115,10 +123,11 @@ export async function stylizeSelfie(selfieDataUrl: string): Promise<string | nul
     }
 
     const data = await response.json()
+    const url = data.data?.[0]?.url
+    if (url) return url
     const b64 = data.data?.[0]?.b64_json
-    if (!b64) return null
-
-    return `data:image/png;base64,${b64}`
+    if (b64) return `data:image/png;base64,${b64}`
+    return null
   } catch (e) {
     console.error('Selfie stylization failed:', e)
     return null

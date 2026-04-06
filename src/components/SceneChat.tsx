@@ -142,24 +142,24 @@ function detectPersonality(bio: string | null): PersonalityType {
 
 const SUGGESTIONS: Record<PersonalityType, Record<string, string[]>> = {
   quiet: {
-    opening: ["I'm just passing through.", "...go on.", "You seem like you have a lot on your mind.", "I'll just listen.", "Don't mind me.", "Sorry — I didn't mean to stare."],
-    mid: ["Tell me more.", "I noticed that too.", "Take your time.", "That's a lot to carry.", "I've been thinking about what you said.", "You don't have to talk about it if you don't want to."],
-    deep: ["I think I understand.", "You don't have to explain.", "I'm not going anywhere.", "I see you.", "We don't have to figure it out right now.", "I'm glad you told me."],
+    opening: ["Hi... I'm a bit shy, but hi.", "You seem interesting.", "I noticed you from across the room.", "Sorry if I'm quiet, I'm just taking it all in.", "I don't usually talk first, but here I am.", "Something about you made me want to say hello."],
+    mid: ["Tell me more about that.", "I like hearing you talk.", "That's really sweet.", "I've been thinking about what you said.", "You're easy to talk to, you know that?", "I feel like I can be myself around you."],
+    deep: ["I'm really glad we met.", "You make me feel safe.", "I don't want this moment to end.", "I've never told anyone this before.", "You understand me.", "Thank you for being patient with me."],
   },
   bold: {
-    opening: ["So, what's really going on here?", "Cut the small talk.", "I've heard about you.", "You don't seem like everyone else here.", "Alright, impress me.", "I have a feeling about you."],
-    mid: ["That doesn't add up.", "Prove it.", "What are you not telling me?", "I'm calling your bluff.", "You're holding back.", "Say that again — slower."],
-    deep: ["I need the truth. Now.", "I'm not afraid of this.", "Let's stop pretending.", "I didn't come this far to back down.", "You know I'm right.", "No more games."],
+    opening: ["Okay, I'm intrigued. Tell me everything.", "I've heard about you. The real version.", "You're not like everyone else here, are you?", "I have a good feeling about you.", "Alright, you have my attention.", "Something tells me we're going to get along."],
+    mid: ["Wait, that's actually fascinating.", "I want to know the real you.", "You're full of surprises.", "I like that about you.", "Keep going, I'm listening.", "There's more to that story, isn't there?"],
+    deep: ["I trust you. Completely.", "This feels real.", "I've never felt this way before.", "Let's figure this out together.", "You changed something in me.", "I don't want to hold back anymore."],
   },
   dreamer: {
-    opening: ["This place feels different.", "I had a feeling I'd end up here.", "There's something in the air...", "Have we met before?", "I keep getting this feeling...", "The light here is different."],
-    mid: ["What does that remind you of?", "I keep thinking about that.", "It's almost like it was meant to happen.", "Do you believe in signs?", "I dreamed about something like this.", "Tell me what you see when you close your eyes."],
-    deep: ["Do you ever feel like you're part of something bigger?", "I think we both know what this is.", "Some things don't need words.", "Maybe this is exactly where we're supposed to be.", "I don't want to wake up from this.", "What if this is the real version?"],
+    opening: ["This feels like fate, doesn't it?", "I had a feeling I'd meet someone like you.", "There's something magical about this moment.", "Have we met before? You feel so familiar.", "The universe brought us together.", "I feel like I've been waiting for this."],
+    mid: ["What's your favorite memory?", "Do you believe some things are meant to be?", "I keep thinking about you.", "Tell me about your dreams.", "I feel like we're connected somehow.", "There's something beautiful about this."],
+    deep: ["I think we were meant to find each other.", "Some things don't need words.", "This is exactly where I'm supposed to be.", "I never want to forget this feeling.", "You make the world feel brighter.", "What if this is the beginning of something amazing?"],
   },
   custom: {
-    opening: ["Hey.", "Tell me about yourself.", "What's on your mind?", "I'm curious about you.", "So... what now?", "This is new for me."],
-    mid: ["That's interesting.", "Keep going.", "I wasn't expecting that.", "Really?", "Makes sense actually.", "Huh. I didn't think of it that way."],
-    deep: ["I trust you.", "What happens next?", "I want to understand.", "I'm glad I'm here.", "Whatever happens, I'm in.", "I don't regret any of this."],
+    opening: ["Hey! It's nice to meet you.", "Tell me about yourself.", "I'm curious about you.", "What brings you here?", "I feel like we'd get along.", "This is exciting, isn't it?"],
+    mid: ["That's really interesting.", "I like the way you think.", "I wasn't expecting that!", "Tell me more.", "You're really fun to talk to.", "I'm glad we're talking."],
+    deep: ["I trust you.", "I'm really glad I met you.", "I want to understand everything about you.", "This means a lot to me.", "Whatever happens, I'm with you.", "You make me want to be braver."],
   },
 }
 
@@ -211,7 +211,7 @@ interface Props {
 // ─── Component ───
 
 export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, storyContext, chatImagePrompt, onComplete }: Props) {
-  const { bio, loveInterest, selectedUniverse, characterState, characterPortraits, characterAffinities, characterMemories, selfieUrl } = useActiveStory()
+  const { activeCharacter, bio, loveInterest, selectedUniverse, characterState, characterPortraits, characterAffinities, characterMemories, selfieUrl } = useActiveStory()
   const { addChatMessage, setChatSummary, setCharacterPortrait, updateAffinity, addCharacterMemory } = useStore()
 
   // Per-character state
@@ -292,7 +292,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
     // Generate intro image in parallel (chatImagePrompt overrides character default)
     const imagePrompt = chatImagePrompt ?? charData?.introImagePrompt
     if (imagePrompt) {
-      generateSceneImage({ prompt: imagePrompt, width: 768, height: 512, referenceImageUrl: selfieUrl }).then(url => {
+      generateSceneImage({ prompt: imagePrompt, width: 768, height: 512, referenceImageUrl: selfieUrl, protagonistGender: activeCharacter?.gender }).then(url => {
         if (url) {
           setChatStates(prev => ({
             ...prev,
