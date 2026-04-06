@@ -9,6 +9,10 @@
   padding: 0;
 }
 
+h1, h2, h3 {
+  text-wrap: balance;
+}
+
 html, body {
   background-color: #0d0a12;
   color: #f0ecf8;
