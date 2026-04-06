@@ -266,7 +266,12 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
     for (const sc of characters) {
       const p = characterPortraits[sc.characterId]
       const charData = getCharacter(sc.characterId, selectedUniverse) ?? CHARACTERS[sc.characterId]
-      if (!p && charData?.portraitPrompt) {
+      if (charData?.staticPortrait) {
+        if (p !== charData.staticPortrait) setCharacterPortrait(sc.characterId, charData.staticPortrait)
+        continue
+      }
+      if (p) continue
+      if (charData?.portraitPrompt) {
         generateCharacterPortrait(charData.portraitPrompt).then(url => {
           if (url) setCharacterPortrait(sc.characterId, url)
         })

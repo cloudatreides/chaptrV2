@@ -354,11 +354,14 @@ export function StoryReaderPage() {
           characterId: sc.characterId === 'jiwon' ? resolveLoveInterestId(loveInterest) : sc.characterId,
         }))
         if (currentStep.groupChat) {
+          const groupContext = currentStep.arcBrief
+            ? `${storyContext}\n\nCurrent scene: ${currentStep.arcBrief}`
+            : storyContext
           return (
             <GroupChatScene
               stepId={currentStep.id}
               characters={resolvedSceneChars}
-              storyContext={storyContext}
+              storyContext={groupContext}
               onComplete={handleChatComplete}
             />
           )
@@ -399,7 +402,7 @@ export function StoryReaderPage() {
     }
   }
 
-  const isFullScreenStep = currentStep.type === 'chat' || currentStep.type === 'scene'
+  const isFullScreenStep = currentStep.type === 'chat' || currentStep.type === 'scene' || currentStep.type === 'choice'
 
   return (
     <div className="bg-bg min-h-screen">

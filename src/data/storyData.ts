@@ -132,6 +132,7 @@ const SCENE_PROMPTS = {
   practiceHall: 'Anime style, a girl with vibrant blue dyed hair in an oversized hoodie leaning against a practice room window talking animatedly to a young person, bright academy hallway, cherry blossoms through skylights, warm afternoon light',
   afterHours: 'Anime style, a handsome Korean male idol with dark hair playing piano in a dim studio late at night, a young person sitting beside him listening, sheet music scattered, Seoul city lights through the window, intimate and vulnerable',
   soraRooftop: 'Anime style, a girl with vibrant blue hair sitting on an academy rooftop railing talking to a young person, sunset over Seoul, warm golden light, wind in her hair, cheerful but with a hint of seriousness, K-drama aesthetic',
+  convenienceStore: 'Anime style, three young people sitting on the curb outside a glowing convenience store late at night in Seoul, sharing snacks and drinks, neon signs reflecting on wet pavement, a handsome Korean male idol in black, a girl with blue hair laughing, warm golden light from the store window, relaxed and intimate group moment, K-drama aesthetic',
 }
 
 export const STORY_STEPS: StoryStep[] = [
@@ -252,6 +253,21 @@ export const STORY_STEPS: StoryStep[] = [
       { characterId: 'sora', minExchanges: 1, maxExchanges: 8, required: false },
     ],
     minCharactersTalkedTo: 1,
+  },
+
+  // ── Group hangout — both paths converge here before the final choice ──
+  {
+    id: 'scene-group-1',
+    type: 'scene',
+    title: 'Late Night Run',
+    groupChat: true,
+    chatImagePrompt: SCENE_PROMPTS.convenienceStore,
+    sceneCharacters: [
+      { characterId: 'jiwon', minExchanges: 2, maxExchanges: 6, required: true },
+      { characterId: 'sora', minExchanges: 2, maxExchanges: 6, required: true },
+    ],
+    arcBrief: 'Late night after practice. The three of you ended up at the convenience store outside the agency. Nobody planned it — you just all needed air at the same time. Sora grabbed ramyeon, Jiwon is nursing a coffee. The mood is loose, unguarded. This is the first time all three of you have hung out together like this. Sora is watching how you and Jiwon interact, Jiwon is more relaxed than usual with Sora around to break the tension. Something about this moment feels important, like the calm before whatever comes next.',
+    minCharactersTalkedTo: 2,
   },
 
   // ── Choice Point B (options differ per path) ──

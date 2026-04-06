@@ -23,7 +23,7 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
   const body = useKontext
     ? {
         model: 'black-forest-labs/FLUX.1-kontext-pro',
-        prompt: `The character shown in the reference image is the protagonist of this scene. The protagonist is ${protagonistGender === 'female' ? 'female' : 'male'}. Place them into the following scene, keeping their face, gender, hairstyle, and appearance exactly as shown: ${genderedPrompt}`,
+        prompt: `The reference image shows the protagonist, a ${protagonistGender === 'female' ? 'young woman' : 'young man'}. Place them into the following scene, keeping their face and appearance exactly as shown. IMPORTANT: Any other characters described in the scene (e.g. a Korean male idol, a girl with blue hair) are DIFFERENT people — generate them as new distinct characters, do NOT use the reference face for them. Scene: ${genderedPrompt}`,
         image_url: referenceImageUrl,
         width,
         height,

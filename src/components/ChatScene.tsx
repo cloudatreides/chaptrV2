@@ -213,9 +213,14 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
   const canContinue = exchangeCount >= minExchanges && !isTyping
   const portrait = characterPortraits[characterId] ?? null
 
-  // Generate character portrait if not cached
+  // Use static portrait if available (always wins), otherwise generate
   useEffect(() => {
-    if (portrait || !character?.portraitPrompt) return
+    if (character?.staticPortrait) {
+      if (portrait !== character.staticPortrait) setCharacterPortrait(characterId, character.staticPortrait)
+      return
+    }
+    if (portrait) return
+    if (!character?.portraitPrompt) return
     generateCharacterPortrait(character.portraitPrompt).then((url) => {
       if (url) setCharacterPortrait(characterId, url)
     })
