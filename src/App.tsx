@@ -12,6 +12,7 @@ import { FreeChatPage } from './pages/FreeChatPage'
 import { SharedRevealPage } from './pages/SharedRevealPage'
 import { QuestPage } from './pages/QuestPage'
 import { HomePage } from './pages/HomePage'
+import { EditCharacterPage } from './pages/EditCharacterPage'
 import { TermsPage } from './pages/TermsPage'
 import { PrivacyPage } from './pages/PrivacyPage'
 
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="/universes" element={<ProtectedRoute><UniversesPage /></ProtectedRoute>} />
           <Route path="/characters" element={<ProtectedRoute><CharacterSelectPage /></ProtectedRoute>} />
           <Route path="/create-character" element={<ProtectedRoute><CreateCharacterPage /></ProtectedRoute>} />
+          <Route path="/edit-character/:charId" element={<ProtectedRoute><EditCharacterPage /></ProtectedRoute>} />
           <Route path="/story" element={<ProtectedRoute><StoryReaderPage /></ProtectedRoute>} />
           <Route path="/reveal" element={<ProtectedRoute><RevealPage /></ProtectedRoute>} />
           <Route path="/free-chat" element={<ProtectedRoute><FreeChatPage /></ProtectedRoute>} />

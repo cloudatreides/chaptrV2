@@ -189,7 +189,7 @@ export function HomePage() {
               {characters.map((char) => (
                 <button
                   key={char.id}
-                  onClick={() => { setActiveCharacter(char.id); navigate('/characters') }}
+                  onClick={() => navigate(`/edit-character/${char.id}`)}
                   className="cursor-pointer flex flex-col items-center gap-1.5 active:opacity-75 transition-opacity"
                 >
                   <div className="w-14 h-14 rounded-full overflow-hidden" style={{ border: '2px solid rgba(200,75,158,0.4)', background: 'rgba(200,75,158,0.1)' }}>
@@ -395,7 +395,7 @@ export function HomePage() {
                   {characters.map((char) => (
                     <button
                       key={char.id}
-                      onClick={() => { setActiveCharacter(char.id); navigate('/characters') }}
+                      onClick={() => navigate(`/edit-character/${char.id}`)}
                       className="cursor-pointer w-full flex items-center gap-3 rounded-xl p-3 text-left transition-all hover:brightness-110 active:brightness-90"
                       style={{ background: '#111016', border: '1px solid rgba(200,75,158,0.08)' }}
                     >
