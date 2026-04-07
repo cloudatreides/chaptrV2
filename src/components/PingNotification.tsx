@@ -159,7 +159,7 @@ export function PingNotification({ ping, onDismiss }: Props) {
     <AnimatePresence>
       {phase !== 'done' && (
         <motion.div
-          className="fixed inset-x-0 bottom-0 z-50 flex flex-col items-center px-4 pb-6 safe-bottom pointer-events-none"
+          className="fixed inset-x-0 bottom-20 z-50 flex flex-col items-center px-4 pb-6 safe-bottom pointer-events-none"
           initial={{ y: 80, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 80, opacity: 0 }}
