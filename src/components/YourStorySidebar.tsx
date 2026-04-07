@@ -1,4 +1,4 @@
-import { RotateCcw, LogOut } from 'lucide-react'
+import { RotateCcw, LogOut, Camera } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { useAuth } from '../contexts/AuthContext'
@@ -125,9 +125,21 @@ export function YourStorySidebar() {
         )}
       </div>
 
+      {/* Album */}
+      <button
+        className="w-full flex items-center gap-2.5 mt-4 px-4 py-3 rounded-xl text-textSecondary text-sm font-medium transition-all hover:text-textPrimary hover:bg-white/[0.03]"
+        onClick={() => navigate('/album')}
+      >
+        <Camera size={14} />
+        <span>Album</span>
+        {useStore.getState().storyMoments.length > 0 && (
+          <span className="ml-auto text-textMuted text-[10px]">{useStore.getState().storyMoments.length}</span>
+        )}
+      </button>
+
       {/* Replay */}
       <button
-        className="w-full flex items-center justify-center gap-2 mt-4 px-4 py-4 rounded-xl text-textPrimary text-sm font-medium transition-all"
+        className="w-full flex items-center justify-center gap-2 mt-2 px-4 py-4 rounded-xl text-textPrimary text-sm font-medium transition-all"
         style={{ background: 'rgba(26, 21, 37, 0.85)', border: '1px solid rgba(42, 32, 64, 0.8)' }}
         onClick={() => { resetStory(); navigate('/story') }}
       >

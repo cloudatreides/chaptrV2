@@ -501,12 +501,13 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
 
   const [showContinue, setShowContinue] = useState(false)
 
-  // Delay showing the continue button so it doesn't interrupt active chatting
+  // Show continue button after requirements met + delay — once shown, never hide
   useEffect(() => {
-    if (!canContinueScene) { setShowContinue(false); return }
+    if (showContinue) return // already shown, keep it
+    if (!canContinueScene) return
     const timer = setTimeout(() => setShowContinue(true), 10000)
     return () => clearTimeout(timer)
-  }, [canContinueScene])
+  }, [canContinueScene, showContinue])
 
   const handleContinue = async () => {
     // Summarize all conversations that haven't been summarized yet

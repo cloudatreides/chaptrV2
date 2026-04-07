@@ -18,6 +18,7 @@ import { CastGroupChatPage } from './pages/CastGroupChatPage'
 import { EditCharacterPage } from './pages/EditCharacterPage'
 import { UniverseDetailPage } from './pages/UniverseDetailPage'
 import { AccountPage } from './pages/AccountPage'
+import { AlbumPage } from './pages/AlbumPage'
 import { TermsPage } from './pages/TermsPage'
 import { PrivacyPage } from './pages/PrivacyPage'
 
@@ -45,6 +46,7 @@ export default function App() {
           <Route path="/reveal" element={<ProtectedRoute><RevealPage /></ProtectedRoute>} />
           <Route path="/free-chat" element={<ProtectedRoute><FreeChatPage /></ProtectedRoute>} />
           <Route path="/quest/:questId" element={<ProtectedRoute><QuestPage /></ProtectedRoute>} />
+          <Route path="/album" element={<ProtectedRoute><AlbumPage /></ProtectedRoute>} />
           <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

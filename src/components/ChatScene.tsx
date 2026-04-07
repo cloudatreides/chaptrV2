@@ -226,12 +226,13 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
   const [showContinue, setShowContinue] = useState(false)
   const portrait = characterPortraits[characterId] ?? null
 
-  // Delay showing the continue button so it doesn't interrupt active chatting
+  // Show continue button after minExchanges met + delay — once shown, never hide
   useEffect(() => {
-    if (!canContinue) { setShowContinue(false); return }
+    if (showContinue) return // already shown, keep it
+    if (!canContinue) return
     const timer = setTimeout(() => setShowContinue(true), 10000)
     return () => clearTimeout(timer)
-  }, [canContinue])
+  }, [canContinue, showContinue])
 
   // Use static portrait if available (always wins), otherwise generate
   useEffect(() => {

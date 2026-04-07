@@ -30,6 +30,16 @@ export interface CastChatMessage {
   characterId?: string // used in group chat to identify speaker
 }
 
+export interface StoryMoment {
+  id: string
+  imageUrl: string
+  characterIds: string[]
+  universeId: string
+  beatLabel: string
+  note: string
+  timestamp: number
+}
+
 export interface AmbientPing {
   id: string
   characterId: string
@@ -157,6 +167,12 @@ interface StoreState {
   // ── Favorites (quick access in sidebar) ──
   favoriteCastIds: string[] // can be cast IDs ("sora") or group keys ("sora+jiwon")
   toggleFavoriteCast: (id: string) => void
+
+  // ── Story Moments (album) ──
+  storyMoments: StoryMoment[]
+  addStoryMoment: (moment: StoryMoment) => void
+  updateMomentNote: (momentId: string, note: string) => void
+  deleteStoryMoment: (momentId: string) => void
 
   // ── Gems ──
   gemBalance: number
@@ -448,6 +464,18 @@ export const useStore = create<StoreState>()(
         },
       })),
 
+      // ── Story Moments ──
+      storyMoments: [],
+      addStoryMoment: (moment) => set((s) => ({
+        storyMoments: [...s.storyMoments, moment],
+      })),
+      updateMomentNote: (momentId, note) => set((s) => ({
+        storyMoments: s.storyMoments.map((m) => m.id === momentId ? { ...m, note } : m),
+      })),
+      deleteStoryMoment: (momentId) => set((s) => ({
+        storyMoments: s.storyMoments.filter((m) => m.id !== momentId),
+      })),
+
       // ── Favorites ──
       favoriteCastIds: [],
       toggleFavoriteCast: (id) => set((s) => ({
@@ -493,7 +521,7 @@ export const useStore = create<StoreState>()(
     }),
     {
       name: 'chaptr-v2-story',
-      version: 6,
+      version: 7,
       migrate: (persisted: any, version: number) => {
         if (version < 2 && persisted) {
           // Migrate from flat store to multi-character
@@ -556,6 +584,9 @@ export const useStore = create<StoreState>()(
         if (version < 6 && persisted) {
           persisted.favoriteCastIds = persisted.favoriteCastIds ?? []
         }
+        if (version < 7 && persisted) {
+          persisted.storyMoments = persisted.storyMoments ?? []
+        }
         return persisted
       },
       partialize: (s) => ({
@@ -572,6 +603,7 @@ export const useStore = create<StoreState>()(
         unlockedCastIds: s.unlockedCastIds,
         groupCastThreads: s.groupCastThreads,
         favoriteCastIds: s.favoriteCastIds,
+        storyMoments: s.storyMoments,
       }),
     }
   )

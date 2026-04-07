@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu } from 'lucide-react'
+import { Menu, Camera } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { useActiveStory } from '../hooks/useActiveStory'
@@ -20,6 +20,7 @@ import { ambientAudio } from '../lib/ambientAudio'
 import type { AmbientMood } from '../lib/ambientAudio'
 import { COMMUNITY_STATS } from '../data/communityStats'
 import { ShareMomentToast } from '../components/ShareMomentToast'
+import { CAST_ROSTER, getCastCharacter } from '../data/castRoster'
 import { trackEvent } from '../lib/supabase'
 import { getPingsForUniverse } from '../data/pings'
 import { PingNotification } from '../components/PingNotification'
@@ -45,6 +46,7 @@ export function StoryReaderPage() {
     isGeneratingScene, setIsGeneratingScene,
     setSceneImage,
     unlockCastCharacter,
+    addStoryMoment,
   } = useStore()
   const playthroughHistory = useStore((s) => s.playthroughHistory)
   const summariesList = useStore.getState().getSummariesList()
@@ -314,6 +316,8 @@ export function StoryReaderPage() {
 
   const [choiceResult, setChoiceResult] = useState<{ choicePointId: string; selectedOptionId: string } | null>(null)
   const [shareMoment, setShareMoment] = useState<{ label: string; universe: string } | null>(null)
+  const [captureMoment, setCaptureMoment] = useState<{ imageUrl: string; characterIds: string[]; beatLabel: string } | null>(null)
+  const [isCapturing, setIsCapturing] = useState(false)
 
   const handleBranchChoice = (optionId: string) => {
     if (!currentStep || currentStep.type !== 'choice') return
@@ -343,7 +347,59 @@ export function StoryReaderPage() {
     setTimeout(() => setShareMoment(null), 8000)
   }
 
-  const handleChatComplete = () => advanceStep()
+  const handleChatComplete = () => {
+    // Check if this scene has characters for a selfie moment
+    const charIds: string[] = []
+    if (currentStep?.type === 'chat' && currentStep.characterId) {
+      charIds.push(currentStep.characterId === 'jiwon' ? resolveLoveInterestId(loveInterest) : currentStep.characterId)
+    } else if (currentStep?.type === 'scene' && currentStep.sceneCharacters) {
+      for (const sc of currentStep.sceneCharacters) {
+        charIds.push(sc.characterId === 'jiwon' ? resolveLoveInterestId(loveInterest) : sc.characterId)
+      }
+    }
+
+    // Generate a selfie moment if we have a selfie reference and characters
+    if (selfieUrl && charIds.length > 0 && currentStep) {
+      setIsCapturing(true)
+      const charDescs = charIds.map(id => {
+        const roster = CAST_ROSTER.find(c => c.id === id)
+        const charData = roster ? getCastCharacter(roster) : null
+        // Extract a short visual description from portraitPrompt if available
+        if (charData?.portraitPrompt) {
+          const match = charData.portraitPrompt.match(/portrait of (.+?)(?:,\s*(?:soft|clean|high))/i)
+          return match?.[1] ?? roster?.name ?? id
+        }
+        return roster?.name ?? id
+      })
+      const gender = activeCharacter?.gender === 'female' ? 'young woman' : 'young man'
+      const prompt = charIds.length === 1
+        ? `Anime style, selfie photo of two people: ${charDescs[0]} and a ${gender} (the protagonist), posing together, warm smiles, ${currentStep.title ?? 'academy'} setting, bright warm lighting, K-drama aesthetic, high quality anime art, casual candid selfie, ONLY these two people in the image`
+        : `Anime style, group selfie photo: ${charDescs.join(', ')} and a ${gender} (the protagonist), posing together, warm smiles, ${currentStep.title ?? 'academy'} setting, bright warm lighting, K-drama aesthetic, high quality anime art, fun candid moment`
+      generateSceneImage({
+        prompt,
+        referenceImageUrl: selfieUrl,
+        protagonistGender: activeCharacter?.gender ?? 'female',
+        width: 768,
+        height: 576,
+      }).then((url) => {
+        setIsCapturing(false)
+        if (url) {
+          setCaptureMoment({
+            imageUrl: url,
+            characterIds: charIds,
+            beatLabel: currentStep.title ?? 'A moment',
+          })
+        } else {
+          advanceStep()
+        }
+      }).catch(() => {
+        setIsCapturing(false)
+        advanceStep()
+      })
+    } else {
+      advanceStep()
+    }
+  }
 
   if (!currentStep) return null
 
@@ -629,6 +685,83 @@ export function StoryReaderPage() {
             universeName={shareMoment.universe}
             onDismiss={() => setShareMoment(null)}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Capture moment overlay */}
+      <AnimatePresence>
+        {(isCapturing || captureMoment) && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center p-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="absolute inset-0 bg-black/80" />
+            <motion.div
+              className="relative z-10 w-full max-w-sm rounded-2xl overflow-hidden"
+              style={{ background: '#151020' }}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+            >
+              {isCapturing ? (
+                <div className="flex flex-col items-center gap-4 py-16 px-6">
+                  <motion.div
+                    className="w-12 h-12 rounded-full border-2 border-transparent border-t-accent"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                  />
+                  <p className="text-white/50 text-sm">Capturing moment...</p>
+                </div>
+              ) : captureMoment ? (
+                <>
+                  <div className="relative aspect-[4/3]">
+                    <img src={captureMoment.imageUrl} alt="" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                    <div className="absolute bottom-3 left-4">
+                      <p className="text-white text-xs font-semibold flex items-center gap-1.5">
+                        <Camera size={12} /> {captureMoment.beatLabel}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="p-5 space-y-3">
+                    <p className="text-white/70 text-sm text-center">Save this moment to your album?</p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          setCaptureMoment(null)
+                          advanceStep()
+                        }}
+                        className="cursor-pointer flex-1 py-2.5 rounded-xl text-white/40 text-sm font-medium border border-white/10 hover:border-white/20 transition-colors"
+                      >
+                        Skip
+                      </button>
+                      <button
+                        onClick={() => {
+                          addStoryMoment({
+                            id: crypto.randomUUID(),
+                            imageUrl: captureMoment.imageUrl,
+                            characterIds: captureMoment.characterIds,
+                            universeId: selectedUniverse ?? 'seoul-transfer',
+                            beatLabel: captureMoment.beatLabel,
+                            note: '',
+                            timestamp: Date.now(),
+                          })
+                          setCaptureMoment(null)
+                          advanceStep()
+                        }}
+                        className="cursor-pointer flex-1 py-2.5 rounded-xl text-white text-sm font-medium transition-opacity hover:opacity-90"
+                        style={{ background: 'linear-gradient(135deg, #c84b9e, #8b5cf6)' }}
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : null}
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

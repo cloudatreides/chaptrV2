@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { BookOpen, Users, Sparkles, LogOut, Star, MessageCircle, User } from 'lucide-react'
+import { BookOpen, Users, Sparkles, Camera, LogOut, Star, MessageCircle, User } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { useStore } from '../store/useStore'
 import { CAST_ROSTER, getCastCharacter } from '../data/castRoster'
@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { icon: BookOpen, label: 'My Story', path: '/home' },
   { icon: Users, label: 'Characters To Meet', path: '/cast' },
   { icon: Sparkles, label: 'Your Twins', path: '/characters' },
+  { icon: Camera, label: 'Album', path: '/album' },
 ]
 
 export function AppSidebar() {
