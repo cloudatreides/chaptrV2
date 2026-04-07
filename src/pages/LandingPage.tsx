@@ -570,7 +570,7 @@ export function LandingPage() {
           {/* Top vignette */}
           <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(13,11,18,0.6) 0%, rgba(13,11,18,0) 20%)' }} />
           {/* Bottom book-page fade */}
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(13,11,18,0) 0%, rgba(13,11,18,0) 45%, rgba(13,11,18,0.92) 65%, rgba(13,11,18,1) 80%)' }} />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(13,11,18,0) 0%, rgba(13,11,18,0.15) 35%, rgba(13,11,18,0.85) 55%, rgba(13,11,18,0.97) 68%, rgba(13,11,18,1) 78%)' }} />
 
           {/* Logo */}
           <div className="relative z-10 flex items-center gap-2 px-5 pt-10 safe-top">
@@ -586,7 +586,7 @@ export function LandingPage() {
                 <p className="text-white/90 font-medium text-xs tracking-[2px] uppercase" style={{ fontFamily: SG, textShadow: '0 1px 8px rgba(0,0,0,0.8)' }}>AI Interactive Story</p>
               </div>
               <TypewriterHeadline fontSize={40} style={{ lineHeight: 1 }} />
-              <p className="text-white/60 text-sm leading-relaxed" style={{ maxWidth: 300, fontFamily: INTER }}>
+              <p className="text-white/75 text-sm leading-relaxed" style={{ maxWidth: 300, fontFamily: INTER, textShadow: '0 1px 8px rgba(0,0,0,0.9)' }}>
                 Upload a selfie. Chat with AI characters. Make choices that change the ending. Every story is uniquely yours.
               </p>
             </motion.div>
@@ -607,8 +607,8 @@ export function LandingPage() {
             </motion.button>
 
             <motion.p
-              className="text-white/25 text-xs text-center"
-              style={{ fontFamily: INTER }}
+              className="text-white/40 text-xs text-center"
+              style={{ fontFamily: INTER, textShadow: '0 1px 6px rgba(0,0,0,0.8)' }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
