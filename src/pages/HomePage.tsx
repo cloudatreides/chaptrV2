@@ -428,12 +428,12 @@ export function HomePage() {
                   style={{ background: '#1a1428' }}
                 >
                   <img src={u.image} alt={u.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                  <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,9,15,0.95) 0%, transparent 50%)' }} />
+                  <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,9,15,1) 0%, rgba(10,9,15,0.85) 40%, transparent 70%)' }} />
                   <div className="absolute bottom-2 left-2 right-2">
-                    <p className="text-white/80 text-[10px] font-semibold leading-tight">{u.title}</p>
+                    <p className="text-white text-[10px] font-semibold leading-tight drop-shadow-sm">{u.title}</p>
                     <div className="flex items-center gap-1 mt-1">
-                      <Users size={9} className="text-white/25" />
-                      <span className="text-white/25 text-[9px]">{formatPlayerCount(UNIVERSE_PLAYERS[u.id] ?? 0)}</span>
+                      <Users size={9} className="text-white/50" />
+                      <span className="text-white/50 text-[9px]">{formatPlayerCount(UNIVERSE_PLAYERS[u.id] ?? 0)}</span>
                     </div>
                   </div>
                 </button>
@@ -631,13 +631,13 @@ export function HomePage() {
                         style={{ background: '#1a1428' }}
                       >
                         <img src={u.image} alt={u.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                        <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,9,15,0.95) 0%, transparent 50%)' }} />
+                        <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,9,15,1) 0%, rgba(10,9,15,0.85) 40%, transparent 70%)' }} />
                         <div className="absolute bottom-3 left-3 right-3">
-                          <span className="text-accent text-[9px] font-semibold tracking-[1px] uppercase">{u.genreTag}</span>
-                          <p className="text-white/90 text-sm font-semibold mt-0.5">{u.title}</p>
+                          <span className="text-accent text-[9px] font-semibold tracking-[1px] uppercase drop-shadow-sm">{u.genreTag}</span>
+                          <p className="text-white text-sm font-semibold mt-0.5 drop-shadow-sm">{u.title}</p>
                           <div className="flex items-center gap-1.5 mt-1.5">
-                            <Users size={11} className="text-white/30" />
-                            <span className="text-white/30 text-[11px]">{formatPlayerCount(UNIVERSE_PLAYERS[u.id] ?? 0)} played</span>
+                            <Users size={11} className="text-white/50" />
+                            <span className="text-white/50 text-[11px]">{formatPlayerCount(UNIVERSE_PLAYERS[u.id] ?? 0)} played</span>
                           </div>
                         </div>
                       </button>
