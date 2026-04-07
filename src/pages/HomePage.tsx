@@ -538,178 +538,179 @@ export function HomePage() {
             </div>
           </div>
 
-          {/* Empty state — first-time user */}
-          {!hasCharacters && (
-            <motion.div
-              className="flex flex-col items-center justify-center gap-6 py-24"
-              initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-            >
-              <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(200,75,158,0.15), rgba(139,92,246,0.15))', border: '1px solid rgba(200,75,158,0.2)' }}>
-                <Sparkles size={36} className="text-accent" />
-              </div>
-              <div className="text-center">
-                <h2 className="text-white font-bold text-2xl mb-3">Create your first character</h2>
-                <p className="text-white/40 text-base leading-relaxed max-w-[380px]">
-                  Upload a selfie, pick a personality, and step into an AI-powered story where you're the main character.
-                </p>
-              </div>
-              <motion.button
-                onClick={() => navigate('/create-character')}
-                className="cursor-pointer flex items-center gap-2 text-white font-semibold px-8 py-3.5 rounded-xl"
-                style={{ background: 'linear-gradient(135deg, #c84b9e, #8b5cf6)' }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                Get Started <ArrowRight size={18} />
-              </motion.button>
-            </motion.div>
-          )}
-
-          {hasCharacters && (
-            <div className="flex gap-8">
-              {/* Left column — main content */}
-              <div className="flex-1 flex flex-col gap-8">
-                {/* Ambient Ping Cards */}
-                <PingCards delay={0.05} />
-
-                {/* Continue Story */}
-                {activePlaythrough && activeUniverse && (
-                  <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-                    <p className="text-accent/50 text-[10px] font-semibold tracking-[2px] uppercase mb-3">Continue Story</p>
-                    <button
-                      onClick={handleResume}
-                      className="cursor-pointer w-full text-left rounded-2xl overflow-hidden group"
-                      style={{ background: 'linear-gradient(160deg, #161220, #1a1428)', border: '1px solid rgba(200,75,158,0.1)', boxShadow: '0 4px 30px rgba(0,0,0,0.3)' }}
-                    >
-                      <div className="flex">
-                        {firstSceneImage && (
-                          <div className="w-[280px] h-[180px] overflow-hidden shrink-0">
-                            <img src={firstSceneImage} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                          </div>
-                        )}
-                        <div className="flex-1 px-6 py-5 flex flex-col justify-center gap-3">
-                          <p className="text-accent text-[11px] font-semibold tracking-[1px]">{activeUniverse.title}</p>
-                          <p className="text-white font-semibold text-xl">
-                            {getChapterLabel(activePlaythrough.progress.currentStepIndex, getStepCount(activePlaythrough.universeId))}
-                          </p>
-                          <div className="w-full max-w-[300px] h-[5px] rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }}>
-                            <div
-                              className="h-full rounded-full"
-                              style={{
-                                width: `${Math.min(((activePlaythrough.progress.currentStepIndex + 1) / getStepCount(activePlaythrough.universeId)) * 100, 100)}%`,
-                                background: 'linear-gradient(90deg, #c84b9e, #8b5cf6)',
-                              }}
-                            />
-                          </div>
-                          <div className="flex items-center gap-2 text-white/60 text-sm">
-                            Resume as {activePlaythrough.character.name} <ArrowRight size={14} />
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                  </motion.div>
-                )}
-
-                {/* Characters To Meet */}
-                <CastSection delay={0.08} />
-
-                {/* Universes */}
-                <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="text-accent/50 text-[10px] font-semibold tracking-[2px] uppercase">Your Universes</p>
+          <div className="flex gap-8">
+            {/* Left column — main content */}
+            <div className="flex-1 flex flex-col gap-8">
+              {/* FTUE — Create first character */}
+              {!hasCharacters && (
+                <motion.div
+                  className="rounded-2xl p-6 flex items-center gap-6"
+                  style={{ background: 'linear-gradient(160deg, #161220, #1a1428)', border: '1px solid rgba(200,75,158,0.15)' }}
+                  initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+                >
+                  <div className="w-14 h-14 rounded-full flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, rgba(200,75,158,0.15), rgba(139,92,246,0.15))', border: '1px solid rgba(200,75,158,0.2)' }}>
+                    <Sparkles size={24} className="text-accent" />
                   </div>
-                  <div className="flex gap-2 mb-4">
-                    {GENRE_FILTERS.map((g) => (
-                      <button
-                        key={g}
-                        onClick={() => setGenreFilter(g)}
-                        className="cursor-pointer text-[11px] font-semibold px-3.5 py-1.5 rounded-full transition-colors"
-                        style={{
-                          background: genreFilter === g ? 'rgba(200,75,158,0.15)' : 'rgba(255,255,255,0.04)',
-                          color: genreFilter === g ? '#c84b9e' : 'rgba(255,255,255,0.35)',
-                          border: `1px solid ${genreFilter === g ? 'rgba(200,75,158,0.25)' : 'rgba(255,255,255,0.06)'}`,
-                        }}
-                      >
-                        {g[0] + g.slice(1).toLowerCase()}
-                      </button>
-                    ))}
+                  <div className="flex-1">
+                    <h2 className="text-white font-bold text-lg mb-1">Create your first character</h2>
+                    <p className="text-white/40 text-sm leading-relaxed">
+                      Upload a selfie, pick a personality, and step into a story where you're the main character.
+                    </p>
                   </div>
-                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                    {universeCards.map((u) => (
-                      <button
-                        key={u.id}
-                        onClick={() => { setSelectedUniverse(u.id); navigate('/characters') }}
-                        className="cursor-pointer rounded-xl overflow-hidden group text-left"
-                        style={{ background: '#13101c', border: '1px solid rgba(255,255,255,0.06)' }}
-                      >
-                        <div className="relative h-[140px] overflow-hidden">
-                          <img src={u.image} alt={u.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                        </div>
-                        <div className="px-3 py-2.5">
-                          <span className="text-accent text-[9px] font-semibold tracking-[1px] uppercase">{u.genreTag}</span>
-                          <p className="text-white text-sm font-semibold mt-0.5">{u.title}</p>
-                          <div className="flex items-center gap-1.5 mt-1">
-                            <Users size={11} className="text-white/40" />
-                            <span className="text-white/40 text-[11px]">{formatPlayerCount(UNIVERSE_PLAYERS[u.id] ?? 0)} played</span>
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+                  <motion.button
+                    onClick={() => navigate('/create-character')}
+                    className="cursor-pointer flex items-center gap-2 text-white font-semibold px-6 py-3 rounded-xl shrink-0"
+                    style={{ background: 'linear-gradient(135deg, #c84b9e, #8b5cf6)' }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Get Started <ArrowRight size={16} />
+                  </motion.button>
                 </motion.div>
+              )}
 
-              </div>
+              {/* Ambient Ping Cards */}
+              {hasCharacters && <PingCards delay={0.05} />}
 
-              {/* Right sidebar — Characters */}
-              <motion.div
-                className="w-[260px] shrink-0"
-                initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 }}
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-accent/50 text-[10px] font-semibold tracking-[2px] uppercase">Your Twins</p>
-                  <button onClick={handleEditCharacters} className="cursor-pointer text-accent text-xs font-medium flex items-center gap-1 hover:text-accent/80 transition-colors">
-                    <Pencil size={14} /> Edit
-                  </button>
-                </div>
-
-                <div className="flex flex-col gap-3">
-                  {characters.map((char) => (
-                    <button
-                      key={char.id}
-                      onClick={() => navigate(`/edit-character/${char.id}`)}
-                      className="cursor-pointer w-full flex items-center gap-3 rounded-xl p-3 text-left transition-all hover:brightness-110 active:brightness-90"
-                      style={{ background: '#111016', border: '1px solid rgba(200,75,158,0.08)' }}
-                    >
-                      <div className="w-12 h-12 rounded-full overflow-hidden shrink-0" style={{ border: '2px solid rgba(200,75,158,0.3)', background: 'rgba(200,75,158,0.1)' }}>
-                        {char.selfieUrl ? (
-                          <img src={char.selfieUrl} alt={char.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-accent font-semibold">
-                            {char.name[0]?.toUpperCase()}
-                          </div>
-                        )}
+              {/* Continue Story */}
+              {hasCharacters && activePlaythrough && activeUniverse && (
+                <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
+                  <p className="text-accent/50 text-[10px] font-semibold tracking-[2px] uppercase mb-3">Continue Story</p>
+                  <button
+                    onClick={handleResume}
+                    className="cursor-pointer w-full text-left rounded-2xl overflow-hidden group"
+                    style={{ background: 'linear-gradient(160deg, #161220, #1a1428)', border: '1px solid rgba(200,75,158,0.1)', boxShadow: '0 4px 30px rgba(0,0,0,0.3)' }}
+                  >
+                    <div className="flex">
+                      {firstSceneImage && (
+                        <div className="w-[280px] h-[180px] overflow-hidden shrink-0">
+                          <img src={firstSceneImage} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        </div>
+                      )}
+                      <div className="flex-1 px-6 py-5 flex flex-col justify-center gap-3">
+                        <p className="text-accent text-[11px] font-semibold tracking-[1px]">{activeUniverse.title}</p>
+                        <p className="text-white font-semibold text-xl">
+                          {getChapterLabel(activePlaythrough.progress.currentStepIndex, getStepCount(activePlaythrough.universeId))}
+                        </p>
+                        <div className="w-full max-w-[300px] h-[5px] rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                          <div
+                            className="h-full rounded-full"
+                            style={{
+                              width: `${Math.min(((activePlaythrough.progress.currentStepIndex + 1) / getStepCount(activePlaythrough.universeId)) * 100, 100)}%`,
+                              background: 'linear-gradient(90deg, #c84b9e, #8b5cf6)',
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center gap-2 text-white/60 text-sm">
+                          Resume as {activePlaythrough.character.name} <ArrowRight size={14} />
+                        </div>
                       </div>
-                      <div className="flex flex-col gap-0.5">
-                        <p className="text-white/85 font-semibold text-sm">{char.name}</p>
-                        <p className="text-white/30 text-xs">{char.gender === 'female' ? 'Female' : 'Male'} · {char.bio ? char.bio.slice(0, 30) : 'No bio'}</p>
+                    </div>
+                  </button>
+                </motion.div>
+              )}
+
+              {/* Characters To Meet */}
+              <CastSection delay={0.08} />
+
+              {/* Universes */}
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-accent/50 text-[10px] font-semibold tracking-[2px] uppercase">Your Universes</p>
+                </div>
+                <div className="flex gap-2 mb-4">
+                  {GENRE_FILTERS.map((g) => (
+                    <button
+                      key={g}
+                      onClick={() => setGenreFilter(g)}
+                      className="cursor-pointer text-[11px] font-semibold px-3.5 py-1.5 rounded-full transition-colors"
+                      style={{
+                        background: genreFilter === g ? 'rgba(200,75,158,0.15)' : 'rgba(255,255,255,0.04)',
+                        color: genreFilter === g ? '#c84b9e' : 'rgba(255,255,255,0.35)',
+                        border: `1px solid ${genreFilter === g ? 'rgba(200,75,158,0.25)' : 'rgba(255,255,255,0.06)'}`,
+                      }}
+                    >
+                      {g[0] + g.slice(1).toLowerCase()}
+                    </button>
+                  ))}
+                </div>
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                  {universeCards.map((u) => (
+                    <button
+                      key={u.id}
+                      onClick={() => { setSelectedUniverse(u.id); navigate('/characters') }}
+                      className="cursor-pointer rounded-xl overflow-hidden group text-left"
+                      style={{ background: '#13101c', border: '1px solid rgba(255,255,255,0.06)' }}
+                    >
+                      <div className="relative h-[140px] overflow-hidden">
+                        <img src={u.image} alt={u.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      </div>
+                      <div className="px-3 py-2.5">
+                        <span className="text-accent text-[9px] font-semibold tracking-[1px] uppercase">{u.genreTag}</span>
+                        <p className="text-white text-sm font-semibold mt-0.5">{u.title}</p>
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <Users size={11} className="text-white/40" />
+                          <span className="text-white/40 text-[11px]">{formatPlayerCount(UNIVERSE_PLAYERS[u.id] ?? 0)} played</span>
+                        </div>
                       </div>
                     </button>
                   ))}
-
-                  {characters.length < 3 && (
-                    <button
-                      onClick={() => navigate('/create-character')}
-                      className="cursor-pointer w-full flex items-center justify-center gap-2 rounded-xl p-4 transition-all hover:brightness-125 active:brightness-90"
-                      style={{ border: '1.5px dashed rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.01)' }}
-                    >
-                      <Plus size={16} className="text-white/20" />
-                      <p className="text-white/25 text-sm font-medium">Create Twin</p>
-                    </button>
-                  )}
                 </div>
               </motion.div>
+
             </div>
-          )}
+
+            {/* Right sidebar — Characters */}
+            <motion.div
+              className="w-[260px] shrink-0"
+              initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 }}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-accent/50 text-[10px] font-semibold tracking-[2px] uppercase">Your Twins</p>
+                {hasCharacters && (
+                  <button onClick={handleEditCharacters} className="cursor-pointer text-accent text-xs font-medium flex items-center gap-1 hover:text-accent/80 transition-colors">
+                    <Pencil size={14} /> Edit
+                  </button>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-3">
+                {characters.map((char) => (
+                  <button
+                    key={char.id}
+                    onClick={() => navigate(`/edit-character/${char.id}`)}
+                    className="cursor-pointer w-full flex items-center gap-3 rounded-xl p-3 text-left transition-all hover:brightness-110 active:brightness-90"
+                    style={{ background: '#111016', border: '1px solid rgba(200,75,158,0.08)' }}
+                  >
+                    <div className="w-12 h-12 rounded-full overflow-hidden shrink-0" style={{ border: '2px solid rgba(200,75,158,0.3)', background: 'rgba(200,75,158,0.1)' }}>
+                      {char.selfieUrl ? (
+                        <img src={char.selfieUrl} alt={char.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-accent font-semibold">
+                          {char.name[0]?.toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <p className="text-white/85 font-semibold text-sm">{char.name}</p>
+                      <p className="text-white/30 text-xs">{char.gender === 'female' ? 'Female' : 'Male'} · {char.bio ? char.bio.slice(0, 30) : 'No bio'}</p>
+                    </div>
+                  </button>
+                ))}
+
+                {characters.length < 3 && (
+                  <button
+                    onClick={() => navigate('/create-character')}
+                    className="cursor-pointer w-full flex items-center justify-center gap-2 rounded-xl p-4 transition-all hover:brightness-125 active:brightness-90"
+                    style={{ border: '1.5px dashed rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.01)' }}
+                  >
+                    <Plus size={16} className="text-white/20" />
+                    <p className="text-white/25 text-sm font-medium">Create Twin</p>
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          </div>
         </div>
       </div>
 
