@@ -111,8 +111,17 @@ export function AppSidebar() {
                     className="cursor-pointer flex items-center gap-2.5 rounded-lg px-3 py-2 text-left transition-colors hover:bg-white/[0.03]"
                     style={{ background: isActive ? 'rgba(139,92,246,0.08)' : 'transparent' }}
                   >
-                    {fav.isGroup ? (
-                      <Users size={14} style={{ color: isActive ? '#8b5cf6' : 'rgba(255,255,255,0.25)' }} />
+                    {fav.isGroup && fav.members && fav.members.length > 0 ? (
+                      <div className="flex -space-x-1.5 shrink-0">
+                        {fav.members.slice(0, 3).map((m) => {
+                          const charData = getCastCharacter(m!)
+                          return charData?.staticPortrait ? (
+                            <img key={m!.id} src={charData.staticPortrait} alt={m!.name} className="w-5 h-5 rounded-full object-cover" style={{ border: '1.5px solid #0F0D14' }} />
+                          ) : (
+                            <div key={m!.id} className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] text-white/60" style={{ background: '#2D2538', border: '1.5px solid #0F0D14' }}>{m!.name[0]}</div>
+                          )
+                        })}
+                      </div>
                     ) : fav.portrait ? (
                       <img src={fav.portrait} alt={fav.label} className="w-5 h-5 rounded-full object-cover" />
                     ) : (
