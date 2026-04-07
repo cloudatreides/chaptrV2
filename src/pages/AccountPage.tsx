@@ -1,8 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, LogOut, User, Mail, Calendar, Shield } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { ArrowLeft, LogOut, User, Mail, Calendar, Shield, Brain } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { useStore } from '../store/useStore'
+import { useActiveStory } from '../hooks/useActiveStory'
+import { getCharacter, CHARACTERS } from '../data/characters'
 import { supabase } from '../lib/supabase'
 import { AppSidebar } from '../components/AppSidebar'
 
@@ -12,6 +15,16 @@ export function AccountPage() {
   const characters = useStore((s) => s.characters)
   const playthroughHistory = useStore((s) => s.playthroughHistory)
   const gemBalance = useStore((s) => s.gemBalance)
+  const { selectedUniverse } = useActiveStory()
+  const characterMemories = useStore((s) => {
+    const uid = s.selectedUniverse
+    const cid = s.activeCharacterId
+    if (!uid || !cid) return {}
+    return s.progressByCharacter[`${cid}:${uid}`]?.characterMemories ?? {}
+  })
+  const characterPortraits = useStore((s) => s.characterPortraits)
+
+  const memoryEntries = Object.entries(characterMemories).filter(([, mems]) => mems.length > 0)
 
   const fullName = user?.user_metadata?.full_name ?? ''
   const email = user?.email ?? ''
@@ -199,6 +212,71 @@ export function AccountPage() {
                 <p className="text-white/30 text-xs mt-0.5">Gems</p>
               </div>
             </div>
+          </div>
+
+          {/* Memory System */}
+          <div className="rounded-xl p-5" style={{ background: '#161222', border: '1px solid #2D2538' }}>
+            <label className="text-white/40 text-xs font-medium uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <Brain size={12} />
+              Character Memories
+            </label>
+
+            {memoryEntries.length === 0 ? (
+              <div className="flex flex-col items-center py-8 gap-3">
+                {/* Animated pulse rings */}
+                <div className="relative w-16 h-16 flex items-center justify-center">
+                  <motion.div
+                    className="absolute inset-0 rounded-full"
+                    style={{ border: '1px solid rgba(200,75,158,0.2)' }}
+                    animate={{ scale: [1, 1.6, 1.6], opacity: [0.4, 0, 0] }}
+                    transition={{ duration: 2.5, repeat: Infinity, ease: 'easeOut' }}
+                  />
+                  <motion.div
+                    className="absolute inset-0 rounded-full"
+                    style={{ border: '1px solid rgba(139,92,246,0.2)' }}
+                    animate={{ scale: [1, 1.4, 1.4], opacity: [0.3, 0, 0] }}
+                    transition={{ duration: 2.5, repeat: Infinity, ease: 'easeOut', delay: 0.8 }}
+                  />
+                  <Brain size={24} className="text-white/20" />
+                </div>
+                <p className="text-white/30 text-sm font-medium" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                  Memory Building In Progress
+                </p>
+                <p className="text-white/15 text-xs text-center max-w-[240px] leading-relaxed">
+                  Chat with characters and share things about yourself. They'll remember.
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4">
+                {memoryEntries.map(([charId, mems]) => {
+                  const charData = getCharacter(charId, selectedUniverse) ?? CHARACTERS[charId]
+                  const portrait = characterPortraits[charId]
+                  return (
+                    <div key={charId}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-6 h-6 rounded-full overflow-hidden shrink-0" style={{ background: 'rgba(200,75,158,0.15)' }}>
+                          {portrait ? (
+                            <img src={portrait} alt={charData?.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="w-full h-full flex items-center justify-center text-[10px]">{charData?.avatar}</span>
+                          )}
+                        </div>
+                        <span className="text-white/50 text-xs font-medium" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                          {charData?.name ?? charId}
+                        </span>
+                      </div>
+                      <div className="flex flex-col gap-1.5 pl-8">
+                        {mems.map((mem, i) => (
+                          <p key={i} className="text-white/40 text-sm leading-relaxed" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                            "{mem}"
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
         </div>
 
