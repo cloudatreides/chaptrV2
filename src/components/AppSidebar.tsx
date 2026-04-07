@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { BookOpen, Users, Sparkles, Globe, LogOut, Star, MessageCircle } from 'lucide-react'
+import { BookOpen, Users, Sparkles, Globe, LogOut, Star, MessageCircle, User } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { useStore } from '../store/useStore'
 import { CAST_ROSTER, getCastCharacter } from '../data/castRoster'
@@ -14,7 +14,7 @@ const NAV_ITEMS = [
 export function AppSidebar() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { signOut } = useAuth()
+  const { user, signOut } = useAuth()
   const favoriteCastIds = useStore((s) => s.favoriteCastIds)
   const castChatThreads = useStore((s) => s.castChatThreads)
   const groupCastThreads = useStore((s) => s.groupCastThreads)
@@ -131,8 +131,30 @@ export function AppSidebar() {
         </>
       )}
 
-      {/* Logout */}
+      {/* Account + Logout */}
       <div className="mt-auto px-3 pb-5">
+        <div className="w-full h-px mb-3" style={{ background: '#2D2538' }} />
+        <button
+          onClick={() => navigate('/account')}
+          className="cursor-pointer flex items-center gap-2.5 rounded-lg px-3 py-2.5 w-full text-left transition-colors hover:bg-white/[0.03]"
+          style={{ background: location.pathname === '/account' ? 'rgba(200,75,158,0.08)' : 'transparent' }}
+        >
+          {user?.user_metadata?.avatar_url ? (
+            <img src={user.user_metadata.avatar_url} alt="" className="w-5 h-5 rounded-full object-cover" />
+          ) : (
+            <User size={18} style={{ color: location.pathname === '/account' ? '#c84b9e' : 'rgba(255,255,255,0.33)' }} />
+          )}
+          <span
+            className="text-[13px] truncate"
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontWeight: location.pathname === '/account' ? 600 : 500,
+              color: location.pathname === '/account' ? '#fff' : 'rgba(255,255,255,0.53)',
+            }}
+          >
+            {user?.user_metadata?.full_name?.split(' ')[0] ?? 'Account'}
+          </span>
+        </button>
         <button
           onClick={() => signOut()}
           className="cursor-pointer flex items-center gap-2.5 rounded-lg px-3 py-2.5 w-full text-left transition-colors hover:bg-white/[0.03]"

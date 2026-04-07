@@ -303,7 +303,7 @@ export function HomePage() {
       <div className="md:hidden flex flex-col min-h-screen min-h-dvh px-5 pt-14 pb-5 gap-4">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 cursor-pointer" onClick={() => navigate('/account')}>
             <p className="text-accent text-[11px] font-semibold tracking-[2px] uppercase">Welcome back</p>
             <h1 className="text-white font-bold text-[26px]">{userName}</h1>
           </div>

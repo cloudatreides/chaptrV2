@@ -16,6 +16,8 @@ import { CastPage } from './pages/CastPage'
 import { CastChatPage } from './pages/CastChatPage'
 import { CastGroupChatPage } from './pages/CastGroupChatPage'
 import { EditCharacterPage } from './pages/EditCharacterPage'
+import { UniverseDetailPage } from './pages/UniverseDetailPage'
+import { AccountPage } from './pages/AccountPage'
 import { TermsPage } from './pages/TermsPage'
 import { PrivacyPage } from './pages/PrivacyPage'
 
@@ -35,6 +37,7 @@ export default function App() {
           <Route path="/cast/group/:ids" element={<ProtectedRoute><CastGroupChatPage /></ProtectedRoute>} />
           <Route path="/cast/:characterId" element={<ProtectedRoute><CastChatPage /></ProtectedRoute>} />
           <Route path="/universes" element={<ProtectedRoute><UniversesPage /></ProtectedRoute>} />
+          <Route path="/universes/:id" element={<ProtectedRoute><UniverseDetailPage /></ProtectedRoute>} />
           <Route path="/characters" element={<ProtectedRoute><CharacterSelectPage /></ProtectedRoute>} />
           <Route path="/create-character" element={<ProtectedRoute><CreateCharacterPage /></ProtectedRoute>} />
           <Route path="/edit-character/:charId" element={<ProtectedRoute><EditCharacterPage /></ProtectedRoute>} />
@@ -42,6 +45,7 @@ export default function App() {
           <Route path="/reveal" element={<ProtectedRoute><RevealPage /></ProtectedRoute>} />
           <Route path="/free-chat" element={<ProtectedRoute><FreeChatPage /></ProtectedRoute>} />
           <Route path="/quest/:questId" element={<ProtectedRoute><QuestPage /></ProtectedRoute>} />
+          <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
