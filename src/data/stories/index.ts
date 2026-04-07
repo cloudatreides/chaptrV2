@@ -4,6 +4,16 @@ import { HOLLOW_MANOR_STEPS, HOLLOW_MANOR_CHARACTERS, HOLLOW_MANOR_BIBLE } from 
 import { LAST_SIGNAL_STEPS, LAST_SIGNAL_CHARACTERS, LAST_SIGNAL_BIBLE } from './the-last-signal'
 import { SAKURA_ACADEMY_STEPS, SAKURA_ACADEMY_CHARACTERS, SAKURA_ACADEMY_BIBLE } from './sakura-academy'
 import { EDGE_OF_ATLAS_STEPS, EDGE_OF_ATLAS_CHARACTERS, EDGE_OF_ATLAS_BIBLE } from './edge-of-atlas'
+import { INHERITANCE_STEPS, INHERITANCE_CHARACTERS, INHERITANCE_BIBLE } from './the-inheritance'
+import { SKY_PIRATES_STEPS, SKY_PIRATES_CHARACTERS, SKY_PIRATES_BIBLE } from './sky-pirates'
+import { DRIFT_STEPS, DRIFT_CHARACTERS, DRIFT_BIBLE } from './the-drift'
+import { PHANTOM_PROTOCOL_STEPS, PHANTOM_PROTOCOL_CHARACTERS, PHANTOM_PROTOCOL_BIBLE } from './phantom-protocol'
+import { FAE_COURT_STEPS, FAE_COURT_CHARACTERS, FAE_COURT_BIBLE } from './fae-court'
+import { MIDNIGHT_PARIS_STEPS, MIDNIGHT_PARIS_CHARACTERS, MIDNIGHT_PARIS_BIBLE } from './midnight-paris'
+import { CAMPUS_RIVALS_STEPS, CAMPUS_RIVALS_CHARACTERS, CAMPUS_RIVALS_BIBLE } from './campus-rivals'
+import { CRIMSON_DEPTHS_STEPS, CRIMSON_DEPTHS_CHARACTERS, CRIMSON_DEPTHS_BIBLE } from './crimson-depths'
+import { WHISPER_GAME_STEPS, WHISPER_GAME_CHARACTERS, WHISPER_GAME_BIBLE } from './the-whisper-game'
+import { NEON_DISTRICT_STEPS, NEON_DISTRICT_CHARACTERS, NEON_DISTRICT_BIBLE } from './neon-district'
 
 export interface StoryData {
   steps: StoryStep[]
@@ -55,6 +65,96 @@ export const STORY_REGISTRY: Record<string, StoryData> = {
     primaryCharacterId: 'zara',
     revealPerspective: 'Your name in the old maps',
     signatureContext: 'an epic adventure about discovery beyond the edge of the known world. The signature should capture how the protagonist approached the unknown — their method, their spirit, the legacy of what they found and how they found it.',
+  },
+  'the-inheritance': {
+    steps: INHERITANCE_STEPS,
+    characters: INHERITANCE_CHARACTERS,
+    bible: INHERITANCE_BIBLE,
+    trustLabel: 'resolve',
+    primaryCharacterId: 'sable',
+    revealPerspective: 'The Blackwood legacy sees you as',
+    signatureContext: 'a gothic mystery about family secrets and inheritance on the Scottish Highlands. The signature should capture the protagonist\'s relationship with truth — how they handled the weight of buried history, whether they chose mercy or exposure, and what the Blackwood name means because of them.',
+  },
+  'sky-pirates': {
+    steps: SKY_PIRATES_STEPS,
+    characters: SKY_PIRATES_CHARACTERS,
+    bible: SKY_PIRATES_BIBLE,
+    trustLabel: 'loyalty',
+    primaryCharacterId: 'wren',
+    revealPerspective: 'The crew of the Skyward Drift knows you as',
+    signatureContext: 'a steampunk airship adventure about freedom and loyalty above the clouds. The signature should capture how the protagonist earned their place — through boldness or discipline, through trust or silence, and what kind of sky pirate they became.',
+  },
+  'the-drift': {
+    steps: DRIFT_STEPS,
+    characters: DRIFT_CHARACTERS,
+    bible: DRIFT_BIBLE,
+    trustLabel: 'clarity',
+    primaryCharacterId: 'aria',
+    revealPerspective: 'The signal remembers you as',
+    signatureContext: 'a cerebral sci-fi story about consciousness and the unknown at the edge of space. The signature should capture the protagonist\'s relationship with ARIA and the signal — whether they chose to cross the threshold or turn back, and what they understood about the boundary between human and something more.',
+  },
+  'phantom-protocol': {
+    steps: PHANTOM_PROTOCOL_STEPS,
+    characters: PHANTOM_PROTOCOL_CHARACTERS,
+    bible: PHANTOM_PROTOCOL_BIBLE,
+    trustLabel: 'judgment',
+    primaryCharacterId: 'kira',
+    revealPerspective: 'Your operational assessment reads',
+    signatureContext: 'a le Carré-style espionage thriller split between Berlin and Vienna. The signature should capture the protagonist\'s moral compass — who they trusted, how they handled deception, and whether they chose mercy, truth, or something in between.',
+  },
+  'fae-court': {
+    steps: FAE_COURT_STEPS,
+    characters: FAE_COURT_CHARACTERS,
+    bible: FAE_COURT_BIBLE,
+    trustLabel: 'will',
+    primaryCharacterId: 'thorne',
+    revealPerspective: 'The Unseelie Court remembers you as',
+    signatureContext: 'a dark fantasy about bargains and survival in the Unseelie Court. The signature should capture how the protagonist navigated the fae — through honesty or cunning, whether they danced or bargained, and what they gave up to earn their freedom.',
+  },
+  'midnight-paris': {
+    steps: MIDNIGHT_PARIS_STEPS,
+    characters: MIDNIGHT_PARIS_CHARACTERS,
+    bible: MIDNIGHT_PARIS_BIBLE,
+    trustLabel: 'passion',
+    primaryCharacterId: 'lucien',
+    revealPerspective: 'Paris remembers you as',
+    signatureContext: 'a Parisian romance about art, ambition, and impossible choices. The signature should capture the protagonist\'s relationship with creativity and love — whether they chose passion or pragmatism, the underground or the gallery, and what Paris meant to them.',
+  },
+  'campus-rivals': {
+    steps: CAMPUS_RIVALS_STEPS,
+    characters: CAMPUS_RIVALS_CHARACTERS,
+    bible: CAMPUS_RIVALS_BIBLE,
+    trustLabel: 'tension',
+    primaryCharacterId: 'alex',
+    revealPerspective: 'Alex sees you as',
+    signatureContext: 'a college enemies-to-lovers romance about rivalry, vulnerability, and connection. The signature should capture how the protagonist navigated the line between competition and intimacy — whether they fought or softened, and what they discovered beneath the rivalry.',
+  },
+  'crimson-depths': {
+    steps: CRIMSON_DEPTHS_STEPS,
+    characters: CRIMSON_DEPTHS_CHARACTERS,
+    bible: CRIMSON_DEPTHS_BIBLE,
+    trustLabel: 'resolve',
+    primaryCharacterId: 'voss',
+    revealPerspective: 'The deep remembers you as',
+    signatureContext: 'a cosmic horror story set in a deep-sea research station. The signature should capture the protagonist\'s relationship with the unknown — whether they reached toward the abyss or fled from it, and what they understood about the vast, patient thing beneath the ocean floor.',
+  },
+  'the-whisper-game': {
+    steps: WHISPER_GAME_STEPS,
+    characters: WHISPER_GAME_CHARACTERS,
+    bible: WHISPER_GAME_BIBLE,
+    trustLabel: 'nerve',
+    primaryCharacterId: 'mira',
+    revealPerspective: 'The game classified you as',
+    signatureContext: 'a psychological horror story about a viral social game that watches back. The signature should capture the protagonist\'s relationship with surveillance, privacy, and fear — whether they fought the system or played through it, and what freedom cost them.',
+  },
+  'neon-district': {
+    steps: NEON_DISTRICT_STEPS,
+    characters: NEON_DISTRICT_CHARACTERS,
+    bible: NEON_DISTRICT_BIBLE,
+    trustLabel: 'conviction',
+    primaryCharacterId: 'ghost',
+    revealPerspective: 'Ghost remembers you as',
+    signatureContext: 'a cyberpunk mystery about AI personhood and identity in Neo-Tokyo. The signature should capture the protagonist\'s moral stance — how they weighed humanity against machinery, justice against pragmatism, and what they decided a person really is.',
   },
 }
 

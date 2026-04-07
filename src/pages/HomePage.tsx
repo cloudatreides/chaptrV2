@@ -19,9 +19,19 @@ import type { AmbientPingDef } from '../data/ambientPings'
 const UNIVERSE_PLAYERS: Record<string, number> = {
   'seoul-transfer': 12400,
   'sakura-academy': 8700,
+  'midnight-paris': 7300,
+  'campus-rivals': 6100,
   'hollow-manor': 5200,
+  'crimson-depths': 4600,
+  'the-whisper-game': 3900,
   'the-last-signal': 3800,
+  'neon-district': 3200,
+  'the-inheritance': 2800,
+  'sky-pirates': 2500,
   'edge-of-atlas': 2100,
+  'the-drift': 1900,
+  'phantom-protocol': 1600,
+  'fae-court': 1400,
 }
 
 function formatPlayerCount(n: number): string {

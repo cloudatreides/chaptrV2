@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2=".5" y2="1">
+      <stop offset="0%" stop-color="#0a2a1a"/>
+      <stop offset="50%" stop-color="#1a3a2a"/>
+      <stop offset="100%" stop-color="#2a1a3a"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bg)"/>
+  <path d="M0 270Q100 260 200 268Q300 275 400 265L400 300H0Z" fill="#0a1a0a" opacity=".5"/>
+  <path d="M120 300Q115 250 105 200Q100 170 110 140Q115 120 108 90" fill="none" stroke="#1a0f0a" stroke-width="8" opacity=".8"/>
+  <path d="M110 160Q90 140 70 130" fill="none" stroke="#1a0f0a" stroke-width="3" opacity=".7"/>
+  <path d="M108 120Q85 100 75 80" fill="none" stroke="#1a0f0a" stroke-width="2.5" opacity=".6"/>
+  <path d="M112 140Q130 120 145 100" fill="none" stroke="#1a0f0a" stroke-width="2" opacity=".5"/>
+  <path d="M280 300Q285 250 295 200Q300 170 290 140Q285 120 292 90" fill="none" stroke="#1a0f0a" stroke-width="8" opacity=".8"/>
+  <path d="M290 160Q310 140 330 130" fill="none" stroke="#1a0f0a" stroke-width="3" opacity=".7"/>
+  <path d="M292 120Q315 100 325 80" fill="none" stroke="#1a0f0a" stroke-width="2.5" opacity=".6"/>
+  <path d="M288 140Q270 120 255 100" fill="none" stroke="#1a0f0a" stroke-width="2" opacity=".5"/>
+  <path d="M108 90Q150 40 200 30Q250 40 292 90" fill="none" stroke="#1a0f0a" stroke-width="4" opacity=".6"/>
+  <circle cx="160" cy="120" r="2.5" fill="#aae060" opacity=".5"/>
+  <circle cx="240" cy="100" r="2" fill="#aae060" opacity=".4"/>
+  <circle cx="180" cy="80" r="1.5" fill="#aae060" opacity=".45"/>
+  <circle cx="220" cy="60" r="2" fill="#aae060" opacity=".35"/>
+  <circle cx="140" cy="200" r="2" fill="#aae060" opacity=".3"/>
+  <circle cx="260" cy="180" r="1.5" fill="#aae060" opacity=".35"/>
+  <circle cx="200" cy="150" r="2.5" fill="#aae060" opacity=".4"/>
+  <circle cx="100" cy="160" r="1.5" fill="#aae060" opacity=".25"/>
+</svg>

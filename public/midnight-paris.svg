@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0%" stop-color="#1a1040"/>
+      <stop offset="60%" stop-color="#2d1b69"/>
+      <stop offset="100%" stop-color="#c4842d"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bg)"/>
+  <!-- Moon -->
+  <circle cx="320" cy="60" r="25" fill="#f0e6c0" opacity="0.9"/>
+  <circle cx="330" cy="55" r="22" fill="url(#bg)"/>
+  <!-- Eiffel Tower silhouette -->
+  <path d="M200 90 L192 200 L175 280 L185 280 L190 240 L210 240 L215 280 L225 280 L208 200 Z" fill="#0d0820" opacity="0.85"/>
+  <rect x="196" y="82" width="8" height="12" fill="#0d0820" opacity="0.85"/>
+  <rect x="188" y="180" width="24" height="4" fill="#0d0820" opacity="0.85"/>
+  <rect x="184" y="220" width="32" height="4" fill="#0d0820" opacity="0.85"/>
+  <!-- Building silhouettes -->
+  <rect x="0" y="250" width="400" height="50" fill="#0d0820" opacity="0.7"/>
+  <rect x="20" y="230" width="40" height="70" fill="#0d0820" opacity="0.7"/>
+  <rect x="70" y="240" width="30" height="60" fill="#0d0820" opacity="0.7"/>
+  <rect x="300" y="235" width="35" height="65" fill="#0d0820" opacity="0.7"/>
+  <rect x="345" y="245" width="45" height="55" fill="#0d0820" opacity="0.7"/>
+  <!-- Stars -->
+  <circle cx="50" cy="40" r="1.5" fill="#f0e6c0" opacity="0.7"/>
+  <circle cx="150" cy="30" r="1" fill="#f0e6c0" opacity="0.5"/>
+  <circle cx="260" cy="50" r="1.5" fill="#f0e6c0" opacity="0.6"/>
+  <circle cx="100" cy="70" r="1" fill="#f0e6c0" opacity="0.4"/>
+</svg>

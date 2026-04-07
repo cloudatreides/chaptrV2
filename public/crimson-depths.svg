@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4a0a0a"/>
+      <stop offset="50%" stop-color="#2a0a20"/>
+      <stop offset="100%" stop-color="#0a1a3a"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bg)"/>
+  <!-- Submarine silhouette -->
+  <ellipse cx="200" cy="180" rx="90" ry="28" fill="#0a0a1a" opacity="0.8"/>
+  <path d="M280 180 L310 175 L310 185 Z" fill="#0a0a1a" opacity="0.8"/>
+  <!-- Conning tower -->
+  <rect x="185" y="148" width="30" height="32" rx="3" fill="#0a0a1a" opacity="0.8"/>
+  <rect x="195" y="140" width="10" height="12" fill="#0a0a1a" opacity="0.8"/>
+  <!-- Porthole glow -->
+  <circle cx="160" cy="180" r="5" fill="#6a1a1a" opacity="0.4"/>
+  <circle cx="180" cy="180" r="5" fill="#6a1a1a" opacity="0.3"/>
+  <circle cx="220" cy="180" r="5" fill="#6a1a1a" opacity="0.4"/>
+  <!-- Bubbles -->
+  <circle cx="150" cy="120" r="4" fill="none" stroke="#4a6a8a" stroke-width="0.8" opacity="0.3"/>
+  <circle cx="170" cy="90" r="3" fill="none" stroke="#4a6a8a" stroke-width="0.8" opacity="0.25"/>
+  <circle cx="140" cy="70" r="2.5" fill="none" stroke="#4a6a8a" stroke-width="0.8" opacity="0.2"/>
+  <circle cx="250" cy="100" r="3.5" fill="none" stroke="#4a6a8a" stroke-width="0.8" opacity="0.25"/>
+  <circle cx="230" cy="60" r="2" fill="none" stroke="#4a6a8a" stroke-width="0.8" opacity="0.2"/>
+  <circle cx="300" cy="130" r="3" fill="none" stroke="#4a6a8a" stroke-width="0.8" opacity="0.2"/>
+  <!-- Ocean floor -->
+  <path d="M0 270 Q50 260 100 268 Q150 275 200 265 Q250 258 300 270 Q350 278 400 265 L400 300 L0 300 Z" fill="#0a0a1a" opacity="0.6"/>
+  <!-- Seaweed -->
+  <path d="M80 300 Q75 270 85 250 Q90 240 82 220" fill="none" stroke="#1a3a2a" stroke-width="2" opacity="0.4"/>
+  <path d="M320 300 Q325 275 315 255" fill="none" stroke="#1a3a2a" stroke-width="2" opacity="0.3"/>
+</svg>

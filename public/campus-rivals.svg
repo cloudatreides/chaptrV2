@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#0a1628"/>
+      <stop offset="60%" stop-color="#1a2744"/>
+      <stop offset="100%" stop-color="#c49a2d"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bg)"/>
+  <!-- Ground -->
+  <rect x="0" y="260" width="400" height="40" fill="#0a0e1a" opacity="0.8"/>
+  <!-- Main building -->
+  <rect x="140" y="140" width="120" height="120" fill="#0d1525" opacity="0.85"/>
+  <!-- Dome -->
+  <ellipse cx="200" cy="140" rx="45" ry="30" fill="#0d1525" opacity="0.85"/>
+  <!-- Cupola -->
+  <rect x="193" y="105" width="14" height="10" fill="#0d1525" opacity="0.85"/>
+  <ellipse cx="200" cy="105" rx="10" ry="6" fill="#0d1525" opacity="0.85"/>
+  <!-- Columns -->
+  <rect x="155" y="180" width="8" height="80" fill="#141e33" opacity="0.9"/>
+  <rect x="175" y="180" width="8" height="80" fill="#141e33" opacity="0.9"/>
+  <rect x="195" y="180" width="8" height="80" fill="#141e33" opacity="0.9"/>
+  <rect x="215" y="180" width="8" height="80" fill="#141e33" opacity="0.9"/>
+  <rect x="235" y="180" width="8" height="80" fill="#141e33" opacity="0.9"/>
+  <!-- Pediment -->
+  <path d="M140 180 L200 155 L260 180 Z" fill="#0d1525" opacity="0.85"/>
+  <!-- Side buildings -->
+  <rect x="50" y="200" width="90" height="60" fill="#0d1525" opacity="0.7"/>
+  <rect x="260" y="210" width="90" height="50" fill="#0d1525" opacity="0.7"/>
+  <!-- Windows glow -->
+  <rect x="165" y="200" width="6" height="8" fill="#c49a2d" opacity="0.2"/>
+  <rect x="185" y="200" width="6" height="8" fill="#c49a2d" opacity="0.2"/>
+  <rect x="205" y="200" width="6" height="8" fill="#c49a2d" opacity="0.2"/>
+  <!-- Stars -->
+  <circle cx="60" cy="50" r="1.5" fill="#c49a2d" opacity="0.5"/>
+  <circle cx="340" cy="70" r="1" fill="#c49a2d" opacity="0.4"/>
+  <circle cx="300" cy="40" r="1.5" fill="#c49a2d" opacity="0.3"/>
+</svg>
