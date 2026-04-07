@@ -433,7 +433,7 @@ export function HomePage() {
               {universeCards.map((u) => (
                 <button
                   key={u.id}
-                  onClick={() => { setSelectedUniverse(u.id); navigate('/characters') }}
+                  onClick={() => navigate(`/universes/${u.id}`)}
                   className="cursor-pointer shrink-0 w-[130px] rounded-xl overflow-hidden group active:opacity-75 transition-opacity text-left"
                   style={{ background: '#13101c', border: '1px solid rgba(255,255,255,0.06)' }}
                 >
@@ -485,7 +485,7 @@ export function HomePage() {
               {characters.length < 3 && (
                 <button onClick={() => navigate('/create-character')} className="cursor-pointer flex flex-col items-center gap-1.5 active:opacity-75 transition-opacity">
                   <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ border: '1.5px dashed rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.02)' }}>
-                    <Plus size={20} className="text-white/20" />
+                    <Plus size={20} className="text-white/40" />
                   </div>
                   <p className="text-white/30 text-[11px] font-medium">New</p>
                 </button>
@@ -638,7 +638,7 @@ export function HomePage() {
                   {universeCards.map((u) => (
                     <button
                       key={u.id}
-                      onClick={() => { setSelectedUniverse(u.id); navigate('/characters') }}
+                      onClick={() => navigate(`/universes/${u.id}`)}
                       className="cursor-pointer rounded-xl overflow-hidden group text-left"
                       style={{ background: '#13101c', border: '1px solid rgba(255,255,255,0.06)' }}
                     >
@@ -704,8 +704,8 @@ export function HomePage() {
                     className="cursor-pointer w-full flex items-center justify-center gap-2 rounded-xl p-4 transition-all hover:brightness-125 active:brightness-90"
                     style={{ border: '1.5px dashed rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.01)' }}
                   >
-                    <Plus size={16} className="text-white/20" />
-                    <p className="text-white/25 text-sm font-medium">Create Twin</p>
+                    <Plus size={16} className="text-white/40" />
+                    <p className="text-white/45 text-sm font-medium">Create Twin</p>
                   </button>
                 )}
               </div>
