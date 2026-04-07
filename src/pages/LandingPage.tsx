@@ -908,7 +908,7 @@ export function LandingPage() {
             <div className="grid grid-cols-3 gap-6">
               {[
                 { title: 'You\'re the Main Character', desc: 'Your selfie, transformed into anime, as the main character. It\'s your face in every scene.', icon: <Camera size={20} className="text-accent" />, img: '/card-youre-in-it.webp', iconBg: 'rgba(212,121,154,0.12)' },
-                { title: 'Characters That Remember', desc: 'Real freeform conversations, not scripted dialogue trees. Characters have personalities, moods, and memory.', icon: <MessageCircle size={20} className="text-accent" />, img: '/card-ai-characters.webp', iconBg: 'rgba(212,121,154,0.15)' },
+                { title: 'Characters That Remember', desc: 'Real freeform conversations, not scripted dialogue trees. Characters have personalities, moods, and memory.', icon: <MessageCircle size={20} className="text-accent" />, img: '/card-characters-remember.webp', iconBg: 'rgba(212,121,154,0.15)' },
                 { title: 'Branching Paths', desc: '4 unique endings based on the choices you make. Your conversations shift the story in ways you won\'t expect.', icon: <GitBranch size={20} className="text-[#9B7EC8]" />, img: '/card-branching-paths.webp', iconBg: 'rgba(155,126,200,0.15)' },
               ].map((item, i) => (
                 <motion.div
