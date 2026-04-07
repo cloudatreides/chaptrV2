@@ -86,6 +86,7 @@ export function stripMarkdown(text: string): string {
     .replace(/^#{1,3}\s+.*\n?/gm, '')
     .replace(/\*{1,2}([^*]+)\*{1,2}/g, '$1')
     .replace(/^[-*]\s+/gm, '')
+    .replace(/```\w*\n?/g, '')
     .replace(/\s*—\s*/g, ', ')
     .replace(/\n{3,}/g, '\n\n')
     .trim()

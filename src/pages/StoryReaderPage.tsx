@@ -256,12 +256,15 @@ export function StoryReaderPage() {
       for await (const chunk of gen) {
         fullProse += chunk
         const text = jsonBuffer + chunk
+        // Detect code fence or brace that may start trust JSON block
+        const fenceIdx = text.lastIndexOf('```')
         const braceIdx = text.lastIndexOf('{')
-        if (braceIdx >= 0) {
+        const bufferStart = fenceIdx >= 0 ? Math.min(fenceIdx, braceIdx >= 0 ? braceIdx : fenceIdx) : braceIdx
+        if (bufferStart >= 0) {
           // Show text before potential JSON, buffer the rest
-          const safe = text.slice(0, braceIdx)
+          const safe = text.slice(0, bufferStart)
           if (safe) append(safe)
-          jsonBuffer = text.slice(braceIdx)
+          jsonBuffer = text.slice(bufferStart)
         } else {
           append(text)
           jsonBuffer = ''
