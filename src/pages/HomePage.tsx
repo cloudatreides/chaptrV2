@@ -291,8 +291,8 @@ export function HomePage() {
               <LogOut size={16} className="text-white/30" />
             </button>
             <div className="relative">
-              <div className="w-11 h-11 rounded-full flex items-center justify-center text-white font-semibold text-sm" style={{ background: 'linear-gradient(135deg, #c84b9e, #8b5cf6)' }}>
-                {userName[0]?.toUpperCase()}
+              <div className="w-11 h-11 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #c84b9e, #8b5cf6)' }}>
+                <span className="text-white font-bold text-lg tracking-tight" style={{ fontFamily: 'Georgia, serif' }}>c.</span>
               </div>
               {unreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: '#c84b9e', border: '2px solid #0a090f' }}>
@@ -474,8 +474,8 @@ export function HomePage() {
           <div className="flex items-center justify-between mb-10">
             <div className="flex items-center gap-4">
               <div className="relative">
-                <div className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg" style={{ background: 'linear-gradient(135deg, #c84b9e, #8b5cf6)' }}>
-                  {userName[0]?.toUpperCase()}
+                <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #c84b9e, #8b5cf6)' }}>
+                  <span className="text-white font-bold text-xl tracking-tight" style={{ fontFamily: 'Georgia, serif' }}>c.</span>
                 </div>
                 {unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: '#c84b9e', border: '2px solid #0a090f' }}>
