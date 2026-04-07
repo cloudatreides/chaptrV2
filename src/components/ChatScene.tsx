@@ -208,6 +208,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
   const [exchangeCount, setExchangeCount] = useState(0)
   const [isLoadingOpener, setIsLoadingOpener] = useState(true)
   const [introImage, setIntroImage] = useState<string | null>(null)
+  const [isLoadingImage, setIsLoadingImage] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const abortRef = useRef<AbortController | null>(null)
   const hasGeneratedOpener = useRef(false)
@@ -247,8 +248,10 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
       // Generate intro scene image — use selfie as reference if available so the user appears in the scene
       const imagePrompt = chatImagePrompt ?? character?.introImagePrompt
       if (imagePrompt) {
+        setIsLoadingImage(true)
         generateSceneImage({ prompt: imagePrompt, width: 768, height: 512, referenceImageUrl: selfieUrl, protagonistGender: activeCharacter?.gender }).then((url) => {
           if (url) setIntroImage(url)
+          setIsLoadingImage(false)
         })
       }
 
@@ -443,8 +446,14 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
                 <img src={introImage} alt={character?.name} className="w-full h-auto" />
               </motion.div>
             )}
+            {/* Shimmer placeholder while image loads */}
+            {i === 0 && msg.role === 'character' && !introImage && isLoadingImage && (
+              <div className="w-full max-w-[320px] rounded-xl overflow-hidden mb-2">
+                <div className="w-full aspect-[3/2] scene-image-shimmer rounded-xl" />
+              </div>
+            )}
             <div className={`flex items-end gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              {msg.role === 'character' && (
+              {msg.role === 'character' && i > 0 && (
                 <div className="w-7 h-7 rounded-full overflow-hidden shrink-0 mb-0.5" style={{ background: 'rgba(200,75,158,0.15)' }}>
                   {portrait ? (
                     <img src={portrait} alt={character?.name} className="w-full h-full object-cover" />

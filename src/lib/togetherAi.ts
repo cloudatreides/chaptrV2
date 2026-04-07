@@ -97,6 +97,9 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
         response_format: 'url',
       }
 
+  const startTime = performance.now()
+  const model = useKontext ? 'Kontext Pro' : 'Schnell'
+
   try {
     const response = await fetch('/api/together', {
       method: 'POST',
@@ -106,13 +109,15 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
 
     if (!response.ok) {
       const errText = await response.text().catch(() => '')
-      console.error('Together AI error:', response.status, errText)
+      console.error(`[Scene ${model}] error after ${((performance.now() - startTime) / 1000).toFixed(1)}s:`, response.status, errText)
       return null
     }
 
     const data = await response.json()
+    const elapsed = ((performance.now() - startTime) / 1000).toFixed(1)
     const url = data.data?.[0]?.url
     if (url) {
+      console.log(`[Scene ${model}] generated in ${elapsed}s`)
       // Cache Schnell results for future reuse
       if (!useKontext) {
         const hash = await hashPrompt(cacheKey)
@@ -121,10 +126,14 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
       return url
     }
     const b64 = data.data?.[0]?.b64_json
-    if (b64) return `data:image/png;base64,${b64}`
+    if (b64) {
+      console.log(`[Scene ${model}] generated (b64) in ${elapsed}s`)
+      return `data:image/png;base64,${b64}`
+    }
+    console.warn(`[Scene ${model}] no image data after ${elapsed}s`)
     return null
   } catch (e) {
-    console.error('Scene generation failed:', e)
+    console.error(`[Scene ${model}] failed after ${((performance.now() - startTime) / 1000).toFixed(1)}s:`, e)
     return null
   }
 }

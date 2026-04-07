@@ -57,7 +57,7 @@ export function StoryReaderPage() {
   // Redirect if no active character
   useEffect(() => {
     if (!activeCharacter) {
-      navigate(selectedUniverse ? '/characters' : '/universes', { replace: true })
+      navigate(selectedUniverse ? '/characters' : '/home', { replace: true })
     }
   }, [activeCharacter])
 
@@ -174,22 +174,26 @@ export function StoryReaderPage() {
     if (currentStep?.type === 'beat') {
       const incProt = currentStep.includesProtagonist !== false
       if (currentStep.sceneImagePrompts?.length) {
-        currentStep.sceneImagePrompts.forEach((prompt, i) => {
+        const needsGeneration = currentStep.sceneImagePrompts.some((_, i) => !sceneImages[`${currentStep.id}:${i}`])
+        if (needsGeneration) setIsGeneratingScene(true)
+        const promises = currentStep.sceneImagePrompts.map((prompt, i) => {
           const key = `${currentStep.id}:${i}`
-          if (!sceneImages[key]) {
-            generateSceneImage({ prompt, referenceImageUrl: selfieUrl, protagonistGender: gender, includesProtagonist: incProt }).then((url) => {
-              if (url) setSceneImage(key, url)
-            })
-          }
+          if (sceneImages[key]) return Promise.resolve()
+          return generateSceneImage({ prompt, referenceImageUrl: selfieUrl, protagonistGender: gender, includesProtagonist: incProt }).then((url) => {
+            if (url) setSceneImage(key, url)
+          })
         })
+        Promise.all(promises).then(() => setIsGeneratingScene(false))
       } else if (currentStep.sceneImagePrompt && !sceneImages[currentStep.id]) {
+        setIsGeneratingScene(true)
         generateSceneImage({ prompt: currentStep.sceneImagePrompt, referenceImageUrl: selfieUrl, protagonistGender: gender, includesProtagonist: incProt }).then((url) => {
           if (url) setSceneImage(currentStep.id, url)
+          setIsGeneratingScene(false)
         })
       }
     }
 
-    // Generate per-option images for choice steps
+    // Generate per-option images for choice steps (fire-and-forget, no loader needed)
     if (currentStep?.type === 'choice' && currentStep.options) {
       for (const opt of currentStep.options) {
         const key = `${currentStep.id}:${opt.id}`
@@ -228,9 +232,6 @@ export function StoryReaderPage() {
     if (!currentStep || currentStep.type !== 'beat' || hasChosenBeat) return
     if (isFirstBeat) return
 
-    setIsGeneratingScene(true)
-    await new Promise((r) => setTimeout(r, 600))
-    setIsGeneratingScene(false)
     setIsStreaming(true)
     resetStream()
 
@@ -674,12 +675,12 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
   )
 }
 
-const LOADING_PHRASES = ['placing you in Seoul...', 'setting the scene...', 'the story is unfolding...', 'your world is ready']
+const LOADING_PHRASES = ['setting the scene...', 'painting your world...', 'the story is unfolding...', 'almost there...']
 
 function TheatricalLoader({ title }: { title: string }) {
   const [phraseIndex, setPhraseIndex] = useState(0)
   useEffect(() => {
-    const interval = setInterval(() => setPhraseIndex((i) => Math.min(i + 1, LOADING_PHRASES.length - 1)), 1800)
+    const interval = setInterval(() => setPhraseIndex((i) => Math.min(i + 1, LOADING_PHRASES.length - 1)), 2500)
     return () => clearInterval(interval)
   }, [])
   return (
@@ -692,9 +693,9 @@ function TheatricalLoader({ title }: { title: string }) {
         </motion.p>
       </AnimatePresence>
       <div className="w-48 h-1 rounded-full bg-border overflow-hidden">
-        <motion.div className="h-full rounded-full" style={{ background: 'linear-gradient(90deg, #c84b9e 0%, #8b5cf6 100%)' }} initial={{ width: '5%' }} animate={{ width: '90%' }} transition={{ duration: 6, ease: 'easeOut' }} />
+        <motion.div className="h-full rounded-full" style={{ background: 'linear-gradient(90deg, #c84b9e 0%, #8b5cf6 100%)' }} initial={{ width: '5%' }} animate={{ width: '90%' }} transition={{ duration: 15, ease: 'easeOut' }} />
       </div>
-      <p className="text-textMuted text-xs mt-1">{title} — Seoul Arts Academy</p>
+      <p className="text-textMuted text-xs mt-1">{title}</p>
     </div>
   )
 }

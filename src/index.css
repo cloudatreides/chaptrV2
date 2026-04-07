@@ -101,6 +101,11 @@ input:focus, textarea:focus {
   animation: shimmer 1.5s infinite;
   border-radius: 4px;
 }
+.scene-image-shimmer {
+  background: linear-gradient(90deg, #1a1525 25%, #261e3a 50%, #1a1525 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
 
 /* Typewriter cursor blink */
 @keyframes blink {

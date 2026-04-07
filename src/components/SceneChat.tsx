@@ -191,10 +191,11 @@ interface CharChatState {
   hasOpener: boolean
   isLoadingOpener: boolean
   introImage: string | null
+  isLoadingImage: boolean
 }
 
 function freshCharState(): CharChatState {
-  return { messages: [], exchangeCount: 0, isDone: false, hasOpener: false, isLoadingOpener: false, introImage: null }
+  return { messages: [], exchangeCount: 0, isDone: false, hasOpener: false, isLoadingOpener: false, introImage: null, isLoadingImage: false }
 }
 
 // ─── Props ───
@@ -298,13 +299,15 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
     // Generate intro image in parallel (chatImagePrompt overrides character default)
     const imagePrompt = chatImagePrompt ?? charData?.introImagePrompt
     if (imagePrompt) {
+      setChatStates(prev => ({
+        ...prev,
+        [activeCharId]: { ...prev[activeCharId], isLoadingImage: true },
+      }))
       generateSceneImage({ prompt: imagePrompt, width: 768, height: 512, referenceImageUrl: selfieUrl, protagonistGender: activeCharacter?.gender }).then(url => {
-        if (url) {
-          setChatStates(prev => ({
-            ...prev,
-            [activeCharId]: { ...prev[activeCharId], introImage: url },
-          }))
-        }
+        setChatStates(prev => ({
+          ...prev,
+          [activeCharId]: { ...prev[activeCharId], introImage: url ?? prev[activeCharId]?.introImage ?? null, isLoadingImage: false },
+        }))
       })
     }
 
@@ -619,6 +622,12 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
               >
                 <img src={activeState.introImage} alt={activeCharData?.name} className="w-full h-auto" />
               </motion.div>
+            )}
+            {/* Shimmer placeholder while image loads */}
+            {i === 0 && msg.role === 'character' && !activeState.introImage && activeState.isLoadingImage && (
+              <div className="w-full max-w-[320px] rounded-xl overflow-hidden mb-2">
+                <div className="w-full aspect-[3/2] scene-image-shimmer rounded-xl" />
+              </div>
             )}
             <div className={`flex items-end gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               {msg.role === 'character' && (
