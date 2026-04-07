@@ -9,6 +9,7 @@ import { generateCharacterPortrait } from '../lib/togetherAi'
 import { trackEvent } from '../lib/supabase'
 import { getAffinityGrowth } from '../lib/affinity'
 import { parseAffinityDelta } from '../lib/claudeStream'
+import { getUniverseGenre } from '../data/storyData'
 import type { SceneCharacter } from '../data/storyData'
 
 // ─── Types ───
@@ -165,6 +166,7 @@ export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, 
         characterMemories: characterMemories[primaryCharId] ?? [],
         globalAffinityScore: globalAffinities[primaryCharId] ?? 0,
         previousPlaythroughs,
+        genre: getUniverseGenre(selectedUniverse),
       })
 
       for await (const chunk of gen) {

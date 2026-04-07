@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Send, Brain, Info } from 'lucide-react'
+import { ArrowLeft, Send, Brain, Info, Star } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { CAST_ROSTER, getCastCharacter } from '../data/castRoster'
 import { getAffinityTier } from '../lib/affinity'
 import { streamChatReply, extractMemories, parseAffinityDelta } from '../lib/claudeStream'
+import { getUniverseGenre } from '../data/storyData'
 import type { CastChatMessage } from '../store/useStore'
 
 export function CastChatPage() {
@@ -22,6 +23,9 @@ export function CastChatPage() {
   const updateGlobalAffinity = useStore((s) => s.updateGlobalAffinity)
   const characters = useStore((s) => s.characters)
   const isStreaming = useStore((s) => s.isStreaming)
+  const favoriteCastIds = useStore((s) => s.favoriteCastIds)
+  const toggleFavoriteCast = useStore((s) => s.toggleFavoriteCast)
+  const isFavorited = favoriteCastIds.includes(characterId ?? '')
   const setIsStreaming = useStore((s) => s.setIsStreaming)
 
   const [input, setInput] = useState('')
@@ -96,6 +100,7 @@ export function CastChatPage() {
         characterMemories: uniqueMemories,
         globalAffinityScore: score,
         previousPlaythroughs: useStore.getState().playthroughHistory,
+        genre: getUniverseGenre(castMember?.universeId ?? null),
       })
 
       for await (const chunk of stream) {
@@ -273,7 +278,13 @@ export function CastChatPage() {
             <button onClick={() => navigate('/cast')} className="cursor-pointer flex items-center gap-2 text-white/50 text-sm">
               <ArrowLeft size={20} className="text-white" /> Cast
             </button>
-            <Info size={16} className="text-white/30" />
+            <button
+              onClick={() => characterId && toggleFavoriteCast(characterId)}
+              className="cursor-pointer w-8 h-8 rounded-full flex items-center justify-center"
+              title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+            >
+              <Star size={18} className={isFavorited ? 'text-yellow-400 fill-yellow-400' : 'text-white/30'} />
+            </button>
           </div>
           <div className="flex flex-col items-center gap-2 pb-4">
             <div className="w-16 h-16 rounded-full overflow-hidden" style={{ border: `2px solid ${tier.color}`, background: '#1A1624' }}>
@@ -323,9 +334,18 @@ export function CastChatPage() {
                 <p className="text-white font-semibold text-sm">{castMember.name}</p>
                 <p className="text-white/30 text-[10px]">{castMember.universeLabel}</p>
               </div>
-              <span className="ml-auto text-[10px] font-semibold px-2.5 py-1 rounded-lg" style={{ background: `${tier.color}22`, color: tier.color }}>
-                {tier.label} · {score}%
-              </span>
+              <div className="ml-auto flex items-center gap-2">
+                <span className="text-[10px] font-semibold px-2.5 py-1 rounded-lg" style={{ background: `${tier.color}22`, color: tier.color }}>
+                  {tier.label} · {score}%
+                </span>
+                <button
+                  onClick={() => characterId && toggleFavoriteCast(characterId)}
+                  className="cursor-pointer w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/5 transition-colors"
+                  title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+                >
+                  <Star size={16} className={isFavorited ? 'text-yellow-400 fill-yellow-400' : 'text-white/30'} />
+                </button>
+              </div>
             </div>
 
             {/* Messages */}

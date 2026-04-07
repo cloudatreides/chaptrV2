@@ -36,7 +36,7 @@ export function AppSidebar() {
 
   return (
     <div
-      className="hidden md:flex flex-col shrink-0 h-screen sticky top-0"
+      className="hidden md:flex flex-col shrink-0 h-full"
       style={{ width: 260, background: '#0F0D14', borderRight: '1px solid #2D2538' }}
     >
       {/* Logo — click to go home */}

@@ -702,6 +702,12 @@ export function getCharacterBible(preference: 'jiwon' | 'yuna' | null): string {
 import { getStoryData } from './stories'
 
 /** Get steps for a universe. Falls back to Seoul Transfer. */
+/** Get genre for a universe (e.g. 'ROMANCE', 'HORROR'). Defaults to 'ROMANCE' for Seoul Transfer. */
+export function getUniverseGenre(universeId: string | null): string {
+  if (!universeId) return 'ROMANCE'
+  return UNIVERSES.find(u => u.id === universeId)?.genre ?? 'ROMANCE'
+}
+
 export function getStepsForUniverse(universeId: string | null): StoryStep[] {
   const storyData = getStoryData(universeId)
   if (storyData) return storyData.steps

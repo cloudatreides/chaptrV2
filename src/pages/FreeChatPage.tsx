@@ -8,6 +8,7 @@ import { useActiveStory } from '../hooks/useActiveStory'
 import { streamChatReply, generateOpeningMessage, extractMemories } from '../lib/claudeStream'
 import { generateCharacterPortrait } from '../lib/togetherAi'
 import { getStoryData } from '../data/stories'
+import { getUniverseGenre } from '../data/storyData'
 import { trackEvent } from '../lib/supabase'
 import { getAffinityGrowth } from '../lib/affinity'
 import { AffinityBadge } from '../components/AffinityBadge'
@@ -209,6 +210,7 @@ export function FreeChatPage() {
       sceneContext: sceneCtx || undefined,
       affinityScore: characterAffinities[activeCharId] ?? 0,
       characterMemories: characterMemories[activeCharId] ?? [],
+      genre: getUniverseGenre(selectedUniverse),
     }).then(opening => {
       const charMessage = { role: 'character' as const, content: opening }
       setChatStates(prev => ({
@@ -291,6 +293,7 @@ export function FreeChatPage() {
         sceneContext: sceneCtx || undefined,
         affinityScore: characterAffinities[activeCharId] ?? 0,
         characterMemories: characterMemories[activeCharId] ?? [],
+        genre: getUniverseGenre(selectedUniverse),
       })
 
       for await (const chunk of gen) {

@@ -6,6 +6,7 @@ import { useStore } from '../store/useStore'
 import { CAST_ROSTER, getCastCharacter, UNIVERSE_COLORS } from '../data/castRoster'
 import { getAffinityTier } from '../lib/affinity'
 import { streamChatReply, extractMemories, generateGroupReaction, parseAffinityDelta } from '../lib/claudeStream'
+import { getUniverseGenre } from '../data/storyData'
 import type { CastChatMessage } from '../store/useStore'
 import type { CastMember } from '../data/castRoster'
 
@@ -138,6 +139,7 @@ export function CastGroupChatPage() {
         characterMemories: uniqueMemories,
         globalAffinityScore: score,
         previousPlaythroughs: useStore.getState().playthroughHistory,
+        genre: getUniverseGenre(universeId),
       })
 
       for await (const chunk of stream) {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Share2, RotateCcw, MessageCircle } from 'lucide-react'
+import { Share2, RotateCcw, MessageCircle, ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { useActiveStory } from '../hooks/useActiveStory'
@@ -245,6 +245,14 @@ export function RevealPage() {
               >
                 <RotateCcw size={16} />
                 Try a different path
+              </button>
+
+              <button
+                onClick={() => navigate('/home')}
+                className="flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium text-textMuted text-sm hover:text-textSecondary transition-colors"
+              >
+                <ArrowLeft size={16} />
+                Back to home
               </button>
             </motion.div>
 

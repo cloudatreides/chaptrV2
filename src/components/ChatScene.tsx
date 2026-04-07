@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Send, ArrowRight } from 'lucide-react'
 import { CHARACTERS, getCharacter } from '../data/characters'
+import { getUniverseGenre } from '../data/storyData'
 import { useStore } from '../store/useStore'
 import { useActiveStory } from '../hooks/useActiveStory'
 import { streamChatReply, summarizeChat, generateOpeningMessage, extractMemories } from '../lib/claudeStream'
@@ -283,6 +284,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
           characterMemories: characterMemories[characterId] ?? [],
           globalAffinityScore,
           previousPlaythroughs,
+          genre: getUniverseGenre(selectedUniverse),
         })
         const charMessage = { role: 'character' as const, content: opening }
         setLocalMessages([charMessage])
@@ -341,6 +343,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
         characterMemories: characterMemories[characterId] ?? [],
         globalAffinityScore,
         previousPlaythroughs,
+        genre: getUniverseGenre(selectedUniverse),
       })
 
       for await (const chunk of gen) {

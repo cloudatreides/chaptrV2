@@ -351,7 +351,7 @@ export function CastPage() {
       </div>
 
       {/* ═══ DESKTOP ═══ */}
-      <div className="hidden md:flex min-h-screen">
+      <div className="hidden md:flex h-screen overflow-hidden">
         <AppSidebar />
         <div className="flex-1 min-h-screen overflow-y-auto px-8 lg:px-12 py-10">
           <div className="flex items-center justify-between mb-8">

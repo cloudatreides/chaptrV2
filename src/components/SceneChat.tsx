@@ -9,6 +9,7 @@ import { generateCharacterPortrait, generateSceneImage } from '../lib/togetherAi
 import { trackEvent } from '../lib/supabase'
 import { getAffinityGrowth } from '../lib/affinity'
 import { parseAffinityDelta } from '../lib/claudeStream'
+import { getUniverseGenre } from '../data/storyData'
 import type { SceneCharacter } from '../data/storyData'
 
 // ─── Mood stages (reused from ChatScene) ───
@@ -333,6 +334,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
       characterMemories: characterMemories[activeCharId] ?? [],
       globalAffinityScore: globalAffinities[activeCharId] ?? 0,
       previousPlaythroughs,
+      genre: getUniverseGenre(selectedUniverse),
     }).then(opening => {
       const charMessage = { role: 'character' as const, content: opening }
       setChatStates(prev => ({
@@ -421,6 +423,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
         characterMemories: characterMemories[activeCharId] ?? [],
         globalAffinityScore: globalAffinities[activeCharId] ?? 0,
         previousPlaythroughs,
+        genre: getUniverseGenre(selectedUniverse),
       })
 
       for await (const chunk of gen) {

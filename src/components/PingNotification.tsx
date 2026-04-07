@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Send, MessageCircle } from 'lucide-react'
 import { getCharacter, CHARACTERS } from '../data/characters'
+import { getUniverseGenre } from '../data/storyData'
 import { useStore } from '../store/useStore'
 import { useActiveStory } from '../hooks/useActiveStory'
 import { streamChatReply, generateOpeningMessage } from '../lib/claudeStream'
@@ -51,6 +52,7 @@ export function PingNotification({ ping, onDismiss }: Props) {
       loveInterest,
       universeId: selectedUniverse,
       affinityScore,
+      genre: getUniverseGenre(selectedUniverse),
     }).then(msg => {
       setPingMessage(msg)
       setMessages([{ role: 'character', content: msg }])
@@ -128,6 +130,7 @@ export function PingNotification({ ping, onDismiss }: Props) {
         universeId: selectedUniverse,
         signal: abortRef.current.signal,
         affinityScore,
+        genre: getUniverseGenre(selectedUniverse),
       })
 
       for await (const chunk of gen) {

@@ -226,7 +226,7 @@ export function AccountPage() {
       <div className="md:hidden">{content}</div>
 
       {/* Desktop */}
-      <div className="hidden md:flex min-h-screen">
+      <div className="hidden md:flex h-screen overflow-hidden">
         <AppSidebar />
         {content}
       </div>

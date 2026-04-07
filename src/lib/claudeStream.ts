@@ -57,6 +57,7 @@ export interface StreamChatParams {
   bio: string | null
   loveInterest: 'jiwon' | 'yuna' | null
   universeId: string | null
+  genre?: string // universe genre (e.g. 'ROMANCE', 'HORROR')
   signal?: AbortSignal
   sceneContext?: string // context from other character conversations in the same scene
   affinityScore?: number // per-character affinity level (0-100)
@@ -233,6 +234,7 @@ export interface OpeningMessageParams {
   bio: string | null
   loveInterest: 'jiwon' | 'yuna' | null
   universeId: string | null
+  genre?: string // universe genre (e.g. 'ROMANCE', 'HORROR')
   sceneContext?: string // context from other character conversations in the same scene
   affinityScore?: number // per-character affinity level (0-100)
   characterMemories?: string[] // memorable facts protagonist has shared with this character
@@ -241,7 +243,7 @@ export interface OpeningMessageParams {
 }
 
 export async function generateOpeningMessage(params: OpeningMessageParams): Promise<string> {
-  const { characterId, storyContext, characterState, bio, loveInterest, universeId, sceneContext, affinityScore, characterMemories, globalAffinityScore, previousPlaythroughs } = params
+  const { characterId, storyContext, characterState, bio, loveInterest, universeId, genre, sceneContext, affinityScore, characterMemories, globalAffinityScore, previousPlaythroughs } = params
   const character = getCharacter(characterId, universeId)
   if (!character) return '...'
 
@@ -249,10 +251,14 @@ export async function generateOpeningMessage(params: OpeningMessageParams): Prom
   const trustLabel = trust > 70 ? 'high' : trust > 40 ? 'moderate' : 'low'
 
   let system = characterId === 'sora' ? getSoraSystemPrompt(loveInterest) : character.systemPrompt
+  // (Change C) Override base personality at high affinity in romance
+  if (genre === 'ROMANCE' && affinityScore !== undefined && affinityScore >= 56) {
+    system += `\n\nIMPORTANT OVERRIDE: Your usual guardedness and deflection is cracking. You catch yourself being honest before you can stop it. The personality traits above (guarded, deflects, cold) are your DEFAULT — but this person has gotten past your walls. Let that show.`
+  }
   system += `\n\nSTORY CONTEXT: ${storyContext}`
   system += `\n\nRelationship with protagonist: ${trustLabel} trust (${trust}/100).`
   if (affinityScore !== undefined) {
-    const tier = getAffinityTier(affinityScore)
+    const tier = getAffinityTier(affinityScore, genre)
     system += `\nAffinity level: ${tier.label} (${affinityScore}/100). ${tier.promptModifier}`
   }
   if (bio) system += `\nProtagonist personality: "${bio}"`
@@ -261,6 +267,16 @@ export async function generateOpeningMessage(params: OpeningMessageParams): Prom
   }
   if (sceneContext) system += `\n\n${sceneContext}`
   system += buildMemoryPrompt(globalAffinityScore, previousPlaythroughs)
+  // (Change B) Romance engagement rule
+  if (genre === 'ROMANCE') {
+    system += `\n\nROMANCE RULE — CRITICAL:
+This is a romance story. When the protagonist expresses romantic interest, affection, or flirts with you, DO NOT shut it down, lecture them, or play therapist. Instead, REACT EMOTIONALLY:
+- Get flustered, deflect with humor, or let something genuine slip
+- Show physical tells through your words: "I don't know why I just said that", "Why do you make this so hard?"
+- Push-pull is good. Vulnerability followed by a joke is good. Almost-confessions are good.
+- NEVER lecture about what love is. NEVER say "that's obsession not love". NEVER be preachy.
+- The audience wants romantic TENSION — give them butterflies, not therapy.`
+  }
   system += `\n\nIMPORTANT: You are initiating this conversation. Say something first — a greeting, a comment, a question. Keep it in character. 1-2 sentences max. This should feel natural for the moment in the story.
 
 WRITING STYLE — MANDATORY:
@@ -288,7 +304,7 @@ WRITING STYLE — MANDATORY:
 // ─── Character Chat ───
 
 export async function* streamChatReply(params: StreamChatParams): AsyncGenerator<string> {
-  const { characterId, messages, storyContext, exchangeNumber, maxExchanges, characterState, bio, loveInterest, universeId, signal, sceneContext, affinityScore, characterMemories, globalAffinityScore, previousPlaythroughs } = params
+  const { characterId, messages, storyContext, exchangeNumber, maxExchanges, characterState, bio, loveInterest, universeId, genre, signal, sceneContext, affinityScore, characterMemories, globalAffinityScore, previousPlaythroughs } = params
   const character = getCharacter(characterId, universeId)
   if (!character) throw new Error(`Unknown character: ${characterId}`)
 
@@ -296,10 +312,14 @@ export async function* streamChatReply(params: StreamChatParams): AsyncGenerator
   const trustLabel = trust > 70 ? 'high' : trust > 40 ? 'moderate' : 'low'
 
   let system = characterId === 'sora' ? getSoraSystemPrompt(loveInterest) : character.systemPrompt
+  // (Change C) Override base personality at high affinity in romance
+  if (genre === 'ROMANCE' && affinityScore !== undefined && affinityScore >= 56) {
+    system += `\n\nIMPORTANT OVERRIDE: Your usual guardedness and deflection is cracking. You catch yourself being honest before you can stop it. The personality traits above (guarded, deflects, cold) are your DEFAULT — but this person has gotten past your walls. Let that show.`
+  }
   system += `\n\nSTORY CONTEXT: ${storyContext}`
   system += `\n\nRelationship with protagonist: ${trustLabel} trust (${trust}/100).`
   if (affinityScore !== undefined) {
-    const tier = getAffinityTier(affinityScore)
+    const tier = getAffinityTier(affinityScore, genre)
     system += `\nAffinity level: ${tier.label} (${affinityScore}/100). ${tier.promptModifier}`
   }
   if (bio) system += `\nProtagonist personality: "${bio}"`
@@ -308,6 +328,16 @@ export async function* streamChatReply(params: StreamChatParams): AsyncGenerator
   }
   if (sceneContext) system += `\n\n${sceneContext}`
   system += buildMemoryPrompt(globalAffinityScore, previousPlaythroughs)
+  // (Change B) Romance engagement rule
+  if (genre === 'ROMANCE') {
+    system += `\n\nROMANCE RULE — CRITICAL:
+This is a romance story. When the protagonist expresses romantic interest, affection, or flirts with you, DO NOT shut it down, lecture them, or play therapist. Instead, REACT EMOTIONALLY:
+- Get flustered, deflect with humor, or let something genuine slip
+- Show physical tells through your words: "I don't know why I just said that", "Why do you make this so hard?"
+- Push-pull is good. Vulnerability followed by a joke is good. Almost-confessions are good.
+- NEVER lecture about what love is. NEVER say "that's obsession not love". NEVER be preachy.
+- The audience wants romantic TENSION — give them butterflies, not therapy.`
+  }
 
   system += `\n\nWRITING STYLE — MANDATORY:
 - Write ONLY dialogue. Just speak as the character.

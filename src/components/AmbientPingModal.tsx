@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Send } from 'lucide-react'
 import { getCharacter, CHARACTERS } from '../data/characters'
+import { getUniverseGenre } from '../data/storyData'
 import { useStore } from '../store/useStore'
 import { streamChatReply } from '../lib/claudeStream'
 import { getAffinityGrowth } from '../lib/affinity'
@@ -77,6 +78,7 @@ export function AmbientPingModal({ ping, onDismiss }: Props) {
         universeId: ping.universeId,
         signal: abortRef.current.signal,
         affinityScore,
+        genre: getUniverseGenre(ping.universeId),
       })
 
       for await (const chunk of gen) {
