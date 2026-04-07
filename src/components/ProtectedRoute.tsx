@@ -1,8 +1,12 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
+const DEV_BYPASS_AUTH = import.meta.env.DEV
+
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuth()
+
+  if (DEV_BYPASS_AUTH) return <>{children}</>
 
   if (loading) {
     return (
