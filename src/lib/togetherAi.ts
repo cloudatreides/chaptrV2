@@ -57,6 +57,18 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
     ? prompt.replace(/a young person/gi, protagonistGender === 'female' ? 'a young woman' : 'a young man')
     : prompt
 
+  // Convert width/height to closest aspect ratio string for Schnell
+  const toAspectRatio = (w: number, h: number): string => {
+    const ratio = w / h
+    if (ratio >= 1.7) return '16:9'
+    if (ratio >= 1.4) return '3:2'
+    if (ratio >= 1.2) return '4:3'
+    if (ratio >= 0.9) return '1:1'
+    if (ratio >= 0.7) return '3:4'
+    if (ratio >= 0.6) return '2:3'
+    return '9:16'
+  }
+
   // Cache key: prompt + dimensions + gender (Schnell only — Kontext is personalized per selfie)
   const cacheKey = `${genderedPrompt}|${width}x${height}`
   if (!useKontext) {
@@ -79,8 +91,7 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
     : {
         model: 'black-forest-labs/FLUX.1-schnell',
         prompt: genderedPrompt,
-        width,
-        height,
+        aspect_ratio: toAspectRatio(width, height),
         steps: 4,
         n: 1,
         response_format: 'url',
@@ -94,7 +105,8 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
     })
 
     if (!response.ok) {
-      console.error('Together AI error:', response.status)
+      const errText = await response.text().catch(() => '')
+      console.error('Together AI error:', response.status, errText)
       return null
     }
 
@@ -126,8 +138,7 @@ export async function generateCharacterPortrait(prompt: string): Promise<string 
       body: JSON.stringify({
         model: 'black-forest-labs/FLUX.1-schnell',
         prompt,
-        width: 512,
-        height: 512,
+        aspect_ratio: '1:1',
         steps: 4,
         n: 1,
         response_format: 'url',
