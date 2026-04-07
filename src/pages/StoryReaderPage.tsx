@@ -50,6 +50,7 @@ export function StoryReaderPage() {
   const summariesList = useStore.getState().getSummariesList()
 
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [groupChatAccepted, setGroupChatAccepted] = useState(false)
   const [activePing, setActivePing] = useState<PingDef | null>(null)
   const [questToast, setQuestToast] = useState<QuestDef | null>(null)
   const prevStepIndexRef = useRef(currentStepIndex)
@@ -304,6 +305,9 @@ export function StoryReaderPage() {
     }
   }, [currentStepIndex, currentStep?.id])
 
+  // Reset group chat acceptance when step changes
+  useEffect(() => { setGroupChatAccepted(false) }, [currentStepIndex])
+
   const universeTitle = UNIVERSES.find(u => u.id === selectedUniverse)?.title ?? 'The Seoul Transfer'
 
   const handleAdvance = () => advanceStep()
@@ -405,6 +409,40 @@ export function StoryReaderPage() {
           characterId: sc.characterId === 'jiwon' ? resolveLoveInterestId(loveInterest) : sc.characterId,
         }))
         if (currentStep.groupChat) {
+          // Show choice prompt before entering group chat
+          if (!groupChatAccepted) {
+            return (
+              <motion.div
+                className="flex flex-col items-center justify-center h-full px-6 text-center gap-6"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {currentStep.title && (
+                  <h2 className="text-lg font-semibold text-white/90">{currentStep.title}</h2>
+                )}
+                {currentStep.arcBrief && (
+                  <p className="text-sm text-white/50 max-w-md leading-relaxed">{currentStep.arcBrief}</p>
+                )}
+                <div className="flex flex-col gap-3 w-full max-w-xs mt-2">
+                  <motion.button
+                    className="w-full py-3 rounded-xl text-sm font-medium border border-white/10 text-white/70 hover:text-white hover:border-white/25 transition-colors"
+                    onClick={() => setGroupChatAccepted(true)}
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    Join the conversation
+                  </motion.button>
+                  <motion.button
+                    className="w-full py-3 rounded-xl text-sm font-medium text-white/30 hover:text-white/50 transition-colors"
+                    onClick={handleChatComplete}
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    Skip and continue the story
+                  </motion.button>
+                </div>
+              </motion.div>
+            )
+          }
           const groupContext = currentStep.arcBrief
             ? `${storyContext}\n\nCurrent scene: ${currentStep.arcBrief}`
             : storyContext
