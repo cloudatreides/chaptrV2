@@ -9,6 +9,9 @@ import { getCharacter, CHARACTERS } from '../data/characters'
 import { supabase } from '../lib/supabase'
 import { AppSidebar } from '../components/AppSidebar'
 
+const EMPTY_MEMORIES: Record<string, string[]> = {}
+const EMPTY_PORTRAITS: Record<string, string> = {}
+
 export function AccountPage() {
   const navigate = useNavigate()
   const { user, signOut } = useAuth()
@@ -19,14 +22,14 @@ export function AccountPage() {
   const characterMemories = useStore((s) => {
     const uid = s.selectedUniverse
     const cid = s.activeCharacterId
-    if (!uid || !cid) return {} as Record<string, string[]>
-    return s.storyProgress[`${cid}:${uid}`]?.characterMemories ?? {} as Record<string, string[]>
+    if (!uid || !cid) return EMPTY_MEMORIES
+    return s.storyProgress[`${cid}:${uid}`]?.characterMemories ?? EMPTY_MEMORIES
   })
   const characterPortraits = useStore((s) => {
     const uid = s.selectedUniverse
     const cid = s.activeCharacterId
-    if (!uid || !cid) return {} as Record<string, string>
-    return s.storyProgress[`${cid}:${uid}`]?.characterPortraits ?? {} as Record<string, string>
+    if (!uid || !cid) return EMPTY_PORTRAITS
+    return s.storyProgress[`${cid}:${uid}`]?.characterPortraits ?? EMPTY_PORTRAITS
   })
 
   const memoryEntries = Object.entries(characterMemories).filter(([, mems]: [string, string[]]) => mems.length > 0)
