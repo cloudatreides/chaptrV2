@@ -87,6 +87,7 @@ RULES:
     id: 'yuna',
     name: 'Yuna',
     avatar: '🎵',
+    staticPortrait: '/yuna-portrait.png',
     portraitPrompt: 'Anime style portrait of a beautiful 22 year old Korean female K-pop idol, long dark hair with subtle auburn highlights, sharp elegant features, confident gaze with a hint of vulnerability, wearing a sleek black blazer over a white top, soft studio lighting, clean dark background, high quality anime art style, detailed face, K-drama aesthetic',
     introImagePrompt: 'Anime style, beautiful 22 year old Korean female K-pop idol leaning against a practice room doorframe, arms crossed, long dark hair with auburn highlights, confident gaze with curiosity, wearing a sleek black blazer, warm moody lighting from behind, cinematic composition, half-body shot, K-drama aesthetic, high quality anime art',
     chatTemperature: 0.8,
