@@ -683,9 +683,9 @@ export function LandingPage() {
           </div>
           <div className="relative z-10 flex flex-col gap-3 px-4 pb-10">
             {[
-              { label: 'AI Characters', detail: 'Real conversations, not scripted dialogue trees', icon: <MessageCircle size={16} className="text-accent" /> },
+              { label: 'You\'re the Main Character', detail: 'Your face, anime-styled, as the protagonist', icon: <Camera size={16} className="text-accentLight" /> },
+              { label: 'Characters That Remember', detail: 'Real conversations, not scripted dialogue trees', icon: <MessageCircle size={16} className="text-accent" /> },
               { label: 'Branching Paths', detail: '4 unique endings based on your choices', icon: <GitBranch size={16} className="text-gem" /> },
-              { label: 'You\'re In It', detail: 'Your face, anime-styled, as the protagonist', icon: <Camera size={16} className="text-accentLight" /> },
             ].map((item, i) => (
               <motion.div
                 key={item.label}
@@ -896,11 +896,8 @@ export function LandingPage() {
             <div className="h-px mb-24 mx-auto" style={{ background: 'linear-gradient(90deg, transparent, rgba(200,75,158,0.25), transparent)', maxWidth: 600 }} />
 
             <div className="flex flex-col items-center text-center gap-3 mb-14">
-              <div className="flex items-center gap-2">
-                <Sparkles size={12} className="text-accent/50" />
-                <p className="text-accent/50 font-semibold text-[10px] tracking-[2px] uppercase" style={{ fontFamily: INTER }}>NOT JUST A VISUAL NOVEL</p>
-              </div>
-              <h2 className="text-white font-bold" style={{ fontSize: 40, lineHeight: 1.2, fontFamily: SERIF }}>
+              <p className="text-accent/50 font-semibold text-[10px] tracking-[3px] uppercase" style={{ fontFamily: INTER }}>NOT JUST A VISUAL NOVEL</p>
+              <h2 className="text-white font-bold" style={{ fontSize: 44, lineHeight: 1.2, fontFamily: SERIF }}>
                 Stories that respond to you
               </h2>
               <p className="text-white/40 text-base" style={{ maxWidth: 480, fontFamily: INTER }}>
@@ -910,30 +907,71 @@ export function LandingPage() {
 
             <div className="grid grid-cols-3 gap-6">
               {[
-                { title: 'AI Characters', desc: 'Real freeform conversations, not scripted dialogue trees. Characters have personalities, moods, and memory.', icon: <MessageCircle size={20} className="text-accent" />, glow: 'rgba(200,75,158,0.12)' },
-                { title: 'Branching Paths', desc: '4 unique endings based on the choices you make. Your conversations shift the story in ways you won\'t expect.', icon: <GitBranch size={20} className="text-gem" />, glow: 'rgba(234,179,8,0.08)' },
-                { title: 'You\'re In It', desc: 'Your selfie, transformed into anime, as the main character. It\'s your face in every scene.', icon: <Camera size={20} className="text-accentLight" />, glow: 'rgba(139,92,246,0.1)' },
+                { title: 'You\'re the Main Character', desc: 'Your selfie, transformed into anime, as the main character. It\'s your face in every scene.', icon: <Camera size={20} className="text-accent" />, img: '/card-youre-in-it.webp', iconBg: 'rgba(212,121,154,0.12)' },
+                { title: 'Characters That Remember', desc: 'Real freeform conversations, not scripted dialogue trees. Characters have personalities, moods, and memory.', icon: <MessageCircle size={20} className="text-accent" />, img: '/card-ai-characters.webp', iconBg: 'rgba(212,121,154,0.15)' },
+                { title: 'Branching Paths', desc: '4 unique endings based on the choices you make. Your conversations shift the story in ways you won\'t expect.', icon: <GitBranch size={20} className="text-[#9B7EC8]" />, img: '/card-branching-paths.webp', iconBg: 'rgba(155,126,200,0.15)' },
               ].map((item, i) => (
                 <motion.div
                   key={item.title}
-                  className="rounded-2xl p-7 flex flex-col gap-5 relative group"
-                  style={{ background: 'linear-gradient(160deg, rgba(17,16,22,1) 0%, rgba(22,18,35,1) 100%)', border: '1px solid rgba(200,75,158,0.1)', boxShadow: '0 4px 30px rgba(0,0,0,0.3)' }}
+                  className="rounded-2xl overflow-hidden flex flex-col relative group"
+                  style={{ background: '#13111A', border: '1px solid rgba(45,37,56,0.3)', boxShadow: '0 4px 40px rgba(0,0,0,0.3)' }}
                   initial={{ opacity: 0, y: 14 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
                   whileHover={{ y: -4, transition: { duration: 0.2 } }}
                 >
-                  {/* Card glow on hover */}
-                  <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: `radial-gradient(ellipse at top, ${item.glow}, transparent 70%)` }} />
-                  <div className="relative z-10">
-                    <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: 'rgba(200,75,158,0.08)', border: '1px solid rgba(200,75,158,0.08)' }}>
+                  <div className="relative w-full h-[180px] overflow-hidden">
+                    <img src={item.img} alt={item.title} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, transparent 50%, #13111A 100%)' }} />
+                  </div>
+                  <div className="flex flex-col gap-4 p-6 pt-5">
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: item.iconBg }}>
                       {item.icon}
                     </div>
+                    <div>
+                      <p className="text-[#E8E3F0] font-semibold text-lg mb-2" style={{ fontFamily: SG }}>{item.title}</p>
+                      <p className="text-white/35 text-sm leading-relaxed" style={{ fontFamily: INTER }}>{item.desc}</p>
+                    </div>
                   </div>
-                  <div className="relative z-10">
-                    <p className="text-white/90 font-semibold text-base mb-2" style={{ fontFamily: INTER }}>{item.title}</p>
-                    <p className="text-white/40 text-sm leading-relaxed" style={{ fontFamily: INTER }}>{item.desc}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Desktop Social Proof ── */}
+        <section className="py-20 relative overflow-hidden" style={{ background: '#0A090F' }}>
+          <div className="page-container mx-auto px-8 lg:px-20 relative z-10">
+            <div className="flex flex-col items-center text-center gap-3 mb-14">
+              <p className="text-accent/50 font-semibold text-[10px] tracking-[3px] uppercase" style={{ fontFamily: INTER }}>WHAT READERS ARE SAYING</p>
+              <h2 className="text-white font-bold" style={{ fontSize: 36, lineHeight: 1.2, fontFamily: SERIF }}>
+                Stories that stay with you
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-3 gap-6">
+              {[
+                { quote: "I've replayed the same universe 3 times and got completely different endings each time. The characters actually remember what I said.", name: 'Chloe Tan', location: 'Singapore', avatar: '/avatar-chloe.webp' },
+                { quote: "This is what I wanted visual novels to be. It doesn't feel scripted at all — the AI characters have real personality and they react to everything.", name: 'Pimchanok W.', location: 'Thailand', avatar: '/avatar-pim.webp' },
+                { quote: "Seeing my own face in the story scenes genuinely caught me off guard. It makes every choice feel so much more personal.", name: 'Putri Ayu', location: 'Indonesia', avatar: '/avatar-putri.webp' },
+              ].map((t, i) => (
+                <motion.div
+                  key={t.name}
+                  className="rounded-2xl p-7 flex flex-col justify-between gap-6"
+                  style={{ background: '#13111A', border: '1px solid rgba(45,37,56,0.3)' }}
+                  initial={{ opacity: 0, y: 14 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                >
+                  <p className="text-white/60 text-sm leading-relaxed" style={{ fontFamily: INTER }}>"{t.quote}"</p>
+                  <div className="flex items-center gap-3">
+                    <img src={t.avatar} alt={t.name} className="w-9 h-9 rounded-full object-cover" />
+                    <div>
+                      <p className="text-[#E8E3F0] text-sm font-semibold" style={{ fontFamily: SG }}>{t.name}</p>
+                      <p className="text-white/30 text-xs" style={{ fontFamily: INTER }}>{t.location}</p>
+                    </div>
                   </div>
                 </motion.div>
               ))}
@@ -942,37 +980,30 @@ export function LandingPage() {
         </section>
 
         {/* ── Desktop Final CTA ── */}
-        <section className="py-24 relative overflow-hidden" style={{ background: '#0A090F' }}>
-          {/* Ambient glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] rounded-full" style={{ background: 'radial-gradient(ellipse, rgba(200,75,158,0.08) 0%, transparent 70%)' }} />
+        <section className="relative overflow-hidden" style={{ height: 400 }}>
+          {/* Background image */}
+          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/cta-bg.webp)' }} />
+          <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at center, rgba(13,11,18,0.7) 0%, rgba(13,11,18,0.88) 60%, rgba(13,11,18,0.96) 100%)' }} />
 
-          <div className="page-container mx-auto px-20 relative z-10">
+          <div className="relative z-10 h-full flex flex-col items-center justify-center text-center gap-7">
             <motion.div
-              className="rounded-3xl px-12 py-16 flex flex-col items-center text-center gap-6 relative overflow-hidden"
-              style={{ background: 'linear-gradient(135deg, rgba(200,75,158,0.1) 0%, rgba(139,92,246,0.1) 100%)', border: '1px solid rgba(200,75,158,0.18)', boxShadow: '0 0 80px rgba(200,75,158,0.06), 0 4px 40px rgba(0,0,0,0.4)' }}
+              className="flex flex-col items-center gap-7"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
             >
-              {/* Inner glow accent */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] rounded-full" style={{ background: 'radial-gradient(ellipse, rgba(200,75,158,0.08) 0%, transparent 70%)' }} />
-
-              <div className="relative z-10 flex flex-col items-center gap-6">
-                <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(200,75,158,0.15) 0%, rgba(139,92,246,0.15) 100%)', border: '1px solid rgba(200,75,158,0.25)', boxShadow: '0 0 40px rgba(200,75,158,0.1)' }}>
-                  <BookOpen size={28} className="text-accent" />
-                </div>
-                <h3 className="text-white font-bold text-3xl" style={{ fontFamily: SERIF }}>Your story is waiting</h3>
-                <p className="text-white/40 text-base" style={{ fontFamily: INTER, maxWidth: 400 }}>
-                  One selfie. One choice. A story that's entirely yours.
-                </p>
-                <button
-                  className="flex items-center justify-center gap-2.5 text-white font-semibold text-base transition-all hover:scale-[1.02]"
-                  style={{ height: 54, paddingLeft: 36, paddingRight: 36, borderRadius: 12, background: 'linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%)', fontFamily: SG, boxShadow: '0 4px 24px rgba(200,75,158,0.25)' }}
-                  onClick={handleCTA}
-                >
-                  Begin Now <ArrowRight size={18} />
-                </button>
-              </div>
+              <p className="text-accent/50 font-semibold text-[10px] tracking-[3px] uppercase" style={{ fontFamily: INTER }}>YOUR CHAPTER BEGINS</p>
+              <h3 className="text-white font-bold" style={{ fontSize: 44, fontFamily: SERIF }}>Your story is waiting</h3>
+              <p className="text-white/50 text-base" style={{ fontFamily: INTER, maxWidth: 400 }}>
+                One selfie. One choice. A story that's entirely yours.
+              </p>
+              <button
+                className="flex items-center justify-center gap-2.5 text-white font-bold text-base transition-all hover:scale-[1.02]"
+                style={{ height: 56, paddingLeft: 44, paddingRight: 44, borderRadius: 32, background: 'linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%)', fontFamily: SG, boxShadow: '0 0 32px rgba(200,75,158,0.4), 0 4px 24px rgba(200,75,158,0.25)', letterSpacing: 0.5 }}
+                onClick={handleCTA}
+              >
+                Begin Now <ArrowRight size={18} />
+              </button>
             </motion.div>
           </div>
         </section>
