@@ -3,7 +3,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { LoginPage } from './pages/LoginPage'
 import { LandingPage } from './pages/LandingPage'
-import { UniversesPage } from './pages/UniversesPage'
+
 import { CharacterSelectPage } from './pages/CharacterSelectPage'
 import { CreateCharacterPage } from './pages/CreateCharacterPage'
 import { StoryReaderPage } from './pages/StoryReaderPage'
@@ -36,7 +36,7 @@ export default function App() {
           <Route path="/cast" element={<ProtectedRoute><CastPage /></ProtectedRoute>} />
           <Route path="/cast/group/:ids" element={<ProtectedRoute><CastGroupChatPage /></ProtectedRoute>} />
           <Route path="/cast/:characterId" element={<ProtectedRoute><CastChatPage /></ProtectedRoute>} />
-          <Route path="/universes" element={<ProtectedRoute><UniversesPage /></ProtectedRoute>} />
+
           <Route path="/universes/:id" element={<ProtectedRoute><UniverseDetailPage /></ProtectedRoute>} />
           <Route path="/characters" element={<ProtectedRoute><CharacterSelectPage /></ProtectedRoute>} />
           <Route path="/create-character" element={<ProtectedRoute><CreateCharacterPage /></ProtectedRoute>} />

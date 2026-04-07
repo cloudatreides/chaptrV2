@@ -338,7 +338,7 @@ export function CastPage() {
                   <span>{tappedChar.unlockHint}</span>
                 </div>
                 <button
-                  onClick={() => { setTappedChar(null); navigate('/universes') }}
+                  onClick={() => { setTappedChar(null); navigate('/home') }}
                   className="cursor-pointer w-full py-3 rounded-xl text-white font-semibold text-sm mt-2"
                   style={{ background: `linear-gradient(135deg, ${UNIVERSE_COLORS[tappedChar.universeId] ?? '#c84b9e'}, #8b5cf6)` }}
                 >
@@ -483,7 +483,7 @@ export function CastPage() {
                       onMouseLeave={() => setHoveredChar(null)}
                     >
                       <button
-                        onClick={() => navigate('/universes')}
+                        onClick={() => navigate('/home')}
                         className="cursor-pointer w-full flex items-center gap-3 rounded-2xl p-4 text-left transition-all"
                         style={{
                           background: isHovered ? '#15131E' : '#0E0C14',
@@ -513,7 +513,7 @@ export function CastPage() {
                               <span>{cast.unlockHint}</span>
                             </div>
                             <button
-                              onClick={(e) => { e.stopPropagation(); navigate('/universes') }}
+                              onClick={(e) => { e.stopPropagation(); navigate('/home') }}
                               className="cursor-pointer text-[11px] font-semibold py-2 rounded-lg transition-all hover:brightness-110"
                               style={{ background: `${uniColor}20`, color: uniColor }}
                             >

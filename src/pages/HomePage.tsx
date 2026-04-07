@@ -141,7 +141,7 @@ export function HomePage() {
     navigate('/story')
   }
 
-  const handleNewStory = () => navigate('/universes')
+  const handleNewStory = () => navigate('/home')
 
   const handleEditCharacters = () => navigate('/characters')
 

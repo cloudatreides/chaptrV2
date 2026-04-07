@@ -47,7 +47,7 @@ export function CharacterSelectPage() {
         </div>
 
         {/* Back */}
-        <button onClick={() => navigate('/universes')} className="flex items-center gap-1 text-textSecondary text-sm mt-4 mb-6 hover:text-textPrimary transition-colors w-fit">
+        <button onClick={() => navigate('/home')} className="flex items-center gap-1 text-textSecondary text-sm mt-4 mb-6 hover:text-textPrimary transition-colors w-fit">
           <ChevronLeft size={16} />
           Back
         </button>
