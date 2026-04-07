@@ -224,7 +224,7 @@ function StoryUniverses({ height, className }: { height: number; className?: str
               className="rounded-full"
               animate={{
                 width: i === activeIdx ? 16 : 4,
-                background: i === activeIdx ? UNIVERSE_CARDS[activeIdx].accent : 'rgba(255,255,255,0.2)',
+                background: i === activeIdx ? UNIVERSE_CARDS[activeIdx].accent : 'rgba(255,255,255,0.4)',
               }}
               style={{ height: 4 }}
               transition={{ duration: 0.3 }}
@@ -419,7 +419,7 @@ function ChatDemo({ compact }: { compact?: boolean }) {
             <span
               key={stage}
               className="text-[9px] italic"
-              style={{ color: i === 0 ? '#e060b8' : 'rgba(255,255,255,0.2)', fontWeight: i === 0 ? 600 : 400 }}
+              style={{ color: i === 0 ? '#e060b8' : 'rgba(255,255,255,0.4)', fontWeight: i === 0 ? 600 : 400 }}
             >
               {stage}
             </span>

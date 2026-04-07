@@ -338,7 +338,7 @@ export function HomePage() {
               <Sparkles size={28} className="text-accent" />
             </div>
             <div className="text-center">
-              <h2 className="text-white font-bold text-xl mb-2">Create your first character</h2>
+              <h2 className="text-white font-bold text-xl mb-2">Create your first Twin</h2>
               <p className="text-white/40 text-sm leading-relaxed max-w-[260px]">
                 Upload a selfie, pick a personality, and step into an AI-powered story where you're the main character.
               </p>
@@ -552,7 +552,7 @@ export function HomePage() {
                     <Sparkles size={24} className="text-accent" />
                   </div>
                   <div className="flex-1">
-                    <h2 className="text-white font-bold text-lg mb-1">Create your first character</h2>
+                    <h2 className="text-white font-bold text-lg mb-1">Create your first Twin</h2>
                     <p className="text-white/40 text-sm leading-relaxed">
                       Upload a selfie, pick a personality, and step into a story where you're the main character.
                     </p>

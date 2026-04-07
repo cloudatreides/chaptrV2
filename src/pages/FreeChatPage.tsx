@@ -418,7 +418,7 @@ export function FreeChatPage() {
                 <span
                   className="text-[10px] transition-all duration-300"
                   style={{
-                    color: isActiveMood ? '#e060b8' : isPast ? 'rgba(200,75,158,0.5)' : 'rgba(255,255,255,0.25)',
+                    color: isActiveMood ? '#e060b8' : isPast ? 'rgba(200,75,158,0.5)' : 'rgba(255,255,255,0.4)',
                     fontWeight: isActiveMood ? 600 : 400,
                     fontStyle: 'italic',
                   }}

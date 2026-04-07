@@ -275,13 +275,13 @@ export function CastPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-white text-xs font-semibold truncate">{gc.members.map((m) => m.name).join(', ')}</p>
-                      <p className="text-white/25 text-[10px] truncate">{gc.speakerName}: {gc.lastMsg?.content.slice(0, 40)}</p>
+                      <p className="text-white/40 text-[10px] truncate">{gc.speakerName}: {gc.lastMsg?.content.slice(0, 40)}</p>
                     </div>
                     <button
                       onClick={(e) => { e.stopPropagation(); toggleFavoriteCast(gc.key) }}
                       className="cursor-pointer shrink-0 p-1"
                     >
-                      <Star size={14} className={favoriteCastIds.includes(gc.key) ? 'text-yellow-400 fill-yellow-400' : 'text-white/15'} />
+                      <Star size={14} className={favoriteCastIds.includes(gc.key) ? 'text-yellow-400 fill-yellow-400' : 'text-white/35'} />
                     </button>
                   </motion.button>
                 ))}
@@ -445,7 +445,7 @@ export function CastPage() {
                     </div>
                     <p className="text-white/30 text-xs mb-1">{cast.universeLabel}</p>
                     {!selectMode && (
-                      <p className="text-white/25 text-xs italic truncate">
+                      <p className="text-white/40 text-xs italic truncate">
                         {lastMsg ? `"${lastMsg.content.slice(0, 50)}..."` : 'Start chatting'}
                       </p>
                     )}
@@ -456,9 +456,9 @@ export function CastPage() {
                         onClick={(e) => { e.stopPropagation(); toggleFavoriteCast(cast.id) }}
                         className="cursor-pointer p-1 rounded-lg hover:bg-white/5 transition-colors"
                       >
-                        <Star size={14} className={favoriteCastIds.includes(cast.id) ? 'text-yellow-400 fill-yellow-400' : 'text-white/10 hover:text-white/25'} />
+                        <Star size={14} className={favoriteCastIds.includes(cast.id) ? 'text-yellow-400 fill-yellow-400' : 'text-white/30 hover:text-white/50'} />
                       </button>
-                      <MessageCircle size={18} className="text-accent/40" />
+                      <MessageCircle size={18} className="text-accent/60" />
                     </div>
                   )}
                 </motion.button>
@@ -558,7 +558,7 @@ export function CastPage() {
                       onClick={(e) => { e.stopPropagation(); toggleFavoriteCast(gc.key) }}
                       className="cursor-pointer shrink-0 p-1.5 rounded-lg hover:bg-white/5 transition-colors"
                     >
-                      <Star size={16} className={favoriteCastIds.includes(gc.key) ? 'text-yellow-400 fill-yellow-400' : 'text-white/15 hover:text-white/30'} />
+                      <Star size={16} className={favoriteCastIds.includes(gc.key) ? 'text-yellow-400 fill-yellow-400' : 'text-white/35 hover:text-white/50'} />
                     </button>
                   </motion.button>
                 ))}

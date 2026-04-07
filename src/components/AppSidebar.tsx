@@ -78,14 +78,14 @@ export function AppSidebar() {
             >
               <item.icon
                 size={18}
-                style={{ color: isActive ? '#c84b9e' : 'rgba(255,255,255,0.33)' }}
+                style={{ color: isActive ? '#c84b9e' : 'rgba(255,255,255,0.5)' }}
               />
               <span
                 className="text-[13px]"
                 style={{
                   fontFamily: "'Space Grotesk', sans-serif",
                   fontWeight: isActive ? 600 : 500,
-                  color: isActive ? '#fff' : 'rgba(255,255,255,0.53)',
+                  color: isActive ? '#fff' : 'rgba(255,255,255,0.65)',
                 }}
               >
                 {item.label}
@@ -100,7 +100,7 @@ export function AppSidebar() {
         <>
           <div className="w-full h-px mx-auto mt-2" style={{ background: '#2D2538' }} />
           <div className="px-3 py-3">
-            <p className="text-white/20 text-[10px] font-semibold tracking-[1.5px] uppercase mb-2 px-3">Favorites</p>
+            <p className="text-white/40 text-[10px] font-semibold tracking-[1.5px] uppercase mb-2 px-3">Favorites</p>
             <div className="flex flex-col gap-0.5">
               {favoriteItems.map((fav) => {
                 const isActive = location.pathname === fav.path
@@ -125,11 +125,11 @@ export function AppSidebar() {
                     ) : fav.portrait ? (
                       <img src={fav.portrait} alt={fav.label} className="w-5 h-5 rounded-full object-cover" />
                     ) : (
-                      <MessageCircle size={14} style={{ color: isActive ? '#c84b9e' : 'rgba(255,255,255,0.25)' }} />
+                      <MessageCircle size={14} style={{ color: isActive ? '#c84b9e' : 'rgba(255,255,255,0.5)' }} />
                     )}
                     <span
                       className="text-[12px] truncate"
-                      style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: isActive ? 600 : 400, color: isActive ? '#fff' : 'rgba(255,255,255,0.4)' }}
+                      style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: isActive ? 600 : 400, color: isActive ? '#fff' : 'rgba(255,255,255,0.6)' }}
                     >
                       {fav.label}
                     </span>

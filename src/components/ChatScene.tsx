@@ -137,7 +137,7 @@ function MoodStage({ stage, isActive, isPast, showDivider, tooltip }: {
           <span
             className="text-[10px] italic cursor-default transition-colors duration-300"
             style={{
-              color: isPast ? 'rgba(200,75,158,0.5)' : 'rgba(255,255,255,0.25)',
+              color: isPast ? 'rgba(200,75,158,0.5)' : 'rgba(255,255,255,0.4)',
               fontWeight: 400,
             }}
           >
