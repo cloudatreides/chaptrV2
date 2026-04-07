@@ -109,7 +109,41 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
 
     if (!response.ok) {
       const errText = await response.text().catch(() => '')
-      console.error(`[Scene ${model}] error after ${((performance.now() - startTime) / 1000).toFixed(1)}s:`, response.status, errText)
+      console.warn(`[Scene ${model}] error after ${((performance.now() - startTime) / 1000).toFixed(1)}s:`, response.status, errText)
+
+      // Kontext failed (e.g. invalid reference image) — fall back to Schnell
+      if (useKontext) {
+        console.log('[Scene] Kontext failed, falling back to Schnell...')
+        const schnellBody = {
+          model: 'black-forest-labs/FLUX.1-schnell',
+          prompt: genderedPrompt,
+          aspect_ratio: toAspectRatio(width, height),
+          steps: 4,
+          n: 1,
+          response_format: 'url',
+        }
+        const fallbackResp = await fetch('/api/together', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(schnellBody),
+        })
+        if (fallbackResp.ok) {
+          const fallbackData = await fallbackResp.json()
+          const elapsed = ((performance.now() - startTime) / 1000).toFixed(1)
+          const fallbackUrl = fallbackData.data?.[0]?.url
+          if (fallbackUrl) {
+            console.log(`[Scene Schnell fallback] generated in ${elapsed}s`)
+            const hash = await hashPrompt(cacheKey)
+            cacheImage(hash, fallbackUrl, genderedPrompt)
+            return fallbackUrl
+          }
+          const fb64 = fallbackData.data?.[0]?.b64_json
+          if (fb64) {
+            console.log(`[Scene Schnell fallback] generated (b64) in ${elapsed}s`)
+            return `data:image/png;base64,${fb64}`
+          }
+        }
+      }
       return null
     }
 

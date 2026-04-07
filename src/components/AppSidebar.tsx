@@ -42,7 +42,7 @@ export function AppSidebar() {
       {/* Logo — click to go home */}
       <div
         className="flex items-center gap-2 px-6 h-[72px] cursor-pointer"
-        onClick={() => navigate('/')}
+        onClick={() => navigate('/home')}
       >
         <div
           className="flex items-center justify-center shrink-0 relative"
