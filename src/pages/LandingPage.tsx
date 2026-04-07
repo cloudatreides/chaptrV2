@@ -261,7 +261,7 @@ function ChoiceCards({ height, className }: { height: number; className?: string
       className={`relative w-full flex flex-col items-center justify-center gap-3 px-5 ${className ?? ''}`}
       style={{ height, backgroundColor: '#111016' }}
     >
-      <p className="text-white/25 text-[10px] tracking-[1.5px] uppercase font-medium" style={{ fontFamily: INTER }}>
+      <p className="text-white/45 text-[10px] tracking-[1.5px] uppercase font-medium" style={{ fontFamily: INTER }}>
         What do you do?
       </p>
       <div className="w-full flex gap-3">
@@ -411,7 +411,7 @@ function ChatDemo({ compact }: { compact?: boolean }) {
         <CharAvatar size={compact ? 26 : 32} />
         <div>
           <p className="text-white/80 text-xs font-medium" style={{ fontFamily: INTER }}>Jiwon</p>
-          <p className="text-white/25 text-[10px]" style={{ fontFamily: INTER }}>Seoul Transfer · Romance</p>
+          <p className="text-white/45 text-[10px]" style={{ fontFamily: INTER }}>Seoul Transfer · Romance</p>
         </div>
         {/* Mood stages like the app */}
         <div className="ml-auto flex items-center gap-1.5">
@@ -581,10 +581,6 @@ export function LandingPage() {
           {/* Hero text pinned to bottom */}
           <div className="relative z-10 mt-auto px-5 pb-8 flex flex-col gap-4 safe-bottom">
             <motion.div className="flex flex-col gap-3" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <div className="flex items-center gap-2">
-                <BookOpen size={14} className="text-accent" />
-                <p className="text-white font-medium text-xs tracking-[2px] uppercase" style={{ fontFamily: SG, textShadow: '0 2px 12px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.8)' }}>AI Interactive Story</p>
-              </div>
               <TypewriterHeadline fontSize={40} style={{ lineHeight: 1 }} />
               <p className="text-white/75 text-sm leading-relaxed" style={{ maxWidth: 300, fontFamily: INTER, textShadow: '0 1px 8px rgba(0,0,0,0.9)' }}>
                 Upload a selfie. Chat with AI characters. Make choices that change the ending. Every story is uniquely yours.
@@ -785,15 +781,6 @@ export function LandingPage() {
             <div className="flex items-center justify-between gap-12 px-8 lg:px-16" style={{ paddingTop: 130 }}>
               {/* Left: text + CTA */}
               <div className="flex flex-col gap-6 flex-1 max-w-xl">
-                <motion.div
-                  className="flex items-center gap-2"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.15 }}
-                >
-                  <BookOpen size={14} className="text-accent" />
-                  <p className="text-white font-medium text-xs tracking-[3px] uppercase" style={{ fontFamily: SG, textShadow: '0 2px 12px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.8)' }}>AI Interactive Story</p>
-                </motion.div>
 
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}>
                   <TypewriterHeadline fontSize={72} />
@@ -1017,7 +1004,7 @@ export function LandingPage() {
                   <LogoMark size={28} small />
                   <span className="text-white font-bold text-base" style={{ fontFamily: INTER }}>chaptr</span>
                 </div>
-                <p className="text-white/25 text-sm" style={{ fontFamily: INTER }}>Your face. Your story.</p>
+                <p className="text-white/45 text-sm" style={{ fontFamily: INTER }}>Your face. Your story.</p>
               </div>
 
               <div className="flex items-center gap-8">
@@ -1063,7 +1050,7 @@ function MobileFooter() {
             <LogoMark size={28} small />
             <span className="text-white font-bold text-base" style={{ fontFamily: INTER }}>chaptr</span>
           </div>
-          <p className="text-white/25 text-sm" style={{ fontFamily: INTER }}>Your face. Your story.</p>
+          <p className="text-white/45 text-sm" style={{ fontFamily: INTER }}>Your face. Your story.</p>
         </div>
         <div className="flex items-center justify-between">
           {['About', 'Privacy', 'Terms', 'Contact'].map((l) => (
