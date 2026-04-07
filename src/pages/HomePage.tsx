@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, Plus, Pencil, Sparkles, MessageCircle, Heart, LogOut } from 'lucide-react'
+import { ArrowRight, Plus, Pencil, Sparkles, MessageCircle, Heart, LogOut, Lock } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { UNIVERSES } from '../data/storyData'
 import { useAuth } from '../contexts/AuthContext'
@@ -189,19 +189,38 @@ export function HomePage() {
               <p className="text-[9px] font-medium" style={{ color: tier.color }}>{tier.label}</p>
             </button>
           ))}
-          {/* Locked — silhouettes */}
-          {lockedCast.slice(0, 4).map((c) => (
-            <div key={c.id} className="shrink-0 flex flex-col items-center gap-1.5 opacity-40">
-              <div
-                className="w-12 h-12 rounded-full flex items-center justify-center"
-                style={{ border: `2px solid ${UNIVERSE_COLORS[c.universeId] ?? '#555'}22`, background: 'rgba(255,255,255,0.03)' }}
+          {/* Locked — show real name + avatar, tappable to /cast */}
+          {lockedCast.slice(0, 4).map((c) => {
+            const charData = getCastCharacter(c)
+            const uniColor = UNIVERSE_COLORS[c.universeId] ?? '#555'
+            return (
+              <button
+                key={c.id}
+                onClick={() => navigate('/cast')}
+                className="cursor-pointer shrink-0 flex flex-col items-center gap-1.5 active:opacity-75 transition-opacity"
               >
-                <span className="text-white/20 text-lg">?</span>
-              </div>
-              <p className="text-white/30 text-[10px] font-semibold">{c.name}</p>
-              <p className="text-[9px] font-medium text-white/20">{c.universeLabel}</p>
-            </div>
-          ))}
+                <div className="relative">
+                  <div
+                    className="w-12 h-12 rounded-full overflow-hidden"
+                    style={{ border: `2px solid ${uniColor}33`, background: '#1A1624' }}
+                  >
+                    {charData?.staticPortrait ? (
+                      <img src={charData.staticPortrait} alt={c.name} className="w-full h-full object-cover" style={{ filter: 'grayscale(0.4) brightness(0.6)' }} />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-sm opacity-50">
+                        {charData?.avatar ?? c.name[0]}
+                      </div>
+                    )}
+                  </div>
+                  <div className="absolute inset-0 w-12 h-12 rounded-full flex items-center justify-center bg-black/20">
+                    <Lock size={10} className="text-white/30" />
+                  </div>
+                </div>
+                <p className="text-white/40 text-[10px] font-semibold">{c.name}</p>
+                <p className="text-[9px] font-medium" style={{ color: `${uniColor}66` }}>{c.universeLabel}</p>
+              </button>
+            )
+          })}
         </div>
       </motion.div>
     )
