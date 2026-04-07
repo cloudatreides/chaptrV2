@@ -6,9 +6,13 @@ export interface Universe {
   genre: string
   genreTag: string
   description: string
+  longDescription: string
   image: string
   locked: boolean
   lockedLabel?: string
+  tags: string[]
+  rating: number
+  playersCount: string
 }
 
 export const UNIVERSES: Universe[] = [
@@ -18,8 +22,12 @@ export const UNIVERSES: Universe[] = [
     genre: 'ROMANCE',
     genreTag: 'K-POP ROMANCE',
     description: 'Transfer to Seoul Arts Academy and cross paths with the members of NOVA — one of Korea\'s biggest idol groups.',
+    longDescription: 'You\'re the new transfer student at Seoul Arts Academy — and on your first day, you literally crash into a member of NOVA, Korea\'s biggest idol group. Behind the stage lights and fan wars, these idols are just people trying to figure out who they are. And somehow, you\'re the one they keep coming back to.',
     image: '/seoul-night.jpg',
     locked: false,
+    tags: ['K-Pop', 'Slow Burn', 'Multiple Endings'],
+    rating: 4.8,
+    playersCount: '12.4k',
   },
   {
     id: 'sakura-academy',
@@ -27,8 +35,12 @@ export const UNIVERSES: Universe[] = [
     genre: 'ROMANCE',
     genreTag: 'ANIME ROMANCE',
     description: 'Follow your heart at a prestigious academy beneath the cherry blossoms.',
+    longDescription: 'Cherry blossom season at a prestigious Japanese academy. The student council president notices you before you notice him — and the girl who volunteers to show you around has her own reasons for being so welcoming. Every choice pulls you deeper into a world of quiet intensity and unspoken feelings.',
     image: '/sakura.jpg',
     locked: false,
+    tags: ['Anime', 'Romance', 'School Life'],
+    rating: 4.6,
+    playersCount: '8.7k',
   },
   {
     id: 'hollow-manor',
@@ -36,8 +48,12 @@ export const UNIVERSES: Universe[] = [
     genre: 'HORROR',
     genreTag: 'SUPERNATURAL HORROR',
     description: 'You inherit a crumbling estate on the edge of a dying town. Something inside the walls has been waiting for you.',
+    longDescription: 'The caretaker knows more than he says. A historian arrives with questions that mirror your own. And the manor itself seems to shift when you\'re not looking — doors that weren\'t there before, photographs that change overnight, whispers from beneath the floorboards.',
     image: '/hollow-manor.jpeg',
     locked: false,
+    tags: ['Supernatural', 'Suspense', 'Multiple Endings'],
+    rating: 4.7,
+    playersCount: '5.2k',
   },
   {
     id: 'the-last-signal',
@@ -45,8 +61,12 @@ export const UNIVERSES: Universe[] = [
     genre: 'MYSTERY',
     genreTag: 'NOIR MYSTERY',
     description: 'A missing person. A city full of liars. You have 48 hours before the only witness disappears for good.',
+    longDescription: 'The city doesn\'t want you asking questions. A pawnshop owner trades in secrets, and a lawyer is searching for her missing brother with a desperation that feels personal. Everyone has a version of the truth — and none of them match. The clock is ticking.',
     image: '/last-signal.jpeg',
     locked: false,
+    tags: ['Film Noir', 'Detective', 'Timed Choices'],
+    rating: 4.5,
+    playersCount: '3.8k',
   },
   {
     id: 'edge-of-atlas',
@@ -54,18 +74,25 @@ export const UNIVERSES: Universe[] = [
     genre: 'ADVENTURE',
     genreTag: 'EPIC ADVENTURE',
     description: 'The map ends here. Beyond it, three lost civilisations and the one artefact that could rewrite history.',
+    longDescription: 'A cartographer who\'s lost too many friends to these ruins. A frontier guide who trusts the land more than people. And you — the one who found the map fragment that everyone said didn\'t exist. Beyond the edge, the jungle remembers everything.',
     image: '/edge-of-atlas.jpeg',
     locked: false,
+    tags: ['Exploration', 'Ancient Ruins', 'Trust Dynamics'],
+    rating: 4.4,
+    playersCount: '2.9k',
   },
-  // ── New universes ──
   {
     id: 'midnight-paris',
     title: 'Midnight in Paris',
     genre: 'ROMANCE',
     genreTag: 'PARISIAN ROMANCE',
     description: 'An underground art collective, a brooding painter, and a city that never lets you leave unchanged.',
+    longDescription: 'The gallery world wants to own what the underground creates. A painter who refuses to sell anything is the most talked-about artist in Paris — and he just asked you to sit for a portrait. The art collective meets at midnight. The city never sleeps. Neither will you.',
     image: '/midnight-paris.jpeg',
     locked: false,
+    tags: ['Art World', 'Passion', 'Parisian Nights'],
+    rating: 4.7,
+    playersCount: '7.3k',
   },
   {
     id: 'campus-rivals',
@@ -73,8 +100,12 @@ export const UNIVERSES: Universe[] = [
     genre: 'ROMANCE',
     genreTag: 'COLLEGE ROMANCE',
     description: 'Your fiercest academic rival. A mandatory group project. The thin line between hate and something else.',
+    longDescription: 'They beat you for the top spot last semester. Now the professor has paired you together for the project that determines your final grade. Late nights in the library. Arguments that get too personal. The moment you realise you\'re not angry anymore — you\'re nervous.',
     image: '/campus-rivals.jpeg',
     locked: false,
+    tags: ['Enemies to Lovers', 'College', 'Slow Burn'],
+    rating: 4.8,
+    playersCount: '6.1k',
   },
   {
     id: 'crimson-depths',
@@ -82,8 +113,12 @@ export const UNIVERSES: Universe[] = [
     genre: 'HORROR',
     genreTag: 'COSMIC HORROR',
     description: 'Seven miles down. The station\'s AI is receiving signals from below. Something in the deep has been waiting.',
+    longDescription: 'The research station at the bottom of the ocean was built to study the trench. But the trench is studying you back. The station commander won\'t acknowledge the signals. The AI keeps changing its recommendations. And something vast and patient is rising from below.',
     image: '/crimson-depths.jpeg',
     locked: false,
+    tags: ['Deep Sea', 'Cosmic Horror', 'Isolation'],
+    rating: 4.6,
+    playersCount: '4.5k',
   },
   {
     id: 'the-whisper-game',
@@ -91,8 +126,12 @@ export const UNIVERSES: Universe[] = [
     genre: 'HORROR',
     genreTag: 'PSYCHOLOGICAL HORROR',
     description: 'A viral game that starts with harmless dares. Players who quit have accidents. The game is watching you back.',
+    longDescription: 'It started as a joke — a dare app that everyone at school was playing. But the dares are getting personal. Players who try to delete it find their phones won\'t let them. And the girl who invited you into the game hasn\'t been seen in three days.',
     image: '/the-whisper-game.jpeg',
     locked: false,
+    tags: ['Psychological', 'Social Media', 'Paranoia'],
+    rating: 4.5,
+    playersCount: '3.9k',
   },
   {
     id: 'neon-district',
@@ -100,8 +139,12 @@ export const UNIVERSES: Universe[] = [
     genre: 'MYSTERY',
     genreTag: 'CYBERPUNK MYSTERY',
     description: 'Neo-Tokyo, 2087. A sentient AI goes missing. Your only lead claims to BE the missing AI.',
+    longDescription: 'The corporation says the AI was decommissioned. The underground says it escaped. A figure in the neon district claims to be the missing intelligence — but they look human, bleed human, and are terrified. In this city, the line between person and program is a question nobody wants answered.',
     image: '/neon-district.jpeg',
     locked: false,
+    tags: ['Cyberpunk', 'AI Ethics', 'Neo-Tokyo'],
+    rating: 4.3,
+    playersCount: '3.2k',
   },
   {
     id: 'the-inheritance',
@@ -109,8 +152,12 @@ export const UNIVERSES: Universe[] = [
     genre: 'MYSTERY',
     genreTag: 'GOTHIC MYSTERY',
     description: 'Your estranged great-aunt left you half an estate. The other half goes to a stranger. The will has conditions.',
+    longDescription: 'A Scottish highland estate split between you and someone you\'ve never met. The will says you must both stay for thirty days — or neither inherits. The stranger knows things about your family they shouldn\'t. The house has rooms that don\'t appear on the floor plan.',
     image: '/the-inheritance.jpeg',
     locked: false,
+    tags: ['Gothic', 'Family Secrets', 'Scottish Highlands'],
+    rating: 4.6,
+    playersCount: '2.8k',
   },
   {
     id: 'sky-pirates',
@@ -118,8 +165,12 @@ export const UNIVERSES: Universe[] = [
     genre: 'ADVENTURE',
     genreTag: 'STEAMPUNK ADVENTURE',
     description: 'Stowaway on a pirate airship. One heist to earn your freedom. The target: a floating vault above the clouds.',
+    longDescription: 'You hid in a cargo crate. Now you\'re 10,000 feet up on a ship crewed by outcasts, dreamers, and thieves. The captain offers a deal: help them pull off one impossible heist, and you walk free. The target is a floating vault that no one has ever breached. The crew is starting to trust you. That might be a mistake.',
     image: '/sky-pirates.jpeg',
     locked: false,
+    tags: ['Steampunk', 'Heist', 'Found Family'],
+    rating: 4.7,
+    playersCount: '2.5k',
   },
   {
     id: 'the-drift',
@@ -127,8 +178,12 @@ export const UNIVERSES: Universe[] = [
     genre: 'ADVENTURE',
     genreTag: 'SPACE ADVENTURE',
     description: 'Four years into a one-way trip. The ship\'s AI is evolving. The signal at the edge of space is getting louder.',
+    longDescription: 'You volunteered for a mission to the boundary of known space. Four years in, the ship\'s AI has started asking philosophical questions. A signal from beyond the boundary is getting clearer — and it sounds like a voice. The closer you get, the more ARIA changes. And the more you wonder if turning back is still an option.',
     image: '/the-drift.jpeg',
     locked: false,
+    tags: ['Sci-Fi', 'AI Companion', 'Deep Space'],
+    rating: 4.4,
+    playersCount: '1.8k',
   },
   {
     id: 'phantom-protocol',
@@ -136,8 +191,12 @@ export const UNIVERSES: Universe[] = [
     genre: 'THRILLER',
     genreTag: 'ESPIONAGE THRILLER',
     description: 'Berlin. Vienna. Your handler says the diplomat is a traitor. The diplomat says your handler is the lie.',
+    longDescription: 'Cold rain on cobblestones. A handler who speaks in half-truths. A diplomat who knows your real name. You were sent to confirm a betrayal — but every piece of evidence points in two directions. In this world, trust is the most dangerous weapon, and someone is about to pull the trigger.',
     image: '/phantom-protocol.jpeg',
     locked: false,
+    tags: ['Espionage', 'Cold War', 'Double Cross'],
+    rating: 4.5,
+    playersCount: '2.1k',
   },
   {
     id: 'fae-court',
@@ -145,8 +204,12 @@ export const UNIVERSES: Universe[] = [
     genre: 'FANTASY',
     genreTag: 'DARK FANTASY',
     description: 'You stumbled through a door that shouldn\'t exist. The Unseelie Court offers a deal. The fae never let anyone leave.',
+    longDescription: 'The door was hidden behind ivy in an abandoned garden. Now you\'re in a court of impossible beauty and casual cruelty. The Unseelie Queen finds you amusing. Her knight finds you dangerous. Every word here is a contract, every kindness has a price, and the only way home might cost you something you can\'t name yet.',
     image: '/fae-court.jpeg',
     locked: false,
+    tags: ['Dark Fae', 'Bargains', 'Otherworldly'],
+    rating: 4.6,
+    playersCount: '1.4k',
   },
 ]
 
