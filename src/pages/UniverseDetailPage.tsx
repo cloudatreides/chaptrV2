@@ -51,7 +51,7 @@ export function UniverseDetailPage() {
 
           {/* Back button */}
           <button
-            onClick={() => navigate('/universes')}
+            onClick={() => navigate('/home')}
             className="absolute top-[52px] left-4 w-9 h-9 rounded-full flex items-center justify-center text-white/80 hover:text-white transition-colors z-10"
             style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)' }}
           >
@@ -169,9 +169,18 @@ export function UniverseDetailPage() {
                   style={{ background: '#1a1525', border: '1px solid #2a2040', width: '150px' }}
                 >
                   {/* Avatar */}
-                  <div className="w-14 h-14 rounded-full flex items-center justify-center text-2xl" style={{ background: '#13101c' }}>
-                    {storyCharacters.find((c) => c.id === member.id)?.avatar ?? '👤'}
-                  </div>
+                  {(() => {
+                    const char = storyCharacters.find((c) => c.id === member.id)
+                    return char?.staticPortrait ? (
+                      <div className="w-14 h-14 rounded-full overflow-hidden shrink-0" style={{ background: '#13101c' }}>
+                        <img src={char.staticPortrait} alt={member.name} className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="w-14 h-14 rounded-full flex items-center justify-center text-2xl" style={{ background: '#13101c' }}>
+                        {char?.avatar ?? '👤'}
+                      </div>
+                    )
+                  })()}
                   <div>
                     <p className="text-textPrimary text-[14px] font-bold">{member.name}</p>
                     <p className="text-textSecondary text-[11px] font-medium mt-0.5">
