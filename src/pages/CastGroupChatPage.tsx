@@ -253,13 +253,12 @@ export function CastGroupChatPage() {
 
       {messages.map((msg, i) => {
         const cd = msg.characterId ? charDataMap[msg.characterId] : null
+        const isNew = i >= messages.length - 2
         return (
-          <motion.div
-            key={i}
+          <div
+            key={`${msg.timestamp}-${i}`}
             className={`flex gap-2.5 ${msg.role === 'user' ? 'justify-end' : ''}`}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.15 }}
+            style={isNew ? { animation: 'fadeInUp 0.15s ease-out' } : undefined}
           >
             {msg.role === 'character' && msg.characterId && <CharAvatar charId={msg.characterId} />}
             <div className="flex flex-col max-w-[80%]">
@@ -279,7 +278,7 @@ export function CastGroupChatPage() {
                 {msg.content}
               </div>
             </div>
-          </motion.div>
+          </div>
         )
       })}
 
