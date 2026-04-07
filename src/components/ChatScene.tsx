@@ -204,7 +204,7 @@ interface Props {
 }
 
 export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3, storyContext, chatImagePrompt, onComplete }: Props) {
-  const { activeCharacter, bio, loveInterest, selectedUniverse, characterState, characterPortraits, characterAffinities, characterMemories, selfieUrl } = useActiveStory()
+  const { bio, loveInterest, selectedUniverse, characterState, characterPortraits, characterAffinities, characterMemories } = useActiveStory()
   const { addChatMessage, setChatSummary, setCharacterPortrait, updateAffinity, addCharacterMemory, globalAffinities, playthroughHistory } = useStore()
   const affinityScore = characterAffinities[characterId] ?? 0
   const globalAffinityScore = globalAffinities[characterId] ?? 0

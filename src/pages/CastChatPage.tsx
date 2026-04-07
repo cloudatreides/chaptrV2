@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Send, Brain, Info, Star } from 'lucide-react'
+import { ArrowLeft, Send, Brain, Star } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { CAST_ROSTER, getCastCharacter } from '../data/castRoster'
 import { getAffinityTier } from '../lib/affinity'

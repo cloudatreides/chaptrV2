@@ -19,12 +19,17 @@ export function AccountPage() {
   const characterMemories = useStore((s) => {
     const uid = s.selectedUniverse
     const cid = s.activeCharacterId
-    if (!uid || !cid) return {}
-    return s.progressByCharacter[`${cid}:${uid}`]?.characterMemories ?? {}
+    if (!uid || !cid) return {} as Record<string, string[]>
+    return s.storyProgress[`${cid}:${uid}`]?.characterMemories ?? {} as Record<string, string[]>
   })
-  const characterPortraits = useStore((s) => s.characterPortraits)
+  const characterPortraits = useStore((s) => {
+    const uid = s.selectedUniverse
+    const cid = s.activeCharacterId
+    if (!uid || !cid) return {} as Record<string, string>
+    return s.storyProgress[`${cid}:${uid}`]?.characterPortraits ?? {} as Record<string, string>
+  })
 
-  const memoryEntries = Object.entries(characterMemories).filter(([, mems]) => mems.length > 0)
+  const memoryEntries = Object.entries(characterMemories).filter(([, mems]: [string, string[]]) => mems.length > 0)
 
   const fullName = user?.user_metadata?.full_name ?? ''
   const email = user?.email ?? ''
@@ -248,7 +253,7 @@ export function AccountPage() {
               </div>
             ) : (
               <div className="flex flex-col gap-4">
-                {memoryEntries.map(([charId, mems]) => {
+                {memoryEntries.map(([charId, mems]: [string, string[]]) => {
                   const charData = getCharacter(charId, selectedUniverse) ?? CHARACTERS[charId]
                   const portrait = characterPortraits[charId]
                   return (
