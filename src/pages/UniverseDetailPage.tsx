@@ -4,7 +4,7 @@ import { ChevronLeft, BookOpen, Star, Users, Clock, Heart } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { UNIVERSES } from '../data/storyData'
 import { STORY_REGISTRY } from '../data/stories'
-import { CAST_ROSTER } from '../data/castRoster'
+import { CAST_ROSTER, getCastCharacter } from '../data/castRoster'
 import { trackEvent } from '../lib/supabase'
 
 export function UniverseDetailPage() {
@@ -170,7 +170,7 @@ export function UniverseDetailPage() {
                 >
                   {/* Avatar */}
                   {(() => {
-                    const char = storyCharacters.find((c) => c.id === member.id)
+                    const char = getCastCharacter(member)
                     return char?.staticPortrait ? (
                       <div className="w-14 h-14 rounded-full overflow-hidden shrink-0" style={{ background: '#13101c' }}>
                         <img src={char.staticPortrait} alt={member.name} className="w-full h-full object-cover" />
