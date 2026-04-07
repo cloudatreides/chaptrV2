@@ -504,21 +504,9 @@ export function HomePage() {
         <div className="flex-1 min-h-screen overflow-y-auto px-8 lg:px-12 py-12">
           {/* Header */}
           <div className="flex items-center justify-between mb-10">
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #c84b9e, #8b5cf6)' }}>
-                  <span className="text-white font-bold text-xl tracking-tight" style={{ fontFamily: 'Georgia, serif' }}>c.</span>
-                </div>
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: '#c84b9e', border: '2px solid #0a090f' }}>
-                    {unreadCount}
-                  </span>
-                )}
-              </div>
-              <div>
-                <p className="text-accent text-xs font-semibold tracking-[2px] uppercase">Welcome back</p>
-                <h1 className="text-white font-bold text-3xl">{userName}</h1>
-              </div>
+            <div>
+              <p className="text-accent text-xs font-semibold tracking-[2px] uppercase">Welcome back</p>
+              <h1 className="text-white font-bold text-3xl">{userName}</h1>
             </div>
             <div className="flex items-center gap-3">
               <button
