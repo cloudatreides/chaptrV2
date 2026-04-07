@@ -86,7 +86,7 @@ export function EditCharacterPage() {
     return (
       <div className="min-h-screen min-h-dvh bg-bg flex items-center justify-center px-6">
         <div className="text-center">
-          <p className="text-textSecondary text-lg mb-3">Character not found</p>
+          <p className="text-textSecondary text-lg mb-3">Twin not found</p>
           <button onClick={() => navigate('/home')} className="text-accent text-sm hover:underline">Go home</button>
         </div>
       </div>
@@ -195,7 +195,7 @@ export function EditCharacterPage() {
         </button>
 
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="text-textPrimary font-bold text-3xl mb-1">Edit Character</h1>
+          <h1 className="text-textPrimary font-bold text-3xl mb-1">Edit Twin</h1>
           <p className="text-textSecondary text-base mb-6">Update {character.name}'s details.</p>
         </motion.div>
 
@@ -374,7 +374,7 @@ export function EditCharacterPage() {
               className="cursor-pointer w-full py-3 rounded-xl text-sm font-medium text-red-400/70 hover:text-red-400 transition-colors flex items-center justify-center gap-2"
               onClick={() => setShowDeleteConfirm(true)}
             >
-              <Trash2 size={14} /> Delete Character
+              <Trash2 size={14} /> Delete Twin
             </button>
           ) : (
             <motion.div

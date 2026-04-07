@@ -131,14 +131,14 @@ export function CreateCharacterPage() {
       bio: bio || null,
     })
     trackEvent('character_created', { gender, hasPhoto: !!finalPhoto, hasBio: !!bio })
-    navigate('/story')
+    navigate('/characters')
   }
 
   if (characters.length >= 3) {
     return (
       <div className="min-h-screen min-h-dvh bg-bg flex items-center justify-center px-6">
         <div className="text-center">
-          <p className="text-textSecondary text-lg mb-3">Maximum 3 characters reached</p>
+          <p className="text-textSecondary text-lg mb-3">Maximum 3 twins reached</p>
           <button onClick={() => navigate('/characters')} className="text-accent text-sm hover:underline">Go back</button>
         </div>
       </div>
@@ -164,7 +164,7 @@ export function CreateCharacterPage() {
         </button>
 
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="text-textPrimary font-bold text-3xl mb-1">Create Character</h1>
+          <h1 className="text-textPrimary font-bold text-3xl mb-1">Create Twin</h1>
           <p className="text-textSecondary text-base mb-6">Build who you'll be in the story.</p>
         </motion.div>
 
@@ -327,7 +327,7 @@ export function CreateCharacterPage() {
             disabled={!canCreate}
             style={{ opacity: canCreate ? 1 : 0.5, cursor: canCreate ? 'pointer' : 'not-allowed' }}
           >
-            {isStylizing ? 'Stylizing photo...' : isUploading ? 'Uploading photo...' : 'Create Character'}
+            {isStylizing ? 'Stylizing photo...' : isUploading ? 'Uploading photo...' : 'Create Twin'}
           </button>
         </div>
       </div>

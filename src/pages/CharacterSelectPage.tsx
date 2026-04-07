@@ -53,8 +53,8 @@ export function CharacterSelectPage() {
         </button>
 
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="text-textPrimary font-bold text-3xl mb-1">Choose Your Character</h1>
-          <p className="text-textSecondary text-base mb-6">Pick who enters this story, or create someone new.</p>
+          <h1 className="text-textPrimary font-bold text-3xl mb-1">Your Twins</h1>
+          <p className="text-textSecondary text-base mb-6">Pick who enters this story, or create a new twin.</p>
         </motion.div>
 
         {/* Character cards */}
@@ -132,10 +132,10 @@ export function CharacterSelectPage() {
               transition={{ delay: characters.length * 0.08 }}
             >
               <Plus size={16} />
-              Create new character
+              Create new twin
             </motion.button>
           ) : (
-            <p className="text-textMuted text-xs text-center py-2">Maximum 3 characters</p>
+            <p className="text-textMuted text-xs text-center py-2">Maximum 3 twins</p>
           )}
         </div>
       </div>
