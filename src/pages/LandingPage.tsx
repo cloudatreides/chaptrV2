@@ -387,16 +387,15 @@ function ChatDemo({ compact }: { compact?: boolean }) {
     return msgs
   }, [visibleMessages])
 
-  if (phase === 'waiting') return null
-
+  const showMessages = phase !== 'waiting'
   const completed = getCompletedMessages()
-  const currentlyTyping = visibleMessages < CHAT_SCRIPT.length ? CHAT_SCRIPT[visibleMessages] : null
+  const currentlyTyping = showMessages && visibleMessages < CHAT_SCRIPT.length ? CHAT_SCRIPT[visibleMessages] : null
   const partialText = currentlyTyping?.role === 'character' && !isTyping
     ? currentlyTyping.text.slice(0, typingCharIdx)
     : null
 
   return (
-    <motion.div
+    <div
       className="w-full rounded-2xl overflow-hidden"
       style={{
         maxWidth: compact ? 280 : 380,
@@ -404,9 +403,6 @@ function ChatDemo({ compact }: { compact?: boolean }) {
         border: '1px solid rgba(200,75,158,0.15)',
         backdropFilter: 'blur(20px)',
       }}
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
     >
       {/* Chat header — matches app ChatScene header */}
       <div className="flex items-center gap-2 px-3 py-2 border-b border-white/5">
@@ -430,7 +426,7 @@ function ChatDemo({ compact }: { compact?: boolean }) {
       </div>
 
       {/* Messages */}
-      <div className={`flex flex-col gap-2 px-3 ${compact ? 'py-2.5' : 'py-3'}`}>
+      <div className={`flex flex-col gap-2 px-3 ${compact ? 'py-2.5' : 'py-3'}`} style={{ minHeight: compact ? 120 : 160 }}>
         <AnimatePresence>
           {completed.map((msg, i) => (
             <motion.div
@@ -535,7 +531,7 @@ function ChatDemo({ compact }: { compact?: boolean }) {
           </motion.div>
         )}
       </div>
-    </motion.div>
+    </div>
   )
 }
 

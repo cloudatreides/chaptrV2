@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, Lock, MessageCircle, X } from 'lucide-react'
 import { useStore } from '../store/useStore'
+import { AppSidebar } from '../components/AppSidebar'
 import { CAST_ROSTER, UNIVERSE_COLORS, getCastCharacter } from '../data/castRoster'
 import { getAffinityTier } from '../lib/affinity'
 import type { CastMember } from '../data/castRoster'
@@ -174,25 +175,21 @@ export function CastPage() {
       </div>
 
       {/* ═══ DESKTOP ═══ */}
-      <div className="hidden md:block min-h-screen">
-        <div className="page-container px-8 lg:px-16 py-12">
+      <div className="hidden md:flex min-h-screen">
+        <AppSidebar />
+        <div className="flex-1 min-h-screen overflow-y-auto px-8 lg:px-12 py-10">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <div className="flex items-center gap-3 mb-1">
-                <button onClick={() => navigate('/home')} className="cursor-pointer text-white/40 hover:text-white/60 transition-colors">
-                  <ArrowLeft size={20} />
-                </button>
-                <h1 className="text-white font-bold text-2xl">Characters To Meet</h1>
-              </div>
-              <p className="text-white/40 text-sm ml-8">Chat with characters from your stories. Unlock more by playing.</p>
+              <h1 className="text-white font-bold text-2xl mb-1">Characters To Meet</h1>
+              <p className="text-white/40 text-sm">Chat with characters from your stories. Unlock more by playing.</p>
             </div>
             <span className="text-accent text-sm font-semibold px-4 py-2 rounded-xl" style={{ background: 'rgba(200,75,158,0.1)' }}>
               {unlocked.length} / {CAST_ROSTER.length} unlocked
             </span>
           </div>
 
-          {/* Unlocked */}
-          <p className="text-accent/50 text-[11px] font-semibold tracking-[2px] uppercase mb-4">UNLOCKED</p>
+          {/* Base characters */}
+          <p className="text-accent/50 text-[11px] font-semibold tracking-[1.5px] uppercase mb-4">BASE CHARACTERS — Always available</p>
           <div className="grid grid-cols-3 gap-4 mb-10">
             {unlocked.map((cast, i) => {
               const score = globalAffinities[cast.id] ?? 0
@@ -228,7 +225,7 @@ export function CastPage() {
           {/* Locked — with hover cards */}
           {locked.length > 0 && (
             <>
-              <p className="text-white/30 text-[11px] font-semibold tracking-[2px] uppercase mb-4">PLAY TO UNLOCK</p>
+              <p className="text-white/30 text-[11px] font-semibold tracking-[1.5px] uppercase mb-4">STORY-LOCKED — Play the story to unlock</p>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {locked.map((cast, i) => {
                   const uniColor = UNIVERSE_COLORS[cast.universeId] ?? '#888'
