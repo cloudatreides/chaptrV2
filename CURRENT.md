@@ -1,43 +1,54 @@
 # Chaptr V2 — Current Session State
 
 ## In Progress
-- Nothing actively in progress
+- QA testing needed on the new Album/Selfie feature (run `/qa` in fresh session)
 
 ## Done This Session
 
-### Bug Fixes — UI Polish Pass
+### New Feature: Album & Selfie Moments
+- **Store**: Added `StoryMoment` type, `storyMoments` array with `addStoryMoment`, `updateMomentNote`, `deleteStoryMoment` actions. Persisted with migration v7.
+- **Album page** (`src/pages/AlbumPage.tsx`): Grid view of captured moments, detail modal with editable notes, share (clipboard), delete. Empty state with camera icon.
+- **Sidebar**: Added "Album" nav item (Camera icon) to both `AppSidebar` and `YourStorySidebar`.
+- **Route**: `/album` added to `App.tsx`.
+- **Capture flow** (`StoryReaderPage.tsx`): After every chat/scene completion, if user has a selfie, generates a group selfie via Kontext with character descriptions from `portraitPrompt`. Shows "Save/Skip" modal. 1-on-1 chats use a two-person prompt with "ONLY these two people" to prevent phantom characters.
+- **Cost**: ~$0.20 per capture (Kontext call). ~$1-1.20 per full playthrough.
 
-1. **Affinity tags leaking into chat** — `[AFFINITY:+1]` was showing in story chat bubbles. Added `parseAffinityDelta()` stripping to ChatScene, SceneChat, and GroupChatScene (both stored messages and streaming display). Cast chat pages already had this.
+### Bug Fixes
+1. **Sidebar logo navigation** — Logo now goes to `/home` (app homepage) when inside the app, not `/` (landing page). Fixed in both `AppSidebar` and `StoryReaderPage` sidebar.
+2. **Sidebar account/logout floating** — Changed parent layout from `min-h-screen` to `h-screen overflow-hidden` on HomePage, CastPage, AccountPage. Sidebar no longer uses `sticky top-0`.
+3. **Character intro images showing wrong character** — Swapped priority: character's own `introImagePrompt` now takes precedence over shared scene `chatImagePrompt` in both `ChatScene` and `SceneChat`.
+4. **"Continue the story" button disappearing** — Once shown, the button never hides again (both `ChatScene` and `SceneChat`). Previously it vanished when user kept chatting.
+5. **Reveal page missing "Back to home"** — Added `ArrowLeft` button below "Try a different path".
+6. **Cast chat favorite toggle** — Added star icon to desktop and mobile headers in `CastChatPage`.
 
-2. **Duplicate affinity display** — AffinityBadge was shown in both the chat header and the sidebar. Removed from chat headers (ChatScene, SceneChat, GroupChatScene) — affinity now only shown in sidebar.
-
-3. **Scene images not loading (production)** — Together AI changed FLUX.1-schnell to require `aspect_ratio` instead of `width`/`height`. Updated `togetherAi.ts` to use `aspect_ratio` for Schnell calls (scenes + portraits). Kontext Pro unchanged.
-
-4. **Cast chat input losing focus** — `ChatInput` was defined as a function component inside the render body of `CastChatPage`. Every keystroke re-rendered the parent → new component reference → React unmount/remount → lost focus. Changed to a JSX variable.
-
-5. **Affinity subtext barely visible** — Bumped "Chat more to build affinity..." text from `text-white/20` to `text-white/40` in CastChatPage sidebar.
-
-6. **Landing page text contrast** — "Free to play" subtext was barely visible over hero image. Bumped opacity and added stronger text shadows.
-
-7. **Removed "AI Interactive Story" label** — Removed from both mobile and desktop hero sections on landing page (unnecessary clutter).
-
-8. **Mood stage text visibility** — Inactive mood stages in ChatScene and SceneChat bumped from `rgba(255,255,255,0.25)` to `rgba(255,255,255,0.4)`.
+### Dev Setup
+- **Vite proxy**: Added `/api` proxy to `https://chaptr-v2.vercel.app` in `vite.config.ts` for local dev.
+- **Auth bypass**: Already existed via `DEV_BYPASS_AUTH` in `ProtectedRoute.tsx`.
 
 ## Next
+- Run `/qa` on localhost or production to verify Album feature end-to-end
+- Test selfie capture quality across different story scenes
 - Create `chaptr_image_cache` table in Supabase
-- Test full playthrough on newer universes to verify scene image generation
 - Cost modeling before scaling
 
 ## Blockers
 - Image cache won't work until Supabase table is created
 
 ## Key Files Changed
-- `src/components/ChatScene.tsx` — affinity tag stripping, removed AffinityBadge, mood stage visibility
-- `src/components/SceneChat.tsx` — affinity tag stripping, removed AffinityBadge, mood stage visibility
-- `src/components/GroupChatScene.tsx` — affinity tag stripping, removed AffinityBadge
-- `src/lib/togetherAi.ts` — Schnell aspect_ratio fix, better error logging
-- `src/pages/CastChatPage.tsx` — input focus fix, affinity subtext visibility
-- `src/pages/LandingPage.tsx` — text contrast, removed "AI Interactive Story" label
+- `src/store/useStore.ts` — StoryMoment type, store slice, migration v7
+- `src/pages/AlbumPage.tsx` — NEW: Album page
+- `src/pages/StoryReaderPage.tsx` — Capture flow after chat completion
+- `src/components/AppSidebar.tsx` — Album nav item, logo fix
+- `src/components/YourStorySidebar.tsx` — Album link in story sidebar
+- `src/components/ChatScene.tsx` — Intro image priority fix, continue button fix
+- `src/components/SceneChat.tsx` — Intro image priority fix, continue button fix
+- `src/pages/RevealPage.tsx` — Back to home button
+- `src/pages/CastChatPage.tsx` — Favorite star toggle
+- `src/pages/HomePage.tsx` — h-screen layout fix
+- `src/pages/AccountPage.tsx` — h-screen layout fix
+- `src/pages/CastPage.tsx` — h-screen layout fix
+- `src/App.tsx` — Album route
+- `vite.config.ts` — API proxy for local dev
 
 ## Stack
 React + Vite + TS + Tailwind v3 + Zustand + Framer Motion + Vaul + Claude Haiku + Together AI FLUX
