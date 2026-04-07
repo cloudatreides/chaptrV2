@@ -1041,8 +1041,8 @@ export function LandingPage() {
 
             <div className="h-px mt-8 mb-6" style={{ background: 'rgba(42,32,64,0.3)' }} />
             <div className="flex items-center justify-between">
-              <p className="text-white/15 text-xs" style={{ fontFamily: INTER }}>2026 Chaptr. All rights reserved.</p>
-              <p className="text-white/15 text-xs" style={{ fontFamily: INTER }}>Made by Cloud Labs</p>
+              <p className="text-white/40 text-xs" style={{ fontFamily: INTER }}>2026 Chaptr. All rights reserved.</p>
+              <p className="text-white/40 text-xs" style={{ fontFamily: INTER }}>Made by Cloud Labs</p>
             </div>
           </div>
         </footer>
@@ -1076,8 +1076,8 @@ function MobileFooter() {
           ))}
         </div>
         <div className="flex flex-col gap-1">
-          <p className="text-white/15 text-xs" style={{ fontFamily: INTER }}>2026 Chaptr. All rights reserved.</p>
-          <p className="text-white/15 text-xs" style={{ fontFamily: INTER }}>Made by Cloud Labs</p>
+          <p className="text-white/40 text-xs" style={{ fontFamily: INTER }}>2026 Chaptr. All rights reserved.</p>
+          <p className="text-white/40 text-xs" style={{ fontFamily: INTER }}>Made by Cloud Labs</p>
         </div>
       </div>
     </footer>
