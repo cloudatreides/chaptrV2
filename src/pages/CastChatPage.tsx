@@ -236,7 +236,7 @@ export function CastChatPage() {
     </AnimatePresence>
   )
 
-  const ChatInput = () => (
+  const chatInput = (
     <div className="shrink-0 px-5 pb-5 pt-2">
       <form
         onSubmit={(e) => { e.preventDefault(); handleSend() }}
@@ -298,7 +298,7 @@ export function CastChatPage() {
           <MessageList />
         </div>
         <MemoryToast />
-        <ChatInput />
+        {chatInput}
       </div>
 
       {/* ═══ DESKTOP ═══ */}
@@ -333,7 +333,7 @@ export function CastChatPage() {
               <MessageList />
             </div>
             <MemoryToast />
-            <ChatInput />
+            {chatInput}
           </div>
 
           {/* Right — Profile sidebar */}
@@ -386,7 +386,7 @@ export function CastChatPage() {
                 )}
               </AnimatePresence>
               {!affinityChange && (
-                <p className="text-white/20 text-[10px] mt-1.5 leading-relaxed">Chat more to build affinity. Higher levels unlock deeper, more personal conversations.</p>
+                <p className="text-white/40 text-[10px] mt-1.5 leading-relaxed">Chat more to build affinity. Higher levels unlock deeper, more personal conversations.</p>
               )}
             </div>
 
