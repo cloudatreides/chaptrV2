@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, BookOpen, Sparkles, Camera, MessageCircle, GitBranch } from 'lucide-react'
+import { AuthModal } from '../components/AuthModal'
 
 
 const STEPS: { num: string; icon: React.ReactNode; title: string; desc: string; img: string; widget?: 'morph' | 'universes' | 'choices' }[] = [
@@ -537,13 +538,14 @@ function ChatDemo({ compact }: { compact?: boolean }) {
 
 export function LandingPage() {
   const navigate = useNavigate()
-  const { session, signInWithGoogle } = useAuth()
+  const { session } = useAuth()
+  const [showAuth, setShowAuth] = useState(false)
 
   function handleCTA() {
     if (session) {
       navigate('/home')
     } else {
-      signInWithGoogle()
+      setShowAuth(true)
     }
   }
 
@@ -551,6 +553,7 @@ export function LandingPage() {
 
   return (
     <div className="bg-bg">
+      <AuthModal open={showAuth} onClose={() => setShowAuth(false)} />
 
       {/* ══════════════════════
           MOBILE
