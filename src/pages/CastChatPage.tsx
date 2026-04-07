@@ -60,10 +60,12 @@ export function CastChatPage() {
     const abortController = new AbortController()
     abortRef.current = abortController
 
-    // Build messages for Claude
+    // Build messages for Claude (cast as ChatMessage for type compat)
     const recentMessages = [...messages, userMsg].slice(-20).map((m) => ({
-      role: m.role === 'user' ? 'user' as const : 'assistant' as const,
+      role: m.role,
       content: m.content,
+      characterId: characterId,
+      timestamp: m.timestamp,
     }))
 
     // Collect character memories from all playthroughs
@@ -88,7 +90,7 @@ export function CastChatPage() {
         loveInterest: null,
         universeId: castMember?.universeId ?? null,
         signal: abortController.signal,
-        sceneContext: null,
+        sceneContext: undefined,
         affinityScore: score,
         characterMemories: uniqueMemories,
         globalAffinityScore: score,
@@ -113,8 +115,7 @@ export function CastChatPage() {
           const lastFew = [...messages, userMsg, { role: 'character' as const, content: fullReply.trim(), timestamp: Date.now() }].slice(-4)
           extractMemories({
             characterId,
-            messages: lastFew.map((m) => ({ role: m.role === 'user' ? 'user' as const : 'assistant' as const, content: m.content })),
-            universeId: castMember?.universeId ?? null,
+            messages: lastFew.map((m) => ({ role: m.role, content: m.content, characterId: characterId, timestamp: m.timestamp })),
           }).then((memories) => {
             if (memories.length > 0) {
               const addMem = useStore.getState().addCharacterMemory
@@ -361,11 +362,11 @@ export function CastChatPage() {
               <p className="text-white/70 text-sm">{castMember.universeLabel}</p>
             </div>
 
-            {/* Character bio */}
-            {charData.bio && (
+            {/* Character description */}
+            {'description' in charData && (charData as any).description && (
               <div>
                 <p className="text-white/30 text-[10px] font-semibold tracking-[2px] uppercase mb-2">About</p>
-                <p className="text-white/50 text-sm leading-relaxed">{charData.bio}</p>
+                <p className="text-white/50 text-sm leading-relaxed">{(charData as any).description}</p>
               </div>
             )}
 
