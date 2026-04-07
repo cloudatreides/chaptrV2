@@ -583,7 +583,7 @@ export function LandingPage() {
             <motion.div className="flex flex-col gap-3" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
               <div className="flex items-center gap-2">
                 <BookOpen size={14} className="text-accent" />
-                <p className="text-white/90 font-medium text-xs tracking-[2px] uppercase" style={{ fontFamily: SG, textShadow: '0 1px 8px rgba(0,0,0,0.8)' }}>AI Interactive Story</p>
+                <p className="text-white font-medium text-xs tracking-[2px] uppercase" style={{ fontFamily: SG, textShadow: '0 2px 12px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.8)' }}>AI Interactive Story</p>
               </div>
               <TypewriterHeadline fontSize={40} style={{ lineHeight: 1 }} />
               <p className="text-white/75 text-sm leading-relaxed" style={{ maxWidth: 300, fontFamily: INTER, textShadow: '0 1px 8px rgba(0,0,0,0.9)' }}>
@@ -607,8 +607,8 @@ export function LandingPage() {
             </motion.button>
 
             <motion.p
-              className="text-white/40 text-xs text-center"
-              style={{ fontFamily: INTER, textShadow: '0 1px 6px rgba(0,0,0,0.8)' }}
+              className="text-white/60 text-xs text-center"
+              style={{ fontFamily: INTER, textShadow: '0 2px 12px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.8)' }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
@@ -792,7 +792,7 @@ export function LandingPage() {
                   transition={{ delay: 0.15 }}
                 >
                   <BookOpen size={14} className="text-accent" />
-                  <p className="text-white/90 font-medium text-xs tracking-[3px] uppercase" style={{ fontFamily: SG, textShadow: '0 1px 8px rgba(0,0,0,0.8)' }}>AI Interactive Story</p>
+                  <p className="text-white font-medium text-xs tracking-[3px] uppercase" style={{ fontFamily: SG, textShadow: '0 2px 12px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.8)' }}>AI Interactive Story</p>
                 </motion.div>
 
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}>
@@ -815,7 +815,7 @@ export function LandingPage() {
                   >
                     Start Your Story <ArrowRight size={18} />
                   </button>
-                  <span className="text-white/25 text-sm" style={{ fontFamily: INTER }}>Free to play · No downloads · New story every time</span>
+                  <span className="text-white/50 text-sm" style={{ fontFamily: INTER, textShadow: '0 2px 12px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.8)' }}>Free to play · No downloads · New story every time</span>
                 </motion.div>
               </div>
 
