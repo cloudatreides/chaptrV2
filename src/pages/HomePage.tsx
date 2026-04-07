@@ -10,6 +10,7 @@ import { getStoryData } from '../data/stories'
 import { getEligibleAmbientPings } from '../data/ambientPings'
 import { getAffinityTier } from '../lib/affinity'
 import { getCharacter, CHARACTERS } from '../data/characters'
+import { CAST_ROSTER, UNIVERSE_COLORS, getCastCharacter } from '../data/castRoster'
 import { AmbientPingModal } from '../components/AmbientPingModal'
 import type { AmbientPingDef } from '../data/ambientPings'
 
@@ -73,18 +74,23 @@ export function HomePage() {
   const unreadPings = ambientPings.filter((p) => !p.read)
   const unreadCount = unreadPings.length
 
-  // ─── Relationships: characters with global affinity > 0 ───
-  const relationships = useMemo(() => {
-    return Object.entries(globalAffinities)
-      .filter(([, score]) => score > 0)
-      .sort(([, a], [, b]) => b - a)
-      .map(([charId, score]) => {
+  const unlockedCastIds = useStore((s) => s.unlockedCastIds)
+
+  // ─── Cast roster: unlocked + locked characters ───
+  const unlockedCast = useMemo(() => {
+    return CAST_ROSTER
+      .filter((c) => unlockedCastIds.includes(c.id))
+      .map((c) => {
+        const score = globalAffinities[c.id] ?? 0
         const tier = getAffinityTier(score)
-        const charData = getCharacter(charId, null) ?? CHARACTERS[charId]
-        return { charId, score, tier, charData }
+        const charData = getCastCharacter(c)
+        return { ...c, score, tier, charData }
       })
-      .filter(({ charData }) => charData != null)
-  }, [globalAffinities])
+  }, [unlockedCastIds, globalAffinities])
+
+  const lockedCast = useMemo(() => {
+    return CAST_ROSTER.filter((c) => !unlockedCastIds.includes(c.id))
+  }, [unlockedCastIds])
 
   // Find active playthrough (most recent character with progress)
   const activePlaythrough = characters
@@ -138,41 +144,62 @@ export function HomePage() {
     setActivePingModal(def)
   }
 
-  // ─── Relationships section (shared between mobile + desktop) ───
-  const RelationshipsSection = ({ className = '', delay = 0 }: { className?: string; delay?: number }) => {
-    if (relationships.length === 0) return null
+  // ─── Characters To Meet section (shared between mobile + desktop) ───
+  const CastSection = ({ className = '', delay = 0 }: { className?: string; delay?: number }) => {
+    if (unlockedCast.length === 0 && lockedCast.length === 0) return null
     return (
       <motion.div className={className} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay }}>
-        <div className="flex items-center gap-1.5 mb-2">
-          <Heart size={12} className="text-accent/50" />
-          <p className="text-accent/50 text-[10px] font-semibold tracking-[2px] uppercase">Relationships</p>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-1.5">
+            <Heart size={12} className="text-accent/50" />
+            <p className="text-accent/50 text-[10px] font-semibold tracking-[2px] uppercase">Characters To Meet</p>
+          </div>
+          <button onClick={() => navigate('/cast')} className="cursor-pointer text-accent text-xs font-medium flex items-center gap-1 hover:text-accent/80 transition-colors active:opacity-75">
+            Explore All <ArrowRight size={12} />
+          </button>
         </div>
         <div className="flex gap-3 overflow-x-auto scrollbar-none pb-1">
-          {relationships.map(({ charId, score, tier, charData }) => (
-            <div
-              key={charId}
-              className="shrink-0 flex flex-col items-center gap-1.5"
+          {/* Unlocked — tappable */}
+          {unlockedCast.map(({ id, score, tier, charData }) => (
+            <button
+              key={id}
+              onClick={() => navigate(`/cast/${id}`)}
+              className="cursor-pointer shrink-0 flex flex-col items-center gap-1.5 active:opacity-75 transition-opacity"
             >
               <div className="relative">
                 <div
                   className="w-12 h-12 rounded-full overflow-hidden"
                   style={{ border: `2px solid ${tier.color}`, background: 'rgba(200,75,158,0.1)' }}
                 >
-                  {charData!.staticPortrait ? (
-                    <img src={charData!.staticPortrait} alt={charData!.name} className="w-full h-full object-cover" />
+                  {charData?.staticPortrait ? (
+                    <img src={charData.staticPortrait} alt={charData.name} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-accent text-sm font-semibold">
-                      {charData!.avatar}
+                      {charData?.avatar ?? id[0]?.toUpperCase()}
                     </div>
                   )}
                 </div>
-                {/* Affinity fill ring */}
-                <svg className="absolute inset-0 w-12 h-12 -rotate-90" viewBox="0 0 48 48">
-                  <circle cx="24" cy="24" r="22" fill="none" stroke={tier.color} strokeWidth="2" strokeDasharray={`${(score / 100) * 138} 138`} strokeLinecap="round" opacity={0.4} />
-                </svg>
+                {score > 0 && (
+                  <svg className="absolute inset-0 w-12 h-12 -rotate-90" viewBox="0 0 48 48">
+                    <circle cx="24" cy="24" r="22" fill="none" stroke={tier.color} strokeWidth="2" strokeDasharray={`${(score / 100) * 138} 138`} strokeLinecap="round" opacity={0.4} />
+                  </svg>
+                )}
               </div>
-              <p className="text-white/70 text-[10px] font-semibold">{charData!.name}</p>
+              <p className="text-white/70 text-[10px] font-semibold">{charData?.name ?? id}</p>
               <p className="text-[9px] font-medium" style={{ color: tier.color }}>{tier.label}</p>
+            </button>
+          ))}
+          {/* Locked — silhouettes */}
+          {lockedCast.slice(0, 4).map((c) => (
+            <div key={c.id} className="shrink-0 flex flex-col items-center gap-1.5 opacity-40">
+              <div
+                className="w-12 h-12 rounded-full flex items-center justify-center"
+                style={{ border: `2px solid ${UNIVERSE_COLORS[c.universeId] ?? '#555'}22`, background: 'rgba(255,255,255,0.03)' }}
+              >
+                <span className="text-white/20 text-lg">?</span>
+              </div>
+              <p className="text-white/30 text-[10px] font-semibold">{c.name}</p>
+              <p className="text-[9px] font-medium text-white/20">{c.universeLabel}</p>
             </div>
           ))}
         </div>
@@ -334,8 +361,8 @@ export function HomePage() {
           </motion.div>
         )}
 
-        {/* Relationships */}
-        {hasCharacters && <RelationshipsSection delay={0.08} />}
+        {/* Characters To Meet */}
+        {hasCharacters && <CastSection delay={0.08} />}
 
         {/* Your Universes */}
         {hasCharacters && (
@@ -363,11 +390,11 @@ export function HomePage() {
           </motion.div>
         )}
 
-        {/* Your Characters */}
+        {/* Your Twins */}
         {hasCharacters && (
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
             <div className="flex items-center justify-between mb-2">
-              <p className="text-accent/50 text-[10px] font-semibold tracking-[2px] uppercase">Your Characters</p>
+              <p className="text-accent/50 text-[10px] font-semibold tracking-[2px] uppercase">Your Twins</p>
               <button onClick={handleEditCharacters} className="cursor-pointer text-accent text-xs font-medium flex items-center gap-1">
                 <Pencil size={14} /> Edit
               </button>
@@ -530,8 +557,8 @@ export function HomePage() {
                   </motion.div>
                 )}
 
-                {/* Relationships */}
-                <RelationshipsSection delay={0.08} />
+                {/* Characters To Meet */}
+                <CastSection delay={0.08} />
 
                 {/* Universes */}
                 <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
@@ -568,7 +595,7 @@ export function HomePage() {
                 initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 }}
               >
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-accent/50 text-[10px] font-semibold tracking-[2px] uppercase">Your Characters</p>
+                  <p className="text-accent/50 text-[10px] font-semibold tracking-[2px] uppercase">Your Twins</p>
                   <button onClick={handleEditCharacters} className="cursor-pointer text-accent text-xs font-medium flex items-center gap-1 hover:text-accent/80 transition-colors">
                     <Pencil size={14} /> Edit
                   </button>
@@ -605,7 +632,7 @@ export function HomePage() {
                       style={{ border: '1.5px dashed rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.01)' }}
                     >
                       <Plus size={16} className="text-white/20" />
-                      <p className="text-white/25 text-sm font-medium">Create Character</p>
+                      <p className="text-white/25 text-sm font-medium">Create Twin</p>
                     </button>
                   )}
                 </div>

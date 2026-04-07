@@ -44,7 +44,9 @@ export function StoryReaderPage() {
     isStreaming, setIsStreaming,
     isGeneratingScene, setIsGeneratingScene,
     setSceneImage,
+    unlockCastCharacter,
   } = useStore()
+  const playthroughHistory = useStore((s) => s.playthroughHistory)
   const summariesList = useStore.getState().getSummariesList()
 
   const [sheetOpen, setSheetOpen] = useState(false)
@@ -146,6 +148,20 @@ export function StoryReaderPage() {
     }
   }, [currentStepIndex])
 
+  // ─── Cast unlock — unlock NPC characters when player enters chat/scene steps ───
+  useEffect(() => {
+    if (!currentStep) return
+    if (currentStep.type === 'chat' && currentStep.characterId) {
+      const charId = currentStep.characterId === 'jiwon' ? resolveLoveInterestId(loveInterest) : currentStep.characterId
+      unlockCastCharacter(charId)
+    } else if (currentStep.type === 'scene' && currentStep.sceneCharacters) {
+      for (const sc of currentStep.sceneCharacters) {
+        const charId = sc.characterId === 'jiwon' ? resolveLoveInterestId(loveInterest) : sc.characterId
+        unlockCastCharacter(charId)
+      }
+    }
+  }, [currentStepIndex])
+
   useEffect(() => {
     setBeatProse('')
     setHasChosenBeat(false)
@@ -232,6 +248,7 @@ export function StoryReaderPage() {
         loveInterest,
         universeId: selectedUniverse,
         signal: abortRef.current.signal,
+        previousPlaythroughs: playthroughHistory,
       })
 
       for await (const chunk of gen) {

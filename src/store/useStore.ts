@@ -23,6 +23,12 @@ export interface PlaythroughRecord {
   trustScore: number
 }
 
+export interface CastChatMessage {
+  role: 'user' | 'character'
+  content: string
+  timestamp: number
+}
+
 export interface AmbientPing {
   id: string
   characterId: string
@@ -136,6 +142,12 @@ interface StoreState {
   addAmbientPingReply: (pingId: string, msg: ChatMessage) => void
   dismissAmbientPing: (pingId: string) => void
   updateLastSessionTimestamp: () => void
+
+  // ── Cast chat (persistent NPC threads) ──
+  castChatThreads: Record<string, CastChatMessage[]>
+  unlockedCastIds: string[]
+  addCastChatMessage: (characterId: string, msg: CastChatMessage) => void
+  unlockCastCharacter: (characterId: string) => void
 
   // ── Gems ──
   gemBalance: number
@@ -403,6 +415,21 @@ export const useStore = create<StoreState>()(
       })),
       updateLastSessionTimestamp: () => set({ lastSessionTimestamp: Date.now() }),
 
+      // ── Cast chat ──
+      castChatThreads: {},
+      unlockedCastIds: ['sora', 'jiwon', 'yuna'], // base characters always unlocked
+      addCastChatMessage: (characterId, msg) => set((s) => ({
+        castChatThreads: {
+          ...s.castChatThreads,
+          [characterId]: [...(s.castChatThreads[characterId] ?? []), msg].slice(-100),
+        },
+      })),
+      unlockCastCharacter: (characterId) => set((s) => ({
+        unlockedCastIds: s.unlockedCastIds.includes(characterId)
+          ? s.unlockedCastIds
+          : [...s.unlockedCastIds, characterId],
+      })),
+
       // ── Gems ──
       gemBalance: 50,
       spendGems: (amount) => {
@@ -440,7 +467,7 @@ export const useStore = create<StoreState>()(
     }),
     {
       name: 'chaptr-v2-story',
-      version: 3,
+      version: 4,
       migrate: (persisted: any, version: number) => {
         if (version < 2 && persisted) {
           // Migrate from flat store to multi-character
@@ -493,6 +520,10 @@ export const useStore = create<StoreState>()(
           persisted.ambientPings = persisted.ambientPings ?? []
           persisted.lastSessionTimestamp = persisted.lastSessionTimestamp ?? Date.now()
         }
+        if (version < 4 && persisted) {
+          persisted.castChatThreads = persisted.castChatThreads ?? {}
+          persisted.unlockedCastIds = persisted.unlockedCastIds ?? ['sora', 'jiwon', 'yuna']
+        }
         return persisted
       },
       partialize: (s) => ({
@@ -505,6 +536,8 @@ export const useStore = create<StoreState>()(
         playthroughHistory: s.playthroughHistory,
         ambientPings: s.ambientPings,
         lastSessionTimestamp: s.lastSessionTimestamp,
+        castChatThreads: s.castChatThreads,
+        unlockedCastIds: s.unlockedCastIds,
       }),
     }
   )
