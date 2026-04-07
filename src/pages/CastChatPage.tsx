@@ -348,12 +348,21 @@ export function CastChatPage() {
               </span>
             </div>
 
+            {/* Bio */}
+            {castMember.bio && (
+              <div>
+                <p className="text-white/30 text-[10px] font-semibold tracking-[2px] uppercase mb-2">About</p>
+                <p className="text-white/50 text-sm leading-relaxed">{castMember.bio}</p>
+              </div>
+            )}
+
             {/* Affinity bar */}
             <div>
               <p className="text-white/30 text-[10px] font-semibold tracking-[2px] uppercase mb-2">Affinity</p>
               <div className="w-full h-2 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }}>
                 <div className="h-full rounded-full transition-all duration-500" style={{ width: `${score}%`, background: `linear-gradient(90deg, ${tier.color}, #8b5cf6)` }} />
               </div>
+              <p className="text-white/20 text-[10px] mt-1.5 leading-relaxed">Chat more to build affinity. Higher levels unlock deeper, more personal conversations.</p>
             </div>
 
             {/* Universe */}
@@ -361,14 +370,6 @@ export function CastChatPage() {
               <p className="text-white/30 text-[10px] font-semibold tracking-[2px] uppercase mb-2">Universe</p>
               <p className="text-white/70 text-sm">{castMember.universeLabel}</p>
             </div>
-
-            {/* Character description */}
-            {'description' in charData && (charData as any).description && (
-              <div>
-                <p className="text-white/30 text-[10px] font-semibold tracking-[2px] uppercase mb-2">About</p>
-                <p className="text-white/50 text-sm leading-relaxed">{(charData as any).description}</p>
-              </div>
-            )}
 
             {/* Memories */}
             {allMemories.length > 0 && (

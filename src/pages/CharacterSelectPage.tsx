@@ -54,7 +54,7 @@ export function CharacterSelectPage() {
 
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="text-textPrimary font-bold text-3xl mb-1">Your Twins</h1>
-          <p className="text-textSecondary text-base mb-6">Pick who enters this story, or create a new twin.</p>
+          <p className="text-textSecondary text-base mb-6">Choose which version of you steps into the story.</p>
         </motion.div>
 
         {/* Character cards */}

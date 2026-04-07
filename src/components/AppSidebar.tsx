@@ -19,16 +19,19 @@ export function AppSidebar() {
       className="hidden md:flex flex-col shrink-0 h-screen sticky top-0"
       style={{ width: 260, background: '#0F0D14', borderRight: '1px solid #2D2538' }}
     >
-      {/* Logo — matches landing page LogoMark */}
-      <div className="flex items-center gap-2 px-6 h-[72px]">
+      {/* Logo — click to go home */}
+      <div
+        className="flex items-center gap-2 px-6 h-[72px] cursor-pointer"
+        onClick={() => navigate('/home')}
+      >
         <div
           className="flex items-center justify-center shrink-0 relative"
           style={{ width: 28, height: 28, borderRadius: 7, background: 'linear-gradient(225deg, #c84b9e 0%, #8b5cf6 100%)' }}
         >
-          <span className="text-white font-bold" style={{ fontSize: 14, fontFamily: "'Space Grotesk', sans-serif" }}>C</span>
+          <span className="text-white font-bold" style={{ fontSize: 14, fontFamily: "'Syne', sans-serif" }}>C</span>
           <div className="absolute bg-white rounded-full" style={{ width: 5, height: 5, right: 2, bottom: 2, opacity: 0.9 }} />
         </div>
-        <span className="text-white font-medium" style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 16 }}>
+        <span className="text-white font-semibold" style={{ fontFamily: "'Syne', sans-serif", fontSize: 17, letterSpacing: '-0.02em' }}>
           chaptr
         </span>
       </div>

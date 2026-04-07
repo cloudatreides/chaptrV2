@@ -27,6 +27,7 @@ export interface CastChatMessage {
   role: 'user' | 'character'
   content: string
   timestamp: number
+  characterId?: string // used in group chat to identify speaker
 }
 
 export interface AmbientPing {
@@ -148,6 +149,10 @@ interface StoreState {
   unlockedCastIds: string[]
   addCastChatMessage: (characterId: string, msg: CastChatMessage) => void
   unlockCastCharacter: (characterId: string) => void
+
+  // ── Group cast chat (persistent group threads, keyed by sorted charIds joined with +) ──
+  groupCastThreads: Record<string, CastChatMessage[]>
+  addGroupCastMessage: (groupKey: string, msg: CastChatMessage) => void
 
   // ── Gems ──
   gemBalance: number
@@ -430,6 +435,15 @@ export const useStore = create<StoreState>()(
           : [...s.unlockedCastIds, characterId],
       })),
 
+      // ── Group cast chat ──
+      groupCastThreads: {},
+      addGroupCastMessage: (groupKey, msg) => set((s) => ({
+        groupCastThreads: {
+          ...s.groupCastThreads,
+          [groupKey]: [...(s.groupCastThreads[groupKey] ?? []), msg].slice(-100),
+        },
+      })),
+
       // ── Gems ──
       gemBalance: 50,
       spendGems: (amount) => {
@@ -467,7 +481,7 @@ export const useStore = create<StoreState>()(
     }),
     {
       name: 'chaptr-v2-story',
-      version: 4,
+      version: 5,
       migrate: (persisted: any, version: number) => {
         if (version < 2 && persisted) {
           // Migrate from flat store to multi-character
@@ -524,6 +538,9 @@ export const useStore = create<StoreState>()(
           persisted.castChatThreads = persisted.castChatThreads ?? {}
           persisted.unlockedCastIds = persisted.unlockedCastIds ?? ['sora', 'jiwon', 'yuna']
         }
+        if (version < 5 && persisted) {
+          persisted.groupCastThreads = persisted.groupCastThreads ?? {}
+        }
         return persisted
       },
       partialize: (s) => ({
@@ -538,6 +555,7 @@ export const useStore = create<StoreState>()(
         lastSessionTimestamp: s.lastSessionTimestamp,
         castChatThreads: s.castChatThreads,
         unlockedCastIds: s.unlockedCastIds,
+        groupCastThreads: s.groupCastThreads,
       }),
     }
   )

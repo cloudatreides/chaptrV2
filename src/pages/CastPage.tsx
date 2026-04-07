@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Lock, MessageCircle, X } from 'lucide-react'
+import { ArrowLeft, Lock, MessageCircle, X, Users, Check } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { AppSidebar } from '../components/AppSidebar'
 import { CAST_ROSTER, UNIVERSE_COLORS, getCastCharacter } from '../data/castRoster'
@@ -21,6 +21,55 @@ export function CastPage() {
   const [hoveredChar, setHoveredChar] = useState<string | null>(null)
   // Tap state for locked character cards (mobile)
   const [tappedChar, setTappedChar] = useState<CastMember | null>(null)
+
+  // ─── Group chat selection ───
+  const [selectMode, setSelectMode] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+
+  // Universe constraint: once first char is selected, only same-universe chars are selectable
+  const selectedUniverse = selectedIds.length > 0
+    ? CAST_ROSTER.find((c) => c.id === selectedIds[0])?.universeId ?? null
+    : null
+
+  function toggleSelect(charId: string) {
+    setSelectedIds((prev) => {
+      if (prev.includes(charId)) return prev.filter((id) => id !== charId)
+      if (prev.length >= 3) return prev // max 3
+      const charUniverse = CAST_ROSTER.find((c) => c.id === charId)?.universeId
+      if (prev.length > 0 && charUniverse !== selectedUniverse) return prev // same universe only
+      return [...prev, charId]
+    })
+  }
+
+  function exitSelectMode() {
+    setSelectMode(false)
+    setSelectedIds([])
+  }
+
+  function startGroupChat() {
+    if (selectedIds.length < 2) return
+    const ids = [...selectedIds].sort().join('+')
+    exitSelectMode()
+    navigate(`/cast/group/${ids}`)
+  }
+
+  function handleCardClick(castId: string) {
+    if (selectMode) {
+      toggleSelect(castId)
+    } else {
+      navigate(`/cast/${castId}`)
+    }
+  }
+
+  // Check if a char is selectable (same universe or no selection yet)
+  function isSelectable(castId: string): boolean {
+    if (!selectMode) return true
+    if (selectedIds.includes(castId)) return true
+    if (selectedIds.length >= 3) return false
+    if (selectedIds.length === 0) return true
+    const charUniverse = CAST_ROSTER.find((c) => c.id === castId)?.universeId
+    return charUniverse === selectedUniverse
+  }
 
   // ─── Character avatar helper ───
   const CharAvatar = ({ cast, size = 'w-14 h-14', locked = false }: { cast: CastMember; size?: string; locked?: boolean }) => {
@@ -58,47 +107,107 @@ export function CastPage() {
     )
   }
 
+  // ─── Selection checkmark overlay ───
+  const SelectionOverlay = ({ charId }: { charId: string }) => {
+    if (!selectMode) return null
+    const selected = selectedIds.includes(charId)
+    const selectable = isSelectable(charId)
+    return (
+      <div className={`absolute inset-0 rounded-2xl z-10 transition-all ${!selectable ? 'bg-black/40' : ''}`}>
+        {selected && (
+          <div
+            className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center"
+            style={{ background: 'linear-gradient(135deg, #c84b9e, #8b5cf6)' }}
+          >
+            <Check size={12} className="text-white" />
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // Group chat eligible: need 2+ unlocked chars in same universe
+  const universeGroups = unlocked.reduce<Record<string, CastMember[]>>((acc, c) => {
+    acc[c.universeId] = [...(acc[c.universeId] ?? []), c]
+    return acc
+  }, {})
+  const canGroupChat = Object.values(universeGroups).some((g) => g.length >= 2)
+
   return (
     <div className="bg-bg min-h-screen min-h-dvh">
       {/* ═══ MOBILE ═══ */}
       <div className="md:hidden flex flex-col min-h-screen min-h-dvh">
         <div className="flex items-center justify-between px-5 pt-14 pb-3">
-          <button onClick={() => navigate('/home')} className="cursor-pointer flex items-center gap-2 text-white/50 text-sm">
-            <ArrowLeft size={20} className="text-white" /> Home
+          <button onClick={() => selectMode ? exitSelectMode() : navigate('/home')} className="cursor-pointer flex items-center gap-2 text-white/50 text-sm">
+            {selectMode ? (
+              <><X size={20} className="text-white" /> Cancel</>
+            ) : (
+              <><ArrowLeft size={20} className="text-white" /> Home</>
+            )}
           </button>
-          <p className="text-white font-bold text-base">Characters To Meet</p>
-          <p className="text-accent text-sm font-semibold">{unlocked.length}/{CAST_ROSTER.length}</p>
+          <p className="text-white font-bold text-base">{selectMode ? 'Select Characters' : 'Characters To Meet'}</p>
+          {selectMode ? (
+            <p className="text-accent text-sm font-semibold">{selectedIds.length}/3</p>
+          ) : (
+            <p className="text-accent text-sm font-semibold">{unlocked.length}/{CAST_ROSTER.length}</p>
+          )}
         </div>
+        {selectMode && selectedUniverse && (
+          <p className="text-center text-white/25 text-[10px] -mt-1 mb-1">Same universe only · {CAST_ROSTER.find((c) => c.id === selectedIds[0])?.universeLabel}</p>
+        )}
         <div className="w-full h-px bg-white/5" />
 
         <div className="flex-1 overflow-y-auto px-5 py-5 flex flex-col gap-5">
           {/* Unlocked */}
           <div>
-            <p className="text-accent/50 text-[10px] font-semibold tracking-[2px] uppercase mb-3">UNLOCKED</p>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-accent/50 text-[10px] font-semibold tracking-[2px] uppercase">UNLOCKED</p>
+              {!selectMode && canGroupChat && (
+                <button
+                  onClick={() => setSelectMode(true)}
+                  className="cursor-pointer flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-lg transition-all"
+                  style={{ background: 'rgba(139,92,246,0.1)', color: '#8b5cf6' }}
+                >
+                  <Users size={11} /> Group Chat
+                </button>
+              )}
+            </div>
             <div className="grid grid-cols-3 gap-3">
               {unlocked.map((cast, i) => {
                 const score = globalAffinities[cast.id] ?? 0
                 const tier = getAffinityTier(score)
                 const lastMsg = castChatThreads[cast.id]?.slice(-1)[0]
+                const selectable = isSelectable(cast.id)
                 return (
                   <motion.button
                     key={cast.id}
-                    onClick={() => navigate(`/cast/${cast.id}`)}
-                    className="cursor-pointer flex flex-col items-center gap-1.5 rounded-2xl p-3 pb-2.5 text-center"
-                    style={{ background: '#111016', border: `1px solid ${UNIVERSE_COLORS[cast.universeId]}22` }}
+                    onClick={() => handleCardClick(cast.id)}
+                    className={`cursor-pointer relative flex flex-col items-center gap-1.5 rounded-2xl p-3 pb-2.5 text-center transition-all ${!selectable ? 'opacity-40' : ''}`}
+                    style={{
+                      background: selectMode && selectedIds.includes(cast.id) ? '#1A1030' : '#111016',
+                      border: selectMode && selectedIds.includes(cast.id)
+                        ? '1px solid rgba(139,92,246,0.4)'
+                        : `1px solid ${UNIVERSE_COLORS[cast.universeId]}22`,
+                    }}
                     initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
                     whileTap={{ scale: 0.97 }}
+                    disabled={selectMode && !selectable}
                   >
+                    <SelectionOverlay charId={cast.id} />
                     <CharAvatar cast={cast} size="w-12 h-12" />
                     <p className="text-white text-[11px] font-semibold">{cast.name}</p>
                     <p className="text-white/25 text-[9px]">{cast.universeLabel}</p>
-                    <span className="text-[8px] font-semibold px-2 py-0.5 rounded-md" style={{ background: `${tier.color}22`, color: tier.color }}>
-                      {tier.label}
-                    </span>
-                    {lastMsg && (
-                      <p className="text-white/30 text-[9px] italic truncate w-full mt-0.5">
-                        "{lastMsg.content.slice(0, 30)}..."
-                      </p>
+                    {!selectMode && (
+                      <>
+                        <span className="text-[8px] font-semibold px-2 py-0.5 rounded-md" style={{ background: `${tier.color}22`, color: tier.color }}>
+                          {tier.label}
+                        </span>
+                        {lastMsg && (
+                          <p className="text-white/30 text-[9px] italic truncate w-full mt-0.5">
+                            "{lastMsg.content.slice(0, 30)}..."
+                          </p>
+                        )}
+                      </>
                     )}
                   </motion.button>
                 )
@@ -106,8 +215,8 @@ export function CastPage() {
             </div>
           </div>
 
-          {/* Locked — inviting cards */}
-          {locked.length > 0 && (
+          {/* Locked — inviting cards (hidden in select mode) */}
+          {!selectMode && locked.length > 0 && (
             <div>
               <p className="text-white/30 text-[10px] font-semibold tracking-[2px] uppercase mb-3">PLAY TO UNLOCK</p>
               <div className="grid grid-cols-3 gap-3">
@@ -132,6 +241,25 @@ export function CastPage() {
             </div>
           )}
         </div>
+
+        {/* Mobile floating group chat button */}
+        <AnimatePresence>
+          {selectMode && selectedIds.length >= 2 && (
+            <motion.div
+              className="fixed bottom-6 left-5 right-5 z-40"
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
+            >
+              <button
+                onClick={startGroupChat}
+                className="cursor-pointer w-full py-3.5 rounded-2xl text-white font-semibold text-sm flex items-center justify-center gap-2"
+                style={{ background: 'linear-gradient(135deg, #c84b9e, #8b5cf6)', boxShadow: '0 8px 32px rgba(200,75,158,0.3)' }}
+              >
+                <Users size={16} />
+                Start Group Chat ({selectedIds.length})
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Mobile tap-to-reveal sheet */}
         <AnimatePresence>
@@ -180,29 +308,85 @@ export function CastPage() {
         <div className="flex-1 min-h-screen overflow-y-auto px-8 lg:px-12 py-10">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-white font-bold text-2xl mb-1">Characters To Meet</h1>
-              <p className="text-white/40 text-sm">Chat with characters from your stories. Unlock more by playing.</p>
+              <h1 className="text-white font-bold text-2xl mb-1">
+                {selectMode ? 'Select Characters for Group Chat' : 'Characters To Meet'}
+              </h1>
+              <p className="text-white/40 text-sm">
+                {selectMode
+                  ? `Pick 2–3 characters from the same universe. ${selectedUniverse ? `Selecting from ${CAST_ROSTER.find((c) => c.id === selectedIds[0])?.universeLabel}.` : ''}`
+                  : 'Chat with characters from your stories. Unlock more by playing.'}
+              </p>
             </div>
-            <span className="text-accent text-sm font-semibold px-4 py-2 rounded-xl" style={{ background: 'rgba(200,75,158,0.1)' }}>
-              {unlocked.length} / {CAST_ROSTER.length} unlocked
-            </span>
+            <div className="flex items-center gap-3">
+              {selectMode ? (
+                <>
+                  <span className="text-white/40 text-sm">{selectedIds.length}/3 selected</span>
+                  <button
+                    onClick={exitSelectMode}
+                    className="cursor-pointer text-sm font-medium px-4 py-2 rounded-xl transition-all hover:brightness-110"
+                    style={{ background: 'rgba(255,255,255,0.06)', color: '#fff' }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={startGroupChat}
+                    disabled={selectedIds.length < 2}
+                    className="cursor-pointer text-sm font-semibold px-4 py-2 rounded-xl transition-all hover:brightness-110 disabled:opacity-30 flex items-center gap-2"
+                    style={{ background: 'linear-gradient(135deg, #c84b9e, #8b5cf6)', color: '#fff' }}
+                  >
+                    <Users size={14} /> Start Group Chat
+                  </button>
+                </>
+              ) : (
+                <>
+                  {canGroupChat && (
+                    <button
+                      onClick={() => setSelectMode(true)}
+                      className="cursor-pointer flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-xl transition-all hover:brightness-110"
+                      style={{ background: 'rgba(139,92,246,0.1)', color: '#8b5cf6' }}
+                    >
+                      <Users size={14} /> Group Chat
+                    </button>
+                  )}
+                  <span className="text-accent text-sm font-semibold px-4 py-2 rounded-xl" style={{ background: 'rgba(200,75,158,0.1)' }}>
+                    {unlocked.length} / {CAST_ROSTER.length} unlocked
+                  </span>
+                </>
+              )}
+            </div>
           </div>
 
-          {/* Base characters */}
-          <p className="text-accent/50 text-[11px] font-semibold tracking-[1.5px] uppercase mb-4">BASE CHARACTERS — Always available</p>
+          {/* Unlocked characters */}
+          <p className="text-accent/50 text-[11px] font-semibold tracking-[1.5px] uppercase mb-4">
+            {selectMode ? 'SELECT CHARACTERS' : 'BASE CHARACTERS — Always available'}
+          </p>
           <div className="grid grid-cols-3 gap-4 mb-10">
             {unlocked.map((cast, i) => {
               const score = globalAffinities[cast.id] ?? 0
               const tier = getAffinityTier(score)
               const lastMsg = castChatThreads[cast.id]?.slice(-1)[0]
+              const selected = selectedIds.includes(cast.id)
+              const selectable = isSelectable(cast.id)
               return (
                 <motion.button
                   key={cast.id}
-                  onClick={() => navigate(`/cast/${cast.id}`)}
-                  className="cursor-pointer flex items-center gap-4 rounded-2xl p-4 text-left transition-all hover:brightness-110"
-                  style={{ background: '#111016', border: `1px solid ${tier.color}22` }}
+                  onClick={() => handleCardClick(cast.id)}
+                  className={`cursor-pointer relative flex items-center gap-4 rounded-2xl p-4 text-left transition-all hover:brightness-110 ${!selectable ? 'opacity-30 pointer-events-none' : ''}`}
+                  style={{
+                    background: selected ? '#1A1030' : '#111016',
+                    border: selected ? '1px solid rgba(139,92,246,0.4)' : `1px solid ${tier.color}22`,
+                  }}
                   initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
+                  disabled={selectMode && !selectable}
                 >
+                  {selectMode && selected && (
+                    <div
+                      className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center z-10"
+                      style={{ background: 'linear-gradient(135deg, #c84b9e, #8b5cf6)' }}
+                    >
+                      <Check size={14} className="text-white" />
+                    </div>
+                  )}
                   <CharAvatar cast={cast} size="w-16 h-16" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
@@ -212,18 +396,20 @@ export function CastPage() {
                       </span>
                     </div>
                     <p className="text-white/30 text-xs mb-1">{cast.universeLabel}</p>
-                    <p className="text-white/25 text-xs italic truncate">
-                      {lastMsg ? `"${lastMsg.content.slice(0, 50)}..."` : 'Start chatting'}
-                    </p>
+                    {!selectMode && (
+                      <p className="text-white/25 text-xs italic truncate">
+                        {lastMsg ? `"${lastMsg.content.slice(0, 50)}..."` : 'Start chatting'}
+                      </p>
+                    )}
                   </div>
-                  <MessageCircle size={20} className="text-accent/40 shrink-0" />
+                  {!selectMode && <MessageCircle size={20} className="text-accent/40 shrink-0" />}
                 </motion.button>
               )
             })}
           </div>
 
-          {/* Locked — with hover cards */}
-          {locked.length > 0 && (
+          {/* Locked — with hover cards (hidden in select mode) */}
+          {!selectMode && locked.length > 0 && (
             <>
               <p className="text-white/30 text-[11px] font-semibold tracking-[1.5px] uppercase mb-4">STORY-LOCKED — Play the story to unlock</p>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

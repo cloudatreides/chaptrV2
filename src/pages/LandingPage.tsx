@@ -35,6 +35,7 @@ const STEPS: { num: string; icon: React.ReactNode; title: string; desc: string; 
 
 const SERIF = "'Playfair Display', Georgia, serif"
 const SG = 'Space Grotesk, sans-serif'
+const SYNE = "'Syne', sans-serif"
 const INTER = 'Inter, sans-serif'
 
 // ─── Typewriter Headline ───
@@ -574,7 +575,7 @@ export function LandingPage() {
           {/* Logo */}
           <div className="relative z-10 flex items-center gap-2 px-5 pt-10 safe-top">
             <LogoMark size={34} />
-            <span className="text-white font-medium text-lg" style={{ fontFamily: SG }}>chaptr</span>
+            <span className="text-white font-semibold text-lg" style={{ fontFamily: SYNE, letterSpacing: '-0.02em' }}>chaptr</span>
           </div>
 
           {/* Hero text pinned to bottom */}
@@ -756,7 +757,7 @@ export function LandingPage() {
             <nav className="flex items-center justify-between px-8 lg:px-16 pt-7">
               <div className="flex items-center gap-2.5">
                 <LogoMark size={34} />
-                <span className="text-white font-medium text-lg" style={{ fontFamily: SG }}>chaptr</span>
+                <span className="text-white font-semibold text-lg" style={{ fontFamily: SYNE, letterSpacing: '-0.02em' }}>chaptr</span>
               </div>
               <div className="flex items-center gap-8">
                 {[
@@ -1064,7 +1065,7 @@ function LogoMark({ size, small }: { size: number; small?: boolean }) {
           : 'linear-gradient(225deg, #c84b9e 0%, #8b5cf6 100%)',
       }}
     >
-      <span className="text-white font-bold" style={{ fontSize: size * 0.5, fontFamily: SG }}>C</span>
+      <span className="text-white font-bold" style={{ fontSize: size * 0.5, fontFamily: SYNE }}>C</span>
       {!small && (
         <div className="absolute bg-white rounded-full" style={{ width: size * 0.18, height: size * 0.18, right: size * 0.06, bottom: size * 0.06, opacity: 0.9 }} />
       )}
