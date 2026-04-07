@@ -1,32 +1,107 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2=".5" y2="1">
-      <stop offset="0%" stop-color="#1a1a20"/>
-      <stop offset="100%" stop-color="#0a1a2a"/>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#08101a"/><stop offset="50%" stop-color="#101828"/>
+      <stop offset="100%" stop-color="#0a1420"/>
+    </linearGradient>
+    <radialGradient id="cold-glow" cx="55%" cy="60%" r="30%">
+      <stop offset="0%" stop-color="#2040a0" stop-opacity="0.12"/><stop offset="100%" stop-color="#101828" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="soft"><feGaussianBlur stdDeviation="4"/></filter>
+    <linearGradient id="river" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0c1825"/><stop offset="100%" stop-color="#060c18"/>
     </linearGradient>
   </defs>
-  <rect width="400" height="300" fill="url(#bg)"/>
-  <rect x="0" y="260" width="400" height="40" fill="#0a0a10"/>
-  <rect x="30" y="200" width="35" height="100" fill="#0a0a10"/>
-  <rect x="75" y="220" width="25" height="80" fill="#0a0a10"/>
-  <rect x="110" y="180" width="30" height="120" fill="#0a0a10"/>
-  <rect x="197" y="80" width="6" height="180" fill="#0a0a10"/>
-  <ellipse cx="200" cy="120" rx="14" ry="18" fill="#0a0a10"/>
-  <circle cx="200" cy="120" r="10" fill="#0e1525" opacity=".8"/>
-  <circle cx="200" cy="78" r="3" fill="#0a0a10"/>
-  <rect x="240" y="210" width="40" height="90" fill="#0a0a10"/>
-  <rect x="290" y="190" width="30" height="110" fill="#0a0a10"/>
-  <rect x="330" y="230" width="35" height="70" fill="#0a0a10"/>
-  <rect x="375" y="215" width="25" height="85" fill="#0a0a10"/>
-  <rect x="148" y="240" width="5" height="20" fill="#0a0a10"/>
-  <rect x="158" y="240" width="5" height="20" fill="#0a0a10"/>
-  <rect x="168" y="240" width="5" height="20" fill="#0a0a10"/>
-  <rect x="146" y="235" width="30" height="6" fill="#0a0a10"/>
-  <circle cx="200" cy="150" r="30" fill="none" stroke="#4a6a8a" stroke-width=".8" opacity=".25"/>
-  <circle cx="200" cy="150" r="20" fill="none" stroke="#4a6a8a" stroke-width=".5" opacity=".2"/>
-  <line x1="200" y1="115" x2="200" y2="135" stroke="#4a6a8a" stroke-width=".8" opacity=".25"/>
-  <line x1="200" y1="165" x2="200" y2="185" stroke="#4a6a8a" stroke-width=".8" opacity=".25"/>
-  <line x1="165" y1="150" x2="185" y2="150" stroke="#4a6a8a" stroke-width=".8" opacity=".25"/>
-  <line x1="215" y1="150" x2="235" y2="150" stroke="#4a6a8a" stroke-width=".8" opacity=".25"/>
-  <rect x="0" y="250" width="400" height="50" fill="#1a1a2a" opacity=".2"/>
+
+  <rect width="800" height="450" fill="url(#sky)"/>
+  <rect width="800" height="450" fill="url(#cold-glow)"/>
+
+  <!-- Far buildings -->
+  <g fill="#0a1220">
+    <rect x="0" y="130" width="50" height="320"/><rect x="45" y="150" width="40" height="300"/>
+    <rect x="80" y="115" width="55" height="335"/><rect x="130" y="140" width="45" height="310"/>
+    <rect x="610" y="125" width="55" height="325"/><rect x="660" y="145" width="45" height="305"/>
+    <rect x="700" y="120" width="50" height="330"/><rect x="745" y="135" width="55" height="315"/>
+  </g>
+  <g fill="#1a2840" opacity="0.6">
+    <rect x="10" y="145" width="7" height="10" rx="1"/><rect x="28" y="148" width="7" height="10" rx="1"/>
+    <rect x="10" y="170" width="7" height="10" rx="1"/><rect x="28" y="172" width="7" height="10" rx="1"/>
+    <rect x="90" y="130" width="7" height="10" rx="1"/><rect x="110" y="132" width="7" height="10" rx="1"/>
+    <rect x="625" y="140" width="7" height="10" rx="1"/><rect x="645" y="142" width="7" height="10" rx="1"/>
+    <rect x="715" y="135" width="7" height="10" rx="1"/><rect x="735" y="138" width="7" height="10" rx="1"/>
+    <rect x="758" y="150" width="7" height="10" rx="1"/><rect x="778" y="152" width="7" height="10" rx="1"/>
+  </g>
+
+  <!-- Fernsehturm (TV Tower) -->
+  <g fill="#08101a">
+    <rect x="392" y="45" width="16" height="200"/>
+    <ellipse cx="400" cy="120" rx="28" ry="18"/>
+    <ellipse cx="400" cy="120" rx="25" ry="15" fill="#0c1520"/>
+    <circle cx="400" cy="115" r="10"/>
+    <rect x="398" y="18" width="4" height="30"/>
+    <circle cx="400" cy="15" r="4"/>
+    <!-- Restaurant sphere windows -->
+    <rect x="382" y="115" width="5" height="6" fill="#2040a0" opacity="0.5" rx="1" filter="url(#glow)"/>
+    <rect x="413" y="115" width="5" height="6" fill="#2040a0" opacity="0.5" rx="1" filter="url(#glow)"/>
+  </g>
+
+  <!-- Mid buildings -->
+  <g fill="#081018">
+    <rect x="170" y="175" width="90" height="275"/><rect x="255" y="160" width="70" height="290"/>
+    <rect x="475" y="170" width="80" height="280"/><rect x="550" y="185" width="65" height="265"/>
+  </g>
+  <g fill="#1a2840" opacity="0.5">
+    <rect x="182" y="190" width="8" height="12" rx="1"/><rect x="205" y="192" width="8" height="12" rx="1"/>
+    <rect x="228" y="190" width="8" height="12" rx="1"/><rect x="182" y="218" width="8" height="12" rx="1"/>
+    <rect x="205" y="220" width="8" height="12" rx="1" fill="#2050a0" opacity="0.7"/>
+    <rect x="268" y="175" width="8" height="12" rx="1"/><rect x="290" y="178" width="8" height="12" rx="1"/>
+    <rect x="268" y="202" width="8" height="12" rx="1" fill="#2050a0" opacity="0.7"/>
+    <rect x="488" y="185" width="8" height="12" rx="1"/><rect x="512" y="188" width="8" height="12" rx="1"/>
+    <rect x="536" y="185" width="8" height="12" rx="1" fill="#2050a0" opacity="0.7"/>
+    <rect x="562" y="200" width="8" height="12" rx="1"/><rect x="585" y="202" width="8" height="12" rx="1"/>
+  </g>
+
+  <!-- Bridge -->
+  <g fill="#060c18">
+    <rect x="200" y="345" width="400" height="12" rx="2"/>
+    <rect x="250" y="340" width="8" height="18"/><rect x="350" y="340" width="8" height="18"/>
+    <rect x="450" y="340" width="8" height="18"/><rect x="540" y="340" width="8" height="18"/>
+    <!-- Arches -->
+    <path d="M252,357 Q300,380 348,357" fill="none" stroke="#0c1828" stroke-width="3"/>
+    <path d="M352,357 Q400,380 448,357" fill="none" stroke="#0c1828" stroke-width="3"/>
+    <path d="M452,357 Q500,380 540,357" fill="none" stroke="#0c1828" stroke-width="3"/>
+  </g>
+
+  <!-- Figure on bridge -->
+  <g fill="#040810">
+    <rect x="395" y="318" width="7" height="25" rx="2"/>
+    <circle cx="398" cy="314" r="5"/>
+  </g>
+
+  <!-- Bridge lamp posts -->
+  <g stroke="#1a2838" stroke-width="2" fill="none">
+    <line x1="300" y1="328" x2="300" y2="345"/>
+    <line x1="500" y1="328" x2="500" y2="345"/>
+  </g>
+  <circle cx="300" cy="325" r="3.5" fill="#c0d0e0" opacity="0.5" filter="url(#glow)"/>
+  <circle cx="500" cy="325" r="3.5" fill="#c0d0e0" opacity="0.5" filter="url(#glow)"/>
+
+  <!-- River -->
+  <rect x="0" y="370" width="800" height="80" fill="url(#river)"/>
+  <!-- Reflections -->
+  <ellipse cx="400" cy="395" rx="200" ry="18" fill="#0c1828" opacity="0.6" filter="url(#soft)"/>
+  <rect x="394" y="375" width="12" height="60" fill="#101830" opacity="0.3" filter="url(#soft)"/>
+
+  <!-- Fog -->
+  <ellipse cx="400" cy="365" rx="500" ry="30" fill="#101828" opacity="0.4" filter="url(#soft)"/>
+
+  <radialGradient id="vig" cx="50%" cy="50%" r="62%">
+    <stop offset="0%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity="0.6"/>
+  </radialGradient>
+  <rect width="800" height="450" fill="url(#vig)"/>
+  <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#060c18" stop-opacity="0"/><stop offset="100%" stop-color="#060c18" stop-opacity="0.8"/>
+  </linearGradient>
+  <rect width="800" height="450" fill="url(#fade)"/>
 </svg>

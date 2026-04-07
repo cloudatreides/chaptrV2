@@ -1,32 +1,106 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#4a0a0a"/>
-      <stop offset="50%" stop-color="#2a0a20"/>
-      <stop offset="100%" stop-color="#0a1a3a"/>
+    <linearGradient id="ocean" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#020818"/><stop offset="35%" stop-color="#0a1830"/>
+      <stop offset="70%" stop-color="#1a0820"/><stop offset="100%" stop-color="#2a0818"/>
     </linearGradient>
+    <radialGradient id="stn-light" cx="50%" cy="55%" r="25%">
+      <stop offset="0%" stop-color="#40a0c0" stop-opacity="0.3"/><stop offset="100%" stop-color="#0a1830" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="red-glow" cx="50%" cy="85%" r="30%">
+      <stop offset="0%" stop-color="#c03030" stop-opacity="0.2"/><stop offset="100%" stop-color="#2a0818" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="soft"><feGaussianBlur stdDeviation="5"/></filter>
   </defs>
-  <rect width="400" height="300" fill="url(#bg)"/>
-  <!-- Submarine silhouette -->
-  <ellipse cx="200" cy="180" rx="90" ry="28" fill="#0a0a1a" opacity="0.8"/>
-  <path d="M280 180 L310 175 L310 185 Z" fill="#0a0a1a" opacity="0.8"/>
-  <!-- Conning tower -->
-  <rect x="185" y="148" width="30" height="32" rx="3" fill="#0a0a1a" opacity="0.8"/>
-  <rect x="195" y="140" width="10" height="12" fill="#0a0a1a" opacity="0.8"/>
-  <!-- Porthole glow -->
-  <circle cx="160" cy="180" r="5" fill="#6a1a1a" opacity="0.4"/>
-  <circle cx="180" cy="180" r="5" fill="#6a1a1a" opacity="0.3"/>
-  <circle cx="220" cy="180" r="5" fill="#6a1a1a" opacity="0.4"/>
+
+  <rect width="800" height="450" fill="url(#ocean)"/>
+  <rect width="800" height="450" fill="url(#stn-light)"/>
+  <rect width="800" height="450" fill="url(#red-glow)"/>
+
+  <!-- Ocean floor terrain -->
+  <g fill="#0a0412" opacity="0.8">
+    <polygon points="0,420 40,395 80,405 120,388 165,400 210,380 260,395 310,375 360,390 400,378 440,392 480,372 530,388 580,370 620,385 670,375 720,390 760,380 800,395 800,450 0,450"/>
+  </g>
+
+  <!-- Station structure -->
+  <g fill="#0c1028">
+    <rect x="260" y="210" width="280" height="120" rx="8"/>
+    <rect x="320" y="175" width="160" height="45" rx="5"/>
+    <rect x="370" y="155" width="60" height="28" rx="4"/>
+    <ellipse cx="235" cy="265" rx="35" ry="28"/>
+    <ellipse cx="565" cy="262" rx="32" ry="26"/>
+    <rect x="255" y="255" width="30" height="8" rx="2"/>
+    <rect x="520" y="252" width="30" height="8" rx="2"/>
+    <rect x="310" y="325" width="180" height="40" rx="5"/>
+    <rect x="355" y="360" width="90" height="25" rx="4"/>
+    <rect x="345" y="330" width="12" height="30"/><rect x="445" y="330" width="12" height="30"/>
+    <rect x="396" y="128" width="8" height="32"/><rect x="388" y="125" width="24" height="6" rx="2"/>
+    <circle cx="400" cy="122" r="5"/>
+  </g>
+
+  <!-- Pipes -->
+  <g stroke="#18203a" stroke-width="3" fill="none">
+    <line x1="260" y1="240" x2="230" y2="248"/><line x1="540" y1="238" x2="558" y2="245"/>
+    <path d="M310,330 Q300,345 310,365"/><path d="M490,330 Q500,345 490,365"/>
+  </g>
+
+  <!-- Station windows -->
+  <g filter="url(#glow)">
+    <circle cx="290" cy="250" r="6" fill="#40c0d0" opacity="0.8"/>
+    <circle cx="320" cy="250" r="6" fill="#30a0b8" opacity="0.7"/>
+    <circle cx="350" cy="250" r="6" fill="#40c0d0" opacity="0.8"/>
+    <circle cx="450" cy="250" r="6" fill="#30a0b8" opacity="0.7"/>
+    <circle cx="480" cy="250" r="6" fill="#40c0d0" opacity="0.8"/>
+    <circle cx="510" cy="250" r="6" fill="#30a0b8" opacity="0.7"/>
+    <rect x="340" y="188" width="10" height="14" fill="#40c0d0" rx="2"/>
+    <rect x="370" y="188" width="10" height="14" fill="#30a0b8" rx="2"/>
+    <rect x="420" y="188" width="10" height="14" fill="#40c0d0" rx="2"/>
+    <rect x="450" y="188" width="10" height="14" fill="#30a0b8" rx="2"/>
+    <circle cx="400" cy="160" r="4" fill="#ff3030" opacity="0.9"/>
+  </g>
+
+  <!-- Light beams -->
+  <g opacity="0.08" fill="#40c0d0">
+    <polygon points="290,256 240,420 260,420"/>
+    <polygon points="510,256 540,420 560,420"/>
+    <polygon points="400,370 370,450 430,450"/>
+  </g>
+
+  <!-- Bioluminescent particles -->
+  <g filter="url(#glow)">
+    <circle cx="120" cy="180" r="2" fill="#40e0d0" opacity="0.6"/>
+    <circle cx="180" cy="320" r="1.5" fill="#60f0e0" opacity="0.5"/>
+    <circle cx="650" cy="200" r="2" fill="#40e0d0" opacity="0.6"/>
+    <circle cx="700" cy="350" r="1.5" fill="#60f0e0" opacity="0.5"/>
+    <circle cx="90" cy="380" r="2" fill="#ff6060" opacity="0.4"/>
+    <circle cx="720" cy="280" r="1.5" fill="#ff4040" opacity="0.3"/>
+    <circle cx="50" cy="260" r="1.5" fill="#40e0d0" opacity="0.4"/>
+    <circle cx="750" cy="160" r="2" fill="#60f0e0" opacity="0.4"/>
+    <circle cx="600" cy="380" r="1.5" fill="#ff5050" opacity="0.3"/>
+  </g>
+
   <!-- Bubbles -->
-  <circle cx="150" cy="120" r="4" fill="none" stroke="#4a6a8a" stroke-width="0.8" opacity="0.3"/>
-  <circle cx="170" cy="90" r="3" fill="none" stroke="#4a6a8a" stroke-width="0.8" opacity="0.25"/>
-  <circle cx="140" cy="70" r="2.5" fill="none" stroke="#4a6a8a" stroke-width="0.8" opacity="0.2"/>
-  <circle cx="250" cy="100" r="3.5" fill="none" stroke="#4a6a8a" stroke-width="0.8" opacity="0.25"/>
-  <circle cx="230" cy="60" r="2" fill="none" stroke="#4a6a8a" stroke-width="0.8" opacity="0.2"/>
-  <circle cx="300" cy="130" r="3" fill="none" stroke="#4a6a8a" stroke-width="0.8" opacity="0.2"/>
-  <!-- Ocean floor -->
-  <path d="M0 270 Q50 260 100 268 Q150 275 200 265 Q250 258 300 270 Q350 278 400 265 L400 300 L0 300 Z" fill="#0a0a1a" opacity="0.6"/>
-  <!-- Seaweed -->
-  <path d="M80 300 Q75 270 85 250 Q90 240 82 220" fill="none" stroke="#1a3a2a" stroke-width="2" opacity="0.4"/>
-  <path d="M320 300 Q325 275 315 255" fill="none" stroke="#1a3a2a" stroke-width="2" opacity="0.3"/>
+  <g fill="none" stroke="#2a4060" stroke-width="0.8" opacity="0.5">
+    <circle cx="340" cy="140" r="4"/><circle cx="345" cy="120" r="3"/><circle cx="338" cy="100" r="2"/>
+    <circle cx="460" cy="145" r="3.5"/><circle cx="455" cy="125" r="2.5"/><circle cx="462" cy="108" r="2"/>
+    <circle cx="200" cy="350" r="3"/><circle cx="620" cy="340" r="3"/>
+  </g>
+
+  <!-- Sediment -->
+  <g fill="#2a1830" opacity="0.4">
+    <circle cx="100" cy="430" r="40" filter="url(#soft)"/>
+    <circle cx="300" cy="435" r="50" filter="url(#soft)"/>
+    <circle cx="550" cy="432" r="45" filter="url(#soft)"/>
+    <circle cx="740" cy="428" r="38" filter="url(#soft)"/>
+  </g>
+
+  <radialGradient id="vig" cx="50%" cy="50%" r="60%">
+    <stop offset="0%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity="0.65"/>
+  </radialGradient>
+  <rect width="800" height="450" fill="url(#vig)"/>
+  <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#0a0410" stop-opacity="0"/><stop offset="100%" stop-color="#0a0410" stop-opacity="0.8"/>
+  </linearGradient>
+  <rect width="800" height="450" fill="url(#fade)"/>
 </svg>
