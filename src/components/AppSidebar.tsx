@@ -60,6 +60,8 @@ export function AppSidebar() {
       {/* Divider */}
       <div className="w-full h-px" style={{ background: '#2D2538' }} />
 
+      {/* Scrollable middle section */}
+      <div className="flex-1 overflow-y-auto">
       {/* Nav */}
       <nav className="flex flex-col gap-1 px-3 py-4">
         {NAV_ITEMS.map((item) => {
@@ -131,8 +133,10 @@ export function AppSidebar() {
         </>
       )}
 
-      {/* Account + Logout */}
-      <div className="mt-auto px-3 pb-5">
+      </div>{/* end scrollable middle */}
+
+      {/* Account + Logout — pinned to bottom */}
+      <div className="shrink-0 px-3 pb-5">
         <div className="w-full h-px mb-3" style={{ background: '#2D2538' }} />
         <button
           onClick={() => navigate('/account')}
