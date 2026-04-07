@@ -391,7 +391,7 @@ export const useStore = create<StoreState>()(
       updateGlobalAffinity: (characterId, newScore) => set((s) => ({
         globalAffinities: {
           ...s.globalAffinities,
-          [characterId]: Math.max(s.globalAffinities[characterId] ?? 0, newScore),
+          [characterId]: Math.max(0, Math.min(100, newScore)),
         },
       })),
 

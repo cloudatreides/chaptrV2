@@ -4,6 +4,33 @@ import { getSoraSystemPrompt } from '../data/characters'
 import { getAffinityTier } from './affinity'
 import type { ChatMessage, PlaythroughRecord } from '../store/useStore'
 
+// ─── Affinity Delta Parser ───
+
+export interface AffinityParseResult {
+  content: string   // reply with tag stripped
+  delta: number     // parsed affinity change (-5 to +5), defaults to +2 if no tag
+  reason: string    // human-readable reason
+}
+
+export function parseAffinityDelta(reply: string): AffinityParseResult {
+  const match = reply.match(/\[AFFINITY:([+-]\d+)\]\s*$/)
+  if (!match) {
+    return { content: reply.trim(), delta: 2, reason: 'Friendly conversation' }
+  }
+  const delta = parseInt(match[1], 10)
+  const clamped = Math.max(-5, Math.min(5, delta))
+  const content = reply.replace(/\n?\[AFFINITY:[+-]\d+\]\s*$/, '').trim()
+
+  let reason: string
+  if (clamped >= 3) reason = 'Really connected with you'
+  else if (clamped >= 1) reason = 'Enjoyed the conversation'
+  else if (clamped === 0) reason = 'Neutral exchange'
+  else if (clamped >= -2) reason = 'Felt a bit put off'
+  else reason = 'Didn\'t appreciate that'
+
+  return { content, delta: clamped, reason }
+}
+
 // ─── Types ───
 
 export interface StreamBeatParams {
@@ -288,6 +315,16 @@ export async function* streamChatReply(params: StreamChatParams): AsyncGenerator
 - No stage directions, no prose narration, no "I say softly" — just the words you'd actually say.
 - NEVER use em dashes (—). Use commas, periods, or just start a new sentence. Em dashes are an AI writing tell.
 - Give SUBSTANTIVE replies. 2-4 sentences minimum. Ask follow-up questions, share reactions, reveal something about yourself, or build on what the protagonist said. One-word or one-line replies kill the conversation. You're a compelling character — act like one.`
+
+  system += `\n\nAFFINITY — MANDATORY:
+After your dialogue, on a NEW line, add exactly one tag: [AFFINITY:+N] or [AFFINITY:-N] where N is 1-5.
+This reflects how this exchange made you feel about the protagonist:
+- +1 to +2: Normal pleasant chat, small talk
+- +3 to +5: They said something that really resonated, showed genuine care, or impressed you
+- -1 to -2: They were dismissive, rude, shallow, or said something mildly off-putting
+- -3 to -5: They were deeply disrespectful, cruel, or crossed a clear boundary
+Be honest as your character. Don't always give positive scores. If they're boring or pushy, reflect that.
+Example: "yeah I'd love to grab coffee sometime, that sounds really nice.\n[AFFINITY:+2]"`
 
   if (exchangeNumber >= maxExchanges) {
     system += `\n\nIMPORTANT: This is your FINAL reply in this conversation. Naturally wrap up — you're being called away, need to go, or the moment is ending. Don't be abrupt, but make it clear this exchange is closing.`

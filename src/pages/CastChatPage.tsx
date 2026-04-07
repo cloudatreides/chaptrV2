@@ -4,8 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, Send, Brain, Info } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { CAST_ROSTER, getCastCharacter } from '../data/castRoster'
-import { getAffinityTier, getAffinityGrowth } from '../lib/affinity'
-import { streamChatReply, extractMemories } from '../lib/claudeStream'
+import { getAffinityTier } from '../lib/affinity'
+import { streamChatReply, extractMemories, parseAffinityDelta } from '../lib/claudeStream'
 import type { CastChatMessage } from '../store/useStore'
 
 export function CastChatPage() {
@@ -27,6 +27,7 @@ export function CastChatPage() {
   const [input, setInput] = useState('')
   const [streamingContent, setStreamingContent] = useState('')
   const [memoryToast, setMemoryToast] = useState<string | null>(null)
+  const [affinityChange, setAffinityChange] = useState<{ delta: number; reason: string } | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
   const abortRef = useRef<AbortController | null>(null)
 
@@ -103,12 +104,16 @@ export function CastChatPage() {
       }
 
       if (fullReply.trim()) {
-        const charMsg: CastChatMessage = { role: 'character', content: fullReply.trim(), timestamp: Date.now() }
+        // Parse affinity delta from Claude's response
+        const { content: cleanReply, delta, reason } = parseAffinityDelta(fullReply)
+        const charMsg: CastChatMessage = { role: 'character', content: cleanReply, timestamp: Date.now() }
         addCastChatMessage(characterId, charMsg)
 
-        // Affinity growth
-        const growth = getAffinityGrowth(exchangeCount + 1)
-        updateGlobalAffinity(characterId, Math.min(100, score + growth))
+        // Affinity change (can go up or down)
+        const newScore = Math.max(0, Math.min(100, score + delta))
+        updateGlobalAffinity(characterId, newScore)
+        setAffinityChange({ delta, reason })
+        setTimeout(() => setAffinityChange(null), 4000)
 
         // Memory extraction every 2nd exchange
         if ((exchangeCount + 1) % 2 === 0) {
@@ -362,7 +367,27 @@ export function CastChatPage() {
               <div className="w-full h-2 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }}>
                 <div className="h-full rounded-full transition-all duration-500" style={{ width: `${score}%`, background: `linear-gradient(90deg, ${tier.color}, #8b5cf6)` }} />
               </div>
-              <p className="text-white/20 text-[10px] mt-1.5 leading-relaxed">Chat more to build affinity. Higher levels unlock deeper, more personal conversations.</p>
+              <AnimatePresence>
+                {affinityChange && (
+                  <motion.div
+                    className="flex items-center gap-1.5 mt-2 px-2.5 py-1.5 rounded-lg text-[11px] font-medium"
+                    style={{
+                      background: affinityChange.delta >= 0 ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)',
+                      border: `1px solid ${affinityChange.delta >= 0 ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)'}`,
+                      color: affinityChange.delta >= 0 ? '#10b981' : '#ef4444',
+                    }}
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                  >
+                    <span className="font-bold">{affinityChange.delta > 0 ? '+' : ''}{affinityChange.delta}%</span>
+                    <span className="opacity-70">{affinityChange.reason}</span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              {!affinityChange && (
+                <p className="text-white/20 text-[10px] mt-1.5 leading-relaxed">Chat more to build affinity. Higher levels unlock deeper, more personal conversations.</p>
+              )}
             </div>
 
             {/* Universe */}

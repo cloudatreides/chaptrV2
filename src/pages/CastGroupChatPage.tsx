@@ -4,8 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, Send, Brain, Users } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { CAST_ROSTER, getCastCharacter, UNIVERSE_COLORS } from '../data/castRoster'
-import { getAffinityTier, getAffinityGrowth } from '../lib/affinity'
-import { streamChatReply, extractMemories, generateGroupReaction } from '../lib/claudeStream'
+import { getAffinityTier } from '../lib/affinity'
+import { streamChatReply, extractMemories, generateGroupReaction, parseAffinityDelta } from '../lib/claudeStream'
 import type { CastChatMessage } from '../store/useStore'
 import type { CastMember } from '../data/castRoster'
 
@@ -39,6 +39,7 @@ export function CastGroupChatPage() {
   const [streamingContent, setStreamingContent] = useState('')
   const [primaryCharIndex, setPrimaryCharIndex] = useState(0)
   const [memoryToast, setMemoryToast] = useState<string | null>(null)
+  const [affinityChange, setAffinityChange] = useState<{ charId: string; delta: number; reason: string } | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
   const abortRef = useRef<AbortController | null>(null)
 
@@ -145,17 +146,21 @@ export function CastGroupChatPage() {
       }
 
       if (fullReply.trim()) {
+        // Parse affinity delta from Claude's response
+        const { content: cleanReply, delta, reason } = parseAffinityDelta(fullReply)
         const charMsg: CastChatMessage = {
           role: 'character',
-          content: fullReply.trim(),
+          content: cleanReply,
           timestamp: Date.now(),
           characterId: primaryCharId,
         }
         addGroupCastMessage(groupKey, charMsg)
 
-        // Affinity growth
-        const growth = getAffinityGrowth(newExchange)
-        updateGlobalAffinity(primaryCharId, Math.min(100, score + growth))
+        // Affinity change (can go up or down)
+        const newScore = Math.max(0, Math.min(100, score + delta))
+        updateGlobalAffinity(primaryCharId, newScore)
+        setAffinityChange({ charId: primaryCharId, delta, reason })
+        setTimeout(() => setAffinityChange(null), 4000)
 
         setStreamingContent('')
         setStreamingCharId(null)
@@ -179,11 +184,13 @@ export function CastGroupChatPage() {
           }).catch(() => {})
         }
 
-        // AI-to-AI reaction (30% chance)
-        if (castMembers.length > 1 && Math.random() < 0.3) {
+        // AI-to-AI reaction (70% chance, with delay)
+        if (castMembers.length > 1 && Math.random() < 0.7) {
+          await new Promise((r) => setTimeout(r, 1000)) // 1s delay for natural feel
           const reactorIdx = (primaryIdx + 1) % castMembers.length
           const reactorId = castMembers[reactorIdx].id
           if (reactorId !== primaryCharId) {
+            setStreamingCharId(reactorId)
             const updatedMsgs = [...allMsgs, charMsg]
             const reactionThreadCtx = buildThreadContext(updatedMsgs)
             const reaction = await generateGroupReaction({
@@ -193,6 +200,7 @@ export function CastGroupChatPage() {
               universeId,
               loveInterest: null,
             })
+            setStreamingCharId(null)
             if (reaction) {
               const reactionMsg: CastChatMessage = {
                 role: 'character',
@@ -484,24 +492,43 @@ export function CastGroupChatPage() {
                 {castMembers.map((cm) => {
                   const s = globalAffinities[cm.id] ?? 0
                   const t = getAffinityTier(s)
+                  const hasChange = affinityChange?.charId === cm.id
                   return (
-                    <button
-                      key={cm.id}
-                      onClick={() => navigate(`/cast/${cm.id}`)}
-                      className="cursor-pointer flex items-center gap-3 p-2.5 rounded-xl transition-all hover:brightness-110"
-                      style={{ background: '#111016' }}
-                    >
-                      <CharAvatar charId={cm.id} size="w-9 h-9" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white text-sm font-medium">{cm.name}</p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <div className="flex-1 h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }}>
-                            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${s}%`, background: `linear-gradient(90deg, ${t.color}, #8b5cf6)` }} />
+                    <div key={cm.id}>
+                      <button
+                        onClick={() => navigate(`/cast/${cm.id}`)}
+                        className="cursor-pointer w-full flex items-center gap-3 p-2.5 rounded-xl transition-all hover:brightness-110"
+                        style={{ background: '#111016' }}
+                      >
+                        <CharAvatar charId={cm.id} size="w-9 h-9" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white text-sm font-medium">{cm.name}</p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <div className="flex-1 h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                              <div className="h-full rounded-full transition-all duration-500" style={{ width: `${s}%`, background: `linear-gradient(90deg, ${t.color}, #8b5cf6)` }} />
+                            </div>
+                            <span className="text-[9px] font-semibold shrink-0" style={{ color: t.color }}>{t.label}</span>
                           </div>
-                          <span className="text-[9px] font-semibold shrink-0" style={{ color: t.color }}>{t.label}</span>
                         </div>
-                      </div>
-                    </button>
+                      </button>
+                      <AnimatePresence>
+                        {hasChange && (
+                          <motion.div
+                            className="flex items-center gap-1.5 mt-1 mx-2.5 px-2 py-1 rounded-md text-[10px] font-medium"
+                            style={{
+                              background: affinityChange.delta >= 0 ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)',
+                              color: affinityChange.delta >= 0 ? '#10b981' : '#ef4444',
+                            }}
+                            initial={{ opacity: 0, y: -4 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -4 }}
+                          >
+                            <span className="font-bold">{affinityChange.delta > 0 ? '+' : ''}{affinityChange.delta}%</span>
+                            <span className="opacity-70">{affinityChange.reason}</span>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
                   )
                 })}
               </div>
