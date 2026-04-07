@@ -3,7 +3,7 @@
 AI-powered interactive story app where you upload a selfie and become the main character.
 
 ## Status
-V2 — Live at chaptr-v2.vercel.app. Multi-character system, 3 universes (Romance, Horror, Mystery), ambient audio, social sharing.
+V2 — Live at chaptr-v2.vercel.app. 15 universes across 6 genres, 29 cast characters with AI portraits, cast chat system, ambient audio, social sharing.
 
 ## Stack
 React + Vite + TypeScript + Tailwind v3 + Zustand (persist v2, multi-character) + Framer Motion + Vaul + Anthropic Haiku (via Vercel Edge proxy) + Together AI FLUX (scenes/portraits/selfie stylization) + Supabase (analytics, playthroughs, share URLs)
@@ -23,7 +23,7 @@ https://github.com/cloudatreides/chaptrV2
 Post-story mode at `/free-chat`. All universe characters available as tabs. Full playthrough context injected (choices, summaries, trust, reveal signature). No exchange limit.
 
 ### F2 — Affinity System
-Per-character affinity (0–100) stored as `characterAffinities` in progress. 5 tiers: Stranger → Acquaintance → Friend → Close → Confidant. `AffinityBadge` component shows tier label + fill bar. Tier injects `promptModifier` into all Claude calls. Grows every exchange via `getAffinityGrowth()`.
+Per-character affinity (0–100) stored as `characterAffinities` in progress. 5 tiers: Stranger → Acquaintance → Friend → Close → Confidant. `AffinityBadge` component shows tier label + fill bar (used in sidebar + free chat, removed from story chat headers to avoid duplication). Tier injects `promptModifier` into all Claude calls. AI responses include `[AFFINITY:+N]` tags (stripped before display) that adjust score dynamically based on conversation quality (-5 to +5 per exchange).
 
 ### F3 — Character-Initiated Messages (Pings)
 Characters can message the protagonist between story steps. Definitions in `src/data/pings.ts`. `PingNotification` component renders notification + mini-chat drawer (Vaul sheet). Triggered on step transitions via `prevStepIndexRef`. Affinity-gated — characters only reach out above a threshold.
@@ -38,26 +38,22 @@ Characters remember personal facts the protagonist reveals. `extractMemories()` 
 Unified message thread where multiple characters talk simultaneously. `GroupChatScene.tsx` component — round-robin character rotation per exchange, 30% chance of a brief AI-to-AI reaction from a second character (`generateGroupReaction()`). Activated by setting `groupChat: true` on any scene step in storyData. Memory extraction wired in.
 
 ## Key Files
-- `src/store/useStore.ts` — Multi-character Zustand store, progress keyed by `characterId:universeId`
+- `src/store/useStore.ts` — Multi-character Zustand store v6, progress keyed by `characterId:universeId`
 - `src/hooks/useActiveStory.ts` — Derived state hook (THE way to read character+progress)
 - `src/lib/claudeStream.ts` — Streaming prose + chat + memory extraction + group reactions
+- `src/lib/togetherAi.ts` — Scene generation with prompt-hash caching, includesProtagonist routing, aspect_ratio
 - `src/lib/affinity.ts` — Tier definitions + growth formula
 - `src/lib/ambientAudio.ts` — Web Audio API ambient pads (mood-based: story/chat/choice/reveal)
-- `src/data/storyData.ts` — Story steps, character bibles, universe registry (`groupChat` flag on scene steps)
-- `src/data/pings.ts` — Character-initiated message definitions
-- `src/data/quests.ts` — Side story / quest definitions
+- `src/data/storyData.ts` — Story steps, universe registry, `includesProtagonist` flag
+- `src/data/stories/*.ts` — 14 universe-specific story files
+- `src/data/castRoster.ts` — 11-character roster with bios, unlock hints
 - `src/pages/StoryReaderPage.tsx` — Main reader (beats, choices, chat, scene images, pings, quest toasts)
-- `src/pages/FreeChatPage.tsx` — Post-story free chat (all characters, no limit)
-- `src/pages/QuestPage.tsx` — Mini story reader for side quests
-- `src/pages/CharacterSelectPage.tsx` — Character picker (max 3)
-- `src/pages/CreateCharacterPage.tsx` — Character creation (name, gender, personality, selfie)
-- `src/components/ChatScene.tsx` — Single-character chat
-- `src/components/SceneChat.tsx` — Multi-character tabbed scene chat
-- `src/components/GroupChatScene.tsx` — Unified group chat thread
-- `src/components/PingNotification.tsx` — Character-initiated ping + mini-chat drawer
-- `src/components/QuestUnlockToast.tsx` — Quest unlock notification
-- `src/components/AffinityBadge.tsx` — Tier label + fill bar
-- `src/components/ChoicePoint.tsx` — Choice UI component
+- `src/pages/AccountPage.tsx` — My Account with editable name, stats
+- `src/pages/UniverseDetailPage.tsx` — Universe detail view
+- `src/pages/HomePage.tsx` — Home with FTUE, universe cards, cast section
+- `src/pages/CastPage.tsx` — Full cast browser with group chats + favorites
+- `src/pages/LandingPage.tsx` — Public landing page
+- `src/components/AppSidebar.tsx` — Desktop nav with favorites, stacked avatars, account link
 - `api/claude.ts` + `api/together.ts` — Vercel Edge API proxies
 - `api/og.tsx` + `api/share.ts` — OG image + share HTML
 
@@ -78,9 +74,9 @@ Unified message thread where multiple characters talk simultaneously. `GroupChat
 
 ## ChatScene
 - **Intro image**: Generated scene via Together AI (FLUX.1 Kontext Pro if selfieUrl available, FLUX.1 Schnell otherwise). Uses character's `introImagePrompt` or `chatImagePrompt`.
+- **Schnell uses `aspect_ratio`** (not `width`/`height`) per Together AI API change. Kontext Pro still uses `width`/`height`.
 
 ## Open Issues / Next Priorities
-1. Immersive choice UX — scene backdrop + consequence hints
-2. Test full playthrough on Horror + Mystery universes
-3. Cost modeling before scaling
-4. Hero BG blurry on retina — needs 2x source
+1. Test full playthrough on newer universes (scene images, branching, cast unlocks)
+2. Cost modeling before scaling
+3. Mobile polish on universe detail pages

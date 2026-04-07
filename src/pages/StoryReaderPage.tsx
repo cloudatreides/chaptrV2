@@ -508,7 +508,7 @@ export function StoryReaderPage() {
       <div className="hidden md:flex min-h-screen">
         <div className="page-container flex w-full mx-auto">
           <aside className="w-[260px] shrink-0 flex flex-col border-r border-border sticky top-0 h-screen overflow-y-auto" style={{ background: '#0f0c18' }}>
-            <div className="flex items-center gap-2 px-5 pt-6 pb-4 border-b border-border cursor-pointer" onClick={() => navigate('/')}>
+            <div className="flex items-center gap-2 px-5 pt-6 pb-4 border-b border-border cursor-pointer" onClick={() => navigate('/home')}>
               <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%)' }}>
                 <span className="text-white font-bold text-sm">C</span>
               </div>
