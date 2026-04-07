@@ -47,6 +47,14 @@ export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, 
   const abortRef = useRef<AbortController | null>(null)
 
   const canContinue = exchangeCount >= minExchanges && !isTyping
+  const [showContinue, setShowContinue] = useState(false)
+
+  // Delay showing the continue button so it doesn't interrupt active chatting
+  useEffect(() => {
+    if (!canContinue) { setShowContinue(false); return }
+    const timer = setTimeout(() => setShowContinue(true), 10000)
+    return () => clearTimeout(timer)
+  }, [canContinue])
 
   // ─── Generate character portraits ───
 
@@ -353,15 +361,14 @@ export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, 
       {/* Input area */}
       <div className="px-4 pb-6 pt-3 border-t border-border safe-bottom space-y-2">
         <AnimatePresence>
-          {canContinue && (
+          {showContinue && (
             <motion.button
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all"
-              style={{ background: 'rgba(200,75,158,0.12)', color: '#c84b9e' }}
+              className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-medium border border-white/10 text-white/40 hover:text-white/60 hover:border-white/20 transition-colors"
               onClick={onComplete}
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.25 }}
+              transition={{ duration: 0.4 }}
             >
               Continue the story <ArrowRight size={14} />
             </motion.button>

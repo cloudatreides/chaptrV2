@@ -214,7 +214,15 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
   const hasGeneratedOpener = useRef(false)
 
   const canContinue = exchangeCount >= minExchanges && !isTyping
+  const [showContinue, setShowContinue] = useState(false)
   const portrait = characterPortraits[characterId] ?? null
+
+  // Delay showing the continue button so it doesn't interrupt active chatting
+  useEffect(() => {
+    if (!canContinue) { setShowContinue(false); return }
+    const timer = setTimeout(() => setShowContinue(true), 10000)
+    return () => clearTimeout(timer)
+  }, [canContinue])
 
   // Use static portrait if available (always wins), otherwise generate
   useEffect(() => {
@@ -245,8 +253,8 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
     const generateOpener = async () => {
       setIsLoadingOpener(true)
 
-      // Generate intro scene image — character only, no protagonist selfie
-      const imagePrompt = chatImagePrompt ?? character?.introImagePrompt
+      // Generate intro scene image — prefer character's own intro over shared scene prompt
+      const imagePrompt = character?.introImagePrompt ?? chatImagePrompt
       if (imagePrompt) {
         setIsLoadingImage(true)
         generateSceneImage({ prompt: imagePrompt, width: 768, height: 512 }).then((url) => {
@@ -511,18 +519,14 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
       <div className="px-4 pb-6 pt-3 border-t border-border safe-bottom space-y-2">
         {/* Continue story button — appears after minExchanges */}
         <AnimatePresence>
-          {canContinue && (
+          {showContinue && (
             <motion.button
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all"
-              style={{
-                background: 'rgba(200,75,158,0.12)',
-                color: '#c84b9e',
-              }}
+              className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-medium border border-white/10 text-white/40 hover:text-white/60 hover:border-white/20 transition-colors"
               onClick={handleContinue}
               initial={{ opacity: 0, height: 0, marginBottom: 0 }}
               animate={{ opacity: 1, height: 'auto', marginBottom: 0 }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.25 }}
+              transition={{ duration: 0.4 }}
             >
               Continue the story <ArrowRight size={14} />
             </motion.button>

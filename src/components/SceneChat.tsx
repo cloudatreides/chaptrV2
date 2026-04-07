@@ -296,8 +296,8 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
       [activeCharId]: { ...prev[activeCharId], isLoadingOpener: true },
     }))
 
-    // Generate intro image in parallel (chatImagePrompt overrides character default)
-    const imagePrompt = chatImagePrompt ?? charData?.introImagePrompt
+    // Generate intro image in parallel (prefer character's own intro over shared scene prompt)
+    const imagePrompt = charData?.introImagePrompt ?? chatImagePrompt
     if (imagePrompt) {
       setChatStates(prev => ({
         ...prev,
@@ -487,6 +487,15 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
     if (talkedTo < minCharactersTalkedTo) return false
     return true
   })()
+
+  const [showContinue, setShowContinue] = useState(false)
+
+  // Delay showing the continue button so it doesn't interrupt active chatting
+  useEffect(() => {
+    if (!canContinueScene) { setShowContinue(false); return }
+    const timer = setTimeout(() => setShowContinue(true), 10000)
+    return () => clearTimeout(timer)
+  }, [canContinueScene])
 
   const handleContinue = async () => {
     // Summarize all conversations that haven't been summarized yet
@@ -688,18 +697,14 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
       <div className="px-4 pb-6 pt-3 border-t border-border safe-bottom space-y-2">
         {/* Continue story button */}
         <AnimatePresence>
-          {canContinueScene && (
+          {showContinue && (
             <motion.button
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all"
-              style={{
-                background: 'linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%)',
-                color: '#fff',
-              }}
+              className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-medium border border-white/10 text-white/40 hover:text-white/60 hover:border-white/20 transition-colors"
               onClick={handleContinue}
               initial={{ opacity: 0, height: 0, marginBottom: 0 }}
               animate={{ opacity: 1, height: 'auto', marginBottom: 0 }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.25 }}
+              transition={{ duration: 0.4 }}
             >
               Continue the story <ArrowRight size={14} />
             </motion.button>
