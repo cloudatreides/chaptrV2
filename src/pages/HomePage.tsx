@@ -11,6 +11,7 @@ import { getEligibleAmbientPings } from '../data/ambientPings'
 import { getAffinityTier } from '../lib/affinity'
 import { getCharacter, CHARACTERS } from '../data/characters'
 import { CAST_ROSTER, UNIVERSE_COLORS, getCastCharacter } from '../data/castRoster'
+import { AppSidebar } from '../components/AppSidebar'
 import { AmbientPingModal } from '../components/AmbientPingModal'
 import type { AmbientPingDef } from '../data/ambientPings'
 
@@ -466,8 +467,9 @@ export function HomePage() {
       </div>
 
       {/* ═══ DESKTOP ═══ */}
-      <div className="hidden md:block min-h-screen">
-        <div className="page-container px-8 lg:px-16 py-12">
+      <div className="hidden md:flex min-h-screen">
+        <AppSidebar />
+        <div className="flex-1 min-h-screen overflow-y-auto px-8 lg:px-12 py-12">
           {/* Header */}
           <div className="flex items-center justify-between mb-10">
             <div className="flex items-center gap-4">
