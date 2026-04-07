@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Lock, MessageCircle, X, Users, Check } from 'lucide-react'
+import { ArrowLeft, Lock, MessageCircle, X, Users, Check, Star } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { AppSidebar } from '../components/AppSidebar'
 import { CAST_ROSTER, UNIVERSE_COLORS, getCastCharacter } from '../data/castRoster'
@@ -13,6 +13,20 @@ export function CastPage() {
   const unlockedCastIds = useStore((s) => s.unlockedCastIds)
   const globalAffinities = useStore((s) => s.globalAffinities)
   const castChatThreads = useStore((s) => s.castChatThreads)
+  const groupCastThreads = useStore((s) => s.groupCastThreads)
+  const favoriteCastIds = useStore((s) => s.favoriteCastIds)
+  const toggleFavoriteCast = useStore((s) => s.toggleFavoriteCast)
+
+  // Existing group chats (ones with messages)
+  const existingGroupChats = Object.entries(groupCastThreads)
+    .filter(([, msgs]) => msgs.length > 0)
+    .map(([key, msgs]) => {
+      const charIds = key.split('+')
+      const members = charIds.map((id) => CAST_ROSTER.find((c) => c.id === id)).filter(Boolean) as CastMember[]
+      const lastMsg = msgs[msgs.length - 1]
+      const speakerName = lastMsg?.characterId ? members.find((m) => m.id === lastMsg.characterId)?.name : 'You'
+      return { key, members, lastMsg, speakerName, universe: members[0]?.universeLabel ?? '' }
+    })
 
   const unlocked = CAST_ROSTER.filter((c) => unlockedCastIds.includes(c.id))
   const locked = CAST_ROSTER.filter((c) => !unlockedCastIds.includes(c.id))
@@ -240,6 +254,40 @@ export function CastPage() {
               </div>
             </div>
           )}
+
+          {/* Existing Group Chats */}
+          {!selectMode && existingGroupChats.length > 0 && (
+            <div>
+              <p className="text-[#8b5cf6]/50 text-[10px] font-semibold tracking-[2px] uppercase mb-3">YOUR GROUP CHATS</p>
+              <div className="flex flex-col gap-2">
+                {existingGroupChats.map((gc) => (
+                  <motion.button
+                    key={gc.key}
+                    onClick={() => navigate(`/cast/group/${gc.key}`)}
+                    className="cursor-pointer flex items-center gap-3 rounded-2xl p-3 text-left"
+                    style={{ background: '#111016', border: '1px solid rgba(139,92,246,0.12)' }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <div className="flex -space-x-3 shrink-0">
+                      {gc.members.map((m) => (
+                        <CharAvatar key={m.id} cast={m} size="w-9 h-9" />
+                      ))}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-xs font-semibold truncate">{gc.members.map((m) => m.name).join(', ')}</p>
+                      <p className="text-white/25 text-[10px] truncate">{gc.speakerName}: {gc.lastMsg?.content.slice(0, 40)}</p>
+                    </div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); toggleFavoriteCast(gc.key) }}
+                      className="cursor-pointer shrink-0 p-1"
+                    >
+                      <Star size={14} className={favoriteCastIds.includes(gc.key) ? 'text-yellow-400 fill-yellow-400' : 'text-white/15'} />
+                    </button>
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Mobile floating group chat button */}
@@ -402,7 +450,17 @@ export function CastPage() {
                       </p>
                     )}
                   </div>
-                  {!selectMode && <MessageCircle size={20} className="text-accent/40 shrink-0" />}
+                  {!selectMode && (
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggleFavoriteCast(cast.id) }}
+                        className="cursor-pointer p-1 rounded-lg hover:bg-white/5 transition-colors"
+                      >
+                        <Star size={14} className={favoriteCastIds.includes(cast.id) ? 'text-yellow-400 fill-yellow-400' : 'text-white/10 hover:text-white/25'} />
+                      </button>
+                      <MessageCircle size={18} className="text-accent/40" />
+                    </div>
+                  )}
                 </motion.button>
               )
             })}
@@ -469,6 +527,43 @@ export function CastPage() {
                 })}
               </div>
             </>
+          )}
+
+          {/* Existing Group Chats */}
+          {!selectMode && existingGroupChats.length > 0 && (
+            <div className="mt-10">
+              <p className="text-[#8b5cf6]/50 text-[11px] font-semibold tracking-[1.5px] uppercase mb-4">YOUR GROUP CHATS</p>
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                {existingGroupChats.map((gc, i) => (
+                  <motion.button
+                    key={gc.key}
+                    onClick={() => navigate(`/cast/group/${gc.key}`)}
+                    className="cursor-pointer flex items-center gap-4 rounded-2xl p-4 text-left transition-all hover:brightness-110"
+                    style={{ background: '#111016', border: '1px solid rgba(139,92,246,0.15)' }}
+                    initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
+                  >
+                    <div className="flex -space-x-3 shrink-0">
+                      {gc.members.map((m) => (
+                        <CharAvatar key={m.id} cast={m} size="w-12 h-12" />
+                      ))}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-semibold text-sm">{gc.members.map((m) => m.name).join(', ')}</p>
+                      <p className="text-white/30 text-xs mb-1">{gc.universe}</p>
+                      <p className="text-white/20 text-xs italic truncate">
+                        {gc.speakerName}: "{gc.lastMsg?.content.slice(0, 45)}..."
+                      </p>
+                    </div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); toggleFavoriteCast(gc.key) }}
+                      className="cursor-pointer shrink-0 p-1.5 rounded-lg hover:bg-white/5 transition-colors"
+                    >
+                      <Star size={16} className={favoriteCastIds.includes(gc.key) ? 'text-yellow-400 fill-yellow-400' : 'text-white/15 hover:text-white/30'} />
+                    </button>
+                  </motion.button>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       </div>

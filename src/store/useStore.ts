@@ -154,6 +154,10 @@ interface StoreState {
   groupCastThreads: Record<string, CastChatMessage[]>
   addGroupCastMessage: (groupKey: string, msg: CastChatMessage) => void
 
+  // ── Favorites (quick access in sidebar) ──
+  favoriteCastIds: string[] // can be cast IDs ("sora") or group keys ("sora+jiwon")
+  toggleFavoriteCast: (id: string) => void
+
   // ── Gems ──
   gemBalance: number
   spendGems: (amount: number) => boolean
@@ -444,6 +448,14 @@ export const useStore = create<StoreState>()(
         },
       })),
 
+      // ── Favorites ──
+      favoriteCastIds: [],
+      toggleFavoriteCast: (id) => set((s) => ({
+        favoriteCastIds: s.favoriteCastIds.includes(id)
+          ? s.favoriteCastIds.filter((f) => f !== id)
+          : [...s.favoriteCastIds, id],
+      })),
+
       // ── Gems ──
       gemBalance: 50,
       spendGems: (amount) => {
@@ -481,7 +493,7 @@ export const useStore = create<StoreState>()(
     }),
     {
       name: 'chaptr-v2-story',
-      version: 5,
+      version: 6,
       migrate: (persisted: any, version: number) => {
         if (version < 2 && persisted) {
           // Migrate from flat store to multi-character
@@ -541,6 +553,9 @@ export const useStore = create<StoreState>()(
         if (version < 5 && persisted) {
           persisted.groupCastThreads = persisted.groupCastThreads ?? {}
         }
+        if (version < 6 && persisted) {
+          persisted.favoriteCastIds = persisted.favoriteCastIds ?? []
+        }
         return persisted
       },
       partialize: (s) => ({
@@ -556,6 +571,7 @@ export const useStore = create<StoreState>()(
         castChatThreads: s.castChatThreads,
         unlockedCastIds: s.unlockedCastIds,
         groupCastThreads: s.groupCastThreads,
+        favoriteCastIds: s.favoriteCastIds,
       }),
     }
   )
