@@ -245,11 +245,11 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
     const generateOpener = async () => {
       setIsLoadingOpener(true)
 
-      // Generate intro scene image — use selfie as reference if available so the user appears in the scene
+      // Generate intro scene image — character only, no protagonist selfie
       const imagePrompt = chatImagePrompt ?? character?.introImagePrompt
       if (imagePrompt) {
         setIsLoadingImage(true)
-        generateSceneImage({ prompt: imagePrompt, width: 768, height: 512, referenceImageUrl: selfieUrl, protagonistGender: activeCharacter?.gender }).then((url) => {
+        generateSceneImage({ prompt: imagePrompt, width: 768, height: 512 }).then((url) => {
           if (url) setIntroImage(url)
           setIsLoadingImage(false)
         })

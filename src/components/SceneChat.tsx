@@ -303,7 +303,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
         ...prev,
         [activeCharId]: { ...prev[activeCharId], isLoadingImage: true },
       }))
-      generateSceneImage({ prompt: imagePrompt, width: 768, height: 512, referenceImageUrl: selfieUrl, protagonistGender: activeCharacter?.gender }).then(url => {
+      generateSceneImage({ prompt: imagePrompt, width: 768, height: 512 }).then(url => {
         setChatStates(prev => ({
           ...prev,
           [activeCharId]: { ...prev[activeCharId], introImage: url ?? prev[activeCharId]?.introImage ?? null, isLoadingImage: false },
