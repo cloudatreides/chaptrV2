@@ -1,9 +1,9 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, Plus, Pencil, Sparkles, MessageCircle, Heart, LogOut, Lock } from 'lucide-react'
+import { ArrowRight, Plus, Pencil, Sparkles, MessageCircle, Heart, LogOut, Lock, Users } from 'lucide-react'
 import { useStore } from '../store/useStore'
-import { UNIVERSES } from '../data/storyData'
+import { UNIVERSES, GENRE_FILTERS } from '../data/storyData'
 import { useAuth } from '../contexts/AuthContext'
 import { STORY_STEPS } from '../data/storyData'
 import { getStoryData } from '../data/stories'
@@ -14,6 +14,20 @@ import { CAST_ROSTER, UNIVERSE_COLORS, getCastCharacter } from '../data/castRost
 import { AppSidebar } from '../components/AppSidebar'
 import { AmbientPingModal } from '../components/AmbientPingModal'
 import type { AmbientPingDef } from '../data/ambientPings'
+
+// Mock player counts for universe cards
+const UNIVERSE_PLAYERS: Record<string, number> = {
+  'seoul-transfer': 12400,
+  'sakura-academy': 8700,
+  'hollow-manor': 5200,
+  'the-last-signal': 3800,
+  'edge-of-atlas': 2100,
+}
+
+function formatPlayerCount(n: number): string {
+  if (n >= 1000) return `${(n / 1000).toFixed(1).replace(/\.0$/, '')}k`
+  return String(n)
+}
 
 function getStepCount(universeId: string): number {
   if (universeId === 'seoul-transfer') return STORY_STEPS.length
@@ -42,6 +56,7 @@ export function HomePage() {
   const dismissAmbientPing = useStore((s) => s.dismissAmbientPing)
 
   const [activePingModal, setActivePingModal] = useState<AmbientPingDef | null>(null)
+  const [genreFilter, setGenreFilter] = useState('ALL')
 
   const userName = session?.user?.user_metadata?.full_name?.split(' ')[0] ?? characters[0]?.name ?? 'You'
   const hasCharacters = characters.length > 0
@@ -121,7 +136,7 @@ export function HomePage() {
   const handleEditCharacters = () => navigate('/characters')
 
   // Get all universe progress for current characters
-  const universeCards = UNIVERSES.filter((u) => !u.locked).slice(0, 4)
+  const universeCards = UNIVERSES.filter((u) => !u.locked && (genreFilter === 'ALL' || u.genre === genreFilter))
 
   // Get first scene image safely
   const firstSceneImage = activePlaythrough?.progress?.sceneImages
@@ -387,23 +402,40 @@ export function HomePage() {
         {/* Your Universes */}
         {hasCharacters && (
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-accent/50 text-[10px] font-semibold tracking-[2px] uppercase">Your Universes</p>
-              <button onClick={() => navigate('/universes')} className="cursor-pointer text-accent text-xs font-medium flex items-center gap-1 active:opacity-75">
-                Explore All <ArrowRight size={12} />
-              </button>
+            <p className="text-accent/50 text-[10px] font-semibold tracking-[2px] uppercase mb-2">Your Universes</p>
+            <div className="flex gap-1.5 mb-3 overflow-x-auto scrollbar-none">
+              {GENRE_FILTERS.map((g) => (
+                <button
+                  key={g}
+                  onClick={() => setGenreFilter(g)}
+                  className="cursor-pointer shrink-0 text-[10px] font-semibold px-3 py-1.5 rounded-full transition-colors"
+                  style={{
+                    background: genreFilter === g ? 'rgba(200,75,158,0.15)' : 'rgba(255,255,255,0.04)',
+                    color: genreFilter === g ? '#c84b9e' : 'rgba(255,255,255,0.35)',
+                    border: `1px solid ${genreFilter === g ? 'rgba(200,75,158,0.25)' : 'rgba(255,255,255,0.06)'}`,
+                  }}
+                >
+                  {g[0] + g.slice(1).toLowerCase()}
+                </button>
+              ))}
             </div>
             <div className="flex gap-2.5 overflow-x-auto scrollbar-none pb-1">
               {universeCards.map((u) => (
                 <button
                   key={u.id}
                   onClick={() => { setSelectedUniverse(u.id); navigate('/characters') }}
-                  className="cursor-pointer shrink-0 w-[100px] h-[120px] rounded-xl overflow-hidden relative group active:opacity-75 transition-opacity"
+                  className="cursor-pointer shrink-0 w-[120px] h-[140px] rounded-xl overflow-hidden relative group active:opacity-75 transition-opacity"
                   style={{ background: '#1a1428' }}
                 >
                   <img src={u.image} alt={u.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                  <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,9,15,0.9) 0%, transparent 60%)' }} />
-                  <p className="absolute bottom-2 left-2 right-2 text-white/80 text-[10px] font-semibold leading-tight">{u.title}</p>
+                  <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,9,15,0.95) 0%, transparent 50%)' }} />
+                  <div className="absolute bottom-2 left-2 right-2">
+                    <p className="text-white/80 text-[10px] font-semibold leading-tight">{u.title}</p>
+                    <div className="flex items-center gap-1 mt-1">
+                      <Users size={9} className="text-white/25" />
+                      <span className="text-white/25 text-[9px]">{formatPlayerCount(UNIVERSE_PLAYERS[u.id] ?? 0)}</span>
+                    </div>
+                  </div>
                 </button>
               ))}
             </div>
@@ -585,23 +617,40 @@ export function HomePage() {
                 <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                   <div className="flex items-center justify-between mb-3">
                     <p className="text-accent/50 text-[10px] font-semibold tracking-[2px] uppercase">Your Universes</p>
-                    <button onClick={() => navigate('/universes')} className="cursor-pointer text-accent text-xs font-medium flex items-center gap-1 hover:text-accent/80 transition-colors">
-                      Explore All <ArrowRight size={12} />
-                    </button>
                   </div>
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="flex gap-2 mb-4">
+                    {GENRE_FILTERS.map((g) => (
+                      <button
+                        key={g}
+                        onClick={() => setGenreFilter(g)}
+                        className="cursor-pointer text-[11px] font-semibold px-3.5 py-1.5 rounded-full transition-colors"
+                        style={{
+                          background: genreFilter === g ? 'rgba(200,75,158,0.15)' : 'rgba(255,255,255,0.04)',
+                          color: genreFilter === g ? '#c84b9e' : 'rgba(255,255,255,0.35)',
+                          border: `1px solid ${genreFilter === g ? 'rgba(200,75,158,0.25)' : 'rgba(255,255,255,0.06)'}`,
+                        }}
+                      >
+                        {g[0] + g.slice(1).toLowerCase()}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                     {universeCards.map((u) => (
                       <button
                         key={u.id}
                         onClick={() => { setSelectedUniverse(u.id); navigate('/characters') }}
-                        className="cursor-pointer rounded-xl overflow-hidden relative group h-[160px]"
+                        className="cursor-pointer rounded-xl overflow-hidden relative group h-[180px]"
                         style={{ background: '#1a1428' }}
                       >
                         <img src={u.image} alt={u.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                        <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,9,15,0.9) 0%, transparent 50%)' }} />
+                        <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,9,15,0.95) 0%, transparent 50%)' }} />
                         <div className="absolute bottom-3 left-3 right-3">
                           <span className="text-accent text-[9px] font-semibold tracking-[1px] uppercase">{u.genreTag}</span>
                           <p className="text-white/90 text-sm font-semibold mt-0.5">{u.title}</p>
+                          <div className="flex items-center gap-1.5 mt-1.5">
+                            <Users size={11} className="text-white/30" />
+                            <span className="text-white/30 text-[11px]">{formatPlayerCount(UNIVERSE_PLAYERS[u.id] ?? 0)} played</span>
+                          </div>
                         </div>
                       </button>
                     ))}
