@@ -8,7 +8,7 @@ import { streamChatReply, generateGroupReaction, extractMemories } from '../lib/
 import { generateCharacterPortrait } from '../lib/togetherAi'
 import { trackEvent } from '../lib/supabase'
 import { getAffinityGrowth } from '../lib/affinity'
-import { AffinityBadge } from './AffinityBadge'
+import { parseAffinityDelta } from '../lib/claudeStream'
 import type { SceneCharacter } from '../data/storyData'
 
 // ─── Types ───
@@ -164,16 +164,17 @@ export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, 
         setStreamedReply(fullReply)
       }
 
+      const { content: cleanReply } = parseAffinityDelta(fullReply)
       const primaryMsg: GroupMessage = {
         id: `char-${primaryCharId}-${Date.now()}`,
         role: 'character',
-        content: fullReply,
+        content: cleanReply,
         characterId: primaryCharId,
       }
 
       const messagesAfterPrimary = [...newMessages, primaryMsg]
       setMessages(messagesAfterPrimary)
-      addChatMessage({ role: 'character', content: fullReply, characterId: primaryCharId, timestamp: Date.now() })
+      addChatMessage({ role: 'character', content: cleanReply, characterId: primaryCharId, timestamp: Date.now() })
       setStreamedReply('')
       setStreamingCharId(null)
       updateAffinity(primaryCharId, getAffinityGrowth(newExchange))
@@ -267,7 +268,7 @@ export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, 
               <CharAvatar characterId={sc.characterId} size="md" />
               <div>
                 <p className="text-textPrimary text-xs font-semibold leading-tight">{charData?.name ?? sc.characterId}</p>
-                <AffinityBadge score={characterAffinities[sc.characterId] ?? 0} size="sm" />
+                {/* Affinity shown in sidebar */}
               </div>
             </div>
           )
@@ -314,7 +315,7 @@ export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, 
                   <div className="flex items-end gap-2 justify-start">
                     <CharAvatar characterId={streamingCharId} />
                     <div className="chat-bubble chat-bubble-character">
-                      {streamedReply}
+                      {streamedReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '')}
                       <span className="cursor-blink text-accent ml-0.5">|</span>
                     </div>
                   </div>

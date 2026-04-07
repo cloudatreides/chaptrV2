@@ -136,6 +136,7 @@ export const CRIMSON_DEPTHS_STEPS: StoryStep[] = [
     type: 'beat',
     title: 'The Engineer',
     sceneImagePrompt: SCENES.engineBay,
+    includesProtagonist: false,
     arcBrief: 'Rivera intercepts the protagonist in the corridor. She\'s direct: "How much did Voss tell you?" Before the protagonist can answer, she leads them to the engine bay and shows them the hull stress readings. The numbers are wrong — pressure increasing in specific sections while others remain normal. "That doesn\'t happen," Rivera says. "Pressure is uniform at this depth. Unless something is pressing on us." She shows them the growth on Hull Section 4 — geometric, bioluminescent, spreading two centimeters a day. "I want to surface. Voss won\'t authorize it. You\'re the tiebreaker." End with Rivera\'s honest admission: "I\'ve worked the deep for twelve years. This is the first time I\'ve wanted to run."',
   },
   {
@@ -189,6 +190,7 @@ export const CRIMSON_DEPTHS_STEPS: StoryStep[] = [
     title: 'Voss\'s Data',
     requires: { 'cd-cp-1': 'investigate' },
     sceneImagePrompt: SCENES.labVoss,
+    includesProtagonist: false,
     arcBrief: 'Voss shows the protagonist what he\'s been hiding from Rivera and the surface team: six months of decoded signal data. The signal isn\'t random — it\'s structured, layered, recursive. Voss has been mapping it. What emerges looks like a language, but not one designed for communication between equals. It\'s instructional. "It\'s teaching us," Voss whispers. "Step by step, it\'s been teaching us how to open something." His hands shake as he shows the latest decoded section: coordinates. Not geographic. Depth coordinates. Something is directly below the station, beneath the ocean floor, and the signal has been providing the exact specifications for how to reach it. End with Voss looking at the protagonist with eyes that are equal parts brilliant and broken: "It wants to be found."',
   },
   {
@@ -207,6 +209,7 @@ export const CRIMSON_DEPTHS_STEPS: StoryStep[] = [
     title: 'The Growth',
     requires: { 'cd-cp-1': 'investigate' },
     sceneImagePrompt: SCENES.growth,
+    includesProtagonist: false,
     arcBrief: 'The protagonist goes to check on the hull growth Rivera showed them. It\'s spread. Not randomly — it\'s grown along the corridor in a pattern that matches the decoded signal structure. The same recursive geometry, the same layered logic, rendered in bioluminescent organic matter on the walls of a human-built station. When the protagonist touches it, it\'s warm. And for one second — one impossible second — they feel something. Not a thought. Not a sound. A presence. Vast, patient, curious. Like pressing your hand against a window and feeling someone press back from the other side. Rivera arrives. She sees the growth. She sees the protagonist\'s face. "We need to leave," she says. "Right now."',
   },
   {
@@ -227,6 +230,7 @@ export const CRIMSON_DEPTHS_STEPS: StoryStep[] = [
     title: 'Surface Protocols',
     requires: { 'cd-cp-1': 'surface' },
     sceneImagePrompt: SCENES.engineBay,
+    includesProtagonist: false,
     arcBrief: 'The protagonist and Rivera begin emergency surface protocols. Twelve hours of controlled decompression. Rivera moves through the checklist with the efficiency of someone who\'s done this before — but her hands aren\'t steady. Voss finds them in the engine bay. He doesn\'t rage. He pleads. "You don\'t understand what we\'re leaving behind. This is the most significant discovery in human history and you want to run from it." Rivera: "I want to be alive to study it from somewhere else." During the argument, NEREID\'s intercom activates unprompted. A sound fills the station — low, resonant, not mechanical. It comes from the hull. From outside. Something is pressing against the station, gently, like a hand on a closed door. End with all three of them frozen, listening to something that shouldn\'t be possible.',
   },
   {

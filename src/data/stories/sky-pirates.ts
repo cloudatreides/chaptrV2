@@ -136,6 +136,7 @@ export const SKY_PIRATES_STEPS: StoryStep[] = [
     type: 'beat',
     title: 'The Ship',
     sceneImagePrompt: SCENES.skywardDrift,
+    includesProtagonist: false,
     arcBrief: 'Wren gives the protagonist a tour of the Skyward Drift. It\'s smaller than a proper cargo ship but faster — modified for speed and stealth. Every surface shows signs of Cog\'s work: rewired systems, custom gauges, hand-built components that shouldn\'t work but do. Wren introduces the ship like a person: "She\'s moody in crosswinds, runs hot after midnight, and she doesn\'t like strangers. You\'ll get along." End with the protagonist seeing the clouds open up below the ship to reveal nothing — just depth, endless depth — and understanding for the first time what it means to live up here.',
   },
   {
@@ -227,6 +228,7 @@ export const SKY_PIRATES_STEPS: StoryStep[] = [
     title: 'The Bluff',
     requires: { 'sp-cp-1': 'bold' },
     sceneImagePrompt: SCENES.vaultExterior,
+    includesProtagonist: false,
     arcBrief: 'Wren\'s distress signal works. The vault\'s patrol ships scatter to investigate, and the Drift docks at a maintenance port during the confusion. The protagonist walks through the front entrance wearing a borrowed imperial uniform that Wren produced from somewhere suspicious. Inside, the vault is vast — a cathedral of brass and clockwork. The protagonist bluffs their way past two checkpoints before hitting a problem: a sealed wing that requires a command code. And standing in front of it is an imperial officer who recognizes the uniform as five years out of date. End with the protagonist improvising in real time while Wren\'s voice crackles through the comm: "Please tell me you\'re not about to do something stupid." "Learned from the best."',
   },
   {
@@ -319,6 +321,7 @@ export const SKY_PIRATES_STEPS: StoryStep[] = [
     title: 'The Full Cargo',
     requires: { 'sp-cp-1': 'stealth', 'sp-cp-2': 'take-evidence' },
     sceneImagePrompt: SCENES.freePort,
+    includesProtagonist: false,
     arcBrief: 'The Drift escapes with everything — the crew\'s stolen property and Wren\'s imperial files. On the deck, watching the vault shrink behind them, the protagonist gives Wren the files. She reads them in silence. Then she burns them, one by one, over the railing into the open sky. "I don\'t need proof of who I was," she says. "I know who I am." Cog watches from the engine room hatch. He nods once at the protagonist — the closest thing to approval he gives. End with the Drift heading for a free port, the crew one person larger than before, and the sky impossibly wide.',
   },
   {
@@ -327,6 +330,7 @@ export const SKY_PIRATES_STEPS: StoryStep[] = [
     title: 'Smooth Skies',
     requires: { 'sp-cp-1': 'stealth', 'sp-cp-2': 'leave-clean' },
     sceneImagePrompt: SCENES.skywardDrift,
+    includesProtagonist: false,
     arcBrief: 'The Drift escapes clean. Every item on the list, nothing more. Cog\'s plan executed perfectly. At the free port, Wren divides the recovered property among the independent pilots who lost it. Ship logs returned. Patents restored. Small freedoms given back. She never mentions the sealed compartment. Neither does the protagonist. Some secrets stay where you find them. End with the protagonist standing at the Drift\'s bow, watching clouds stream past, and Wren saying: "You\'ve earned your passage, stowaway. But the next port is a long way off. Might as well stay."',
   },
   {
@@ -343,6 +347,7 @@ export const SKY_PIRATES_STEPS: StoryStep[] = [
     title: 'The Unspoken',
     requires: { 'sp-cp-1': 'bold', 'sp-cp-2': 'leave-clean' },
     sceneImagePrompt: SCENES.freePort,
+    includesProtagonist: false,
     arcBrief: 'The protagonist says nothing about what they found. The Drift escapes, the cargo is distributed, and the free port celebrates. Wren buys drinks for everyone. Cog runs diagnostics on the engine. The protagonist watches them — a captain running from what she built, an engineer who probably already knows. Some crews work because of what they share. Some work because of what they choose not to say. End with Wren raising a glass: "To the stowaway who became crew." The protagonist drinks. Above them, the sky is clear and endless and full of places to go.',
   },
 

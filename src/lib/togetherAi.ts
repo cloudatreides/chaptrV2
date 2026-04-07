@@ -1,3 +1,5 @@
+import { supabase } from './supabase'
+
 export interface GenerateSceneParams {
   prompt: string
   width?: number
@@ -7,9 +9,44 @@ export interface GenerateSceneParams {
   includesProtagonist?: boolean
 }
 
+// ─── Prompt-hash image cache (Supabase) ───
+
+async function hashPrompt(text: string): Promise<string> {
+  const encoded = new TextEncoder().encode(text)
+  const buf = await crypto.subtle.digest('SHA-256', encoded)
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
+async function getCachedImage(hash: string): Promise<string | null> {
+  try {
+    const { data } = await supabase
+      .from('chaptr_image_cache')
+      .select('image_url')
+      .eq('prompt_hash', hash)
+      .single()
+    return data?.image_url ?? null
+  } catch {
+    return null
+  }
+}
+
+async function cacheImage(hash: string, imageUrl: string, prompt: string): Promise<void> {
+  try {
+    await supabase.from('chaptr_image_cache').upsert({
+      prompt_hash: hash,
+      image_url: imageUrl,
+      prompt_preview: prompt.slice(0, 200),
+      created_at: new Date().toISOString(),
+    })
+  } catch {
+    // Silent fail — caching is best-effort
+  }
+}
+
 /** Generate a scene image using Together AI.
  *  Uses Kontext Pro (img2img, $0.20) only when the protagonist is visible in the
- *  scene AND a selfie reference exists. Otherwise uses Schnell ($0.04). */
+ *  scene AND a selfie reference exists. Otherwise uses Schnell ($0.04).
+ *  Schnell results are cached by prompt hash to avoid regenerating identical scenes. */
 export async function generateSceneImage(params: GenerateSceneParams): Promise<string | null> {
   const { prompt, width = 768, height = 576, referenceImageUrl, protagonistGender, includesProtagonist = true } = params
 
@@ -19,6 +56,14 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
   const genderedPrompt = protagonistGender
     ? prompt.replace(/a young person/gi, protagonistGender === 'female' ? 'a young woman' : 'a young man')
     : prompt
+
+  // Cache key: prompt + dimensions + gender (Schnell only — Kontext is personalized per selfie)
+  const cacheKey = `${genderedPrompt}|${width}x${height}`
+  if (!useKontext) {
+    const hash = await hashPrompt(cacheKey)
+    const cached = await getCachedImage(hash)
+    if (cached) return cached
+  }
 
   const body = useKontext
     ? {
@@ -55,7 +100,14 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
 
     const data = await response.json()
     const url = data.data?.[0]?.url
-    if (url) return url
+    if (url) {
+      // Cache Schnell results for future reuse
+      if (!useKontext) {
+        const hash = await hashPrompt(cacheKey)
+        cacheImage(hash, url, genderedPrompt)
+      }
+      return url
+    }
     const b64 = data.data?.[0]?.b64_json
     if (b64) return `data:image/png;base64,${b64}`
     return null

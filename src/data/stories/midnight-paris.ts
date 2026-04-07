@@ -152,6 +152,7 @@ export const MIDNIGHT_PARIS_STEPS: StoryStep[] = [
     type: 'beat',
     title: 'Two Worlds',
     sceneImagePrompt: SCENES.collective,
+    includesProtagonist: false,
     arcBrief: 'A week passes. The protagonist is now splitting time between the collective and the gallery. In the collective, they help Lucien prepare for a guerrilla exhibition — painting alongside him at 2am, watching his mood shift from euphoric to hollow in minutes. In the gallery, Camille teaches them how the art world really works: who buys, who decides what\'s valuable, who gets destroyed. The two worlds feel incompatible. Lucien calls Camille "the machine." Camille says Lucien "will burn out before he matters." They\'re both right. They\'re both wrong. End with the protagonist realizing they\'re becoming the bridge between these worlds — and neither side knows it yet.',
   },
 
@@ -189,6 +190,7 @@ export const MIDNIGHT_PARIS_STEPS: StoryStep[] = [
     title: 'The Underground Show',
     requires: { 'mp-cp-1': 'collective' },
     sceneImagePrompt: SCENES.collective,
+    includesProtagonist: false,
     arcBrief: 'The guerrilla exhibition happens in an abandoned warehouse near the Canal Saint-Martin. It\'s electric — raw, unpolished, and alive. The protagonist helps hang paintings, manages the crowd, watches Lucien transform from anxious wreck to something luminous when strangers respond to his work. For three hours, everything is perfect. Then Lucien drinks too much. He starts a fight with a critic who wandered in. The night ends with broken glass and Lucien sitting on the curb outside, head in his hands. "They don\'t see it," he says. "They never see it." End with the protagonist sitting beside him in the cold, wondering if brilliance always costs this much.',
   },
   {
@@ -207,6 +209,7 @@ export const MIDNIGHT_PARIS_STEPS: StoryStep[] = [
     title: 'Camille Finds Out',
     requires: { 'mp-cp-1': 'collective' },
     sceneImagePrompt: SCENES.camilleOffice,
+    includesProtagonist: false,
     arcBrief: 'Camille heard about the guerrilla show — and that the protagonist chose it over her vernissage. She\'s not angry. She\'s disappointed, which is worse. "I gave you an opportunity that people in this city would kill for," she says calmly. "And you chose chaos." But then she pauses. She asks what Lucien showed. When the protagonist describes his work, something shifts in her expression. She\'s seen his work before. She knows how good he is. "He could be extraordinary," she says quietly. "If he\'d stop setting himself on fire." End with Camille making an unexpected offer — she wants to see Lucien\'s new work. Privately.',
   },
   {
@@ -245,6 +248,7 @@ export const MIDNIGHT_PARIS_STEPS: StoryStep[] = [
     title: 'The Morning After',
     requires: { 'mp-cp-1': 'gallery' },
     sceneImagePrompt: SCENES.lucienStudio,
+    includesProtagonist: false,
     arcBrief: 'The protagonist goes to Lucien\'s studio the next morning. The guerrilla show happened without them. It was a disaster — low turnout, Lucien spiraled, half the collective is angry. Lucien won\'t look at the protagonist. "You chose the right side," he says, painting without turning around. "Everyone does eventually." But when the protagonist looks at what he\'s painting, it\'s different from anything he\'s done before — darker, more honest, stripped of pretension. His pain made something true. End with Lucien finally turning around and the protagonist seeing that something between them has cracked — not broken, but changed.',
   },
   {

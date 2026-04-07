@@ -147,6 +147,7 @@ export const HOLLOW_MANOR_STEPS: StoryStep[] = [
     type: 'beat',
     title: 'The Historian',
     sceneImagePrompt: SCENES.maeArrival,
+    includesProtagonist: false,
     arcBrief: 'A knock at the front door. Mae Chen, satchel stuffed with photocopied records. She says she\'s researching the manor\'s history for the county archives. She\'s direct, slightly pushy, and clearly knows more about this place than she should. She asks whether the protagonist has noticed anything unusual. End with Mae saying something that stops the protagonist cold: "The last three people who inherited this place are all gone. Not dead. Gone."',
   },
   {

@@ -124,6 +124,7 @@ export const LAST_SIGNAL_STEPS: StoryStep[] = [
     type: 'beat',
     title: 'The Case',
     sceneImagePrompt: SCENES.office,
+    includesProtagonist: false,
     openingProse: 'She sits across from you, back straight, hands folded around a photograph. The rain hasn\'t stopped in three days.\n\n"His name is Karim. He\'s twenty-four. He\'s my brother." She places the photo on your desk. A young man with kind eyes and a careful smile. "He didn\'t leave. I don\'t care what the police think."\n\nThe photo is still warm from her hands.',
     arcBrief: 'Noor Hadid hires the protagonist to find her missing brother Karim. Establish the tone — rain, desperation held in check, a case that feels personal already. End with the protagonist taking the case and their first lead: the key to Karim\'s apartment.',
   },
@@ -185,6 +186,7 @@ export const LAST_SIGNAL_STEPS: StoryStep[] = [
     title: 'Malone\'s',
     requires: { 'ls-cp-1': 'money' },
     sceneImagePrompt: SCENES.pawnshop,
+    includesProtagonist: false,
     arcBrief: 'The protagonist visits Malone\'s Pawn & Trade. Dex Malone is behind the counter — he recognizes Karim\'s name immediately but pretends not to. When pressed, he admits Karim pawned something valuable the day before he vanished — not for money, but to leave something in Dex\'s care. "Like insurance," Dex says. He won\'t say what it is yet. He wants to know who\'s asking and why before he gives anything up. End with Dex offering a deal: information for information.',
   },
   {

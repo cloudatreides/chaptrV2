@@ -134,6 +134,7 @@ export const INHERITANCE_STEPS: StoryStep[] = [
     type: 'beat',
     title: 'The Other Heir',
     sceneImagePrompt: SCENES.sableMeeting,
+    includesProtagonist: false,
     arcBrief: 'The protagonist meets Sable for the first time. She\'s already been here an hour. She\'s already noticed things — the locked east wing, the gap in the floor plans, Rowan\'s careful phrasing. She sizes up the protagonist in three seconds. The introduction is polite but charged. Two strangers who share blood, standing in a house full of buried history. Sable says: "He\'s been very careful about what he tells us. Have you noticed that?" End with the first crack in Rowan\'s controlled narrative.',
   },
   {
@@ -213,6 +214,7 @@ export const INHERITANCE_STEPS: StoryStep[] = [
     title: 'The Family Wall',
     requires: { 'ti-cp-1': 'east-wing' },
     sceneImagePrompt: SCENES.familyTree,
+    includesProtagonist: false,
     arcBrief: 'Sable and the protagonist explore the east wing together. Behind a false wall, they find a room Eilidh used as a private study. On the wall: a family tree painted in meticulous detail spanning two hundred years. But it\'s different from the official records. Extra branches. Hidden children. A pattern emerges: every generation, one Blackwood was erased from the records. Written out of the family. Sable finds her mother\'s name — crossed out in red ink, but still there. She goes very quiet. Then: "My mother didn\'t leave the family. They removed her." End with both heirs understanding that the Blackwood legacy isn\'t wealth — it\'s erasure.',
   },
   {
@@ -251,6 +253,7 @@ export const INHERITANCE_STEPS: StoryStep[] = [
     title: 'Sable\'s Discovery',
     requires: { 'ti-cp-1': 'journals' },
     sceneImagePrompt: SCENES.familyTree,
+    includesProtagonist: false,
     arcBrief: 'While the protagonist read journals, Sable explored on her own. She found the family tree wall in the east wing. She comes to the protagonist shaken. Her mother\'s name is on the wall — crossed out, but present. The official family records show no trace of her. "They erased her," Sable says. "Not disowned. Erased. Like she never existed." Together, they compare the journals to the wall. The pattern is clear: every generation, one Blackwood was removed. The journals and the wall tell the same story from different angles. End with Sable saying: "Rowan knew about this wall. He had to."',
   },
   {
@@ -271,6 +274,7 @@ export const INHERITANCE_STEPS: StoryStep[] = [
     title: 'The Solicitor\'s Truth',
     requires: { 'ti-cp-1': 'rowan' },
     sceneImagePrompt: SCENES.rowanOffice,
+    includesProtagonist: false,
     arcBrief: 'The protagonist confronts Rowan late at night. He\'s drinking whisky in his study, staring at the rain. When pressed, he doesn\'t crumble — he unfolds. Slowly, deliberately. He tells them he loved Eilidh. Not romantically. She was the closest thing to family he had. She asked him to draft the will this way because she was dying and she couldn\'t face the crypt alone. "She wanted someone with Blackwood blood to see what\'s down there. I\'m not Blackwood. I\'m just the man who kept the paperwork." He won\'t say what\'s in the crypt. "That\'s hers to show you. Not mine to tell." End with the protagonist seeing that Rowan\'s control isn\'t manipulation — it\'s grief.',
   },
   {
@@ -289,6 +293,7 @@ export const INHERITANCE_STEPS: StoryStep[] = [
     title: 'The East Wing Together',
     requires: { 'ti-cp-1': 'rowan' },
     sceneImagePrompt: SCENES.familyTree,
+    includesProtagonist: false,
     arcBrief: 'Armed with what Rowan revealed, the protagonist and Sable open the east wing together. They find the preserved corridor, the scratched portraits, the family tree wall. Sable finds her mother. The protagonist finds their connection. The pattern of erasure is clear. But because they have Rowan\'s context, they also see something else: Eilidh\'s handwriting in the margins of the family tree, adding the erased names back. She spent years reconstructing what the family destroyed. End with both heirs understanding that the will wasn\'t about the estate — it was about restoring the names the Blackwoods tried to erase.',
   },
   {

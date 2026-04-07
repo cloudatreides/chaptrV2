@@ -434,16 +434,18 @@ export function HomePage() {
                 <button
                   key={u.id}
                   onClick={() => { setSelectedUniverse(u.id); navigate('/characters') }}
-                  className="cursor-pointer shrink-0 w-[120px] h-[140px] rounded-xl overflow-hidden relative group active:opacity-75 transition-opacity"
-                  style={{ background: '#1a1428' }}
+                  className="cursor-pointer shrink-0 w-[130px] rounded-xl overflow-hidden group active:opacity-75 transition-opacity text-left"
+                  style={{ background: '#13101c', border: '1px solid rgba(255,255,255,0.06)' }}
                 >
-                  <img src={u.image} alt={u.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                  <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,9,15,1) 0%, rgba(10,9,15,0.85) 40%, transparent 70%)' }} />
-                  <div className="absolute bottom-2 left-2 right-2">
-                    <p className="text-white text-[10px] font-semibold leading-tight drop-shadow-sm">{u.title}</p>
+                  <div className="h-[100px] overflow-hidden">
+                    <img src={u.image} alt={u.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  </div>
+                  <div className="px-2 py-2">
+                    <span className="text-accent text-[8px] font-semibold tracking-[1px] uppercase">{u.genreTag}</span>
+                    <p className="text-white text-[10px] font-semibold leading-tight mt-0.5">{u.title}</p>
                     <div className="flex items-center gap-1 mt-1">
-                      <Users size={9} className="text-white/50" />
-                      <span className="text-white/50 text-[9px]">{formatPlayerCount(UNIVERSE_PLAYERS[u.id] ?? 0)}</span>
+                      <Users size={9} className="text-white/40" />
+                      <span className="text-white/40 text-[9px]">{formatPlayerCount(UNIVERSE_PLAYERS[u.id] ?? 0)}</span>
                     </div>
                   </div>
                 </button>
@@ -637,17 +639,18 @@ export function HomePage() {
                       <button
                         key={u.id}
                         onClick={() => { setSelectedUniverse(u.id); navigate('/characters') }}
-                        className="cursor-pointer rounded-xl overflow-hidden relative group h-[180px]"
-                        style={{ background: '#1a1428' }}
+                        className="cursor-pointer rounded-xl overflow-hidden group text-left"
+                        style={{ background: '#13101c', border: '1px solid rgba(255,255,255,0.06)' }}
                       >
-                        <img src={u.image} alt={u.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                        <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,9,15,1) 0%, rgba(10,9,15,0.85) 40%, transparent 70%)' }} />
-                        <div className="absolute bottom-3 left-3 right-3">
-                          <span className="text-accent text-[9px] font-semibold tracking-[1px] uppercase drop-shadow-sm">{u.genreTag}</span>
-                          <p className="text-white text-sm font-semibold mt-0.5 drop-shadow-sm">{u.title}</p>
-                          <div className="flex items-center gap-1.5 mt-1.5">
-                            <Users size={11} className="text-white/50" />
-                            <span className="text-white/50 text-[11px]">{formatPlayerCount(UNIVERSE_PLAYERS[u.id] ?? 0)} played</span>
+                        <div className="relative h-[140px] overflow-hidden">
+                          <img src={u.image} alt={u.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        </div>
+                        <div className="px-3 py-2.5">
+                          <span className="text-accent text-[9px] font-semibold tracking-[1px] uppercase">{u.genreTag}</span>
+                          <p className="text-white text-sm font-semibold mt-0.5">{u.title}</p>
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <Users size={11} className="text-white/40" />
+                            <span className="text-white/40 text-[11px]">{formatPlayerCount(UNIVERSE_PLAYERS[u.id] ?? 0)} played</span>
                           </div>
                         </div>
                       </button>

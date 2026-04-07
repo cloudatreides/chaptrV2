@@ -137,6 +137,7 @@ export const PHANTOM_PROTOCOL_STEPS: StoryStep[] = [
     type: 'beat',
     title: 'First Contact',
     sceneImagePrompt: SCENES.viennaCafe,
+    includesProtagonist: false,
     arcBrief: 'The protagonist travels to Vienna to begin surveillance on Novak. They find him in a coffee house — exactly where the file said he\'d be. He\'s alone, reading, unthreatening. But when the protagonist sits two tables away, Novak looks up and smiles — not at them, at the situation. "You\'re Kira\'s new one," he says quietly, not looking up from his book. "The last one lasted three weeks before they started asking questions. I wonder how long you\'ll take." He leaves a card with a phone number and walks out. End with the protagonist holding a card they were told would never exist — because Kira said Novak doesn\'t know about the operation.',
   },
   {

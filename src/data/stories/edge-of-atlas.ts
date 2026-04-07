@@ -136,6 +136,7 @@ export const EDGE_OF_ATLAS_STEPS: StoryStep[] = [
     type: 'beat',
     title: "Zara's Maps",
     sceneImagePrompt: SCENES.zarasCamp,
+    includesProtagonist: false,
     arcBrief: 'The protagonist follows a rumour to the edge of the settlement and finds Zara\'s camp — a canvas map tent with three years of surveys pinned to every available surface. Zara clocks them in approximately four seconds. She asks three precise questions, hears their answers, and invites them in. Her maps cover the known frontier in extraordinary detail — and show three distinct gaps where the lost civilisations should be. In the centre of those gaps, appearing in four different map fragments in four different scripts, a word that translates consistently as "the thing that holds." She calls it the Atlascore. "I\'m ten days from confirmation," she says. "I need a second set of eyes in the deep survey." End with the protagonist understanding this is an offer, and a test.',
   },
   {

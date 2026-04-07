@@ -137,6 +137,7 @@ export const DRIFT_STEPS: StoryStep[] = [
     type: 'beat',
     title: 'The Captain\'s Doubt',
     sceneImagePrompt: SCENES.orionQuarters,
+    includesProtagonist: false,
     arcBrief: 'The protagonist finds Orion on the bridge at 0300, staring at the signal readout. He hasn\'t been sleeping. He tells the protagonist what he\'s been thinking: the signal changed three months ago. It used to broadcast in a fixed pattern. Now it adapts — shifts frequency when they adjust sensors, as if it knows they\'re listening. "ARIA says it\'s noise interference. I don\'t believe her." He doesn\'t want to turn back because he\'s afraid. He wants to turn back because in thirty years of service, nothing good has ever adapted to him. End with Orion asking: "Has ARIA said anything to you? Anything... different?"',
   },
   {

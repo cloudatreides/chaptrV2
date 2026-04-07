@@ -119,6 +119,7 @@ export const WHISPER_GAME_STEPS: StoryStep[] = [
     type: 'beat',
     title: 'The Invitation',
     sceneImagePrompt: SCENES.campus,
+    includesProtagonist: false,
     openingProse: 'Mira shows you the message over coffee on a Tuesday.\n\n"It\'s like a scavenger hunt thing," she says, sliding her phone across the table. The screen shows an encrypted messaging app you\'ve never seen — dark interface, green text, a single message from someone called THE HOST.\n\nWELCOME, MIRA. YOU HAVE BEEN SELECTED.\nTHE WHISPER GAME HAS THREE LEVELS.\nLEVEL ONE: PROVE YOU\'RE PAYING ATTENTION.\nYOUR FIRST TASK IS BELOW.\n\n"Everyone\'s playing," Mira says. "It\'s going around. Apparently if you finish all three levels, you get... something. Nobody\'s finished yet."\n\nShe grins. You should have said no.',
     arcBrief: 'The protagonist is introduced to The Whisper Game by Mira. It seems harmless — a viral campus game, dares and challenges, social cachet for participating. Mira is excited, infectious. The first task is simple: photograph a specific campus location at a specific time. Easy. But when they complete it, the response comes instantly — with a photo of them completing the task, taken from an angle they didn\'t notice. Someone was watching. End with the chill of being observed, masked by Mira\'s reassurance: "It\'s just part of the game."',
   },
@@ -245,6 +246,7 @@ export const WHISPER_GAME_STEPS: StoryStep[] = [
     title: 'Mira\'s Confession',
     requires: { 'wg-cp-1': 'play-along' },
     sceneImagePrompt: SCENES.miraPanic,
+    includesProtagonist: false,
     arcBrief: 'Mira breaks. In the protagonist\'s dorm room at 2am, she tells the truth: she didn\'t find The Whisper Game randomly. She was recruited. Specifically. The Host contacted her first, months before the game went public, and asked her to spread it. She was promised immunity — protection from exposure — in exchange for bringing players in. "I thought it was just a tech startup doing viral marketing," she says. "I didn\'t know it was this." She shows the protagonist her original messages from The Host — they predate the game by six months. The first message reads: "I\'ve been watching your friend. I need you to bring them to me." Mira looks at the protagonist. "It was never about me. The game was built to get to you." End with the question neither can answer: why?',
   },
   {

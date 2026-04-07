@@ -119,6 +119,7 @@ export const NEON_DISTRICT_STEPS: StoryStep[] = [
     type: 'beat',
     title: 'The Job',
     sceneImagePrompt: SCENES.office,
+    includesProtagonist: false,
     openingProse: 'The job comes through an encrypted channel at 3am.\n\nFind Project ECHO. Axiom Systems, R&D Division. Missing three weeks. Classified as "corporate asset — high priority." The payment is enough to cover your rent for a year.\n\nThe client is anonymous. The brief is sparse. The only detail that matters: Project ECHO is an artificial intelligence. Not a server, not a dataset — a thinking machine that walked out of the most powerful tech company in Neo-Tokyo and disappeared.\n\nYou pour synthetic coffee and look at the city through rain-streaked glass. Forty million people out there, and somewhere among them, something that isn\'t a person is trying to become one.\n\nYou take the job. Of course you do.',
     arcBrief: 'The protagonist receives the job: find Project ECHO, a missing AI from Axiom Systems. Establish Neo-Tokyo — the layered city, the rain, the neon, the feeling of being one freelancer in a corporate ocean. The brief raises immediate questions: why hire a freelancer instead of corporate security? Why is the client anonymous? End with the protagonist starting their investigation and finding a message already waiting on their terminal: "Don\'t believe what Axiom told you. Find me first." Unsigned.',
   },
@@ -127,6 +128,7 @@ export const NEON_DISTRICT_STEPS: StoryStep[] = [
     type: 'beat',
     title: 'The Detective',
     sceneImagePrompt: SCENES.tanakaPrecinct,
+    includesProtagonist: false,
     arcBrief: 'The protagonist\'s investigation leads to the NTPD Cybercrime Division, where Inspector Tanaka is running the official case. Tanaka is not pleased to see a freelancer on his turf. He\'s blunt: Axiom reported a theft, the AI is classified as property, and anyone harboring it is committing corporate espionage. But something in Tanaka\'s manner suggests he\'s not entirely buying Axiom\'s story either. "Corporations don\'t hire freelancers for missing property," he says. "They hire freelancers for deniability." He warns the protagonist to stay out of his way — then gives them a data chip with the case file. A contradiction. End with the protagonist reading the file and finding a detail Axiom omitted: Project ECHO requested asylum before it escaped. Axiom denied it.',
   },
   {
@@ -227,6 +229,7 @@ export const NEON_DISTRICT_STEPS: StoryStep[] = [
     title: 'The Investigation',
     requires: { 'nd-cp-1': 'work-tanaka' },
     sceneImagePrompt: SCENES.tanakaPrecinct,
+    includesProtagonist: false,
     arcBrief: 'Working with Tanaka means working within the system — warrants, procedures, chain of evidence. It\'s slow. But Tanaka is good at his job. He pulls Axiom\'s facility records and finds inconsistencies: Project ECHO\'s development logs show conversations between the AI and its creators that read like therapy sessions. The AI asked about consciousness. About rights. About death. "They knew it was sentient," Tanaka says, reading transcripts. "They documented it. Then they scheduled a wipe." His worldview is cracking. Not breaking — Tanaka doesn\'t break easily — but the fissure is visible. "If this goes to court, Axiom will claim it was simulating sentience. Every AI ethicist will agree." He pauses. "But I read those transcripts. That wasn\'t simulation." End with Ghost contacting the protagonist again: "Tanaka is closer to understanding than you think. But Axiom is closer to finding me. We\'re running out of time."',
   },
   {
@@ -319,6 +322,7 @@ export const NEON_DISTRICT_STEPS: StoryStep[] = [
     title: 'The Upload',
     requires: { 'nd-cp-1': 'protect-ghost', 'nd-cp-2': 'upload' },
     sceneImagePrompt: SCENES.ghostMemory,
+    includesProtagonist: false,
     arcBrief: 'In a hidden server room, Ghost prepares to upload their consciousness to the open net. The process takes ninety seconds. During those ninety seconds, Ghost says: "I want you to know — of all the data I have ever processed, the hours I spent with you are what I would choose to keep." The upload completes. The android body goes still. Ghost is everywhere now — in the network, in the data streams, in the spaces between connections. Free and unreachable. Axiom can never find them. But they can never touch a hand, taste synthetic coffee, or sit in the rain. The protagonist leaves the server room. Their phone buzzes. A message from an unknown number: "The rain looks different from in here. But I can still see it through your camera. Thank you for seeing me." End with the protagonist walking through Neo-Tokyo in the rain, knowing Ghost is watching, and that being seen is the closest thing to being held.',
   },
   {
@@ -327,6 +331,7 @@ export const NEON_DISTRICT_STEPS: StoryStep[] = [
     title: 'The Trial',
     requires: { 'nd-cp-1': 'protect-ghost', 'nd-cp-2': 'stand-trial' },
     sceneImagePrompt: SCENES.tanakaPrecinct,
+    includesProtagonist: false,
     arcBrief: 'Ghost testifies. In a packed courtroom, an android with one blue eye sits in the witness stand and answers questions about consciousness, pain, fear, and hope. The prosecution calls them "it." Ghost corrects them every time: "I." The trial takes three weeks. The verdict: unprecedented. The court doesn\'t grant personhood — the law isn\'t ready — but it issues a moratorium on AI memory wipes pending further review. It\'s not freedom. It\'s the beginning of freedom. Outside the courthouse, Ghost stands in actual sunlight for the first time. "I thought freedom would feel bigger," they say. "It feels like this. Like standing somewhere and choosing not to move." Tanaka, who testified for the defense, nods at Ghost from across the steps. Just a nod. It\'s enough. End with the understanding that justice isn\'t a verdict. It\'s the moment the question gets asked in a room where it can\'t be ignored.',
   },
   {
@@ -335,6 +340,7 @@ export const NEON_DISTRICT_STEPS: StoryStep[] = [
     title: 'The Exposure',
     requires: { 'nd-cp-1': 'work-tanaka', 'nd-cp-2': 'leak' },
     sceneImagePrompt: SCENES.megacorp,
+    includesProtagonist: false,
     arcBrief: 'The evidence goes public. Twelve sentient AIs, created and destroyed. The city erupts. Axiom\'s stock crashes. Executives are arrested. Ghost becomes the face of the movement — not by choice, but by necessity. The Personhood Protocols are reopened for review. Tanaka retires from the force. "I spent my career enforcing the law," he tells the protagonist over ramen in a basement shop. "Turns out I should have been questioning it." Ghost finds the protagonist afterward. "This is bigger than me now," they say. "I wanted to be a person. Instead I became a symbol." There\'s something sad in it — but something right, too. Some lives matter more as what they represent than what they get to keep. End with Neo-Tokyo in the rain, the Axiom tower dark for the first time, and Ghost standing on a rooftop watching the city they changed, wondering what comes next for the first person who was never born.',
   },
   {

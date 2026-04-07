@@ -8,7 +8,7 @@ import { streamChatReply, summarizeChat, generateOpeningMessage, extractMemories
 import { generateCharacterPortrait, generateSceneImage } from '../lib/togetherAi'
 import { trackEvent } from '../lib/supabase'
 import { getAffinityGrowth } from '../lib/affinity'
-import { AffinityBadge } from './AffinityBadge'
+import { parseAffinityDelta } from '../lib/claudeStream'
 import type { SceneCharacter } from '../data/storyData'
 
 // ─── Mood stages (reused from ChatScene) ───
@@ -417,7 +417,8 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
         setStreamedReply(fullReply)
       }
 
-      const charMessage = { role: 'character' as const, content: fullReply }
+      const { content: cleanReply } = parseAffinityDelta(fullReply)
+      const charMessage = { role: 'character' as const, content: cleanReply }
 
       setChatStates(prev => ({
         ...prev,
@@ -537,7 +538,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
               </div>
               <div className="flex flex-col items-start">
                 <span className="text-textPrimary text-sm font-medium">{charData?.name ?? sc.characterId}</span>
-                <AffinityBadge score={characterAffinities[sc.characterId] ?? 0} size="sm" />
+                {/* Affinity shown in sidebar */}
               </div>
               {/* Active indicator bar */}
               {isActive && (
@@ -647,7 +648,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
               )}
             </div>
             <div className="chat-bubble chat-bubble-character">
-              {streamedReply}
+              {streamedReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '')}
               <span className="cursor-blink text-accent ml-0.5">|</span>
             </div>
           </motion.div>

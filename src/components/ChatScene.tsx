@@ -8,7 +8,7 @@ import { streamChatReply, summarizeChat, generateOpeningMessage, extractMemories
 import { generateCharacterPortrait, generateSceneImage } from '../lib/togetherAi'
 import { trackEvent } from '../lib/supabase'
 import { getAffinityGrowth } from '../lib/affinity'
-import { AffinityBadge } from './AffinityBadge'
+import { parseAffinityDelta } from '../lib/claudeStream'
 
 // Mood labels based on exchange count — feels organic, not mechanical
 const MOOD_STAGES: Record<string, string[]> = {
@@ -329,7 +329,8 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
         setStreamedReply(fullReply)
       }
 
-      const charMessage = { role: 'character' as const, content: fullReply }
+      const { content: cleanReply } = parseAffinityDelta(fullReply)
+      const charMessage = { role: 'character' as const, content: cleanReply }
       setLocalMessages((prev) => [...prev, charMessage])
       addChatMessage({ ...charMessage, characterId, timestamp: Date.now() })
       setStreamedReply('')
@@ -388,7 +389,6 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <p className="text-textPrimary font-semibold text-sm">{character?.name ?? characterId}</p>
-            <AffinityBadge score={affinityScore} size="sm" />
           </div>
           <div className="flex items-center gap-1.5 mt-0.5">
               {getMoodStages(characterId).map((stage, i) => {
@@ -471,7 +471,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
               )}
             </div>
             <div className="chat-bubble chat-bubble-character">
-              {streamedReply}
+              {streamedReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '')}
               <span className="cursor-blink text-accent ml-0.5">|</span>
             </div>
           </motion.div>

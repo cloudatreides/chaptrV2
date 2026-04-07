@@ -36,7 +36,7 @@ export const UNIVERSES: Universe[] = [
     genre: 'HORROR',
     genreTag: 'SUPERNATURAL HORROR',
     description: 'You inherit a crumbling estate on the edge of a dying town. Something inside the walls has been waiting for you.',
-    image: '/hollow-manor.svg',
+    image: '/hollow-manor.jpeg',
     locked: false,
   },
   {
@@ -45,7 +45,7 @@ export const UNIVERSES: Universe[] = [
     genre: 'MYSTERY',
     genreTag: 'NOIR MYSTERY',
     description: 'A missing person. A city full of liars. You have 48 hours before the only witness disappears for good.',
-    image: '/last-signal.svg',
+    image: '/last-signal.jpeg',
     locked: false,
   },
   {
@@ -54,7 +54,7 @@ export const UNIVERSES: Universe[] = [
     genre: 'ADVENTURE',
     genreTag: 'EPIC ADVENTURE',
     description: 'The map ends here. Beyond it, three lost civilisations and the one artefact that could rewrite history.',
-    image: '/edge-of-atlas.svg',
+    image: '/edge-of-atlas.jpeg',
     locked: false,
   },
   // ── New universes ──
@@ -64,7 +64,7 @@ export const UNIVERSES: Universe[] = [
     genre: 'ROMANCE',
     genreTag: 'PARISIAN ROMANCE',
     description: 'An underground art collective, a brooding painter, and a city that never lets you leave unchanged.',
-    image: '/midnight-paris.svg',
+    image: '/midnight-paris.jpeg',
     locked: false,
   },
   {
@@ -73,7 +73,7 @@ export const UNIVERSES: Universe[] = [
     genre: 'ROMANCE',
     genreTag: 'COLLEGE ROMANCE',
     description: 'Your fiercest academic rival. A mandatory group project. The thin line between hate and something else.',
-    image: '/campus-rivals.svg',
+    image: '/campus-rivals.jpeg',
     locked: false,
   },
   {
@@ -82,7 +82,7 @@ export const UNIVERSES: Universe[] = [
     genre: 'HORROR',
     genreTag: 'COSMIC HORROR',
     description: 'Seven miles down. The station\'s AI is receiving signals from below. Something in the deep has been waiting.',
-    image: '/crimson-depths.svg',
+    image: '/crimson-depths.jpeg',
     locked: false,
   },
   {
@@ -91,7 +91,7 @@ export const UNIVERSES: Universe[] = [
     genre: 'HORROR',
     genreTag: 'PSYCHOLOGICAL HORROR',
     description: 'A viral game that starts with harmless dares. Players who quit have accidents. The game is watching you back.',
-    image: '/the-whisper-game.svg',
+    image: '/the-whisper-game.jpeg',
     locked: false,
   },
   {
@@ -100,7 +100,7 @@ export const UNIVERSES: Universe[] = [
     genre: 'MYSTERY',
     genreTag: 'CYBERPUNK MYSTERY',
     description: 'Neo-Tokyo, 2087. A sentient AI goes missing. Your only lead claims to BE the missing AI.',
-    image: '/neon-district.svg',
+    image: '/neon-district.jpeg',
     locked: false,
   },
   {
@@ -109,7 +109,7 @@ export const UNIVERSES: Universe[] = [
     genre: 'MYSTERY',
     genreTag: 'GOTHIC MYSTERY',
     description: 'Your estranged great-aunt left you half an estate. The other half goes to a stranger. The will has conditions.',
-    image: '/the-inheritance.svg',
+    image: '/the-inheritance.jpeg',
     locked: false,
   },
   {
@@ -118,7 +118,7 @@ export const UNIVERSES: Universe[] = [
     genre: 'ADVENTURE',
     genreTag: 'STEAMPUNK ADVENTURE',
     description: 'Stowaway on a pirate airship. One heist to earn your freedom. The target: a floating vault above the clouds.',
-    image: '/sky-pirates.svg',
+    image: '/sky-pirates.jpeg',
     locked: false,
   },
   {
@@ -127,7 +127,7 @@ export const UNIVERSES: Universe[] = [
     genre: 'ADVENTURE',
     genreTag: 'SPACE ADVENTURE',
     description: 'Four years into a one-way trip. The ship\'s AI is evolving. The signal at the edge of space is getting louder.',
-    image: '/the-drift.svg',
+    image: '/the-drift.jpeg',
     locked: false,
   },
   {
@@ -136,7 +136,7 @@ export const UNIVERSES: Universe[] = [
     genre: 'THRILLER',
     genreTag: 'ESPIONAGE THRILLER',
     description: 'Berlin. Vienna. Your handler says the diplomat is a traitor. The diplomat says your handler is the lie.',
-    image: '/phantom-protocol.svg',
+    image: '/phantom-protocol.jpeg',
     locked: false,
   },
   {
@@ -145,7 +145,7 @@ export const UNIVERSES: Universe[] = [
     genre: 'FANTASY',
     genreTag: 'DARK FANTASY',
     description: 'You stumbled through a door that shouldn\'t exist. The Unseelie Court offers a deal. The fae never let anyone leave.',
-    image: '/fae-court.svg',
+    image: '/fae-court.jpeg',
     locked: false,
   },
 ]
@@ -182,6 +182,7 @@ export interface StoryStep {
   openingProse?: string // only for first beat or static opening
   sceneImagePrompt?: string // Together AI FLUX.1 prompt
   sceneImagePrompts?: string[] // multiple prompts for carousel (overrides sceneImagePrompt)
+  includesProtagonist?: boolean // false → use Schnell ($0.04) instead of Kontext ($0.20) even if selfie exists
   staticImage?: string // fallback
   arcBrief?: string // what must be true by end of this beat
   // Chat fields
@@ -272,6 +273,7 @@ export const STORY_STEPS: StoryStep[] = [
     title: 'The Rehearsal',
     staticImage: '/scene-studio.jpg',
     sceneImagePrompts: [SCENE_PROMPTS.rehearsal, SCENE_PROMPTS.rehearsalAlt],
+    includesProtagonist: false,
     arcBrief: 'The next day at the academy. Jiwon is rehearsing. The protagonist sees a different side of him — focused, under pressure. Something Jiwon does or says reveals the weight he carries. End with a moment that makes the protagonist want to know more.',
   },
 
@@ -319,6 +321,7 @@ export const STORY_STEPS: StoryStep[] = [
     title: 'The Crash',
     requires: { 'cp-1': 'crash' },
     sceneImagePrompts: [SCENE_PROMPTS.rehearsal, SCENE_PROMPTS.rehearsalAlt],
+    includesProtagonist: false,
     arcBrief: 'The protagonist walks straight into NOVA\'s rehearsal and sits in the front row. Everyone stops. Sora\'s jaw drops. The choreographer starts yelling. But Jiwon — Jiwon laughs. It\'s the first time anyone has seen him laugh in weeks. He waves off the choreographer: "Let them stay." The rehearsal continues with the protagonist watching from five feet away. Jiwon performs differently with someone watching who doesn\'t work for the label. After, he approaches: "Nobody does that." End with electric tension — this was either the bravest or stupidest thing they\'ve ever done.',
   },
   {
