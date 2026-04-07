@@ -19,11 +19,18 @@ const MOOD_STAGES: Record<string, string[]> = {
   sora: ['hey again~', 'catching up', 'deep mode', 'besties'],
 }
 
-function getMoodIndex(_characterId: string, exchangeCount: number): number {
-  if (exchangeCount <= 2) return 0
-  if (exchangeCount <= 5) return 1
-  if (exchangeCount <= 10) return 2
-  return 3
+function getMoodIndex(affinityScore: number, exchangeCount: number): number {
+  let base = 0
+  if (affinityScore >= 56) base = 3
+  else if (affinityScore >= 36) base = 2
+  else if (affinityScore >= 16) base = 1
+
+  let sessionBoost = 0
+  if (exchangeCount >= 10) sessionBoost = 3
+  else if (exchangeCount >= 5) sessionBoost = 2
+  else if (exchangeCount >= 2) sessionBoost = 1
+
+  return Math.min(3, Math.max(base, sessionBoost))
 }
 
 function getMoodStages(characterId: string): string[] {
@@ -333,7 +340,8 @@ export function FreeChatPage() {
   // ─── Render ───
 
   const moodStages = getMoodStages(activeCharId)
-  const currentMoodIdx = getMoodIndex(activeCharId, activeState.exchangeCount)
+  const activeAffinityScore = characterAffinities[activeCharId] ?? 0
+  const currentMoodIdx = getMoodIndex(activeAffinityScore, activeState.exchangeCount)
 
   return (
     <div className="flex flex-col h-screen h-dvh bg-background">

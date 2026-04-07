@@ -33,11 +33,19 @@ const MOOD_TOOLTIPS: Record<string, { desc: string; hint: string }[]> = {
   ],
 }
 
-function getMoodIndex(_characterId: string, exchangeCount: number): number {
-  if (exchangeCount <= 1) return 0
-  if (exchangeCount <= 3) return 1
-  if (exchangeCount <= 6) return 2
-  return 3
+function getMoodIndex(affinityScore: number, exchangeCount: number): number {
+  // Base mood from persisted affinity (survives across scenes)
+  let base = 0
+  if (affinityScore >= 56) base = 3
+  else if (affinityScore >= 36) base = 2
+  else if (affinityScore >= 16) base = 1
+
+  // Within this session, exchanges can push mood one stage higher
+  let sessionBoost = 0
+  if (exchangeCount >= 6) sessionBoost = 2
+  else if (exchangeCount >= 3) sessionBoost = 1
+
+  return Math.min(3, Math.max(base, sessionBoost))
 }
 
 function getMoodStages(characterId: string): string[] {
@@ -511,7 +519,8 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
   // ─── Render ───
 
   const moodStages = getMoodStages(activeCharId)
-  const currentMoodIdx = getMoodIndex(activeCharId, activeState.exchangeCount)
+  const activeAffinityScore = characterAffinities[activeCharId] ?? 0
+  const currentMoodIdx = getMoodIndex(activeAffinityScore, activeState.exchangeCount)
 
   return (
     <div className="flex flex-col h-full">
