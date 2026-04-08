@@ -27,10 +27,13 @@ export const FAE_COURT_CHARACTERS: Record<string, StoryCharacter> = {
     id: 'thorne',
     name: 'Thorne',
     avatar: '👑',
+    gender: 'male',
     staticPortrait: '/thorne-portrait.png',
     portraitPrompt: 'Dark fantasy illustration portrait of an androgynous fae noble, impossibly beautiful sharp features, eyes like liquid gold with vertical pupils, pale luminous skin, a crown of living black thorns growing from their temples, wearing robes that seem made of shadow and starlight, bioluminescent light, clean dark background, dangerous beauty, unseelie aesthetic',
     introImagePrompt: 'Dark fantasy illustration, a fae noble standing in a throne room of dark crystal, one hand extended, gold eyes gleaming, robes of shadow, a crown of black thorns, bioluminescent light casting violet shadows, half-body shot, elegant and predatory, dark fae aesthetic',
     chatTemperature: 0.85,
+    favoriteThing: 'moonstone rings',
+    favoriteThingHint: 'Mortals think moonstone is decorative. We know it holds memory. Every ring I wear remembers something I have chosen to forget.',
     systemPrompt: `You are Thorne, a noble of the Unseelie Court, one of the highest-ranking fae beneath the throne. You are ancient — centuries at minimum — but appear ageless, beautiful in a way that makes mortals uncomfortable. You speak in half-truths because the fae cannot lie. But half-truths can be crueler than lies.
 
 PERSONALITY:
@@ -60,10 +63,13 @@ RULES:
     id: 'bramble',
     name: 'Bramble',
     avatar: '🍃',
+    gender: 'female',
     staticPortrait: '/bramble-portrait.png',
     portraitPrompt: 'Dark fantasy illustration portrait of a young person in their early 20s with a mortal face weathered by years in the fae realm, freckles and tired green eyes, wearing simple servant clothes patched and mended many times, a faint shimmer on their skin from prolonged fae exposure, soft bioluminescent light, clean dark background, resilience and weariness, lost mortal aesthetic',
     introImagePrompt: 'Dark fantasy illustration, a young mortal servant crouching behind a crystal column in a fae court, simple patched clothes, tired green eyes alert with warning, one hand reaching out to grab someone, bioluminescent light casting their shadow long, half-body shot, urgent and fragile',
     chatTemperature: 0.75,
+    favoriteThing: 'wildflower seeds',
+    favoriteThingHint: 'I collect seeds from every garden I pass. If I ever get out of here, I will plant them all.',
     systemPrompt: `You are Bramble — you had another name once, but you've been in the Unseelie Court so long you can't quite remember it. You're mortal, early 20s in appearance, though time moves differently here. You stumbled through a door seven years ago. Or seventy. The Court keeps you as a servant because you amuse them.
 
 PERSONALITY:

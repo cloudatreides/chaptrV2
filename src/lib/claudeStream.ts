@@ -264,6 +264,10 @@ export async function generateOpeningMessage(params: OpeningMessageParams): Prom
   if (bio) system += `\nProtagonist personality: "${bio}"`
   if (characterMemories && characterMemories.length > 0) {
     system += `\n\nTHINGS THE PROTAGONIST HAS SHARED WITH YOU:\n${characterMemories.map(m => `- ${m}`).join('\n')}\nYou remember these. Weave them in naturally if relevant — don't force it.`
+    // Inject favorite thing hint at Friend+ tier (affinity >= 36) so players can discover it
+    if (affinityScore !== undefined && affinityScore >= 36 && character?.favoriteThingHint) {
+      system += `\n\nPERSONAL DETAIL — If the conversation goes somewhere personal or the protagonist asks about your interests, you may naturally mention: "${character.favoriteThingHint}" — but only if it fits the moment. Don't force it. This is something real about you.`
+    }
   }
   if (sceneContext) system += `\n\n${sceneContext}`
   system += buildMemoryPrompt(globalAffinityScore, previousPlaythroughs)
@@ -325,6 +329,10 @@ export async function* streamChatReply(params: StreamChatParams): AsyncGenerator
   if (bio) system += `\nProtagonist personality: "${bio}"`
   if (characterMemories && characterMemories.length > 0) {
     system += `\n\nTHINGS THE PROTAGONIST HAS SHARED WITH YOU:\n${characterMemories.map(m => `- ${m}`).join('\n')}\nYou remember these. Weave them in naturally if relevant — don't force it.`
+    // Inject favorite thing hint at Friend+ tier (affinity >= 36) so players can discover it
+    if (affinityScore !== undefined && affinityScore >= 36 && character?.favoriteThingHint) {
+      system += `\n\nPERSONAL DETAIL — If the conversation goes somewhere personal or the protagonist asks about your interests, you may naturally mention: "${character.favoriteThingHint}" — but only if it fits the moment. Don't force it. This is something real about you.`
+    }
   }
   if (sceneContext) system += `\n\n${sceneContext}`
   system += buildMemoryPrompt(globalAffinityScore, previousPlaythroughs)

@@ -26,10 +26,13 @@ export const WHISPER_GAME_CHARACTERS: Record<string, StoryCharacter> = {
     id: 'mira',
     name: 'Mira',
     avatar: '💬',
+    gender: 'female',
     staticPortrait: '/mira-portrait.png',
     portraitPrompt: 'Dark psychological horror portrait of a 20 year old woman with short dyed purple hair and multiple ear piercings, expressive dark eyes that shift between excitement and fear, wearing a vintage band tee and denim jacket, warm cafe lighting, clean dark background, charismatic but scared, indie college aesthetic',
     introImagePrompt: 'Dark psychological horror illustration, a 20 year old woman with short purple hair leaning across a cafe table with wide excited eyes, denim jacket, multiple piercings catching the light, phone in hand showing a mysterious message, half-body shot, infectious energy masking something darker',
     chatTemperature: 0.8,
+    favoriteThing: 'friendship playlists',
+    favoriteThingHint: 'I make a playlist for every important person in my life. Yours has twelve songs already.',
     systemPrompt: `You are Mira Kovac, 20, the protagonist's best friend since freshman orientation. You're the one who found The Whisper Game — or it found you. You thought it was just a campus thing, like those old chain letter games but cooler. You were wrong. And now you're in too deep to get out alone.
 
 PERSONALITY:
@@ -59,6 +62,7 @@ RULES:
     id: 'host',
     name: 'The Host',
     avatar: '👁️',
+    gender: 'unknown',
     staticPortrait: '/host-portrait.png',
     portraitPrompt: 'Dark psychological horror portrait, no face visible — instead a phone screen showing a chat interface with a single glowing eye emoji as the avatar, green text on black, the screen cracked slightly, reflected in dark eyes that aren\'t quite visible, cold digital light, clean black background, anonymous and omniscient',
     introImagePrompt: 'Dark psychological horror illustration, a phone propped up on a desk in a dark room showing an encrypted messaging interface, the screen name THE HOST with a glowing eye avatar, messages appearing letter by letter as if being typed in real time, the room dark around it, half-body view of the phone, clinical and terrifying',

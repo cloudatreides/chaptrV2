@@ -174,6 +174,11 @@ interface StoreState {
   updateMomentNote: (momentId: string, note: string) => void
   deleteStoryMoment: (momentId: string) => void
 
+  // ── Chat Actions ──
+  actionCooldowns: Record<string, Record<string, number>> // characterId → actionId → timestamp
+  setActionCooldown: (characterId: string, actionId: string) => void
+  isActionOnCooldown: (characterId: string, actionId: string) => boolean
+
   // ── Gems ──
   gemBalance: number
   spendGems: (amount: number) => boolean
@@ -483,6 +488,24 @@ export const useStore = create<StoreState>()(
           ? s.favoriteCastIds.filter((f) => f !== id)
           : [...s.favoriteCastIds, id],
       })),
+
+      // ── Chat Actions ──
+      actionCooldowns: {},
+      setActionCooldown: (characterId, actionId) => set((s) => ({
+        actionCooldowns: {
+          ...s.actionCooldowns,
+          [characterId]: {
+            ...(s.actionCooldowns[characterId] ?? {}),
+            [actionId]: Date.now(),
+          },
+        },
+      })),
+      isActionOnCooldown: (characterId, actionId) => {
+        const cooldowns = get().actionCooldowns[characterId]
+        if (!cooldowns?.[actionId]) return false
+        // Cooldown = same session (30 min window)
+        return Date.now() - cooldowns[actionId] < 30 * 60 * 1000
+      },
 
       // ── Gems ──
       gemBalance: 50,

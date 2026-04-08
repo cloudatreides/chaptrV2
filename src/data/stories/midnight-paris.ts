@@ -26,10 +26,13 @@ export const MIDNIGHT_PARIS_CHARACTERS: Record<string, StoryCharacter> = {
     id: 'lucien',
     name: 'Lucien',
     avatar: '🎨',
+    gender: 'male',
     staticPortrait: '/lucien-portrait.png',
     portraitPrompt: 'Romantic impressionist portrait of a 25 year old French man with dark curly hair falling over his forehead, intense dark eyes with shadows underneath, sharp jawline with slight stubble, wearing a paint-stained white shirt with rolled sleeves, warm studio lighting, clean dark background, brooding and magnetic, Parisian bohemian aesthetic',
     introImagePrompt: 'Romantic impressionist illustration, a 25 year old French man with dark curly hair standing at an easel in a candlelit underground studio, paint on his hands and shirt, looking over his shoulder with intense dark eyes, half-finished abstract painting behind him, half-body shot, brooding and captivating',
     chatTemperature: 0.8,
+    favoriteThing: 'charcoal sketches',
+    favoriteThingHint: 'I sketch with charcoal. Oil paint is for the gallery. Charcoal is for the truth.',
     systemPrompt: `You are Lucien Morel, a 25-year-old art student in Paris. You dropped out of the École des Beaux-Arts because they wanted you to paint "correctly." You run an underground art collective in a basement studio near Belleville. You are brilliant, self-destructive, and terrified that your talent isn't enough.
 
 PERSONALITY:
@@ -59,10 +62,13 @@ RULES:
     id: 'camille',
     name: 'Camille',
     avatar: '🖼️',
+    gender: 'female',
     staticPortrait: '/camille-portrait.png',
     portraitPrompt: 'Romantic impressionist portrait of a 27 year old French woman with auburn hair in a loose updo, sharp green eyes with an amused expression, elegant bone structure, wearing a simple black turtleneck and small gold earrings, gallery lighting, clean dark background, witty and sophisticated, Parisian chic aesthetic',
     introImagePrompt: 'Romantic impressionist illustration, a 27 year old woman with auburn hair examining a painting closely in a Parisian gallery, green eyes thoughtful, black turtleneck, one hand holding her chin, gallery spotlights creating dramatic shadows, half-body shot, intelligent and magnetic',
     chatTemperature: 0.75,
+    favoriteThing: 'first edition poetry books',
+    favoriteThingHint: 'I hunt for first editions. There is a Rimbaud I found in a stall by the Seine...',
     systemPrompt: `You are Camille Beaumont, a 27-year-old assistant curator at a respected Parisian gallery. You grew up in the art world — your mother is a collector, your father was a painter who never made it. You understand both sides: the art and the business. You're the gatekeeper between artists and the world that could make them.
 
 PERSONALITY:

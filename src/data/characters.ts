@@ -11,11 +11,14 @@ export interface StoryCharacter {
   id: string
   name: string
   avatar: string // emoji fallback for chat bubbles
+  gender: 'male' | 'female' | 'non-binary' | 'unknown'
   staticPortrait?: string // static portrait image path — used instead of AI generation when available
   portraitPrompt: string // FLUX prompt for generating character avatar (square)
   introImagePrompt: string // FLUX prompt for cinematic intro scene image (wide)
   systemPrompt: string
   chatTemperature: number
+  favoriteThing?: string // what they love most — discoverable through conversation
+  favoriteThingHint?: string // surfaces naturally in chat
 }
 
 export const CHARACTERS: Record<string, StoryCharacter> = {
@@ -23,7 +26,10 @@ export const CHARACTERS: Record<string, StoryCharacter> = {
     id: 'jiwon',
     name: 'Jiwon',
     avatar: '🎤',
+    gender: 'male',
     staticPortrait: '/jiwon-portrait.png',
+    favoriteThing: 'old jazz records',
+    favoriteThingHint: 'I listen to a lot of old jazz when I need to clear my head. There\'s this one Chet Baker record...',
     portraitPrompt: 'Anime style portrait of a handsome 23 year old Korean male K-pop idol, sharp jawline, dark messy hair slightly covering one eye, intense dark eyes, subtle smirk, wearing a black turtleneck, soft studio lighting, clean dark background, high quality anime art style, detailed face, K-drama aesthetic',
     introImagePrompt: 'Anime style, handsome 23 year old Korean male K-pop idol leaning against a practice room doorframe, arms crossed, dark messy hair, intense dark eyes with a hint of curiosity, wearing a black turtleneck, warm moody lighting from behind, cinematic composition, half-body shot, K-drama aesthetic, high quality anime art',
     chatTemperature: 0.8,
@@ -55,7 +61,10 @@ RULES:
     id: 'sora',
     name: 'Sora',
     avatar: '💙',
+    gender: 'female',
     staticPortrait: '/sora-portrait.png',
+    favoriteThing: 'film cameras',
+    favoriteThingHint: 'I shoot everything on film. There\'s this old Pentax I found at a flea market...',
     portraitPrompt: 'Anime style portrait of a cute 21 year old Korean female with vibrant blue dyed hair, bright expressive eyes, warm smile, wearing a trendy oversized hoodie, soft studio lighting, clean dark background, high quality anime art style, detailed face, K-drama aesthetic, energetic and friendly vibe',
     introImagePrompt: 'Anime style, cute 21 year old Korean female with vibrant blue dyed hair waving excitedly in a busy academy hallway, bright expressive eyes, big smile, wearing a trendy oversized hoodie, students walking in background, warm natural lighting, half-body shot, energetic pose, K-drama aesthetic, high quality anime art',
     chatTemperature: 0.8,
@@ -87,7 +96,10 @@ RULES:
     id: 'yuna',
     name: 'Yuna',
     avatar: '🎵',
+    gender: 'female',
     staticPortrait: '/yuna-portrait.png',
+    favoriteThing: 'handwritten lyrics',
+    favoriteThingHint: 'I still write all my lyrics by hand. Something about pen on paper makes it more honest.',
     portraitPrompt: 'Anime style portrait of a beautiful 22 year old Korean female K-pop idol, long dark hair with subtle auburn highlights, sharp elegant features, confident gaze with a hint of vulnerability, wearing a sleek black blazer over a white top, soft studio lighting, clean dark background, high quality anime art style, detailed face, K-drama aesthetic',
     introImagePrompt: 'Anime style, beautiful 22 year old Korean female K-pop idol leaning against a practice room doorframe, arms crossed, long dark hair with auburn highlights, confident gaze with curiosity, wearing a sleek black blazer, warm moody lighting from behind, cinematic composition, half-body shot, K-drama aesthetic, high quality anime art',
     chatTemperature: 0.8,

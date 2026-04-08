@@ -12,6 +12,11 @@ import { getUniverseGenre } from '../data/storyData'
 import { trackEvent } from '../lib/supabase'
 import { getAffinityGrowth } from '../lib/affinity'
 import { AffinityBadge } from '../components/AffinityBadge'
+import { ChatActionTray } from '../components/ChatActionTray'
+import { ChatActionBubble } from '../components/ChatActionBubble'
+import { useChatActions } from '../hooks/useChatActions'
+import type { ChatAction } from '../data/chatActions'
+import { parseAffinityDelta } from '../lib/claudeStream'
 
 // ─── Mood stages (from SceneChat) ───
 
@@ -55,7 +60,7 @@ function getFreeSuggestions(exchangeCount: number): string[] {
 // ─── Per-character chat state ───
 
 interface CharChatState {
-  messages: { role: 'user' | 'character'; content: string }[]
+  messages: { role: 'user' | 'character'; content: string; actionData?: { label: string; emoji: string; gemCost: number } }[]
   exchangeCount: number
   hasOpener: boolean
   isLoadingOpener: boolean
@@ -142,6 +147,14 @@ export function FreeChatPage() {
 
   const activeState = chatStates[activeCharId] ?? freshCharState()
   const activeCharData = getCharacter(activeCharId, selectedUniverse) ?? CHARACTERS[activeCharId]
+  const playerCharacter = useStore((s) => s.characters[0])
+  const playerGender = playerCharacter?.gender ?? 'male'
+  const activeCharGender = activeCharData?.gender ?? 'unknown'
+  const { executeAction, checkCooldown, gemBalance } = useChatActions({
+    characterId: activeCharId,
+    universeId: selectedUniverse,
+    characterMemories: characterMemories[activeCharId] ?? [],
+  })
   const portrait = characterPortraits[activeCharId] ?? null
 
   const storyContext = buildPlaythroughContext(
@@ -340,6 +353,92 @@ export function FreeChatPage() {
     }
   }
 
+  const handleAction = async (action: ChatAction) => {
+    if (isTyping) return
+    const result = executeAction(action)
+    if (!result) return
+
+    // Add action as a user message with visual data
+    const actionMessage = {
+      role: 'user' as const,
+      content: `[ACTION: ${result.label}]`,
+      actionData: { label: result.label, emoji: result.emoji, gemCost: result.gemCost },
+    }
+    const newMessages = [...activeState.messages, actionMessage]
+
+    setChatStates(prev => ({
+      ...prev,
+      [activeCharId]: { ...prev[activeCharId], messages: newMessages },
+    }))
+    addChatMessage({ role: 'user', content: `[ACTION: ${result.label}]`, characterId: activeCharId, timestamp: Date.now() })
+
+    // Stream character reaction
+    setIsTyping(true)
+    setStreamedReply('')
+    const newExchange = activeState.exchangeCount + 1
+
+    const allMessages = newMessages.map(m => ({
+      role: m.role,
+      content: m.content,
+      characterId: activeCharId,
+      timestamp: Date.now(),
+    }))
+
+    const sceneCtx = buildSceneContext(activeCharId)
+
+    abortRef.current = new AbortController()
+    try {
+      let fullReply = ''
+      const gen = streamChatReply({
+        characterId: activeCharId,
+        messages: allMessages,
+        storyContext: storyContext + (sceneCtx ? `\n\n${sceneCtx}` : '') + `\n\nACTION CONTEXT: The protagonist just ${result.promptInjection}\nThis is a deliberate gesture — react to it naturally and in character. Your reaction should reflect your personality and current relationship tier.\nDo NOT include an [AFFINITY] tag — the affinity change is handled separately.`,
+        exchangeNumber: newExchange,
+        maxExchanges: 999,
+        characterState,
+        bio,
+        loveInterest,
+        universeId: selectedUniverse,
+        signal: abortRef.current.signal,
+        affinityScore: characterAffinities[activeCharId] ?? 0,
+        characterMemories: characterMemories[activeCharId] ?? [],
+        genre: getUniverseGenre(selectedUniverse),
+      })
+
+      for await (const chunk of gen) {
+        fullReply += chunk
+        setStreamedReply(fullReply)
+      }
+
+      const cleanReply = fullReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '').trim()
+      const charMessage = { role: 'character' as const, content: cleanReply }
+
+      setChatStates(prev => ({
+        ...prev,
+        [activeCharId]: {
+          ...prev[activeCharId],
+          messages: [...newMessages, charMessage],
+          exchangeCount: newExchange,
+        },
+      }))
+      addChatMessage({ ...charMessage, characterId: activeCharId, timestamp: Date.now() })
+      setStreamedReply('')
+      updateAffinity(activeCharId, result.affinityBoost)
+      trackEvent('chat_action', { characterId: activeCharId, actionId: action.id, affinityBoost: result.affinityBoost })
+    } catch (e) {
+      if (e instanceof Error && e.name !== 'AbortError') {
+        const fallback = { role: 'character' as const, content: '...' }
+        setChatStates(prev => ({
+          ...prev,
+          [activeCharId]: { ...prev[activeCharId], messages: [...newMessages, fallback] },
+        }))
+        setStreamedReply('')
+      }
+    } finally {
+      setIsTyping(false)
+    }
+  }
+
   // ─── Render ───
 
   const moodStages = getMoodStages(activeCharId)
@@ -473,9 +572,13 @@ export function FreeChatPage() {
                   )}
                 </div>
               )}
-              <div className={`chat-bubble ${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-character'}`}>
-                {msg.content}
-              </div>
+              {msg.actionData ? (
+                <ChatActionBubble label={msg.actionData.label} emoji={msg.actionData.emoji} gemCost={msg.actionData.gemCost} />
+              ) : (
+                <div className={`chat-bubble ${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-character'}`}>
+                  {msg.content}
+                </div>
+              )}
             </div>
           </motion.div>
         ))}
@@ -549,7 +652,17 @@ export function FreeChatPage() {
         </AnimatePresence>
 
         {/* Chat input */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 relative">
+          <ChatActionTray
+            playerGender={playerGender}
+            characterGender={activeCharGender}
+            affinityScore={characterAffinities[activeCharId] ?? 0}
+            gemBalance={gemBalance}
+            genre={getUniverseGenre(selectedUniverse)}
+            isOnCooldown={checkCooldown}
+            onAction={handleAction}
+            disabled={isTyping || activeState.isLoadingOpener}
+          />
           <input
             type="text"
             value={input}

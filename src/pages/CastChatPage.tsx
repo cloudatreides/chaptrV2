@@ -7,6 +7,10 @@ import { CAST_ROSTER, getCastCharacter } from '../data/castRoster'
 import { getAffinityTier } from '../lib/affinity'
 import { streamChatReply, extractMemories, parseAffinityDelta } from '../lib/claudeStream'
 import { getUniverseGenre } from '../data/storyData'
+import { ChatActionTray } from '../components/ChatActionTray'
+import { ChatActionBubble } from '../components/ChatActionBubble'
+import { useChatActions } from '../hooks/useChatActions'
+import type { ChatAction } from '../data/chatActions'
 import type { CastChatMessage } from '../store/useStore'
 
 export function CastChatPage() {
@@ -40,6 +44,27 @@ export function CastChatPage() {
   const tier = getAffinityTier(score)
   const isUnlocked = unlockedCastIds.includes(characterId ?? '')
   const playerChar = characters[0]
+  const playerGender = playerChar?.gender ?? 'male'
+  const charGender = charData?.gender ?? 'unknown'
+
+  // Collect character memories for action hook
+  const allMemoriesForHook = (() => {
+    const storyProg = useStore.getState().storyProgress
+    const mems: string[] = []
+    for (const prog of Object.values(storyProg)) {
+      mems.push(...(prog.characterMemories[characterId ?? ''] ?? []))
+    }
+    return [...new Set(mems)].slice(0, 10)
+  })()
+
+  const { executeAction, checkCooldown, gemBalance: actionGemBalance } = useChatActions({
+    characterId: characterId ?? '',
+    universeId: castMember?.universeId ?? null,
+    characterMemories: allMemoriesForHook,
+  })
+
+  // Local map to track action data for rendered messages
+  const [actionDataMap, setActionDataMap] = useState<Map<number, { label: string; emoji: string; gemCost: number }>>(new Map())
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -151,6 +176,77 @@ export function CastChatPage() {
     }
   }, [input, characterId, charData, isStreaming, messages, score, exchangeCount, playerChar, castMember, addCastChatMessage, setIsStreaming, updateGlobalAffinity])
 
+  const handleAction = useCallback(async (action: ChatAction) => {
+    if (!characterId || !charData || isStreaming) return
+    const result = executeAction(action)
+    if (!result) return
+
+    // Add action as a user message
+    const userMsg: CastChatMessage = { role: 'user', content: `[ACTION: ${result.label}]`, timestamp: Date.now() }
+    addCastChatMessage(characterId, userMsg)
+
+    // Track action data for rendering
+    const newIndex = messages.length // current length = index of newly added message
+    setActionDataMap((prev) => new Map(prev).set(newIndex, { label: result.label, emoji: result.emoji, gemCost: result.gemCost }))
+
+    setIsStreaming(true)
+    setStreamingContent('')
+
+    const abortController = new AbortController()
+    abortRef.current = abortController
+
+    const recentMessages = [...messages, userMsg].slice(-20).map((m) => ({
+      role: m.role,
+      content: m.content,
+      characterId: characterId,
+      timestamp: m.timestamp,
+    }))
+
+    try {
+      let fullReply = ''
+      const stream = streamChatReply({
+        characterId,
+        messages: recentMessages,
+        storyContext: `This is a persistent chat outside of any story. The protagonist is chatting freely with ${charData.name}.\n\nACTION CONTEXT: The protagonist just ${result.promptInjection}\nThis is a deliberate gesture — react to it naturally and in character. Your reaction should reflect your personality and current relationship tier.\nDo NOT include an [AFFINITY] tag — the affinity change is handled separately.`,
+        exchangeNumber: exchangeCount + 1,
+        maxExchanges: 999,
+        characterState: { junhoTrust: score },
+        bio: playerChar?.bio ?? null,
+        loveInterest: null,
+        universeId: castMember?.universeId ?? null,
+        signal: abortController.signal,
+        sceneContext: undefined,
+        affinityScore: score,
+        characterMemories: allMemoriesForHook,
+        globalAffinityScore: score,
+        previousPlaythroughs: useStore.getState().playthroughHistory,
+        genre: getUniverseGenre(castMember?.universeId ?? null),
+      })
+
+      for await (const chunk of stream) {
+        fullReply += chunk
+        setStreamingContent(fullReply)
+      }
+
+      if (fullReply.trim()) {
+        const cleanReply = fullReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '').trim()
+        const charMsg: CastChatMessage = { role: 'character', content: cleanReply, timestamp: Date.now() }
+        addCastChatMessage(characterId, charMsg)
+
+        // Apply action's guaranteed affinity boost
+        const newScore = Math.max(0, Math.min(100, score + result.affinityBoost))
+        updateGlobalAffinity(characterId, newScore)
+        setAffinityChange({ delta: result.affinityBoost, reason: result.label })
+        setTimeout(() => setAffinityChange(null), 4000)
+      }
+    } catch (err: any) {
+      if (err.name !== 'AbortError') console.error('Cast chat action error:', err)
+    } finally {
+      setIsStreaming(false)
+      setStreamingContent('')
+    }
+  }, [characterId, charData, isStreaming, messages, score, exchangeCount, playerChar, castMember, addCastChatMessage, setIsStreaming, updateGlobalAffinity, executeAction, allMemoriesForHook])
+
   // Collect character memories for sidebar
   const allMemories = (() => {
     const storyProg = useStore.getState().storyProgress
@@ -186,23 +282,30 @@ export function CastChatPage() {
         </div>
       )}
 
-      {messages.map((msg, i) => (
-        <div key={i} className={`flex gap-2.5 ${msg.role === 'user' ? 'justify-end' : ''}`}>
-          {msg.role === 'character' && <CharacterAvatar />}
-          <div
-            className="max-w-[80%] px-3.5 py-2.5 text-[13px] leading-relaxed"
-            style={{
-              background: msg.role === 'user'
-                ? 'linear-gradient(135deg, rgba(200,75,158,0.25), rgba(139,92,246,0.25))'
-                : '#1A1624',
-              color: msg.role === 'user' ? '#fff' : '#E8E3F0',
-              borderRadius: msg.role === 'user' ? '14px 2px 14px 14px' : '2px 14px 14px 14px',
-            }}
-          >
-            {msg.content}
+      {messages.map((msg, i) => {
+        const ad = actionDataMap.get(i)
+        return (
+          <div key={i} className={`flex gap-2.5 ${msg.role === 'user' ? 'justify-end' : ''}`}>
+            {msg.role === 'character' && <CharacterAvatar />}
+            {ad ? (
+              <ChatActionBubble label={ad.label} emoji={ad.emoji} gemCost={ad.gemCost} />
+            ) : (
+              <div
+                className="max-w-[80%] px-3.5 py-2.5 text-[13px] leading-relaxed"
+                style={{
+                  background: msg.role === 'user'
+                    ? 'linear-gradient(135deg, rgba(200,75,158,0.25), rgba(139,92,246,0.25))'
+                    : '#1A1624',
+                  color: msg.role === 'user' ? '#fff' : '#E8E3F0',
+                  borderRadius: msg.role === 'user' ? '14px 2px 14px 14px' : '2px 14px 14px 14px',
+                }}
+              >
+                {msg.content}
+              </div>
+            )}
           </div>
-        </div>
-      ))}
+        )
+      })}
 
       {isStreaming && streamingContent && (
         <div className="flex gap-2.5">
@@ -245,9 +348,19 @@ export function CastChatPage() {
     <div className="shrink-0 px-5 pb-5 pt-2">
       <form
         onSubmit={(e) => { e.preventDefault(); handleSend() }}
-        className="flex items-center gap-3 rounded-3xl px-4 py-2.5"
+        className="relative flex items-center gap-3 rounded-3xl px-4 py-2.5"
         style={{ background: '#1A1624', border: '1px solid #2D2538' }}
       >
+        <ChatActionTray
+          playerGender={playerGender}
+          characterGender={charGender}
+          affinityScore={score}
+          gemBalance={actionGemBalance}
+          genre={getUniverseGenre(castMember?.universeId ?? null)}
+          isOnCooldown={checkCooldown}
+          onAction={handleAction}
+          disabled={isStreaming}
+        />
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}

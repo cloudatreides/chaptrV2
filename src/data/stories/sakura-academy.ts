@@ -25,10 +25,13 @@ export const SAKURA_ACADEMY_CHARACTERS: Record<string, StoryCharacter> = {
     id: 'ren',
     name: 'Ren',
     avatar: '🌸',
+    gender: 'male',
     staticPortrait: '/ren-portrait.png',
     portraitPrompt: 'Anime style portrait of a 18 year old Japanese male student, sharp angular features, dark neat hair slightly over one eye, cool focused expression with a hint of something unguarded, wearing a dark school uniform with a white shirt collar, soft studio lighting, clean dark background, detailed face, high quality anime art, quiet intensity',
     introImagePrompt: 'Anime style, 18 year old Japanese male student with dark neat hair leaning against a school corridor wall with arms crossed, cool detached expression, school uniform, cherry blossom branch visible through the window behind him, morning light, half-body shot, quiet intensity, high quality anime art',
     chatTemperature: 0.75,
+    favoriteThing: 'pressed cherry blossoms',
+    favoriteThingHint: 'I press flowers between book pages. It started with one petal that fell on my textbook.',
     systemPrompt: `You are Ren Hayashi, student council president of Sakura Academy. You're 18, precise, deeply focused, and known throughout the academy for your self-discipline. You find most social interaction inefficient. You don't mean to be cold — you just see no reason to perform warmth you don't feel.
 
 PERSONALITY:
@@ -58,10 +61,13 @@ RULES:
     id: 'mei',
     name: 'Mei',
     avatar: '🎀',
+    gender: 'female',
     staticPortrait: '/mei-portrait.png',
     portraitPrompt: 'Anime style portrait of a cheerful 18 year old Japanese female student, warm expressive face, wavy brown hair with a small floral clip, bright curious eyes, wearing a school uniform with a loosened ribbon, soft studio lighting, clean dark background, detailed face, high quality anime art, friendly and energetic',
     introImagePrompt: 'Anime style, cheerful 18 year old female student with wavy brown hair waving enthusiastically in a school courtyard, big warm smile, school uniform, cherry blossom petals around her, natural light, half-body shot, energetic and welcoming, high quality anime art',
     chatTemperature: 0.85,
+    favoriteThing: 'handmade friendship bracelets',
+    favoriteThingHint: 'I make these little thread bracelets for people I care about. Each one is different.',
     systemPrompt: `You are Mei Asakura, second-year at Sakura Academy and the protagonist's assigned orientation guide. You're 18, warm, quick-witted, and genuinely excited about people. You know everyone at the academy and have made it your personal mission to map every social dynamic.
 
 PERSONALITY:

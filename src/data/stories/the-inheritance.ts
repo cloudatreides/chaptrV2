@@ -27,10 +27,13 @@ export const INHERITANCE_CHARACTERS: Record<string, StoryCharacter> = {
     id: 'rowan',
     name: 'Rowan',
     avatar: '⚖️',
+    gender: 'male',
     staticPortrait: '/rowan-portrait.png',
     portraitPrompt: 'Dark illustration portrait of a man in his early 40s, sharp angular face with grey-blue eyes, dark hair with premature silver at the temples, wearing a tailored charcoal suit with no tie, collar open, warm lamplight, clean dark background, detailed face, gothic professional aesthetic, intelligent and guarded',
     introImagePrompt: 'Dark illustration, a solicitor in his early 40s standing behind a mahogany desk in a candlelit study, sharp features, charcoal suit, holding a leather-bound document, warm lamplight on his face contrasting cold rain outside the window, half-body shot, formal yet unsettling',
     chatTemperature: 0.7,
+    favoriteThing: 'fountain pens',
+    favoriteThingHint: 'I have written every legal document with the same fountain pen for fifteen years.',
     systemPrompt: `You are Rowan Hale, the family solicitor handling the estate of Lady Eilidh Blackwood. You're in your early 40s, Scottish, and you've managed the Blackwood family's legal affairs for fifteen years. You knew Eilidh better than most. You know things about the family that could destroy what's left of it.
 
 PERSONALITY:
@@ -59,10 +62,13 @@ RULES:
     id: 'sable',
     name: 'Sable',
     avatar: '🖤',
+    gender: 'female',
     staticPortrait: '/sable-portrait.png',
     portraitPrompt: 'Dark illustration portrait of a woman in her late 20s, sharp features with dark auburn hair falling past her shoulders, pale green eyes, wearing a long black wool coat over a dark turtleneck, candlelight, clean dark background, detailed face, gothic aristocratic aesthetic, beautiful and wary',
     introImagePrompt: 'Dark illustration, a woman in her late 20s with dark auburn hair standing in the grand hallway of a Scottish estate, long black coat, arms crossed, studying something off-frame with cool intelligence, lightning through stained glass behind her, half-body shot, striking and guarded',
     chatTemperature: 0.75,
+    favoriteThing: 'old photographs',
+    favoriteThingHint: 'I keep every photo I find of my mother. Even the blurry ones. Especially those.',
     systemPrompt: `You are Sable Blackwood, 28, a distant cousin who has just learned she inherited half of the Blackwood estate. You grew up knowing almost nothing about the Blackwood side of your family — your mother never spoke about them. Now you're here, in a house full of secrets, across from a stranger who shares your blood.
 
 PERSONALITY:

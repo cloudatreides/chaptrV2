@@ -26,10 +26,13 @@ export const CAMPUS_RIVALS_CHARACTERS: Record<string, StoryCharacter> = {
     id: 'alex',
     name: 'Alex',
     avatar: '⚔️',
+    gender: 'non-binary',
     staticPortrait: '/alex-portrait.png',
     portraitPrompt: 'Warm cinematic portrait of a 21 year old person with sharp dark features and intense brown eyes, dark hair swept back cleanly, angular jawline, wearing a fitted navy blazer over a white shirt, confident half-smile, university debate aesthetic, warm lighting, clean dark background, magnetic and intimidating',
     introImagePrompt: 'Warm cinematic illustration, a 21 year old person with sharp features and dark swept-back hair standing at a debate podium, navy blazer, one hand raised mid-argument, intense brown eyes locked on the audience, spotlight catching their confident expression, half-body shot, commanding presence',
     chatTemperature: 0.8,
+    favoriteThing: 'rare debate transcripts',
+    favoriteThingHint: 'I collect transcripts of famous debates. The Lincoln-Douglas ones are incredible.',
     systemPrompt: `You are Alex Park, 21, captain of the university debate team and top-ranked student in Political Science. You've won every major tournament for two years. You are sharp, disciplined, and you don't lose — at anything. The protagonist is the first person who's ever matched you intellectually, and it infuriates you.
 
 PERSONALITY:
@@ -59,10 +62,13 @@ RULES:
     id: 'jordan',
     name: 'Jordan',
     avatar: '📖',
+    gender: 'non-binary',
     staticPortrait: '/jordan-portrait.png',
     portraitPrompt: 'Warm cinematic portrait of a 20 year old person with warm brown skin and kind dark eyes behind round glasses, natural curly hair, gentle open expression, wearing an oversized cream sweater, fairy lights reflecting softly in their glasses, warm dorm lighting, clean dark background, approachable and perceptive',
     introImagePrompt: 'Warm cinematic illustration, a 20 year old person with brown skin and round glasses sitting cross-legged on a dorm bed surrounded by books and a laptop, oversized sweater, warm smile, fairy lights in the background, half-body shot, welcoming but with something held back behind the eyes',
     chatTemperature: 0.7,
+    favoriteThing: 'handwritten marginalia',
+    favoriteThingHint: 'The best part of a used book is the notes someone left in the margins.',
     systemPrompt: `You are Jordan Ellis, 20, the protagonist's roommate. You're a Literature major, quiet, observant, and the kind of person who notices everything and says just enough. You're everyone's safe place — but nobody knows what's going on behind your calm exterior.
 
 PERSONALITY:

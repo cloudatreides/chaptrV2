@@ -10,6 +10,10 @@ import { generateCharacterPortrait, generateSceneImage } from '../lib/togetherAi
 import { trackEvent } from '../lib/supabase'
 import { getAffinityGrowth } from '../lib/affinity'
 import { parseAffinityDelta } from '../lib/claudeStream'
+import { ChatActionTray } from './ChatActionTray'
+import { ChatActionBubble } from './ChatActionBubble'
+import { useChatActions } from '../hooks/useChatActions'
+import type { ChatAction } from '../data/chatActions'
 
 // Mood labels based on exchange count — feels organic, not mechanical
 const MOOD_STAGES: Record<string, string[]> = {
@@ -210,7 +214,15 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
   const globalAffinityScore = globalAffinities[characterId] ?? 0
   const previousPlaythroughs = playthroughHistory.filter((pt) => pt.universeId === selectedUniverse)
   const character = getCharacter(characterId, selectedUniverse) ?? CHARACTERS[characterId]
-  const [localMessages, setLocalMessages] = useState<{ role: 'user' | 'character'; content: string }[]>([])
+  const playerCharacter = useStore((s) => s.characters[0])
+  const playerGender = playerCharacter?.gender ?? 'male'
+  const characterGender = character?.gender ?? 'unknown'
+  const { executeAction, checkCooldown, gemBalance } = useChatActions({
+    characterId,
+    universeId: selectedUniverse,
+    characterMemories: characterMemories[characterId] ?? [],
+  })
+  const [localMessages, setLocalMessages] = useState<{ role: 'user' | 'character'; content: string; actionData?: { label: string; emoji: string; gemCost: number } }[]>([])
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const [streamedReply, setStreamedReply] = useState('')
@@ -383,6 +395,78 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
     }
   }
 
+  const handleAction = async (action: ChatAction) => {
+    if (isTyping) return
+    const result = executeAction(action)
+    if (!result) return
+
+    // Add action as a user message with visual data
+    const actionMessage = {
+      role: 'user' as const,
+      content: `[ACTION: ${result.label}]`,
+      actionData: { label: result.label, emoji: result.emoji, gemCost: result.gemCost },
+    }
+    setLocalMessages((prev) => [...prev, actionMessage])
+    addChatMessage({ role: 'user', content: `[ACTION: ${result.label}]`, characterId, timestamp: Date.now() })
+
+    // Stream character reaction
+    setIsTyping(true)
+    setStreamedReply('')
+    const newExchange = exchangeCount + 1
+
+    const allMessages = [...localMessages, actionMessage].map((m) => ({
+      role: m.role,
+      content: m.content,
+      characterId,
+      timestamp: Date.now(),
+    }))
+
+    abortRef.current = new AbortController()
+    try {
+      let fullReply = ''
+      const gen = streamChatReply({
+        characterId,
+        messages: allMessages,
+        storyContext: storyContext + `\n\nACTION CONTEXT: The protagonist just ${result.promptInjection}\nThis is a deliberate gesture — react to it naturally and in character. Your reaction should reflect your personality and current relationship tier.\nDo NOT include an [AFFINITY] tag — the affinity change is handled separately.`,
+        exchangeNumber: newExchange,
+        maxExchanges,
+        characterState,
+        bio,
+        loveInterest,
+        universeId: selectedUniverse,
+        signal: abortRef.current.signal,
+        affinityScore,
+        characterMemories: characterMemories[characterId] ?? [],
+        globalAffinityScore,
+        previousPlaythroughs,
+        genre: getUniverseGenre(selectedUniverse),
+      })
+
+      for await (const chunk of gen) {
+        fullReply += chunk
+        setStreamedReply(fullReply)
+      }
+
+      const cleanReply = fullReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '').trim()
+      const charMessage = { role: 'character' as const, content: cleanReply }
+      setLocalMessages((prev) => [...prev, charMessage])
+      addChatMessage({ ...charMessage, characterId, timestamp: Date.now() })
+      setStreamedReply('')
+      setExchangeCount(newExchange)
+      // Use the action's guaranteed affinity boost instead of normal growth
+      updateAffinity(characterId, result.affinityBoost)
+      trackEvent('chat_action', { characterId, actionId: action.id, affinityBoost: result.affinityBoost })
+    } catch (e) {
+      if (e instanceof Error && e.name !== 'AbortError') {
+        const fallback = { role: 'character' as const, content: '...' }
+        setLocalMessages((prev) => [...prev, fallback])
+        setStreamedReply('')
+      }
+    } finally {
+      setIsTyping(false)
+    }
+  }
+
   const handleChatComplete = async (msgs: { role: 'user' | 'character'; content: string }[]) => {
     // Summarize the conversation
     const summary = await summarizeChat({
@@ -482,9 +566,13 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
                   )}
                 </div>
               )}
-              <div className={`chat-bubble ${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-character'}`}>
-                {msg.content}
-              </div>
+              {msg.actionData ? (
+                <ChatActionBubble label={msg.actionData.label} emoji={msg.actionData.emoji} gemCost={msg.actionData.gemCost} />
+              ) : (
+                <div className={`chat-bubble ${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-character'}`}>
+                  {msg.content}
+                </div>
+              )}
             </div>
           </motion.div>
         ))}
@@ -571,7 +659,17 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
         )}
 
         {/* Chat input */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 relative">
+            <ChatActionTray
+              playerGender={playerGender}
+              characterGender={characterGender}
+              affinityScore={affinityScore}
+              gemBalance={gemBalance}
+              genre={getUniverseGenre(selectedUniverse)}
+              isOnCooldown={checkCooldown}
+              onAction={handleAction}
+              disabled={isTyping || isLoadingOpener}
+            />
             <input
               type="text"
               value={input}

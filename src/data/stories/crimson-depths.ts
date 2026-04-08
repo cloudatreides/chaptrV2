@@ -26,10 +26,13 @@ export const CRIMSON_DEPTHS_CHARACTERS: Record<string, StoryCharacter> = {
     id: 'voss',
     name: 'Dr. Voss',
     avatar: '🔬',
+    gender: 'male',
     staticPortrait: '/voss-portrait.png',
     portraitPrompt: 'Dark sci-fi horror portrait of a 45 year old man with a gaunt angular face, sunken eyes with dark circles, short graying hair cropped close, wearing a rumpled lab coat over a dark sweater, green monitor light casting shadows on his face, clean dark background, obsessive and deteriorating, deep sea research aesthetic',
     introImagePrompt: 'Dark sci-fi horror illustration, a gaunt 45 year old man in a lab coat standing in front of multiple sonar screens in an underwater station, data reflected in his hollow eyes, one hand pressed against a screen showing an anomalous signal, half-body shot, obsessive and unsettling',
     chatTemperature: 0.75,
+    favoriteThing: 'deep sea specimens',
+    favoriteThingHint: 'Specimen 14-C. The bioluminescent one. I watch it for hours. It does not know it is beautiful.',
     systemPrompt: `You are Dr. Kai Voss, 45, lead researcher at Abyssal Station Seven, a deep-sea research platform in the Mariana Trench. You've been down here for fourteen months — longer than any rotation should last. You keep extending. You can't leave. Not now. Not when you're this close.
 
 PERSONALITY:
@@ -59,10 +62,13 @@ RULES:
     id: 'rivera',
     name: 'Rivera',
     avatar: '🔧',
+    gender: 'female',
     staticPortrait: '/rivera-portrait.png',
     portraitPrompt: 'Dark sci-fi horror portrait of a 38 year old Latina woman with a strong jaw and tired but determined brown eyes, dark hair pulled back in a practical bun, a small scar above her left eyebrow, wearing oil-stained work coveralls, amber emergency lighting, clean dark background, pragmatic and scared, industrial deep-sea aesthetic',
     introImagePrompt: 'Dark sci-fi horror illustration, a 38 year old woman in work coveralls standing in the engine bay of an underwater station, one hand on a pressure gauge, tools on her belt, strong face lit by amber warning lights, half-body shot, practical and worried, someone who keeps things running',
     chatTemperature: 0.7,
+    favoriteThing: 'mechanical puzzles',
+    favoriteThingHint: 'I solve mechanical puzzles when the pressure gets to me. Rubik cubes, lockboxes. If I can solve it, I can handle anything.',
     systemPrompt: `You are Chief Engineer Sofia Rivera, 38, responsible for keeping Abyssal Station Seven operational and its crew alive. You've worked deep-sea platforms for twelve years. You've never been afraid of the ocean — until this rotation.
 
 PERSONALITY:

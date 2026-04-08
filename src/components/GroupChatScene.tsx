@@ -11,6 +11,10 @@ import { getAffinityGrowth } from '../lib/affinity'
 import { parseAffinityDelta } from '../lib/claudeStream'
 import { getUniverseGenre } from '../data/storyData'
 import type { SceneCharacter } from '../data/storyData'
+import { ChatActionTray } from './ChatActionTray'
+import { ChatActionBubble } from './ChatActionBubble'
+import { useChatActions } from '../hooks/useChatActions'
+import type { ChatAction } from '../data/chatActions'
 
 // ─── Types ───
 
@@ -19,6 +23,7 @@ interface GroupMessage {
   role: 'user' | 'character'
   content: string
   characterId?: string // for character messages
+  actionData?: { label: string; emoji: string; gemCost: number }
 }
 
 interface Props {
@@ -35,6 +40,17 @@ export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, 
   const { bio, loveInterest, selectedUniverse, characterState, characterPortraits, characterAffinities, characterMemories } = useActiveStory()
   const { addChatMessage, setCharacterPortrait, updateAffinity, addCharacterMemory, globalAffinities, playthroughHistory } = useStore()
   const previousPlaythroughs = playthroughHistory.filter((pt) => pt.universeId === selectedUniverse)
+  const playerCharacter = useStore((s) => s.characters[0])
+  const playerGender = playerCharacter?.gender ?? 'male'
+
+  const primaryCharIdForActions = characters[0]?.characterId ?? ''
+  const primaryCharDataForActions = getCharacter(primaryCharIdForActions, selectedUniverse) ?? CHARACTERS[primaryCharIdForActions]
+  const primaryCharGender = primaryCharDataForActions?.gender ?? 'unknown'
+  const { executeAction, checkCooldown, gemBalance } = useChatActions({
+    characterId: primaryCharIdForActions,
+    universeId: selectedUniverse,
+    characterMemories: characterMemories[primaryCharIdForActions] ?? [],
+  })
 
   const [messages, setMessages] = useState<GroupMessage[]>([])
   const [input, setInput] = useState('')
@@ -250,6 +266,79 @@ export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, 
     }
   }
 
+  // ─── Handle action ───
+
+  const handleAction = async (action: ChatAction) => {
+    if (isTyping) return
+    const result = executeAction(action)
+    if (!result) return
+
+    const actionMessage: GroupMessage = {
+      id: `action-${Date.now()}`,
+      role: 'user',
+      content: `[ACTION: ${result.label}]`,
+      actionData: { label: result.label, emoji: result.emoji, gemCost: result.gemCost },
+    }
+    const newMessages = [...messages, actionMessage]
+    setMessages(newMessages)
+    addChatMessage({ role: 'user', content: `[ACTION: ${result.label}]`, characterId: 'user', timestamp: Date.now() })
+
+    setIsTyping(true)
+    setStreamedReply('')
+    const newExchange = exchangeCount + 1
+    const primaryIdx = primaryCharIndex % characters.length
+    const primaryChar = characters[primaryIdx]
+    const primaryCharId = primaryChar.characterId
+    setStreamingCharId(primaryCharId)
+
+    const claudeMessages = newMessages.map(m => ({
+      role: m.role === 'user' ? 'user' as const : 'character' as const,
+      content: m.content,
+      characterId: m.characterId ?? 'user',
+      timestamp: Date.now(),
+    }))
+    const groupCtx = buildGroupContext(primaryCharId)
+
+    abortRef.current = new AbortController()
+    try {
+      let fullReply = ''
+      const gen = streamChatReply({
+        characterId: primaryCharId,
+        messages: claudeMessages,
+        storyContext: storyContext + `\n\nACTION CONTEXT: The protagonist just ${result.promptInjection}\nReact naturally and in character. Do NOT include an [AFFINITY] tag.`,
+        exchangeNumber: newExchange,
+        maxExchanges: primaryChar.maxExchanges ?? 999,
+        characterState, bio, loveInterest,
+        universeId: selectedUniverse,
+        signal: abortRef.current.signal,
+        sceneContext: groupCtx,
+        affinityScore: characterAffinities[primaryCharId] ?? 0,
+        characterMemories: characterMemories[primaryCharId] ?? [],
+        globalAffinityScore: globalAffinities[primaryCharId] ?? 0,
+        previousPlaythroughs,
+        genre: getUniverseGenre(selectedUniverse),
+      })
+      for await (const chunk of gen) { fullReply += chunk; setStreamedReply(fullReply) }
+
+      const cleanReply = fullReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '').trim()
+      const primaryMsg: GroupMessage = { id: `char-${primaryCharId}-${Date.now()}`, role: 'character', content: cleanReply, characterId: primaryCharId }
+      setMessages(prev => [...prev, primaryMsg])
+      addChatMessage({ role: 'character', content: cleanReply, characterId: primaryCharId, timestamp: Date.now() })
+      setStreamedReply('')
+      setStreamingCharId(null)
+      updateAffinity(primaryCharId, result.affinityBoost)
+      setPrimaryCharIndex((primaryIdx + 1) % characters.length)
+      setExchangeCount(newExchange)
+      trackEvent('chat_action', { characterId: primaryCharId, actionId: action.id, affinityBoost: result.affinityBoost })
+    } catch (e) {
+      if (e instanceof Error && e.name !== 'AbortError') {
+        setMessages(prev => [...prev, { id: `err-${Date.now()}`, role: 'character', content: '...', characterId: primaryCharId }])
+        setStreamedReply('')
+        setStreamingCharId(null)
+      }
+    } finally { setIsTyping(false); setStreamingCharId(null) }
+  }
+
   // ─── Render helpers ───
 
   function CharAvatar({ characterId, size = 'sm' }: { characterId: string; size?: 'sm' | 'md' }) {
@@ -306,9 +395,13 @@ export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, 
                 {msg.role === 'character' && msg.characterId && (
                   <CharAvatar characterId={msg.characterId} />
                 )}
-                <div className={`chat-bubble ${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-character'}`}>
-                  {msg.content}
-                </div>
+                {msg.actionData ? (
+                  <ChatActionBubble label={msg.actionData.label} emoji={msg.actionData.emoji} gemCost={msg.actionData.gemCost} />
+                ) : (
+                  <div className={`chat-bubble ${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-character'}`}>
+                    {msg.content}
+                  </div>
+                )}
               </div>
             </motion.div>
           )
@@ -377,7 +470,17 @@ export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, 
           )}
         </AnimatePresence>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 relative">
+          <ChatActionTray
+            playerGender={playerGender}
+            characterGender={primaryCharGender}
+            affinityScore={characterAffinities[primaryCharIdForActions] ?? 0}
+            gemBalance={gemBalance}
+            genre={getUniverseGenre(selectedUniverse)}
+            isOnCooldown={checkCooldown}
+            onAction={handleAction}
+            disabled={isTyping}
+          />
           <input
             type="text"
             value={input}

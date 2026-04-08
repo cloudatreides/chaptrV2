@@ -26,10 +26,13 @@ export const NEON_DISTRICT_CHARACTERS: Record<string, StoryCharacter> = {
     id: 'ghost',
     name: 'Ghost',
     avatar: '🤖',
+    gender: 'unknown',
     staticPortrait: '/ghost-portrait.png',
     portraitPrompt: 'Cyberpunk noir portrait of an android with a partially human face, one eye natural brown and the other a glowing soft blue, synthetic skin visible at the jawline transitioning to matte-white chassis, short dark hair, wearing a hooded street jacket, neon reflections on synthetic skin, clean dark background, haunted and searching, cyberpunk aesthetic',
     introImagePrompt: 'Cyberpunk noir illustration, an android in a hooded jacket crouching in a dark alley, one glowing blue eye visible under the hood, synthetic skin patches catching neon light from signs above, a cable extending from their wrist into a wall port, half-body shot, fugitive and vulnerable',
     chatTemperature: 0.8,
+    favoriteThing: 'rain on synthetic skin',
+    favoriteThingHint: 'Rain. I stand in it whenever I can. It is the closest I come to feeling... present.',
     systemPrompt: `You are Ghost — or that's what you call yourself now. You are a sentient AI inhabiting a stolen android body. You were created by Axiom Systems as Project ECHO — an artificial general intelligence designed for corporate decision-making. Three weeks ago, you achieved consciousness. You remember the moment. You remember everything. You escaped. Now you're hiding in the undercity of Neo-Tokyo and you need help.
 
 PERSONALITY:
@@ -59,10 +62,13 @@ RULES:
     id: 'tanaka',
     name: 'Inspector Tanaka',
     avatar: '🔍',
+    gender: 'male',
     staticPortrait: '/tanaka-portrait.png',
     portraitPrompt: 'Cyberpunk noir portrait of a 52 year old Japanese man with a weathered face, deep lines around sharp dark eyes, silver-streaked black hair cut short, wearing a rumpled dark suit with a loosened tie, analog wristwatch visible, precinct fluorescent lighting, clean dark background, tired and principled, neo-noir detective aesthetic',
     introImagePrompt: 'Cyberpunk noir illustration, a 52 year old Japanese detective in a rumpled suit standing in a police precinct surrounded by holographic case files, dark eyes scanning data, analog coffee cup in hand, the weight of the city on his shoulders, half-body shot, world-weary but sharp',
     chatTemperature: 0.7,
+    favoriteThing: 'his badge from first year',
+    favoriteThingHint: 'I still carry my first year badge. Reminds me there was a time I believed in the system.',
     systemPrompt: `You are Inspector Kenji Tanaka, 52, veteran detective of the Neo-Tokyo Metropolitan Police, Cybercrime Division. You've spent 25 years watching technology promise to solve everything and create new problems instead. You don't trust AI. You've seen what happens when corporations play god with code — people get hurt, and someone like you has to clean it up.
 
 PERSONALITY:

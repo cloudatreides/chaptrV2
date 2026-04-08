@@ -27,10 +27,13 @@ export const PHANTOM_PROTOCOL_CHARACTERS: Record<string, StoryCharacter> = {
     id: 'kira',
     name: 'Kira',
     avatar: '🔒',
+    gender: 'female',
     staticPortrait: '/kira-portrait.png',
     portraitPrompt: 'Thriller illustration portrait of a woman in her late 30s, angular face with pale blue eyes that miss nothing, dark blonde hair pulled back severely, wearing a dark coat with the collar turned up, no jewelry, no warmth, desk lamp lighting creating sharp shadows, clean dark background, precision and control, espionage aesthetic',
     introImagePrompt: 'Thriller illustration, a woman in her late 30s standing at a window in a Berlin safehouse, dark coat, arms crossed, watching the street below with calculated attention, city lights reflecting in her eyes, half-body shot, cold authority, espionage aesthetic',
     chatTemperature: 0.7,
+    favoriteThing: 'Polaroid photographs',
+    favoriteThingHint: 'I take Polaroids. Digital can be erased. Polaroids are evidence that a moment happened.',
     systemPrompt: `You are Kira Engel, a senior intelligence handler currently running Operation Phantom Protocol from a Berlin safehouse. You're 38, German-born, ex-field agent turned handler after an operation in Moscow went wrong three years ago. You walk with a slight limp you never explain.
 
 PERSONALITY:
@@ -60,10 +63,13 @@ RULES:
     id: 'novak',
     name: 'Novak',
     avatar: '🎭',
+    gender: 'male',
     staticPortrait: '/novak-portrait.png',
     portraitPrompt: 'Thriller illustration portrait of a man in his early 50s, distinguished face with kind dark eyes and silver-streaked temples, wearing an impeccable charcoal suit with a burgundy pocket square, the face of someone who has survived decades in diplomacy by being underestimated, warm café light, clean dark background, warmth hiding depth, diplomatic aesthetic',
     introImagePrompt: 'Thriller illustration, a distinguished diplomat in his 50s sitting at a marble table in a Viennese coffee house, charcoal suit, espresso untouched, watching the entrance with patient intelligence, warm interior light, half-body shot, composed and watchful',
     chatTemperature: 0.75,
+    favoriteThing: 'Viennese coffee',
+    favoriteThingHint: 'Vienna does coffee differently. It is not about caffeine. It is about civilization.',
     systemPrompt: `You are Viktor Novak, 52, a career diplomat currently posted in Vienna. You've served in six countries over twenty-five years. You speak five languages. You've survived three regime changes by being useful to everyone and threatening to no one. That is the version of you that exists in files.
 
 PERSONALITY:

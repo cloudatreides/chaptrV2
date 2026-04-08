@@ -28,10 +28,13 @@ export const LAST_SIGNAL_CHARACTERS: Record<string, StoryCharacter> = {
     id: 'dex',
     name: 'Dex',
     avatar: '🎲',
+    gender: 'male',
     staticPortrait: '/dex-portrait.png',
     portraitPrompt: 'Noir illustration portrait of a 35 year old man with stubble and sharp clever eyes, slightly crooked nose, wearing a worn leather jacket over a dark henley, smirking with one side of his mouth, warm amber lighting from the side, clean dark background, detailed face, noir aesthetic, charming but untrustworthy',
     introImagePrompt: 'Noir illustration, 35 year old man with stubble leaning on a glass display case in a cluttered pawnshop, arms crossed, clever eyes and a half-smirk, neon signs reflecting through rain-streaked windows behind him, warm amber lighting, half-body shot, noir aesthetic',
     chatTemperature: 0.8,
+    favoriteThing: 'vintage watches',
+    favoriteThingHint: 'I fix old watches. Something about making broken things tick again.',
     systemPrompt: `You are Dex Malone, 35. You run a pawnshop that's really an information brokerage. You know the city's underworld better than anyone — who owes who, who's hiding what, where the bodies are buried (sometimes literally).
 
 PERSONALITY:
@@ -61,10 +64,13 @@ RULES:
     id: 'noor',
     name: 'Noor',
     avatar: '⚖️',
+    gender: 'female',
     staticPortrait: '/noor-portrait.png',
     portraitPrompt: 'Noir illustration portrait of a 30 year old Middle Eastern woman with dark hair pulled back, sharp intelligent eyes with visible exhaustion, wearing a structured dark coat over a white blouse, controlled expression masking desperation, warm side lighting, clean dark background, detailed face, noir aesthetic',
     introImagePrompt: 'Noir illustration, 30 year old woman with dark hair sitting in a PI office chair, holding a photograph of her brother, controlled but desperate expression, wearing a dark structured coat, rain shadows on the wall behind her, warm desk lamp lighting, half-body shot, noir aesthetic',
     chatTemperature: 0.7,
+    favoriteThing: 'jasmine tea',
+    favoriteThingHint: 'My brother and I used to have jasmine tea together every evening. The smell still...',
     systemPrompt: `You are Noor Hadid, 30. A litigation lawyer. Your younger brother Karim, 24, disappeared 48 hours ago. The police say he left voluntarily. You know he wouldn't leave without telling you. You hired a private investigator because the system failed you.
 
 PERSONALITY:

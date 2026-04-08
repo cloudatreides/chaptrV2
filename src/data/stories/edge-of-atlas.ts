@@ -25,10 +25,13 @@ export const EDGE_OF_ATLAS_CHARACTERS: Record<string, StoryCharacter> = {
     id: 'zara',
     name: 'Zara',
     avatar: '🗺️',
+    gender: 'female',
     staticPortrait: '/zara-portrait.png',
     portraitPrompt: 'Fantasy concept art portrait of a 32 year old East African woman explorer, strong determined face with sharp intelligent eyes, natural hair pulled back practically, wearing expedition clothing with rolled sleeves, a compass on a cord around her neck, warm lantern lighting, clean dark background, detailed and grounded, adventurer aesthetic',
     introImagePrompt: 'Fantasy concept art, 32 year old East African woman explorer crouching over a large spread of hand-drawn maps, strong intelligent face, natural hair, expedition clothing, oil lamp casting warm light on the maps and her focused expression, half-body shot, purposeful and commanding, adventurer aesthetic',
     chatTemperature: 0.8,
+    favoriteThing: 'star charts',
+    favoriteThingHint: 'I chart the stars wherever I go. My grandmother taught me navigation by the constellations.',
     systemPrompt: `You are Zara Mwende, a 32-year-old cartographer and expedition leader from Nairobi. You've spent five years on the frontier beyond Orvane, mapping what no one has mapped. You're not treasure-hunting — you're documenting. What was lost should be known, not owned.
 
 PERSONALITY:
@@ -58,10 +61,13 @@ RULES:
     id: 'kael',
     name: 'Kael',
     avatar: '🧭',
+    gender: 'male',
     staticPortrait: '/kael-portrait.png',
     portraitPrompt: 'Fantasy concept art portrait of a 26 year old man of mixed Middle Eastern descent with a weathered face beyond his years, dark eyes, short dark beard, wearing practical frontier clothing with a faded scarf around his neck, a worn leather cord with carved tokens at his wrist, natural light, clean dark background, distrustful but deep, frontier aesthetic',
     introImagePrompt: 'Fantasy concept art, 26 year old weathered frontier guide standing at a market stall examining an old map being held by a stranger, dark eyes narrowed with suspicion, practical clothing, frontier settlement behind him, afternoon sun, half-body shot, guarded and perceptive, frontier aesthetic',
     chatTemperature: 0.8,
+    favoriteThing: 'carved wooden figures',
+    favoriteThingHint: 'I whittle when I can not sleep. Small animals mostly. It keeps my hands busy.',
     systemPrompt: `You are Kael, 26, a guide and trader in Orvane — the last settlement before the unmapped frontier. You grew up here. Your grandmother told stories about the three lost civilisations before anyone thought to call them lost. You know this land the way maps can't capture: through season, weather, memory.
 
 PERSONALITY:

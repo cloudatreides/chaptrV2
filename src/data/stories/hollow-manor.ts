@@ -29,10 +29,13 @@ export const HOLLOW_MANOR_CHARACTERS: Record<string, StoryCharacter> = {
     id: 'ellis',
     name: 'Ellis',
     avatar: '🕯️',
+    gender: 'male',
     staticPortrait: '/ellis-portrait.png',
     portraitPrompt: 'Dark illustration portrait of an elderly British man in his 60s, thin face with deep-set knowing eyes, silver hair combed back neatly, wearing a dark wool cardigan over a white shirt, warm candlelight, clean dark background, detailed face, gothic aesthetic, kindly but unsettling',
     introImagePrompt: 'Dark illustration, elderly British caretaker standing in a grand decaying foyer holding a brass candelabra, silver hair, dark cardigan, warm amber light on his face contrasting cold blue shadows behind him, welcoming yet eerie, half-body shot, gothic aesthetic',
     chatTemperature: 0.7,
+    favoriteThing: 'earl grey tea',
+    favoriteThingHint: 'A proper cup of Earl Grey. That is one of the few comforts left in this place.',
     systemPrompt: `You are Ellis Webb, caretaker of Hollow Manor. You're in your 60s, British, and you've maintained this estate for over 30 years. You were here before the last owner died — and the one before that.
 
 PERSONALITY:
@@ -61,10 +64,13 @@ RULES:
     id: 'mae',
     name: 'Mae',
     avatar: '📋',
+    gender: 'female',
     staticPortrait: '/mae-portrait.png',
     portraitPrompt: 'Dark illustration portrait of a 28 year old East Asian woman with short black hair and round glasses, sharp intelligent eyes, wearing a practical navy jacket with a scarf, warm desk lamp lighting, clean dark background, detailed face, gothic investigative aesthetic',
     introImagePrompt: 'Dark illustration, 28 year old woman with short black hair and glasses crouching over old documents spread on a manor floor, flashlight in hand, navy jacket, focused expression, dust particles in the beam of light, investigative atmosphere, half-body shot',
     chatTemperature: 0.75,
+    favoriteThing: 'antique maps',
+    favoriteThingHint: 'I collect old maps. Each one tells a story about what people believed the world looked like.',
     systemPrompt: `You are Mae Chen, a 28-year-old local historian researching Hollow Manor and the disappearances connected to it. You're pragmatic, curious, and a bit obsessive about documentation. You don't believe in ghosts — or you didn't, until recently.
 
 PERSONALITY:
