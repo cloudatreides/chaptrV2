@@ -10,7 +10,7 @@ import { getUniverseGenre } from '../data/storyData'
 import { ChatActionTray } from '../components/ChatActionTray'
 import { ChatActionBubble } from '../components/ChatActionBubble'
 import { useChatActions } from '../hooks/useChatActions'
-import type { ChatAction } from '../data/chatActions'
+import { parseActionFromMessage, type ChatAction } from '../data/chatActions'
 import type { CastChatMessage } from '../store/useStore'
 
 export function CastChatPage() {
@@ -64,7 +64,6 @@ export function CastChatPage() {
   })
 
   // Local map to track action data for rendered messages
-  const [actionDataMap, setActionDataMap] = useState<Map<number, { label: string; emoji: string; gemCost: number }>>(new Map())
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -185,9 +184,6 @@ export function CastChatPage() {
     const userMsg: CastChatMessage = { role: 'user', content: `[ACTION: ${result.label}]`, timestamp: Date.now() }
     addCastChatMessage(characterId, userMsg)
 
-    // Track action data for rendering
-    const newIndex = messages.length // current length = index of newly added message
-    setActionDataMap((prev) => new Map(prev).set(newIndex, { label: result.label, emoji: result.emoji, gemCost: result.gemCost }))
 
     setIsStreaming(true)
     setStreamingContent('')
@@ -283,12 +279,12 @@ export function CastChatPage() {
       )}
 
       {messages.map((msg, i) => {
-        const ad = actionDataMap.get(i)
+        const ad = msg.role === 'user' ? parseActionFromMessage(msg.content) : null
         return (
           <div key={i} className={`flex gap-2.5 ${msg.role === 'user' ? 'justify-end' : ''}`}>
             {msg.role === 'character' && <CharacterAvatar />}
             {ad ? (
-              <ChatActionBubble label={ad.label} emoji={ad.emoji} gemCost={ad.gemCost} />
+              <ChatActionBubble label={ad.label} emoji={ad.emoji} gemCost={0} />
             ) : (
               <div
                 className="max-w-[80%] px-3.5 py-2.5 text-[13px] leading-relaxed"

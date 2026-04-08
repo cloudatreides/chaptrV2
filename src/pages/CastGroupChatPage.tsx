@@ -10,7 +10,7 @@ import { getUniverseGenre } from '../data/storyData'
 import { ChatActionTray } from '../components/ChatActionTray'
 import { ChatActionBubble } from '../components/ChatActionBubble'
 import { useChatActions } from '../hooks/useChatActions'
-import type { ChatAction } from '../data/chatActions'
+import { parseActionFromMessage, type ChatAction } from '../data/chatActions'
 import type { CastChatMessage } from '../store/useStore'
 import type { CastMember } from '../data/castRoster'
 
@@ -59,7 +59,6 @@ export function CastGroupChatPage() {
     universeId,
     characterMemories: [],
   })
-  const [actionDataMap, setActionDataMap] = useState<Map<number, { label: string; emoji: string; gemCost: number }>>(new Map())
 
   // Validate all chars are unlocked and same universe
   const allUnlocked = characterIds.every((id) => unlockedCastIds.includes(id))
@@ -245,8 +244,6 @@ export function CastGroupChatPage() {
     const userMsg: CastChatMessage = { role: 'user', content: `[ACTION: ${result.label}]`, timestamp: Date.now() }
     addGroupCastMessage(groupKey, userMsg)
 
-    const newIndex = messages.length
-    setActionDataMap((prev) => new Map(prev).set(newIndex, { label: result.label, emoji: result.emoji, gemCost: result.gemCost }))
 
     setIsTyping(true)
     setStreamingContent('')
@@ -361,7 +358,7 @@ export function CastGroupChatPage() {
       {messages.map((msg, i) => {
         const cd = msg.characterId ? charDataMap[msg.characterId] : null
         const isNew = i >= messages.length - 2
-        const ad = actionDataMap.get(i)
+        const ad = msg.role === 'user' ? parseActionFromMessage(msg.content) : null
         return (
           <div
             key={`${msg.timestamp}-${i}`}
@@ -374,7 +371,7 @@ export function CastGroupChatPage() {
                 <span className="text-[10px] text-white/30 mb-0.5">{cd.name}</span>
               )}
               {ad ? (
-                <ChatActionBubble label={ad.label} emoji={ad.emoji} gemCost={ad.gemCost} />
+                <ChatActionBubble label={ad.label} emoji={ad.emoji} gemCost={0} />
               ) : (
                 <div
                   className="px-3.5 py-2.5 text-[13px] leading-relaxed"

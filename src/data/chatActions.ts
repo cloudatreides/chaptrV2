@@ -218,6 +218,24 @@ export function getResolvedActions(
   })
 }
 
+/** Parse an action label from a message like "[ACTION: Coffee]" and return display data */
+export function parseActionFromMessage(content: string): { label: string; emoji: string } | null {
+  const match = content.match(/^\[ACTION:\s*(.+)]$/)
+  if (!match) return null
+  const label = match[1]
+  // Search all actions + variants for the label
+  for (const action of CHAT_ACTIONS) {
+    if (action.label === label) return { label: action.label, emoji: action.emoji }
+    if (action.variants) {
+      for (const v of action.variants) {
+        if (v.label === label) return { label: v.label, emoji: v.emoji }
+      }
+    }
+  }
+  // Fallback: unknown action, still render nicely
+  return { label, emoji: '✨' }
+}
+
 /** Get the affinity boost for mystery box (random) */
 export function getMysteryBoxBoost(): number {
   return Math.floor(Math.random() * 8) + 1 // 1-8
