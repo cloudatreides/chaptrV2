@@ -16,7 +16,6 @@ import { ChatActionTray } from '../components/ChatActionTray'
 import { ChatActionBubble } from '../components/ChatActionBubble'
 import { useChatActions } from '../hooks/useChatActions'
 import type { ChatAction } from '../data/chatActions'
-import { parseAffinityDelta } from '../lib/claudeStream'
 
 // ─── Mood stages (from SceneChat) ───
 

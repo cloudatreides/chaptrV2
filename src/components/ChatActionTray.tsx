@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, X, Lock, Gem } from 'lucide-react'
 import { getAvailableActions, CATEGORY_INFO, type ChatAction, type ActionCategory } from '../data/chatActions'
-import { getAffinityTier, AFFINITY_TIERS, ROMANCE_AFFINITY_TIERS } from '../lib/affinity'
+import { AFFINITY_TIERS, ROMANCE_AFFINITY_TIERS } from '../lib/affinity'
 
 interface Props {
   playerGender: 'male' | 'female'
