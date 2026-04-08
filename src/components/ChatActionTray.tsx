@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, X, Lock, Gem, Heart, Send } from 'lucide-react'
 import { getAvailableActions, CATEGORY_INFO, ACTION_DESCRIPTIONS, type ChatAction, type ActionCategory } from '../data/chatActions'
