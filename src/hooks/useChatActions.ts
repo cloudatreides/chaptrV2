@@ -16,6 +16,7 @@ interface ActionResult {
   affinityBoost: number
   promptInjection: string
   reactionImagePrompt: string | null
+  letterContent: string | null
 }
 
 export function useChatActions({ characterId, universeId, characterMemories }: UseChatActionsParams) {
@@ -72,12 +73,16 @@ export function useChatActions({ characterId, universeId, characterMemories }: U
       affinityBoost,
       promptInjection,
       reactionImagePrompt,
+      letterContent: null, // set asynchronously for love-letter actions
     }
   }, [characterId, universeId, characterMemories, spendGems, setActionCooldown, isActionOnCooldown])
+
+  /** Check if an action needs async letter generation */
+  const isLetterAction = useCallback((actionId: string) => actionId === 'love-letter', [])
 
   const checkCooldown = useCallback((actionId: string) => {
     return isActionOnCooldown(characterId, actionId)
   }, [characterId, isActionOnCooldown])
 
-  return { executeAction, checkCooldown, gemBalance }
+  return { executeAction, checkCooldown, gemBalance, isLetterAction }
 }

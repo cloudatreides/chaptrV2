@@ -1,62 +1,62 @@
 # Chaptr V2 — Current Session State
 
 ## In Progress
-- QA testing needed on Chat Actions feature (run `/qa` in fresh session)
+- Run SQL migration for `user_game_state` table in Supabase (see `supabase/migrations/001_user_game_state.sql`)
+- Verify game state sync works: log out → log back in → chat history persists
 
 ## Done This Session
 
-### New Feature: Chat Actions
-Interactive actions players can send during chat sessions that render as visual cards, trigger affinity boosts, and prompt characters to react in-character.
+### Per-User Game State Sync (Supabase)
+- Created `user_game_state` table (JSONB per user with RLS)
+- `src/lib/gameStateSync.ts` — save/load/debounced queue/flush helpers
+- `src/hooks/useGameStateSync.ts` — auto-save on every store change (5s debounce)
+- `src/contexts/AuthContext.tsx` — hydrate from cloud on login, save to cloud before logout
+- `src/App.tsx` — wired GameStateSync wrapper inside AuthProvider
 
-**Core mechanics:**
-- 13 actions across 4 categories: Playful, Gifts, Emotional, Romantic
-- Gender-adaptive variants (M→F: "Send Roses", F→M: "Baked Cookies")
-- Affinity tier-gating (actions unlock as relationship deepens)
-- Gem economy integration (free actions have 30-min cooldowns, gem actions have no cooldown)
-- "Their Favorite Thing" action creates memory-system payoff loop (+10 if memory matches, +3 otherwise)
-- Mystery Box randomizes affinity boost (1-8)
-- favoriteThingHint injected into Claude prompts at Friend+ tier (affinity >= 36) so players can discover favorites through conversation
+### Chat Actions Polish
+- Unlocked all actions for testing (tier-gating bypassed, TODO to restore)
+- Action bubbles now parse from message content (persist on reload, no more `[ACTION: ...]` text)
+- Redesigned action bubbles as styled sticker cards (big emoji + decorative particles)
+- Fixed animation flickering during streaming (removed Framer Motion, static card with React.memo)
+- Gem balance badge on + button when tray is closed
+- Hover tooltips via footer info bar (description, gem cost, affinity boost)
+- Letter writing overlay for "Write a Letter" action (requiresInput field)
+- Romantic actions trigger AI-generated character reaction portraits (Together AI)
 
-**Wired into all 6 chat surfaces:**
-- ChatScene (story chats)
-- SceneChat (multi-character scenes)
-- GroupChatScene (group chats)
-- FreeChatPage
-- CastChatPage
-- CastGroupChatPage
+### Affinity Tier-Gating Restored
+- `getAvailableActions()` now filters by `minTier <= tierIndex` again (was bypassed for testing)
+- Locked actions show with lock icon and required tier label in ChatActionTray
+- Tier index derived from affinity score using genre-aware tier definitions (ROMANCE vs default)
 
-### Previous Session: Album & Selfie Moments
-- Album page, selfie capture flow after chat completion, Kontext image generation
-- Various bug fixes (sidebar, intro images, continue button, reveal page, cast chat)
+### Mobile Polish
+- ChatActionTray popup: added `z-50` to prevent clipping under other elements
+- ChatActionTray popup: `maxHeight` now uses `min(340px, 60dvh)` to avoid overflow on small screens
+- CastChatPage + CastGroupChatPage: input font size bumped to `text-base` (prevents iOS auto-zoom on focus)
+- CastChatPage + CastGroupChatPage: added `safe-bottom` to input containers for notch/home bar clearance
+
+### Build Fixes
+- Fixed multiple TS6133 errors (unused `tierIndex`, `resolvedLabel` params)
+- Fixed action bubbles applied to both CastChatPage and CastGroupChatPage
 
 ## Next
-- Run `/qa` on localhost to verify Chat Actions feature end-to-end
-- Test action tray UX across different chat surfaces
-- Verify favoriteThingHint appears in Claude responses at Friend+ tier
-- Create `chaptr_image_cache` table in Supabase (from previous session)
+- Verify Supabase migration ran successfully and test login/logout persistence
+- Run `/qa` on Chat Actions feature end-to-end (needs node/dev server)
+- Consider adding touch-friendly tap targets for action buttons on mobile (currently 3-col grid works but could be tight on small phones)
 
 ## Blockers
-- Image cache won't work until Supabase table is created
+- `user_game_state` table must be created in Supabase before sync works
+- Node.js not available in current shell — can't run build/dev server for QA
 
-## Key Files Changed (Chat Actions)
-- `src/data/chatActions.ts` — NEW: Action registry, gender variants, helpers
-- `src/components/ChatActionTray.tsx` — NEW: Slide-up action tray UI
-- `src/components/ChatActionBubble.tsx` — NEW: Action card in chat thread
-- `src/hooks/useChatActions.ts` — NEW: Action execution hook
-- `src/data/characters.ts` — Added gender, favoriteThing, favoriteThingHint to StoryCharacter
-- 14 story files — Added gender/favoriteThing/favoriteThingHint to all 28 universe characters
-- `src/store/useStore.ts` — Action cooldown tracking (30-min window)
-- `src/lib/claudeStream.ts` — favoriteThingHint injection at Friend+ tier
-- `src/components/ChatScene.tsx` — Wired actions into story chat
-- `src/components/SceneChat.tsx` — Wired actions into scene chat
-- `src/components/GroupChatScene.tsx` — Wired actions into group chat
-- `src/pages/FreeChatPage.tsx` — Wired actions into free chat
-- `src/pages/CastChatPage.tsx` — Wired actions into cast chat
-- `src/pages/CastGroupChatPage.tsx` — Wired actions into cast group chat
-
-## Stack
-React + Vite + TS + Tailwind v3 + Zustand + Framer Motion + Vaul + Claude Haiku + Together AI FLUX
-Repo: C:/Users/ASUS/projects/chaptr-v2
-GitHub: https://github.com/cloudatreides/chaptrV2
-Live: https://chaptr-v2.vercel.app
-Supabase project: tbrnfiixertryutrijau
+## Key Files Changed
+- `src/data/chatActions.ts` — Restored tier-gating in `getAvailableActions()`
+- `src/components/ChatActionTray.tsx` — z-index fix, dvh-aware maxHeight
+- `src/pages/CastChatPage.tsx` — text-base input, safe-bottom padding
+- `src/pages/CastGroupChatPage.tsx` — text-base input, safe-bottom padding
+- `src/lib/gameStateSync.ts` — NEW: Supabase game state CRUD + debounced save
+- `src/hooks/useGameStateSync.ts` — NEW: Auto-save hook
+- `src/contexts/AuthContext.tsx` — Cloud hydration on login, save on logout
+- `src/App.tsx` — GameStateSync wrapper
+- `src/components/ChatActionBubble.tsx` — Static sticker card design
+- `src/components/ChatReactionImage.tsx` — NEW: Reaction portrait in chat thread
+- `src/hooks/useChatActions.ts` — Reaction image prompt generation
+- `supabase/migrations/001_user_game_state.sql` — NEW: Table + RLS policies

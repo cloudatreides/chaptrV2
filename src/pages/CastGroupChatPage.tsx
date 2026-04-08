@@ -5,7 +5,7 @@ import { ArrowLeft, Send, Brain, Users } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { CAST_ROSTER, getCastCharacter, UNIVERSE_COLORS } from '../data/castRoster'
 import { getAffinityTier } from '../lib/affinity'
-import { streamChatReply, extractMemories, generateGroupReaction, parseAffinityDelta } from '../lib/claudeStream'
+import { streamChatReply, extractMemories, generateGroupReaction, parseAffinityDelta, generateLoveLetter } from '../lib/claudeStream'
 import { getUniverseGenre } from '../data/storyData'
 import { generateCharacterPortrait } from '../lib/togetherAi'
 import { ChatActionTray } from '../components/ChatActionTray'
@@ -57,7 +57,7 @@ export function CastGroupChatPage() {
   const playerGender = playerChar?.gender ?? 'male'
   const primaryCharGender = charDataMap[castMembers[primaryCharIndex % castMembers.length]?.id]?.gender ?? 'unknown'
   const primaryMemberId = castMembers[primaryCharIndex % castMembers.length]?.id ?? ''
-  const { executeAction, checkCooldown, gemBalance: actionGemBalance } = useChatActions({
+  const { executeAction, checkCooldown, gemBalance: actionGemBalance, isLetterAction } = useChatActions({
     characterId: primaryMemberId,
     universeId,
     characterMemories: [],
@@ -239,12 +239,30 @@ export function CastGroupChatPage() {
     }
   }, [input, isTyping, castMembers, messages, exchangeCount, primaryCharIndex, globalAffinities, playerChar, groupKey, universeId, addGroupCastMessage, updateGlobalAffinity])
 
-  const handleAction = useCallback(async (action: ChatAction, userInput?: string) => {
+  const handleAction = useCallback(async (action: ChatAction) => {
     if (isTyping || castMembers.length < 2) return
     const result = executeAction(action)
     if (!result) return
 
-    const msgContent = userInput ? `[ACTION: ${result.label}]\n${userInput}` : `[ACTION: ${result.label}]`
+    // For love-letter actions, generate letter content first
+    let letterContent: string | null = null
+    if (isLetterAction(action.id)) {
+      setIsTyping(true)
+      const primaryIdx = primaryCharIndex % castMembers.length
+      const primaryMember = castMembers[primaryIdx]
+      const primaryCharData = charDataMap[primaryMember.id]
+      letterContent = await generateLoveLetter({
+        characterName: primaryCharData?.name ?? '',
+        bio: playerChar?.bio ?? null,
+        characterMemories: [],
+        affinityScore: globalAffinities[primaryMember.id] ?? 0,
+        isNote: action.label === 'Slip a Note',
+      })
+      result.promptInjection = `wrote you a heartfelt ${action.label === 'Slip a Note' ? 'note' : 'letter'}. Here is what it says: "${letterContent}"\n\nRead this carefully and react with deep, genuine emotion. Quote specific parts that moved you. This is vulnerable and real.`
+      setIsTyping(false)
+    }
+
+    const msgContent = letterContent ? `[ACTION: ${result.label}]\n${letterContent}` : `[ACTION: ${result.label}]`
     const userMsg: CastChatMessage = { role: 'user', content: msgContent, timestamp: Date.now() }
     addGroupCastMessage(groupKey, userMsg)
 
@@ -403,14 +421,17 @@ export function CastGroupChatPage() {
                   <ChatActionBubble label={ad.label} emoji={ad.emoji} gemCost={0} />
                   {ad.userText && (
                     <div
-                      className="max-w-[240px] px-3.5 py-2.5 text-[12px] leading-relaxed italic opacity-90"
+                      className="max-w-[300px] px-4 py-3 rounded-2xl text-[13px] leading-relaxed italic"
                       style={{
-                        background: 'linear-gradient(135deg, rgba(200,75,158,0.25), rgba(139,92,246,0.25))',
-                        color: '#fff',
-                        borderRadius: '14px 2px 14px 14px',
+                        background: 'linear-gradient(135deg, rgba(200,75,158,0.12), rgba(139,92,246,0.12))',
+                        border: '1px solid rgba(200,75,158,0.2)',
+                        color: 'rgba(255,255,255,0.85)',
                       }}
                     >
-                      "{ad.userText}"
+                      <span className="text-[10px] not-italic font-medium block mb-1.5" style={{ color: 'rgba(200,75,158,0.6)' }}>
+                        💌 Your letter
+                      </span>
+                      {ad.userText}
                     </div>
                   )}
                 </div>
@@ -517,7 +538,7 @@ export function CastGroupChatPage() {
           )}
         </AnimatePresence>
 
-        <div className="shrink-0 px-5 pb-5 pt-2">
+        <div className="shrink-0 px-5 pb-5 pt-2 safe-bottom">
           <form
             onSubmit={(e) => { e.preventDefault(); handleSend() }}
             className="relative flex items-center gap-3 rounded-3xl px-4 py-2.5"
@@ -537,7 +558,7 @@ export function CastGroupChatPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Say something to the group..."
-              className="flex-1 bg-transparent text-white text-sm placeholder:text-white/20 outline-none"
+              className="flex-1 bg-transparent text-white text-base placeholder:text-white/20 outline-none"
               disabled={isTyping}
             />
             <button
@@ -621,7 +642,7 @@ export function CastGroupChatPage() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Say something to the group..."
-                  className="flex-1 bg-transparent text-white text-sm placeholder:text-white/20 outline-none"
+                  className="flex-1 bg-transparent text-white text-base placeholder:text-white/20 outline-none"
                   disabled={isTyping}
                 />
                 <button

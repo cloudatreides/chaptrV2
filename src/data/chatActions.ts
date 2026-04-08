@@ -20,7 +20,6 @@ export interface ChatAction {
   minTier: number // 0-4 index into affinity tiers
   promptInjection: string
   variants?: ChatActionVariant[]
-  requiresInput?: 'letter' // action needs user text input before executing
 }
 
 // ─── Action Definitions ───
@@ -165,14 +164,13 @@ export const CHAT_ACTIONS: ChatAction[] = [
     gemCost: 5,
     affinityBoost: 10,
     minTier: 3,
-    requiresInput: 'letter',
-    promptInjection: 'wrote you a heartfelt letter. Here is what the letter says: "{{LETTER_CONTENT}}"\n\nRead this letter carefully and react with deep, genuine emotion. Quote specific parts that moved you. This is vulnerable and real.',
+    promptInjection: '', // dynamically set with AI-generated letter content
     variants: [
       {
         condition: (pg, cg) => pg === 'female' && cg === 'male',
         label: 'Slip a Note',
         emoji: '📝',
-        promptInjection: 'slipped a handwritten note into your pocket when you weren\'t looking. You just found it. Here is what the note says: "{{LETTER_CONTENT}}"\n\nReact with genuine surprise and emotion as you read their words. Quote specific parts that hit you.',
+        promptInjection: '', // dynamically set with AI-generated note content
       },
     ],
   },
@@ -268,12 +266,11 @@ export function getMysteryBoxBoost(): number {
 export function getAvailableActions(
   playerGender: 'male' | 'female',
   characterGender: 'male' | 'female',
-  _tierIndex: number,
+  tierIndex: number,
 ): { available: ChatAction[]; locked: ChatAction[] } {
   const resolved = getResolvedActions(playerGender, characterGender)
-  // TODO: remove — unlock all for testing
-  const available = resolved
-  const locked: ChatAction[] = []
+  const available = resolved.filter(a => a.minTier <= tierIndex)
+  const locked = resolved.filter(a => a.minTier > tierIndex)
   return { available, locked }
 }
 

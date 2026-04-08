@@ -5,7 +5,7 @@ import { CHARACTERS, getCharacter } from '../data/characters'
 import { getUniverseGenre } from '../data/storyData'
 import { useStore } from '../store/useStore'
 import { useActiveStory } from '../hooks/useActiveStory'
-import { streamChatReply, summarizeChat, generateOpeningMessage, extractMemories } from '../lib/claudeStream'
+import { streamChatReply, summarizeChat, generateOpeningMessage, extractMemories, generateLoveLetter } from '../lib/claudeStream'
 import { generateCharacterPortrait, generateSceneImage } from '../lib/togetherAi'
 import { trackEvent } from '../lib/supabase'
 import { getAffinityGrowth } from '../lib/affinity'
@@ -225,12 +225,12 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
   const playerCharacter = useStore((s) => s.characters[0])
   const playerGender = playerCharacter?.gender ?? 'male'
   const characterGender = character?.gender ?? 'unknown'
-  const { executeAction, checkCooldown, gemBalance } = useChatActions({
+  const { executeAction, checkCooldown, gemBalance, isLetterAction } = useChatActions({
     characterId,
     universeId: selectedUniverse,
     characterMemories: characterMemories[characterId] ?? [],
   })
-  const [localMessages, setLocalMessages] = useState<{ role: 'user' | 'character'; content: string; actionData?: { label: string; emoji: string; gemCost: number }; reactionImageUrl?: string }[]>([])
+  const [localMessages, setLocalMessages] = useState<{ role: 'user' | 'character'; content: string; actionData?: { label: string; emoji: string; gemCost: number }; letterContent?: string; reactionImageUrl?: string }[]>([])
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const [streamedReply, setStreamedReply] = useState('')
@@ -403,19 +403,36 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
     }
   }
 
-  const handleAction = async (action: ChatAction, userInput?: string) => {
+  const handleAction = async (action: ChatAction) => {
     if (isTyping) return
     const result = executeAction(action)
     if (!result) return
 
+    // For love-letter actions, generate the letter content first
+    let letterContent: string | null = null
+    if (isLetterAction(action.id)) {
+      setIsTyping(true)
+      const isNote = action.label === 'Slip a Note'
+      letterContent = await generateLoveLetter({
+        characterName: character?.name ?? '',
+        bio,
+        characterMemories: characterMemories[characterId] ?? [],
+        affinityScore,
+        isNote,
+      })
+      result.promptInjection = `wrote you a heartfelt ${isNote ? 'note' : 'letter'}. Here is what it says: "${letterContent}"\n\nRead this carefully and react with deep, genuine emotion. Quote specific parts that moved you. This is vulnerable and real.`
+      setIsTyping(false)
+    }
+
     // Add action as a user message with visual data
     const actionMessage = {
       role: 'user' as const,
-      content: userInput ? userInput : `[ACTION: ${result.label}]`,
+      content: `[ACTION: ${result.label}]`,
       actionData: { label: result.label, emoji: result.emoji, gemCost: result.gemCost },
+      letterContent: letterContent ?? undefined,
     }
     setLocalMessages((prev) => [...prev, actionMessage])
-    addChatMessage({ role: 'user', content: userInput ? userInput : `[ACTION: ${result.label}]`, characterId, timestamp: Date.now() })
+    addChatMessage({ role: 'user', content: letterContent ? `[ACTION: ${result.label}]\n${letterContent}` : `[ACTION: ${result.label}]`, characterId, timestamp: Date.now() })
 
     // Stream character reaction
     setIsTyping(true)
@@ -601,9 +618,19 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
               ) : msg.actionData ? (
                 <div className="flex flex-col items-end gap-1.5">
                   <ChatActionBubble label={msg.actionData.label} emoji={msg.actionData.emoji} gemCost={msg.actionData.gemCost} />
-                  {!msg.content.startsWith('[ACTION:') && msg.content && (
-                    <div className="chat-bubble chat-bubble-user text-[12px] italic opacity-90 max-w-[240px]">
-                      "{msg.content}"
+                  {msg.letterContent && (
+                    <div
+                      className="max-w-[300px] px-4 py-3 rounded-2xl text-[13px] leading-relaxed italic"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(200,75,158,0.12), rgba(139,92,246,0.12))',
+                        border: '1px solid rgba(200,75,158,0.2)',
+                        color: 'rgba(255,255,255,0.85)',
+                      }}
+                    >
+                      <span className="text-[10px] not-italic font-medium block mb-1.5" style={{ color: 'rgba(200,75,158,0.6)' }}>
+                        💌 Your letter
+                      </span>
+                      {msg.letterContent}
                     </div>
                   )}
                 </div>

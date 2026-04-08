@@ -6,7 +6,7 @@ AI-powered interactive story app where you upload a selfie and become the main c
 V2 — Live at chaptr-v2.vercel.app. 15 universes across 6 genres, 29 cast characters with AI portraits, cast chat system, ambient audio, social sharing.
 
 ## Stack
-React + Vite + TypeScript + Tailwind v3 + Zustand (persist v2, multi-character) + Framer Motion + Vaul + Anthropic Haiku (via Vercel Edge proxy) + Together AI FLUX (scenes/portraits/selfie stylization) + Supabase (analytics, playthroughs, share URLs)
+React + Vite + TypeScript + Tailwind v3 + Zustand (persist v2, multi-character) + Framer Motion + Vaul + Anthropic Haiku (via Vercel Edge proxy) + Together AI FLUX (scenes/portraits/selfie stylization) + Supabase (analytics, playthroughs, share URLs, per-user game state sync)
 
 ## Core Loop
 Choose universe → Create character (name, gender, personality, optional selfie) → Read AI-generated story → Make choices that affect narrative and trust → Chat with characters → Gem-gated scene reveals → Share result.
@@ -38,7 +38,8 @@ Characters remember personal facts the protagonist reveals. `extractMemories()` 
 Unified message thread where multiple characters talk simultaneously. `GroupChatScene.tsx` component — round-robin character rotation per exchange, 30% chance of a brief AI-to-AI reaction from a second character (`generateGroupReaction()`). Activated by setting `groupChat: true` on any scene step in storyData. Memory extraction wired in.
 
 ## Key Files
-- `src/store/useStore.ts` — Multi-character Zustand store v6, progress keyed by `characterId:universeId`
+- `src/store/useStore.ts` — Multi-character Zustand store v7, progress keyed by `characterId:universeId`
+- `src/lib/gameStateSync.ts` — Per-user game state sync to Supabase (debounced auto-save + cloud hydration)
 - `src/hooks/useActiveStory.ts` — Derived state hook (THE way to read character+progress)
 - `src/lib/claudeStream.ts` — Streaming prose + chat + memory extraction + group reactions
 - `src/lib/togetherAi.ts` — Scene generation with prompt-hash caching, includesProtagonist routing, aspect_ratio
@@ -76,7 +77,14 @@ Unified message thread where multiple characters talk simultaneously. `GroupChat
 - **Intro image**: Generated scene via Together AI (FLUX.1 Kontext Pro if selfieUrl available, FLUX.1 Schnell otherwise). Uses character's `introImagePrompt` or `chatImagePrompt`.
 - **Schnell uses `aspect_ratio`** (not `width`/`height`) per Together AI API change. Kontext Pro still uses `width`/`height`.
 
+### F7 — Chat Actions
+Interactive actions in all 6 chat surfaces. 13 actions across 4 categories (Playful, Gifts, Emotional, Romantic). Gender-adaptive variants, affinity tier-gating, gem economy, memory-system payoff loop. Letter writing for romantic actions. AI-generated reaction portraits for high-tier romantic actions.
+
+### F8 — Per-User Game State Sync
+Full store state (chat threads, affinities, gems, progress, unlocks) synced to Supabase `user_game_state` table. Debounced auto-save on changes, cloud hydration on login, save-before-logout. Data survives logout/login cycles.
+
 ## Open Issues / Next Priorities
-1. Test full playthrough on newer universes (scene images, branching, cast unlocks)
-2. Cost modeling before scaling
-3. Mobile polish on universe detail pages
+1. Restore affinity tier-gating on actions (currently unlocked for testing)
+2. Test full playthrough on newer universes (scene images, branching, cast unlocks)
+3. Cost modeling before scaling
+4. Mobile polish on universe detail pages

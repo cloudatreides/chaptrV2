@@ -1,6 +1,6 @@
-import { useState, useMemo, useRef } from 'react'
+import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, X, Lock, Gem, Heart, Send } from 'lucide-react'
+import { Plus, X, Lock, Gem, Heart } from 'lucide-react'
 import { getAvailableActions, CATEGORY_INFO, ACTION_DESCRIPTIONS, type ChatAction, type ActionCategory } from '../data/chatActions'
 import { AFFINITY_TIERS, ROMANCE_AFFINITY_TIERS } from '../lib/affinity'
 
@@ -11,7 +11,7 @@ interface Props {
   gemBalance: number
   genre?: string
   isOnCooldown: (actionId: string) => boolean
-  onAction: (action: ChatAction, userInput?: string) => void
+  onAction: (action: ChatAction) => void
   disabled?: boolean
 }
 
@@ -27,9 +27,6 @@ export function ChatActionTray({ playerGender, characterGender, affinityScore, g
   const [isOpen, setIsOpen] = useState(false)
   const [activeCategory, setActiveCategory] = useState<ActionCategory | null>(null)
   const [hoveredAction, setHoveredAction] = useState<string | null>(null)
-  const [letterAction, setLetterAction] = useState<ChatAction | null>(null)
-  const [letterText, setLetterText] = useState('')
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   // Normalize non-binary/unknown to nearest for variant resolution
   const resolvedCharGender = characterGender === 'male' || characterGender === 'female'
@@ -84,12 +81,12 @@ export function ChatActionTray({ playerGender, characterGender, affinityScore, g
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="absolute bottom-full left-0 right-0 mb-2 mx-1 rounded-2xl overflow-hidden flex flex-col"
+            className="absolute bottom-full left-0 right-0 mb-2 mx-1 rounded-2xl overflow-hidden flex flex-col z-50"
             style={{
               background: 'rgba(14,12,22,0.97)',
               border: '1px solid rgba(200,75,158,0.15)',
               backdropFilter: 'blur(16px)',
-              maxHeight: '340px',
+              maxHeight: 'min(340px, 60dvh)',
             }}
             initial={{ opacity: 0, y: 8, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -140,13 +137,8 @@ export function ChatActionTray({ playerGender, characterGender, affinityScore, g
                       key={action.id}
                       onClick={() => {
                         if (!isDisabled) {
-                          if (action.requiresInput === 'letter') {
-                            setLetterAction(action)
-                            setLetterText('')
-                          } else {
-                            onAction(action)
-                            setIsOpen(false)
-                          }
+                          onAction(action)
+                          setIsOpen(false)
                         }
                       }}
                       onMouseEnter={() => setHoveredAction(action.id)}
@@ -198,74 +190,6 @@ export function ChatActionTray({ playerGender, characterGender, affinityScore, g
                 <p className="text-center text-white/20 text-xs py-4">No actions in this category</p>
               )}
             </div>
-
-            {/* Letter writing overlay */}
-            <AnimatePresence>
-              {letterAction && (
-                <motion.div
-                  className="absolute inset-0 flex flex-col rounded-2xl overflow-hidden z-10"
-                  style={{ background: 'rgba(14,12,22,0.99)' }}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.15 }}
-                >
-                  <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/5">
-                    <div className="flex items-center gap-2">
-                      <span className="text-base">{letterAction.emoji}</span>
-                      <span className="text-xs text-white/70 font-medium">{letterAction.label}</span>
-                    </div>
-                    <button onClick={() => setLetterAction(null)} className="text-white/30 hover:text-white/60 transition-colors">
-                      <X size={14} />
-                    </button>
-                  </div>
-                  <div className="flex-1 p-3 flex flex-col gap-2">
-                    <p className="text-[11px] text-white/40">Write what you want to say...</p>
-                    <textarea
-                      ref={textareaRef}
-                      value={letterText}
-                      onChange={(e) => setLetterText(e.target.value)}
-                      placeholder="Dear..."
-                      className="flex-1 w-full resize-none rounded-xl px-3 py-2.5 text-[13px] leading-relaxed text-white/90 placeholder:text-white/20 focus:outline-none"
-                      style={{
-                        background: 'rgba(255,255,255,0.03)',
-                        border: '1px solid rgba(200,75,158,0.15)',
-                        minHeight: '120px',
-                      }}
-                      autoFocus
-                    />
-                  </div>
-                  <div className="px-3 pb-3 flex items-center justify-between">
-                    <span className="flex items-center gap-1 text-[9px]" style={{ color: 'rgba(251,191,36,0.6)' }}>
-                      <Gem size={8} /> {letterAction.gemCost}
-                    </span>
-                    <button
-                      onClick={() => {
-                        if (letterText.trim()) {
-                          const injected = {
-                            ...letterAction,
-                            promptInjection: letterAction.promptInjection.replace('{{LETTER_CONTENT}}', letterText.trim()),
-                          }
-                          onAction(injected, letterText.trim())
-                          setLetterAction(null)
-                          setLetterText('')
-                          setIsOpen(false)
-                        }
-                      }}
-                      disabled={!letterText.trim()}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all disabled:opacity-30"
-                      style={{
-                        background: 'linear-gradient(135deg, rgba(200,75,158,0.3), rgba(139,92,246,0.3))',
-                        border: '1px solid rgba(200,75,158,0.3)',
-                        color: '#fff',
-                      }}
-                    >
-                      <Send size={12} /> Send
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
 
             {/* Footer: info bar on hover, gem balance otherwise */}
             <div className="border-t border-white/5 px-3 py-2 min-h-[44px] flex items-center">

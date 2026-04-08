@@ -531,3 +531,37 @@ Rules:
     return 'a story written in glances'
   }
 }
+
+/** Generate a short romantic letter/note from the protagonist to a character */
+export async function generateLoveLetter(params: {
+  characterName: string
+  bio: string | null
+  characterMemories: string[]
+  affinityScore: number
+  isNote?: boolean
+}): Promise<string> {
+  const { characterName, bio, characterMemories, affinityScore, isNote } = params
+  const format = isNote ? 'a short handwritten note' : 'a short love letter'
+  const memoryContext = characterMemories.length > 0
+    ? `\nThings the protagonist knows about ${characterName}: ${characterMemories.slice(-5).join(', ')}`
+    : ''
+
+  const system = `You are ghostwriting ${format} from a protagonist to ${characterName}.${bio ? ` The protagonist's personality: "${bio}"` : ''}${memoryContext}
+Their relationship closeness: ${affinityScore}/100.
+
+Write ${isNote ? '2-3 sentences' : '3-5 sentences'}. Make it personal, specific, and emotionally honest. Reference shared moments or things they know about ${characterName} if possible. Don't be generic — make it feel like only THIS person could have written it to only THIS character.
+
+Output ONLY the letter text. No "Dear..." header unless it fits naturally. No sign-off. Just the raw, honest words.`
+
+  try {
+    const response = await makeClaudeRequest(system, `Write the ${isNote ? 'note' : 'letter'}.`, {
+      temperature: 0.8,
+      maxTokens: 150,
+    })
+    if (!response.ok) return 'I keep thinking about you. I don\'t know when it started, but I can\'t stop.'
+    const data = await response.json()
+    return data.content?.[0]?.text?.trim() ?? 'I keep thinking about you.'
+  } catch {
+    return 'I keep thinking about you. I don\'t know when it started, but I can\'t stop.'
+  }
+}
