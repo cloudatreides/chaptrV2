@@ -227,7 +227,7 @@ export function getMysteryBoxBoost(): number {
 export function getAvailableActions(
   playerGender: 'male' | 'female',
   characterGender: 'male' | 'female',
-  tierIndex: number,
+  _tierIndex: number,
 ): { available: ChatAction[]; locked: ChatAction[] } {
   const resolved = getResolvedActions(playerGender, characterGender)
   // TODO: remove — unlock all for testing
