@@ -7,8 +7,10 @@ import { CAST_ROSTER, getCastCharacter } from '../data/castRoster'
 import { getAffinityTier } from '../lib/affinity'
 import { streamChatReply, extractMemories, parseAffinityDelta } from '../lib/claudeStream'
 import { getUniverseGenre } from '../data/storyData'
+import { generateCharacterPortrait } from '../lib/togetherAi'
 import { ChatActionTray } from '../components/ChatActionTray'
 import { ChatActionBubble } from '../components/ChatActionBubble'
+import { ChatReactionImage } from '../components/ChatReactionImage'
 import { useChatActions } from '../hooks/useChatActions'
 import { parseActionFromMessage, type ChatAction } from '../data/chatActions'
 import type { CastChatMessage } from '../store/useStore'
@@ -31,6 +33,7 @@ export function CastChatPage() {
   const toggleFavoriteCast = useStore((s) => s.toggleFavoriteCast)
   const isFavorited = favoriteCastIds.includes(characterId ?? '')
   const setIsStreaming = useStore((s) => s.setIsStreaming)
+  const addStoryMoment = useStore((s) => s.addStoryMoment)
 
   const [input, setInput] = useState('')
   const [streamingContent, setStreamingContent] = useState('')
@@ -234,6 +237,16 @@ export function CastChatPage() {
         updateGlobalAffinity(characterId, newScore)
         setAffinityChange({ delta: result.affinityBoost, reason: result.label })
         setTimeout(() => setAffinityChange(null), 4000)
+
+        // Generate reaction image for romantic actions
+        if (result.reactionImagePrompt) {
+          generateCharacterPortrait(result.reactionImagePrompt).then((imgUrl) => {
+            if (imgUrl && characterId) {
+              const imgMsg: CastChatMessage = { role: 'character', content: '', timestamp: Date.now(), reactionImageUrl: imgUrl }
+              addCastChatMessage(characterId, imgMsg)
+            }
+          })
+        }
       }
     } catch (err: any) {
       if (err.name !== 'AbortError') console.error('Cast chat action error:', err)
@@ -281,9 +294,23 @@ export function CastChatPage() {
       {messages.map((msg, i) => {
         const ad = msg.role === 'user' ? parseActionFromMessage(msg.content) : null
         return (
-          <div key={i} className={`flex gap-2.5 ${msg.role === 'user' ? 'justify-end' : ''}`}>
+          <div key={msg.timestamp ?? i} className={`flex gap-2.5 ${msg.role === 'user' ? 'justify-end' : ''}`}>
             {msg.role === 'character' && <CharacterAvatar />}
-            {ad ? (
+            {msg.reactionImageUrl ? (
+              <ChatReactionImage
+                imageUrl={msg.reactionImageUrl}
+                characterName={charData?.name ?? ''}
+                onSaveToAlbum={() => addStoryMoment({
+                  id: `reaction-${Date.now()}`,
+                  imageUrl: msg.reactionImageUrl!,
+                  characterIds: [characterId ?? ''],
+                  universeId: castMember?.universeId ?? '',
+                  beatLabel: `${charData?.name ?? 'Character'} reacted`,
+                  note: '',
+                  timestamp: Date.now(),
+                })}
+              />
+            ) : ad ? (
               <ChatActionBubble label={ad.label} emoji={ad.emoji} gemCost={0} />
             ) : (
               <div
