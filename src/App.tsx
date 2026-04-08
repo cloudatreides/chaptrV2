@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
+import { useGameStateSync } from './hooks/useGameStateSync'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { LoginPage } from './pages/LoginPage'
 import { LandingPage } from './pages/LandingPage'
@@ -22,10 +23,16 @@ import { AlbumPage } from './pages/AlbumPage'
 import { TermsPage } from './pages/TermsPage'
 import { PrivacyPage } from './pages/PrivacyPage'
 
+function GameStateSync({ children }: { children: React.ReactNode }) {
+  useGameStateSync()
+  return <>{children}</>
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <GameStateSync>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/terms" element={<TermsPage />} />
@@ -50,6 +57,7 @@ export default function App() {
           <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </GameStateSync>
       </AuthProvider>
     </BrowserRouter>
   )
