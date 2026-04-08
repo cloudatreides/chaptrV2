@@ -309,7 +309,7 @@ export const IMAGE_REACTION_ACTION_IDS = new Set(['love-letter', 'serenade'])
 export function buildReactionImagePrompt(
   basePortraitPrompt: string,
   actionId: string,
-  resolvedLabel: string,
+  _resolvedLabel: string,
 ): string {
   // Strip the pose/expression/clothing portion after the core appearance description
   // and replace with a reaction-specific one
