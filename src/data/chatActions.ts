@@ -230,8 +230,9 @@ export function getAvailableActions(
   tierIndex: number,
 ): { available: ChatAction[]; locked: ChatAction[] } {
   const resolved = getResolvedActions(playerGender, characterGender)
-  const available = resolved.filter((a) => a.minTier <= tierIndex)
-  const locked = resolved.filter((a) => a.minTier > tierIndex)
+  // TODO: remove — unlock all for testing
+  const available = resolved
+  const locked: ChatAction[] = []
   return { available, locked }
 }
 
