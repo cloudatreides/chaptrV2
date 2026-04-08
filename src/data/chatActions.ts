@@ -20,6 +20,7 @@ export interface ChatAction {
   minTier: number // 0-4 index into affinity tiers
   promptInjection: string
   variants?: ChatActionVariant[]
+  requiresInput?: 'letter' // action needs user text input before executing
 }
 
 // ─── Action Definitions ───
@@ -164,13 +165,14 @@ export const CHAT_ACTIONS: ChatAction[] = [
     gemCost: 5,
     affinityBoost: 10,
     minTier: 3,
-    promptInjection: 'wrote you a heartfelt letter expressing how they feel about you. React with deep emotion — this is vulnerable and real.',
+    requiresInput: 'letter',
+    promptInjection: 'wrote you a heartfelt letter. Here is what the letter says: "{{LETTER_CONTENT}}"\n\nRead this letter carefully and react with deep, genuine emotion. Quote specific parts that moved you. This is vulnerable and real.',
     variants: [
       {
         condition: (pg, cg) => pg === 'female' && cg === 'male',
         label: 'Slip a Note',
         emoji: '📝',
-        promptInjection: 'slipped a handwritten note into your pocket when you weren\'t looking. You just found it. React with genuine surprise and emotion — it says something honest about how they feel.',
+        promptInjection: 'slipped a handwritten note into your pocket when you weren\'t looking. You just found it. Here is what the note says: "{{LETTER_CONTENT}}"\n\nReact with genuine surprise and emotion as you read their words. Quote specific parts that hit you.',
       },
     ],
   },
@@ -236,22 +238,25 @@ export function getResolvedActions(
   })
 }
 
-/** Parse an action label from a message like "[ACTION: Coffee]" and return display data */
-export function parseActionFromMessage(content: string): { label: string; emoji: string } | null {
-  const match = content.match(/^\[ACTION:\s*(.+)]$/)
+/** Parse an action label from a message like "[ACTION: Coffee]" and return display data.
+ *  Also extracts optional user input text appended after the action tag (e.g. love letter content). */
+export function parseActionFromMessage(content: string): { label: string; emoji: string; userText?: string } | null {
+  const firstLine = content.split('\n')[0]
+  const match = firstLine.match(/^\[ACTION:\s*(.+)]$/)
   if (!match) return null
   const label = match[1]
+  const userText = content.includes('\n') ? content.slice(content.indexOf('\n') + 1).trim() : undefined
   // Search all actions + variants for the label
   for (const action of CHAT_ACTIONS) {
-    if (action.label === label) return { label: action.label, emoji: action.emoji }
+    if (action.label === label) return { label: action.label, emoji: action.emoji, userText }
     if (action.variants) {
       for (const v of action.variants) {
-        if (v.label === label) return { label: v.label, emoji: v.emoji }
+        if (v.label === label) return { label: v.label, emoji: v.emoji, userText }
       }
     }
   }
   // Fallback: unknown action, still render nicely
-  return { label, emoji: '✨' }
+  return { label, emoji: '✨', userText }
 }
 
 /** Get the affinity boost for mystery box (random) */

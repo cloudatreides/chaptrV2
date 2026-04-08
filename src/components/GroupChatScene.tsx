@@ -276,7 +276,7 @@ export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, 
 
   // ─── Handle action ───
 
-  const handleAction = async (action: ChatAction) => {
+  const handleAction = async (action: ChatAction, userInput?: string) => {
     if (isTyping) return
     const result = executeAction(action)
     if (!result) return
@@ -284,12 +284,12 @@ export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, 
     const actionMessage: GroupMessage = {
       id: `action-${Date.now()}`,
       role: 'user',
-      content: `[ACTION: ${result.label}]`,
+      content: userInput ? userInput : `[ACTION: ${result.label}]`,
       actionData: { label: result.label, emoji: result.emoji, gemCost: result.gemCost },
     }
     const newMessages = [...messages, actionMessage]
     setMessages(newMessages)
-    addChatMessage({ role: 'user', content: `[ACTION: ${result.label}]`, characterId: 'user', timestamp: Date.now() })
+    addChatMessage({ role: 'user', content: userInput ? userInput : `[ACTION: ${result.label}]`, characterId: 'user', timestamp: Date.now() })
 
     setIsTyping(true)
     setStreamedReply('')
@@ -427,7 +427,14 @@ export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, 
                     })}
                   />
                 ) : msg.actionData ? (
-                  <ChatActionBubble label={msg.actionData.label} emoji={msg.actionData.emoji} gemCost={msg.actionData.gemCost} />
+                  <div className="flex flex-col items-end gap-1.5">
+                    <ChatActionBubble label={msg.actionData.label} emoji={msg.actionData.emoji} gemCost={msg.actionData.gemCost} />
+                    {!msg.content.startsWith('[ACTION:') && msg.content && (
+                      <div className="chat-bubble chat-bubble-user text-[12px] italic opacity-90 max-w-[240px]">
+                        "{msg.content}"
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <div className={`chat-bubble ${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-character'}`}>
                     {msg.content}

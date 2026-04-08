@@ -403,7 +403,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
     }
   }
 
-  const handleAction = async (action: ChatAction) => {
+  const handleAction = async (action: ChatAction, userInput?: string) => {
     if (isTyping) return
     const result = executeAction(action)
     if (!result) return
@@ -411,11 +411,11 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
     // Add action as a user message with visual data
     const actionMessage = {
       role: 'user' as const,
-      content: `[ACTION: ${result.label}]`,
+      content: userInput ? userInput : `[ACTION: ${result.label}]`,
       actionData: { label: result.label, emoji: result.emoji, gemCost: result.gemCost },
     }
     setLocalMessages((prev) => [...prev, actionMessage])
-    addChatMessage({ role: 'user', content: `[ACTION: ${result.label}]`, characterId, timestamp: Date.now() })
+    addChatMessage({ role: 'user', content: userInput ? userInput : `[ACTION: ${result.label}]`, characterId, timestamp: Date.now() })
 
     // Stream character reaction
     setIsTyping(true)
@@ -599,7 +599,14 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
                   })}
                 />
               ) : msg.actionData ? (
-                <ChatActionBubble label={msg.actionData.label} emoji={msg.actionData.emoji} gemCost={msg.actionData.gemCost} />
+                <div className="flex flex-col items-end gap-1.5">
+                  <ChatActionBubble label={msg.actionData.label} emoji={msg.actionData.emoji} gemCost={msg.actionData.gemCost} />
+                  {!msg.content.startsWith('[ACTION:') && msg.content && (
+                    <div className="chat-bubble chat-bubble-user text-[12px] italic opacity-90 max-w-[240px]">
+                      "{msg.content}"
+                    </div>
+                  )}
+                </div>
               ) : (
                 <div className={`chat-bubble ${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-character'}`}>
                   {msg.content}

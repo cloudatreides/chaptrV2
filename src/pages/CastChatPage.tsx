@@ -178,13 +178,14 @@ export function CastChatPage() {
     }
   }, [input, characterId, charData, isStreaming, messages, score, exchangeCount, playerChar, castMember, addCastChatMessage, setIsStreaming, updateGlobalAffinity])
 
-  const handleAction = useCallback(async (action: ChatAction) => {
+  const handleAction = useCallback(async (action: ChatAction, userInput?: string) => {
     if (!characterId || !charData || isStreaming) return
     const result = executeAction(action)
     if (!result) return
 
-    // Add action as a user message
-    const userMsg: CastChatMessage = { role: 'user', content: `[ACTION: ${result.label}]`, timestamp: Date.now() }
+    // Add action as a user message — keep [ACTION:] prefix for parseActionFromMessage, append letter text if present
+    const msgContent = userInput ? `[ACTION: ${result.label}]\n${userInput}` : `[ACTION: ${result.label}]`
+    const userMsg: CastChatMessage = { role: 'user', content: msgContent, timestamp: Date.now() }
     addCastChatMessage(characterId, userMsg)
 
 
@@ -311,7 +312,21 @@ export function CastChatPage() {
                 })}
               />
             ) : ad ? (
-              <ChatActionBubble label={ad.label} emoji={ad.emoji} gemCost={0} />
+              <div className="flex flex-col items-end gap-1.5">
+                <ChatActionBubble label={ad.label} emoji={ad.emoji} gemCost={0} />
+                {ad.userText && (
+                  <div
+                    className="max-w-[240px] px-3.5 py-2.5 text-[12px] leading-relaxed italic opacity-90"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(200,75,158,0.25), rgba(139,92,246,0.25))',
+                      color: '#fff',
+                      borderRadius: '14px 2px 14px 14px',
+                    }}
+                  >
+                    "{ad.userText}"
+                  </div>
+                )}
+              </div>
             ) : (
               <div
                 className="max-w-[80%] px-3.5 py-2.5 text-[13px] leading-relaxed"
