@@ -1,3 +1,4 @@
+import { memo, useRef } from 'react'
 import { motion } from 'framer-motion'
 
 interface Props {
@@ -28,7 +29,11 @@ const ACTION_PARTICLES: Record<string, string[]> = {
 }
 
 /** Renders a chat action as an animated sticker card in the message thread */
-export function ChatActionBubble({ label, emoji, gemCost }: Props) {
+export const ChatActionBubble = memo(function ChatActionBubble({ label, emoji, gemCost }: Props) {
+  const hasAnimated = useRef(false)
+  const shouldAnimate = !hasAnimated.current
+  hasAnimated.current = true
+
   const particles = ACTION_PARTICLES[emoji] ?? ['✨']
 
   return (
@@ -38,25 +43,27 @@ export function ChatActionBubble({ label, emoji, gemCost }: Props) {
         background: 'linear-gradient(145deg, rgba(200,75,158,0.15) 0%, rgba(139,92,246,0.15) 50%, rgba(200,75,158,0.1) 100%)',
         border: '1px solid rgba(200,75,158,0.25)',
       }}
-      initial={{ opacity: 0, scale: 0.7, y: 10 }}
+      initial={shouldAnimate ? { opacity: 0, scale: 0.7, y: 10 } : false}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.4, type: 'spring', stiffness: 250, damping: 18 }}
     >
-      {/* Shimmer overlay */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.06) 50%, transparent 60%)',
-        }}
-        initial={{ x: '-100%' }}
-        animate={{ x: '200%' }}
-        transition={{ duration: 1.5, delay: 0.3, ease: 'easeInOut' }}
-      />
+      {/* Shimmer overlay — only on first render */}
+      {shouldAnimate && (
+        <motion.div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.06) 50%, transparent 60%)',
+          }}
+          initial={{ x: '-100%' }}
+          animate={{ x: '200%' }}
+          transition={{ duration: 1.5, delay: 0.3, ease: 'easeInOut' }}
+        />
+      )}
 
       {/* Emoji showcase area */}
       <div className="relative flex items-center justify-center pt-5 pb-2">
-        {/* Floating particles */}
-        {particles.map((p, i) => (
+        {/* Floating particles — only on first render */}
+        {shouldAnimate && particles.map((p, i) => (
           <motion.span
             key={i}
             className="absolute text-sm pointer-events-none"
@@ -84,7 +91,7 @@ export function ChatActionBubble({ label, emoji, gemCost }: Props) {
         {/* Main emoji with bounce */}
         <motion.span
           className="text-4xl relative z-10"
-          initial={{ scale: 0.3, rotate: -15 }}
+          initial={shouldAnimate ? { scale: 0.3, rotate: -15 } : false}
           animate={{ scale: 1, rotate: 0 }}
           transition={{
             duration: 0.5,
@@ -101,7 +108,7 @@ export function ChatActionBubble({ label, emoji, gemCost }: Props) {
       {/* Label */}
       <motion.div
         className="px-3 pb-3 text-center"
-        initial={{ opacity: 0, y: 4 }}
+        initial={shouldAnimate ? { opacity: 0, y: 4 } : false}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.25, duration: 0.3 }}
       >
@@ -114,4 +121,4 @@ export function ChatActionBubble({ label, emoji, gemCost }: Props) {
       </motion.div>
     </motion.div>
   )
-}
+})
