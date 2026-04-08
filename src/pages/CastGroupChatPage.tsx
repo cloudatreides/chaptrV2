@@ -7,8 +7,10 @@ import { CAST_ROSTER, getCastCharacter, UNIVERSE_COLORS } from '../data/castRost
 import { getAffinityTier } from '../lib/affinity'
 import { streamChatReply, extractMemories, generateGroupReaction, parseAffinityDelta } from '../lib/claudeStream'
 import { getUniverseGenre } from '../data/storyData'
+import { generateCharacterPortrait } from '../lib/togetherAi'
 import { ChatActionTray } from '../components/ChatActionTray'
 import { ChatActionBubble } from '../components/ChatActionBubble'
+import { ChatReactionImage } from '../components/ChatReactionImage'
 import { useChatActions } from '../hooks/useChatActions'
 import { parseActionFromMessage, type ChatAction } from '../data/chatActions'
 import type { CastChatMessage } from '../store/useStore'
@@ -37,6 +39,7 @@ export function CastGroupChatPage() {
   const addGroupCastMessage = useStore((s) => s.addGroupCastMessage)
   const updateGlobalAffinity = useStore((s) => s.updateGlobalAffinity)
   const characters = useStore((s) => s.characters)
+  const addStoryMoment = useStore((s) => s.addStoryMoment)
 
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
@@ -316,6 +319,16 @@ export function CastGroupChatPage() {
         setStreamingContent('')
         setStreamingCharId(null)
         setPrimaryCharIndex((primaryIdx + 1) % castMembers.length)
+
+        // Generate reaction image for romantic actions
+        if (result.reactionImagePrompt) {
+          generateCharacterPortrait(result.reactionImagePrompt).then((imgUrl) => {
+            if (imgUrl) {
+              const imgMsg: CastChatMessage = { role: 'character', content: '', timestamp: Date.now(), characterId: primaryCharId, reactionImageUrl: imgUrl }
+              addGroupCastMessage(groupKey, imgMsg)
+            }
+          })
+        }
       }
     } catch (err: any) {
       if (err.name !== 'AbortError') console.error('Group cast chat action error:', err)
@@ -370,7 +383,21 @@ export function CastGroupChatPage() {
               {msg.role === 'character' && cd && (
                 <span className="text-[10px] text-white/30 mb-0.5">{cd.name}</span>
               )}
-              {ad ? (
+              {msg.reactionImageUrl ? (
+                <ChatReactionImage
+                  imageUrl={msg.reactionImageUrl}
+                  characterName={cd?.name ?? ''}
+                  onSaveToAlbum={() => addStoryMoment({
+                    id: `reaction-${Date.now()}`,
+                    imageUrl: msg.reactionImageUrl!,
+                    characterIds: [msg.characterId ?? ''],
+                    universeId: universeId ?? '',
+                    beatLabel: `${cd?.name ?? 'Character'} reacted`,
+                    note: '',
+                    timestamp: Date.now(),
+                  })}
+                />
+              ) : ad ? (
                 <ChatActionBubble label={ad.label} emoji={ad.emoji} gemCost={0} />
               ) : (
                 <div

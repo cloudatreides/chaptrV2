@@ -13,6 +13,7 @@ import { getUniverseGenre } from '../data/storyData'
 import type { SceneCharacter } from '../data/storyData'
 import { ChatActionTray } from './ChatActionTray'
 import { ChatActionBubble } from './ChatActionBubble'
+import { ChatReactionImage } from './ChatReactionImage'
 import { useChatActions } from '../hooks/useChatActions'
 import type { ChatAction } from '../data/chatActions'
 
@@ -24,6 +25,7 @@ interface GroupMessage {
   content: string
   characterId?: string // for character messages
   actionData?: { label: string; emoji: string; gemCost: number }
+  reactionImageUrl?: string
 }
 
 interface Props {
@@ -44,6 +46,7 @@ export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, 
   const addCharacterMemory = useStore((s) => s.addCharacterMemory)
   const globalAffinities = useStore((s) => s.globalAffinities)
   const playthroughHistory = useStore((s) => s.playthroughHistory)
+  const addStoryMoment = useStore((s) => s.addStoryMoment)
   const previousPlaythroughs = playthroughHistory.filter((pt) => pt.universeId === selectedUniverse)
   const playerCharacter = useStore((s) => s.characters[0])
   const playerGender = playerCharacter?.gender ?? 'male'
@@ -335,6 +338,15 @@ export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, 
       setPrimaryCharIndex((primaryIdx + 1) % characters.length)
       setExchangeCount(newExchange)
       trackEvent('chat_action', { characterId: primaryCharId, actionId: action.id, affinityBoost: result.affinityBoost })
+
+      // Generate reaction image for romantic actions
+      if (result.reactionImagePrompt) {
+        generateCharacterPortrait(result.reactionImagePrompt).then((imgUrl) => {
+          if (imgUrl) {
+            setMessages(prev => [...prev, { id: `reaction-${Date.now()}`, role: 'character', content: '', characterId: primaryCharId, reactionImageUrl: imgUrl }])
+          }
+        })
+      }
     } catch (e) {
       if (e instanceof Error && e.name !== 'AbortError') {
         setMessages(prev => [...prev, { id: `err-${Date.now()}`, role: 'character', content: '...', characterId: primaryCharId }])
@@ -400,7 +412,21 @@ export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, 
                 {msg.role === 'character' && msg.characterId && (
                   <CharAvatar characterId={msg.characterId} />
                 )}
-                {msg.actionData ? (
+                {msg.reactionImageUrl ? (
+                  <ChatReactionImage
+                    imageUrl={msg.reactionImageUrl}
+                    characterName={charData?.name ?? ''}
+                    onSaveToAlbum={() => addStoryMoment({
+                      id: `reaction-${Date.now()}`,
+                      imageUrl: msg.reactionImageUrl!,
+                      characterIds: [msg.characterId ?? ''],
+                      universeId: selectedUniverse ?? '',
+                      beatLabel: `${charData?.name ?? 'Character'} reacted`,
+                      note: '',
+                      timestamp: Date.now(),
+                    })}
+                  />
+                ) : msg.actionData ? (
                   <ChatActionBubble label={msg.actionData.label} emoji={msg.actionData.emoji} gemCost={msg.actionData.gemCost} />
                 ) : (
                   <div className={`chat-bubble ${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-character'}`}>

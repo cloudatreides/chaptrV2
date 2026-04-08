@@ -13,6 +13,7 @@ import { getUniverseGenre } from '../data/storyData'
 import type { SceneCharacter } from '../data/storyData'
 import { ChatActionTray } from './ChatActionTray'
 import { ChatActionBubble } from './ChatActionBubble'
+import { ChatReactionImage } from './ChatReactionImage'
 import { useChatActions } from '../hooks/useChatActions'
 import type { ChatAction } from '../data/chatActions'
 
@@ -198,7 +199,7 @@ function getSuggestions(bio: string | null, exchangeCount: number): string[] {
 // ─── Per-character chat state ───
 
 interface CharChatState {
-  messages: { role: 'user' | 'character'; content: string; actionData?: { label: string; emoji: string; gemCost: number } }[]
+  messages: { role: 'user' | 'character'; content: string; actionData?: { label: string; emoji: string; gemCost: number }; reactionImageUrl?: string }[]
   exchangeCount: number
   isDone: boolean
   hasOpener: boolean
@@ -233,6 +234,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
   const addCharacterMemory = useStore((s) => s.addCharacterMemory)
   const globalAffinities = useStore((s) => s.globalAffinities)
   const playthroughHistory = useStore((s) => s.playthroughHistory)
+  const addStoryMoment = useStore((s) => s.addStoryMoment)
   const previousPlaythroughs = playthroughHistory.filter((pt) => pt.universeId === selectedUniverse)
 
   // Per-character state
@@ -568,6 +570,19 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
       // Use the action's guaranteed affinity boost instead of normal growth
       updateAffinity(activeCharId, result.affinityBoost)
       trackEvent('chat_action', { characterId: activeCharId, actionId: action.id, affinityBoost: result.affinityBoost })
+
+      // Generate reaction image for romantic actions
+      if (result.reactionImagePrompt) {
+        generateCharacterPortrait(result.reactionImagePrompt).then((imgUrl) => {
+          if (imgUrl) {
+            const imgMessage = { role: 'character' as const, content: '', reactionImageUrl: imgUrl }
+            setChatStates(prev => ({
+              ...prev,
+              [activeCharId]: { ...prev[activeCharId], messages: [...prev[activeCharId].messages, imgMessage] },
+            }))
+          }
+        })
+      }
     } catch (e) {
       if (e instanceof Error && e.name !== 'AbortError') {
         const fallback = { role: 'character' as const, content: '...' }
@@ -772,7 +787,21 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
                   )}
                 </div>
               )}
-              {msg.actionData ? (
+              {msg.reactionImageUrl ? (
+                <ChatReactionImage
+                  imageUrl={msg.reactionImageUrl}
+                  characterName={activeCharData?.name ?? ''}
+                  onSaveToAlbum={() => addStoryMoment({
+                    id: `reaction-${Date.now()}`,
+                    imageUrl: msg.reactionImageUrl!,
+                    characterIds: [activeCharId],
+                    universeId: selectedUniverse ?? '',
+                    beatLabel: `${activeCharData?.name ?? 'Character'} reacted`,
+                    note: '',
+                    timestamp: Date.now(),
+                  })}
+                />
+              ) : msg.actionData ? (
                 <ChatActionBubble label={msg.actionData.label} emoji={msg.actionData.emoji} gemCost={msg.actionData.gemCost} />
               ) : (
                 <div className={`chat-bubble ${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-character'}`}>

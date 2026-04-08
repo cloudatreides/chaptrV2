@@ -12,6 +12,7 @@ import { getAffinityGrowth } from '../lib/affinity'
 import { parseAffinityDelta } from '../lib/claudeStream'
 import { ChatActionTray } from './ChatActionTray'
 import { ChatActionBubble } from './ChatActionBubble'
+import { ChatReactionImage } from './ChatReactionImage'
 import { useChatActions } from '../hooks/useChatActions'
 import type { ChatAction } from '../data/chatActions'
 
@@ -216,6 +217,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
   const addCharacterMemory = useStore((s) => s.addCharacterMemory)
   const globalAffinities = useStore((s) => s.globalAffinities)
   const playthroughHistory = useStore((s) => s.playthroughHistory)
+  const addStoryMoment = useStore((s) => s.addStoryMoment)
   const affinityScore = characterAffinities[characterId] ?? 0
   const globalAffinityScore = globalAffinities[characterId] ?? 0
   const previousPlaythroughs = playthroughHistory.filter((pt) => pt.universeId === selectedUniverse)
@@ -228,7 +230,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
     universeId: selectedUniverse,
     characterMemories: characterMemories[characterId] ?? [],
   })
-  const [localMessages, setLocalMessages] = useState<{ role: 'user' | 'character'; content: string; actionData?: { label: string; emoji: string; gemCost: number } }[]>([])
+  const [localMessages, setLocalMessages] = useState<{ role: 'user' | 'character'; content: string; actionData?: { label: string; emoji: string; gemCost: number }; reactionImageUrl?: string }[]>([])
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const [streamedReply, setStreamedReply] = useState('')
@@ -462,6 +464,16 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
       // Use the action's guaranteed affinity boost instead of normal growth
       updateAffinity(characterId, result.affinityBoost)
       trackEvent('chat_action', { characterId, actionId: action.id, affinityBoost: result.affinityBoost })
+
+      // Generate reaction image for romantic actions (fire-and-forget, non-blocking)
+      if (result.reactionImagePrompt) {
+        generateCharacterPortrait(result.reactionImagePrompt).then((imgUrl) => {
+          if (imgUrl) {
+            const imgMessage = { role: 'character' as const, content: '', reactionImageUrl: imgUrl }
+            setLocalMessages((prev) => [...prev, imgMessage])
+          }
+        })
+      }
     } catch (e) {
       if (e instanceof Error && e.name !== 'AbortError') {
         const fallback = { role: 'character' as const, content: '...' }
@@ -572,7 +584,21 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
                   )}
                 </div>
               )}
-              {msg.actionData ? (
+              {msg.reactionImageUrl ? (
+                <ChatReactionImage
+                  imageUrl={msg.reactionImageUrl}
+                  characterName={character?.name ?? ''}
+                  onSaveToAlbum={() => addStoryMoment({
+                    id: `reaction-${Date.now()}`,
+                    imageUrl: msg.reactionImageUrl!,
+                    characterIds: [characterId],
+                    universeId: selectedUniverse ?? '',
+                    beatLabel: `${character?.name ?? 'Character'} reacted`,
+                    note: '',
+                    timestamp: Date.now(),
+                  })}
+                />
+              ) : msg.actionData ? (
                 <ChatActionBubble label={msg.actionData.label} emoji={msg.actionData.emoji} gemCost={msg.actionData.gemCost} />
               ) : (
                 <div className={`chat-bubble ${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-character'}`}>

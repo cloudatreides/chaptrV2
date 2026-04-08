@@ -28,6 +28,7 @@ export interface CastChatMessage {
   content: string
   timestamp: number
   characterId?: string // used in group chat to identify speaker
+  reactionImageUrl?: string // AI-generated reaction portrait from romantic actions
 }
 
 export interface StoryMoment {

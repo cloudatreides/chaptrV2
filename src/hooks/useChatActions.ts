@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { useStore } from '../store/useStore'
-import { type ChatAction, getMysteryBoxBoost, getFavoriteThingPrompt } from '../data/chatActions'
+import { type ChatAction, getMysteryBoxBoost, getFavoriteThingPrompt, IMAGE_REACTION_ACTION_IDS, buildReactionImagePrompt } from '../data/chatActions'
 import { getCharacter, CHARACTERS } from '../data/characters'
 
 interface UseChatActionsParams {
@@ -15,6 +15,7 @@ interface ActionResult {
   gemCost: number
   affinityBoost: number
   promptInjection: string
+  reactionImagePrompt: string | null
 }
 
 export function useChatActions({ characterId, universeId, characterMemories }: UseChatActionsParams) {
@@ -55,12 +56,22 @@ export function useChatActions({ characterId, universeId, characterMemories }: U
       affinityBoost = isMatch ? 10 : 3
     }
 
+    // Build reaction image prompt for romantic actions that trigger it
+    let reactionImagePrompt: string | null = null
+    if (IMAGE_REACTION_ACTION_IDS.has(action.id)) {
+      const charData = getCharacter(characterId, universeId) ?? CHARACTERS[characterId]
+      if (charData?.portraitPrompt) {
+        reactionImagePrompt = buildReactionImagePrompt(charData.portraitPrompt, action.id, action.label)
+      }
+    }
+
     return {
       label: action.label,
       emoji: action.emoji,
       gemCost: action.gemCost,
       affinityBoost,
       promptInjection,
+      reactionImagePrompt,
     }
   }, [characterId, universeId, characterMemories, spendGems, setActionCooldown, isActionOnCooldown])
 

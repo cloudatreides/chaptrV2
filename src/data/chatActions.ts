@@ -301,6 +301,40 @@ export function getFavoriteThingPrompt(
   }
 }
 
+/** IDs of actions that trigger a character reaction image in the chat thread */
+export const IMAGE_REACTION_ACTION_IDS = new Set(['love-letter', 'serenade'])
+
+/** Build a FLUX portrait prompt for a character reacting to a romantic action.
+ *  Takes the character's base portraitPrompt and swaps in a reaction-specific pose/expression. */
+export function buildReactionImagePrompt(
+  basePortraitPrompt: string,
+  actionId: string,
+  resolvedLabel: string,
+): string {
+  // Strip the pose/expression/clothing portion after the core appearance description
+  // and replace with a reaction-specific one
+  const reactionModifiers: Record<string, string> = {
+    'love-letter': 'holding a handwritten letter close to their chest, eyes soft and glistening with emotion, gentle blush on cheeks, tender surprised smile, warm intimate lighting',
+    'serenade': 'eyes closed with a peaceful moved expression, hand over heart, soft blush, listening to music, dreamy warm lighting, deeply touched',
+  }
+
+  const modifier = reactionModifiers[actionId] ?? 'blushing, looking touched and emotional, warm lighting'
+
+  // Take the base prompt up to the first comma after the character description
+  // and append the reaction modifier
+  const base = basePortraitPrompt
+    // Remove existing pose/expression descriptors
+    .replace(/,\s*(subtle smirk|confident gaze|warm smile|bright expressive eyes|intense dark eyes|sharp elegant features|big smile)[^,]*/gi, '')
+    // Remove existing clothing
+    .replace(/,\s*wearing [^,]+/gi, '')
+    // Remove existing lighting
+    .replace(/,\s*(soft studio lighting|warm moody lighting)[^,]*/gi, '')
+    // Remove background
+    .replace(/,\s*clean (dark |simple )?background/gi, '')
+
+  return `${base}, ${modifier}, clean soft-focus background, high quality anime art style`
+}
+
 /** Category display info */
 export const CATEGORY_INFO: Record<ActionCategory, { label: string; color: string }> = {
   romantic: { label: 'Romantic', color: '#e060b8' },
