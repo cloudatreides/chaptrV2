@@ -20,7 +20,9 @@ export function PingNotification({ ping, onDismiss }: Props) {
     bio, loveInterest, selectedUniverse, characterState,
     characterPortraits, characterAffinities,
   } = useActiveStory()
-  const { addChatMessage, markPingSeen, updateAffinity } = useStore()
+  const addChatMessage = useStore((s) => s.addChatMessage)
+  const markPingSeen = useStore((s) => s.markPingSeen)
+  const updateAffinity = useStore((s) => s.updateAffinity)
 
   // Resolve love interest for characterId
   const resolvedCharId = ping.characterId === 'jiwon'

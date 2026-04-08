@@ -19,7 +19,10 @@ export function RevealPage() {
     selectedUniverse, bio, loveInterest, trustStatusLabel,
     chatSummaries, characterAffinities,
   } = useActiveStory()
-  const { setRevealSignature, setSceneImage, resetStory, addPlaythroughRecord } = useStore()
+  const setRevealSignature = useStore((s) => s.setRevealSignature)
+  const setSceneImage = useStore((s) => s.setSceneImage)
+  const resetStory = useStore((s) => s.resetStory)
+  const addPlaythroughRecord = useStore((s) => s.addPlaythroughRecord)
   const activeCharacterId = useStore((s) => s.activeCharacterId)
   const summariesList = Object.values(chatSummaries)
 

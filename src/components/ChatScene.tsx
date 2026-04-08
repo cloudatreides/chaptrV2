@@ -209,7 +209,13 @@ interface Props {
 
 export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3, storyContext, chatImagePrompt, onComplete }: Props) {
   const { bio, loveInterest, selectedUniverse, characterState, characterPortraits, characterAffinities, characterMemories } = useActiveStory()
-  const { addChatMessage, setChatSummary, setCharacterPortrait, updateAffinity, addCharacterMemory, globalAffinities, playthroughHistory } = useStore()
+  const addChatMessage = useStore((s) => s.addChatMessage)
+  const setChatSummary = useStore((s) => s.setChatSummary)
+  const setCharacterPortrait = useStore((s) => s.setCharacterPortrait)
+  const updateAffinity = useStore((s) => s.updateAffinity)
+  const addCharacterMemory = useStore((s) => s.addCharacterMemory)
+  const globalAffinities = useStore((s) => s.globalAffinities)
+  const playthroughHistory = useStore((s) => s.playthroughHistory)
   const affinityScore = characterAffinities[characterId] ?? 0
   const globalAffinityScore = globalAffinities[characterId] ?? 0
   const previousPlaythroughs = playthroughHistory.filter((pt) => pt.universeId === selectedUniverse)

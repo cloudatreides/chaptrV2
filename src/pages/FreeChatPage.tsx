@@ -125,7 +125,10 @@ export function FreeChatPage() {
     bio, loveInterest, selectedUniverse, characterState, characterPortraits, characterAffinities, characterMemories,
     chatSummaries, choiceDescriptions, trustStatusLabel, revealSignature,
   } = useActiveStory()
-  const { addChatMessage, setCharacterPortrait, updateAffinity, addCharacterMemory } = useStore()
+  const addChatMessage = useStore((s) => s.addChatMessage)
+  const setCharacterPortrait = useStore((s) => s.setCharacterPortrait)
+  const updateAffinity = useStore((s) => s.updateAffinity)
+  const addCharacterMemory = useStore((s) => s.addCharacterMemory)
 
   const characterIds = getUniverseCharacterIds(selectedUniverse, loveInterest)
 

@@ -20,7 +20,9 @@ export function QuestPage() {
     loveInterest, bio, selectedUniverse, characterState,
     choiceDescriptions, chatSummaries, questProgress, activeCharacter,
   } = useActiveStory()
-  const { advanceQuest, updateTrust, setTrustStatusLabel } = useStore()
+  const advanceQuest = useStore((s) => s.advanceQuest)
+  const updateTrust = useStore((s) => s.updateTrust)
+  const setTrustStatusLabel = useStore((s) => s.setTrustStatusLabel)
   const summariesList = Object.values(chatSummaries)
 
   const progress = questId ? questProgress[questId] : undefined
@@ -194,7 +196,7 @@ export function QuestPage() {
 
 function QuestComplete({ questId, quest }: { questId: string; quest: { title: string; contextBrief: string; characterId: string } }) {
   const navigate = useNavigate()
-  const { completeQuest } = useStore()
+  const completeQuest = useStore((s) => s.completeQuest)
   const [done, setDone] = useState(false)
 
   useEffect(() => {

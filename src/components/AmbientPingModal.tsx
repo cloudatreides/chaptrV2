@@ -15,7 +15,9 @@ interface Props {
 
 export function AmbientPingModal({ ping, onDismiss }: Props) {
   const globalAffinities = useStore((s) => s.globalAffinities)
-  const { addAmbientPingReply, markAmbientPingRead, updateGlobalAffinity } = useStore()
+  const addAmbientPingReply = useStore((s) => s.addAmbientPingReply)
+  const markAmbientPingRead = useStore((s) => s.markAmbientPingRead)
+  const updateGlobalAffinity = useStore((s) => s.updateGlobalAffinity)
 
   const charData = getCharacter(ping.characterId, ping.universeId) ?? CHARACTERS[ping.characterId]
   const affinityScore = globalAffinities[ping.characterId] ?? 0

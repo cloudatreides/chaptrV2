@@ -38,16 +38,18 @@ export function StoryReaderPage() {
     sceneImages, trustStatusLabel, characterAffinities, seenPings,
   } = useActiveStory()
 
-  const {
-    advanceStep, setBranchChoice,
-    addChoiceDescription, updateTrust,
-    setTrustStatusLabel,
-    isStreaming, setIsStreaming,
-    isGeneratingScene, setIsGeneratingScene,
-    setSceneImage,
-    unlockCastCharacter,
-    addStoryMoment,
-  } = useStore()
+  const advanceStep = useStore((s) => s.advanceStep)
+  const setBranchChoice = useStore((s) => s.setBranchChoice)
+  const addChoiceDescription = useStore((s) => s.addChoiceDescription)
+  const updateTrust = useStore((s) => s.updateTrust)
+  const setTrustStatusLabel = useStore((s) => s.setTrustStatusLabel)
+  const isStreaming = useStore((s) => s.isStreaming)
+  const setIsStreaming = useStore((s) => s.setIsStreaming)
+  const isGeneratingScene = useStore((s) => s.isGeneratingScene)
+  const setIsGeneratingScene = useStore((s) => s.setIsGeneratingScene)
+  const setSceneImage = useStore((s) => s.setSceneImage)
+  const unlockCastCharacter = useStore((s) => s.unlockCastCharacter)
+  const addStoryMoment = useStore((s) => s.addStoryMoment)
   const playthroughHistory = useStore((s) => s.playthroughHistory)
   const summariesList = useStore.getState().getSummariesList()
 
