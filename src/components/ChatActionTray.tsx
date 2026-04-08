@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, X, Lock, Gem, Heart } from 'lucide-react'
 import { getAvailableActions, CATEGORY_INFO, ACTION_DESCRIPTIONS, type ChatAction, type ActionCategory } from '../data/chatActions'
@@ -46,6 +46,12 @@ export function ChatActionTray({ playerGender, characterGender, affinityScore, g
 
   const tierLabels = (genre === 'ROMANCE' ? ROMANCE_AFFINITY_TIERS : AFFINITY_TIERS).map(t => t.label)
 
+  // Find the hovered action data for the info bar
+  const hoveredData = useMemo(() => {
+    if (!hoveredAction) return null
+    return available.find(a => a.id === hoveredAction) ?? null
+  }, [hoveredAction, available])
+
   return (
     <>
       {/* Toggle button */}
@@ -75,12 +81,12 @@ export function ChatActionTray({ playerGender, characterGender, affinityScore, g
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="absolute bottom-full left-0 right-0 mb-2 mx-1 rounded-2xl overflow-hidden"
+            className="absolute bottom-full left-0 right-0 mb-2 mx-1 rounded-2xl overflow-hidden flex flex-col"
             style={{
               background: 'rgba(14,12,22,0.97)',
               border: '1px solid rgba(200,75,158,0.15)',
               backdropFilter: 'blur(16px)',
-              maxHeight: '320px',
+              maxHeight: '340px',
             }}
             initial={{ opacity: 0, y: 8, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -118,79 +124,48 @@ export function ChatActionTray({ playerGender, characterGender, affinityScore, g
             </div>
 
             {/* Actions grid */}
-            <div className="p-2 overflow-y-auto" style={{ maxHeight: '260px' }}>
+            <div className="p-2 overflow-y-auto flex-1" style={{ maxHeight: '240px' }}>
               <div className="grid grid-cols-3 gap-1.5">
                 {/* Available actions */}
                 {filteredAvailable.map(action => {
                   const onCooldown = isOnCooldown(action.id)
                   const cantAfford = action.gemCost > 0 && gemBalance < action.gemCost
                   const isDisabled = onCooldown || cantAfford
-                  const isHovered = hoveredAction === action.id
-                  const desc = ACTION_DESCRIPTIONS[action.id]
 
                   return (
-                    <div key={action.id} className="relative">
-                      <button
-                        onClick={() => {
-                          if (!isDisabled) {
-                            onAction(action)
-                            setIsOpen(false)
-                          }
-                        }}
-                        onMouseEnter={() => setHoveredAction(action.id)}
-                        onMouseLeave={() => setHoveredAction(null)}
-                        disabled={isDisabled}
-                        className="w-full flex flex-col items-center gap-1 p-2.5 rounded-xl transition-all hover:brightness-125 disabled:opacity-30 disabled:hover:brightness-100"
-                        style={{
-                          background: 'rgba(255,255,255,0.03)',
-                          border: '1px solid rgba(255,255,255,0.05)',
-                        }}
-                      >
-                        <span className="text-lg">{action.emoji}</span>
-                        <span className="text-[10px] text-white/70 font-medium text-center leading-tight">{action.label}</span>
-                        <div className="flex items-center gap-1">
-                          {action.gemCost > 0 && (
-                            <span className="flex items-center gap-0.5 text-[9px]" style={{ color: cantAfford ? '#ef4444' : 'rgba(251,191,36,0.6)' }}>
-                              <Gem size={8} /> {action.gemCost}
-                            </span>
-                          )}
-                          {action.gemCost === 0 && (
-                            <span className="text-[9px] text-white/20">free</span>
-                          )}
-                        </div>
-                        {onCooldown && (
-                          <span className="text-[8px] text-white/30">used</span>
+                    <button
+                      key={action.id}
+                      onClick={() => {
+                        if (!isDisabled) {
+                          onAction(action)
+                          setIsOpen(false)
+                        }
+                      }}
+                      onMouseEnter={() => setHoveredAction(action.id)}
+                      onMouseLeave={() => setHoveredAction(null)}
+                      disabled={isDisabled}
+                      className="w-full flex flex-col items-center gap-1 p-2.5 rounded-xl transition-all hover:brightness-125 disabled:opacity-30 disabled:hover:brightness-100"
+                      style={{
+                        background: hoveredAction === action.id ? 'rgba(200,75,158,0.08)' : 'rgba(255,255,255,0.03)',
+                        border: `1px solid ${hoveredAction === action.id ? 'rgba(200,75,158,0.15)' : 'rgba(255,255,255,0.05)'}`,
+                      }}
+                    >
+                      <span className="text-lg">{action.emoji}</span>
+                      <span className="text-[10px] text-white/70 font-medium text-center leading-tight">{action.label}</span>
+                      <div className="flex items-center gap-1">
+                        {action.gemCost > 0 && (
+                          <span className="flex items-center gap-0.5 text-[9px]" style={{ color: cantAfford ? '#ef4444' : 'rgba(251,191,36,0.6)' }}>
+                            <Gem size={8} /> {action.gemCost}
+                          </span>
                         )}
-                      </button>
-
-                      {/* Hover tooltip */}
-                      <AnimatePresence>
-                        {isHovered && !isDisabled && (
-                          <motion.div
-                            className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2.5 rounded-xl pointer-events-none"
-                            style={{
-                              background: 'rgba(14,12,22,0.97)',
-                              border: '1px solid rgba(200,75,158,0.2)',
-                              backdropFilter: 'blur(12px)',
-                            }}
-                            initial={{ opacity: 0, y: 4 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 4 }}
-                            transition={{ duration: 0.15 }}
-                          >
-                            <p className="text-[10px] text-white/60 leading-snug mb-2">{desc}</p>
-                            <div className="flex items-center gap-3">
-                              <span className="flex items-center gap-1 text-[9px]" style={{ color: 'rgba(251,191,36,0.7)' }}>
-                                <Gem size={8} /> {action.gemCost > 0 ? action.gemCost : 'Free'}
-                              </span>
-                              <span className="flex items-center gap-1 text-[9px]" style={{ color: 'rgba(200,75,158,0.7)' }}>
-                                <Heart size={8} /> +{action.affinityBoost}{action.id === 'mystery-box' ? '~8' : ''} affinity
-                              </span>
-                            </div>
-                          </motion.div>
+                        {action.gemCost === 0 && (
+                          <span className="text-[9px] text-white/20">free</span>
                         )}
-                      </AnimatePresence>
-                    </div>
+                      </div>
+                      {onCooldown && (
+                        <span className="text-[8px] text-white/30">used</span>
+                      )}
+                    </button>
                   )
                 })}
 
@@ -216,15 +191,49 @@ export function ChatActionTray({ playerGender, characterGender, affinityScore, g
               )}
             </div>
 
-            {/* Gem balance footer */}
-            <div className="flex items-center justify-between px-3 py-2 border-t border-white/5">
-              <span className="flex items-center gap-1 text-[10px] text-white/30">
-                <Gem size={10} style={{ color: 'rgba(251,191,36,0.5)' }} />
-                {gemBalance} gems
-              </span>
-              <span className="text-[9px] text-white/20">
-                +{affinityScore}% affinity
-              </span>
+            {/* Footer: info bar on hover, gem balance otherwise */}
+            <div className="border-t border-white/5 px-3 py-2 min-h-[44px] flex items-center">
+              <AnimatePresence mode="wait">
+                {hoveredData ? (
+                  <motion.div
+                    key={hoveredData.id}
+                    className="flex flex-col gap-1 w-full"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.1 }}
+                  >
+                    <p className="text-[10px] text-white/50 leading-snug">
+                      {ACTION_DESCRIPTIONS[hoveredData.id] ?? hoveredData.label}
+                    </p>
+                    <div className="flex items-center gap-3">
+                      <span className="flex items-center gap-1 text-[9px]" style={{ color: 'rgba(251,191,36,0.7)' }}>
+                        <Gem size={8} /> {hoveredData.gemCost > 0 ? hoveredData.gemCost : 'Free'}
+                      </span>
+                      <span className="flex items-center gap-1 text-[9px]" style={{ color: 'rgba(200,75,158,0.7)' }}>
+                        <Heart size={8} /> +{hoveredData.affinityBoost}{hoveredData.id === 'mystery-box' ? '~8' : ''} affinity
+                      </span>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="default"
+                    className="flex items-center justify-between w-full"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.1 }}
+                  >
+                    <span className="flex items-center gap-1 text-[10px] text-white/30">
+                      <Gem size={10} style={{ color: 'rgba(251,191,36,0.5)' }} />
+                      {gemBalance} gems
+                    </span>
+                    <span className="text-[9px] text-white/20">
+                      +{affinityScore}% affinity
+                    </span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </motion.div>
         )}
