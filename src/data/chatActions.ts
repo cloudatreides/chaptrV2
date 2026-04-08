@@ -194,6 +194,24 @@ export const CHAT_ACTIONS: ChatAction[] = [
   },
 ]
 
+// ─── Descriptions (for hover tooltips) ───
+
+export const ACTION_DESCRIPTIONS: Record<string, string> = {
+  'poke': 'A playful nudge to get their attention',
+  'send-meme': 'Share something funny and see their reaction',
+  'dare': 'Dare them to do something bold',
+  'challenge': 'Challenge them to a quick game',
+  'coffee': 'Buy them a coffee — a casual, thoughtful gesture',
+  'mystery-box': 'Send a surprise gift — could be anything!',
+  'favorite-thing': 'Gift something personal based on what you know about them',
+  'comfort': 'Reach out with warmth when they need it',
+  'share-secret': 'Open up and share something personal',
+  'ask-past': 'Ask about a memory from their past',
+  'romantic-gift': 'A romantic gesture to show how you feel',
+  'love-letter': 'Pour your heart out in writing',
+  'serenade': 'The ultimate romantic gesture',
+}
+
 // ─── Helpers ───
 
 /** Get the action list with gender variants resolved */
