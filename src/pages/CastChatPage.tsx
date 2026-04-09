@@ -7,7 +7,7 @@ import { CAST_ROSTER, getCastCharacter } from '../data/castRoster'
 import { getAffinityTier } from '../lib/affinity'
 import { streamChatReply, extractMemories, parseAffinityDelta, generateLoveLetter } from '../lib/claudeStream'
 import { getUniverseGenre } from '../data/storyData'
-import { generateCharacterPortrait } from '../lib/togetherAi'
+import { generateCharacterPortrait, generateSceneImage } from '../lib/togetherAi'
 import { ChatActionTray } from '../components/ChatActionTray'
 import { ChatActionBubble } from '../components/ChatActionBubble'
 import { ChatReactionImage } from '../components/ChatReactionImage'
@@ -205,8 +205,11 @@ export function CastChatPage() {
       setIsStreaming(false)
     }
 
-    // Add action as a user message — keep [ACTION:] prefix for parseActionFromMessage, append letter text if present
-    const msgContent = letterContent ? `[ACTION: ${result.label}]\n${letterContent}` : `[ACTION: ${result.label}]`
+    // Add action as a user message — keep [ACTION:] prefix for parseActionFromMessage, append extra text if present
+    let msgContent = `[ACTION: ${result.label}]`
+    if (letterContent) msgContent += `\n${letterContent}`
+    if (result.dareText) msgContent += `\nI dare you to: ${result.dareText}`
+    if (result.memeText) msgContent += `\n"${result.memeText}"`
     const userMsg: CastChatMessage = { role: 'user', content: msgContent, timestamp: Date.now() }
     addCastChatMessage(characterId, userMsg)
 
@@ -284,6 +287,25 @@ export function CastChatPage() {
             }
           })
         }
+
+        // Generate scene image with both characters (e.g. coffee/serenade)
+        // Uses Kontext with selfie reference if available, falls back to Schnell without
+        const selfieUrl = playerChar?.selfieUrl
+        if (result.sceneImagePrompt) {
+          generateSceneImage({
+            prompt: result.sceneImagePrompt,
+            referenceImageUrl: selfieUrl ?? undefined,
+            protagonistGender: playerGender,
+            includesProtagonist: !!selfieUrl,
+            width: 768,
+            height: 576,
+          }).then((imgUrl) => {
+            if (imgUrl && characterId) {
+              const imgMsg: CastChatMessage = { role: 'character', content: '', timestamp: Date.now(), reactionImageUrl: imgUrl }
+              addCastChatMessage(characterId, imgMsg)
+            }
+          })
+        }
       }
     } catch (err: any) {
       if (err.name !== 'AbortError') console.error('Cast chat action error:', err)
@@ -309,7 +331,7 @@ export function CastChatPage() {
 
   // ─── Shared sub-components ───
 
-  const CharacterAvatar = ({ size = 'w-7 h-7', textSize = 'text-xs' }: { size?: string; textSize?: string }) => (
+  const characterAvatar = (size = 'w-7 h-7', textSize = 'text-xs') => (
     <div className={`${size} rounded-full overflow-hidden shrink-0`} style={{ background: '#1A1624' }}>
       {charData.staticPortrait ? (
         <img src={charData.staticPortrait} alt="" className="w-full h-full object-cover" />
@@ -319,7 +341,7 @@ export function CastChatPage() {
     </div>
   )
 
-  const MessageList = () => (
+  const messageList = (
     <>
       {messages.length === 0 && !isStreaming && (
         <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center py-12">
@@ -332,7 +354,7 @@ export function CastChatPage() {
         const ad = msg.role === 'user' ? parseActionFromMessage(msg.content) : null
         return (
           <div key={msg.timestamp ?? i} className={`flex gap-2.5 ${msg.role === 'user' ? 'justify-end' : ''}`}>
-            {msg.role === 'character' && <CharacterAvatar />}
+            {msg.role === 'character' && {characterAvatar()}}
             {msg.reactionImageUrl && msg.role === 'user' ? (
               <div className="max-w-[220px] rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(200,75,158,0.25)' }}>
                 <img src={msg.reactionImageUrl} alt="Gift" className="w-full h-auto" />
@@ -390,7 +412,7 @@ export function CastChatPage() {
 
       {isStreaming && streamingContent && (
         <div className="flex gap-2.5">
-          <CharacterAvatar />
+          {characterAvatar()}
           <div className="max-w-[80%] px-3.5 py-2.5 text-[13px] leading-relaxed" style={{ background: '#1A1624', color: '#E8E3F0', borderRadius: '2px 14px 14px 14px' }}>
             {streamingContent}
             <span className="inline-block w-1.5 h-4 bg-accent/50 ml-0.5 animate-pulse" />
@@ -400,7 +422,7 @@ export function CastChatPage() {
 
       {isStreaming && !streamingContent && (
         <div className="flex gap-2.5">
-          <CharacterAvatar />
+          {characterAvatar()}
           <div className="px-4 py-3 rounded-[2px_14px_14px_14px] flex gap-1.5 items-center" style={{ background: '#1A1624' }}>
             <div className="w-1.5 h-1.5 rounded-full bg-accent/60 animate-bounce" style={{ animationDelay: '0ms' }} />
             <div className="w-1.5 h-1.5 rounded-full bg-accent/40 animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -411,7 +433,7 @@ export function CastChatPage() {
     </>
   )
 
-  const MemoryToast = () => (
+  const memoryToastEl = (
     <AnimatePresence>
       {memoryToast && (
         <motion.div
@@ -500,9 +522,9 @@ export function CastChatPage() {
         </div>
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-3">
-          <MessageList />
+          {messageList}
         </div>
-        <MemoryToast />
+        {memoryToastEl}
         {chatInput}
       </div>
 
@@ -544,9 +566,9 @@ export function CastChatPage() {
 
             {/* Messages */}
             <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-4 flex flex-col gap-3">
-              <MessageList />
+              {messageList}
             </div>
-            <MemoryToast />
+            {memoryToastEl}
             {chatInput}
           </div>
 
