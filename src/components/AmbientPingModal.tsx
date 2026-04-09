@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Send } from 'lucide-react'
+import { X, Send, ArrowRight } from 'lucide-react'
 import { getCharacter, CHARACTERS } from '../data/characters'
 import { getUniverseGenre } from '../data/storyData'
 import { useStore } from '../store/useStore'
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function AmbientPingModal({ ping, onDismiss }: Props) {
+  const navigate = useNavigate()
   const globalAffinities = useStore((s) => s.globalAffinities)
   const addAmbientPingReply = useStore((s) => s.addAmbientPingReply)
   const markAmbientPingRead = useStore((s) => s.markAmbientPingRead)
@@ -85,10 +87,19 @@ export function AmbientPingModal({ ping, onDismiss }: Props) {
 
       for await (const chunk of gen) {
         fullReply += chunk
-        setStreamedReply(fullReply)
+        const displayText = fullReply
+          .replace(/\{[^{}]*"trustDelta"[^{}]*\}?/g, '')
+          .replace(/\{[^{}]*"trustDelta"[^{}]*/g, '')
+          .replace(/\n?\[AFFINITY:[+-]?\d*\]?\s*$/g, '')
+          .trimEnd()
+        setStreamedReply(displayText)
       }
 
-      const charMessage = { role: 'character' as const, content: fullReply }
+      const cleanReply = fullReply
+        .replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/g, '')
+        .replace(/\{[^{}]*"trustDelta"[^{}]*\}/g, '')
+        .trim()
+      const charMessage = { role: 'character' as const, content: cleanReply }
       setMessages(prev => [...prev, charMessage])
       addAmbientPingReply(ping.id, { role: 'character', content: fullReply, characterId: ping.characterId, timestamp: Date.now() })
       setStreamedReply('')
@@ -149,6 +160,15 @@ export function AmbientPingModal({ ping, onDismiss }: Props) {
               <p className="text-white/30 text-[10px]">reached out while you were away</p>
             </div>
             <button
+              className="text-accent/60 hover:text-accent text-[11px] font-medium transition-colors mr-1"
+              onClick={() => {
+                onDismiss()
+                navigate(`/cast/${ping.characterId}`)
+              }}
+            >
+              Full chat
+            </button>
+            <button
               className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/5 transition-colors"
               onClick={onDismiss}
             >
@@ -203,12 +223,24 @@ export function AmbientPingModal({ ping, onDismiss }: Props) {
           {/* Input */}
           <div className="px-4 py-3 border-t border-border">
             {reachedLimit ? (
-              <button
-                className="w-full py-2.5 rounded-xl text-sm font-medium text-white/50 hover:text-white border border-white/10 hover:border-accent/50 transition-all"
-                onClick={onDismiss}
-              >
-                Close
-              </button>
+              <div className="flex flex-col gap-2">
+                <button
+                  className="w-full py-2.5 rounded-xl text-sm font-medium text-white flex items-center justify-center gap-2 transition-all hover:brightness-110"
+                  style={{ background: 'linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%)' }}
+                  onClick={() => {
+                    onDismiss()
+                    navigate(`/cast/${ping.characterId}`)
+                  }}
+                >
+                  Continue chatting <ArrowRight size={14} />
+                </button>
+                <button
+                  className="w-full py-2 rounded-xl text-xs font-medium text-white/40 hover:text-white/60 transition-all"
+                  onClick={onDismiss}
+                >
+                  Close
+                </button>
+              </div>
             ) : (
               <div className="flex gap-2">
                 <input
