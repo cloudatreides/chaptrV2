@@ -312,39 +312,6 @@ export function CreateCharacterPage() {
         <motion.div className="mb-6" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
           <label className="text-textMuted text-xs uppercase tracking-widest mb-2 block">Photo</label>
 
-          {/* Default avatar picker — shown when no photo uploaded */}
-          {!hasPhoto && !isCropping && (
-            <div className="mb-3">
-              <p className="text-textSecondary text-xs mb-2">Pick a default or upload your own</p>
-              <div className="flex gap-3 mb-3">
-                {[
-                  { id: '/default-male.png', label: 'Male' },
-                  { id: '/default-female.png', label: 'Female' },
-                ].map((opt) => (
-                  <button
-                    key={opt.id}
-                    className="cursor-pointer flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all"
-                    style={{
-                      background: selectedDefault === opt.id ? 'rgba(200,75,158,0.15)' : '#13101c',
-                      border: selectedDefault === opt.id ? '2px solid #c84b9e' : '2px solid #2a2040',
-                    }}
-                    onClick={() => setSelectedDefault(selectedDefault === opt.id ? null : opt.id)}
-                  >
-                    <div className="w-16 h-16 rounded-full overflow-hidden">
-                      <img src={opt.id} alt={opt.label} className="w-full h-full object-cover" />
-                    </div>
-                    <span className="text-textSecondary text-[11px]">{opt.label}</span>
-                  </button>
-                ))}
-              </div>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="flex-1 h-px bg-white/10" />
-                <span className="text-textMuted text-[10px] uppercase tracking-widest">or</span>
-                <div className="flex-1 h-px bg-white/10" />
-              </div>
-            </div>
-          )}
-
           {isCropping ? (
             <div className="mb-3">
               <div className="rounded-2xl overflow-hidden" style={{ background: '#13101c' }}>
@@ -394,20 +361,49 @@ export function CreateCharacterPage() {
               </div>
             </div>
           ) : (
-            <div
-              className="flex flex-col items-center justify-center py-8 px-6 rounded-2xl cursor-pointer mb-3 transition-colors"
-              style={{ border: `2px dashed ${dragging ? '#c84b9e' : '#2a2040'}`, background: '#13101c' }}
-              onClick={() => fileRef.current?.click()}
-              onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
-              onDragLeave={() => setDragging(false)}
-              onDrop={(e) => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f) }}
-            >
-              <div className="w-10 h-10 rounded-full flex items-center justify-center mb-2" style={{ background: 'rgba(200,75,158,0.12)' }}>
-                <Camera size={18} className="text-accent" />
+            <>
+              <p className="text-textSecondary text-xs mb-2">Upload a selfie or pick a default</p>
+              <div
+                className="flex flex-col items-center justify-center py-8 px-6 rounded-2xl cursor-pointer mb-3 transition-colors"
+                style={{ border: `2px dashed ${dragging ? '#c84b9e' : '#2a2040'}`, background: '#13101c' }}
+                onClick={() => fileRef.current?.click()}
+                onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
+                onDragLeave={() => setDragging(false)}
+                onDrop={(e) => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f) }}
+              >
+                <div className="w-10 h-10 rounded-full flex items-center justify-center mb-2" style={{ background: 'rgba(200,75,158,0.12)' }}>
+                  <Camera size={18} className="text-accent" />
+                </div>
+                <p className="text-textSecondary text-sm mb-1">Upload a selfie</p>
+                <p className="text-textMuted text-xs">We'll turn it into anime</p>
               </div>
-              <p className="text-textSecondary text-sm mb-1">Upload a selfie</p>
-              <p className="text-textMuted text-xs">We'll turn it into anime</p>
-            </div>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex-1 h-px bg-white/10" />
+                <span className="text-textMuted text-[10px] uppercase tracking-widest">or</span>
+                <div className="flex-1 h-px bg-white/10" />
+              </div>
+              <div className="flex gap-3 mb-3">
+                {[
+                  { id: '/default-male.png', label: 'Male' },
+                  { id: '/default-female.png', label: 'Female' },
+                ].map((opt) => (
+                  <button
+                    key={opt.id}
+                    className="cursor-pointer flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all"
+                    style={{
+                      background: selectedDefault === opt.id ? 'rgba(200,75,158,0.15)' : '#13101c',
+                      border: selectedDefault === opt.id ? '2px solid #c84b9e' : '2px solid #2a2040',
+                    }}
+                    onClick={() => setSelectedDefault(selectedDefault === opt.id ? null : opt.id)}
+                  >
+                    <div className="w-16 h-16 rounded-full overflow-hidden">
+                      <img src={opt.id} alt={opt.label} className="w-full h-full object-cover" />
+                    </div>
+                    <span className="text-textSecondary text-[11px]">{opt.label}</span>
+                  </button>
+                ))}
+              </div>
+            </>
           )}
 
           {hasPhoto && (
