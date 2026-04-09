@@ -5,6 +5,7 @@ import { ArrowLeft, X, Share2, Trash2, Camera } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { CAST_ROSTER } from '../data/castRoster'
 import { AppSidebar } from '../components/AppSidebar'
+import { getUniverseGenre, getMomentConfig } from '../data/storyData'
 import type { StoryMoment } from '../store/useStore'
 
 function formatDate(ts: number): string {
@@ -25,6 +26,9 @@ export function AlbumPage() {
   const storyMoments = useStore((s) => s.storyMoments)
   const updateMomentNote = useStore((s) => s.updateMomentNote)
   const deleteStoryMoment = useStore((s) => s.deleteStoryMoment)
+  const selectedUniverse = useStore((s) => s.selectedUniverse)
+  const genre = getUniverseGenre(selectedUniverse)
+  const momentConfig = getMomentConfig(genre)
 
   const [selectedMoment, setSelectedMoment] = useState<StoryMoment | null>(null)
   const [editingNote, setEditingNote] = useState(false)
@@ -69,9 +73,9 @@ export function AlbumPage() {
         <Camera size={28} className="text-accent/40" />
       </div>
       <div>
-        <p className="text-white/40 text-sm font-medium mb-1">No moments yet</p>
+        <p className="text-white/40 text-sm font-medium mb-1">{momentConfig.emptyLabel}</p>
         <p className="text-white/20 text-xs leading-relaxed max-w-[260px]">
-          Keep playing your story — you'll capture selfies with characters at key moments along the way.
+          {momentConfig.emptyDescription}
         </p>
       </div>
     </div>
@@ -164,7 +168,7 @@ export function AlbumPage() {
                   <textarea
                     value={noteDraft}
                     onChange={(e) => setNoteDraft(e.target.value)}
-                    placeholder="Add a note about this moment..."
+                    placeholder={momentConfig.notePrompt}
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-white/20 outline-none focus:border-accent/30 resize-none"
                     rows={3}
                     autoFocus
@@ -193,7 +197,7 @@ export function AlbumPage() {
                   {selectedMoment.note ? (
                     <p className="text-white/60 text-sm italic">"{selectedMoment.note}"</p>
                   ) : (
-                    <p className="text-white/20 text-sm">Add a note about this moment...</p>
+                    <p className="text-white/20 text-sm">{momentConfig.notePrompt}</p>
                   )}
                 </button>
               )}
@@ -216,9 +220,9 @@ export function AlbumPage() {
         </button>
 
         <div className="mb-8">
-          <h1 className="text-white font-bold text-2xl mb-1">Album</h1>
+          <h1 className="text-white font-bold text-2xl mb-1">{momentConfig.albumTitle}</h1>
           <p className="text-white/30 text-sm">
-            {sorted.length === 0 ? 'Moments from your story will appear here.' : `${sorted.length} moment${sorted.length === 1 ? '' : 's'} captured`}
+            {sorted.length === 0 ? momentConfig.albumSubtitle : `${sorted.length} moment${sorted.length === 1 ? '' : 's'} captured`}
           </p>
         </div>
 

@@ -215,6 +215,92 @@ export const UNIVERSES: Universe[] = [
 
 export const GENRE_FILTERS = ['ALL', 'ROMANCE', 'HORROR', 'MYSTERY', 'ADVENTURE', 'THRILLER', 'FANTASY']
 
+// ─── Genre-aware moment config ───
+export interface GenreMomentConfig {
+  captureLabel: string        // "Capturing moment..." spinner text
+  savePrompt: string          // "Save this moment to your album?"
+  saveButton: string          // "Save" button text
+  albumTitle: string          // Album page heading
+  albumSubtitle: string       // Album page description when empty
+  emptyLabel: string          // Empty state label
+  emptyDescription: string    // Empty state body text
+  notePrompt: string          // "Add a note about this moment..."
+  imageStyle: string          // Prefix for AI image prompt (replaces "selfie photo")
+}
+
+const MOMENT_CONFIGS: Record<string, GenreMomentConfig> = {
+  ROMANCE: {
+    captureLabel: 'Capturing moment...',
+    savePrompt: 'Save this moment to your album?',
+    saveButton: 'Save',
+    albumTitle: 'Album',
+    albumSubtitle: 'Moments from your story will appear here.',
+    emptyLabel: 'No moments yet',
+    emptyDescription: 'Keep playing your story — you\'ll capture moments with characters at key scenes along the way.',
+    notePrompt: 'Add a note about this moment...',
+    imageStyle: 'selfie photo',
+  },
+  THRILLER: {
+    captureLabel: 'Logging intel...',
+    savePrompt: 'Log this to your dossier?',
+    saveButton: 'Log',
+    albumTitle: 'Dossier',
+    albumSubtitle: 'Field intel from your operations will appear here.',
+    emptyLabel: 'No intel logged',
+    emptyDescription: 'Keep running operations — key moments will be logged to your dossier automatically.',
+    notePrompt: 'Add a field note...',
+    imageStyle: 'surveillance photograph, film grain, candid shot',
+  },
+  HORROR: {
+    captureLabel: 'Documenting evidence...',
+    savePrompt: 'Document this evidence?',
+    saveButton: 'Document',
+    albumTitle: 'Evidence',
+    albumSubtitle: 'Documented evidence from your encounters will appear here.',
+    emptyLabel: 'No evidence yet',
+    emptyDescription: 'Keep investigating — evidence from key encounters will be documented along the way.',
+    notePrompt: 'Add a case note...',
+    imageStyle: 'polaroid photograph, flash photography, unsettling angle',
+  },
+  MYSTERY: {
+    captureLabel: 'Filing clue...',
+    savePrompt: 'Add this to your case file?',
+    saveButton: 'File',
+    albumTitle: 'Case Files',
+    albumSubtitle: 'Clues and key moments from your investigation will appear here.',
+    emptyLabel: 'No clues filed',
+    emptyDescription: 'Keep investigating — clues from key moments will be filed as you go.',
+    notePrompt: 'Add an investigator\'s note...',
+    imageStyle: 'detective photograph, noir lighting, documentary shot',
+  },
+  FANTASY: {
+    captureLabel: 'Preserving memory...',
+    savePrompt: 'Preserve this memory?',
+    saveButton: 'Preserve',
+    albumTitle: 'Memories',
+    albumSubtitle: 'Preserved memories from your journey will appear here.',
+    emptyLabel: 'No memories preserved',
+    emptyDescription: 'Keep exploring — memories from key moments in your journey will be preserved along the way.',
+    notePrompt: 'Add a journal entry...',
+    imageStyle: 'fantasy illustration, ethereal lighting, painted scene',
+  },
+  ADVENTURE: {
+    captureLabel: 'Recording entry...',
+    savePrompt: 'Add this to your journal?',
+    saveButton: 'Record',
+    albumTitle: 'Journal',
+    albumSubtitle: 'Entries from your adventures will appear here.',
+    emptyLabel: 'No journal entries',
+    emptyDescription: 'Keep adventuring — key moments will be recorded in your journal as you go.',
+    notePrompt: 'Add a journal entry...',
+    imageStyle: 'adventure snapshot, dynamic composition, action shot',
+  },
+}
+
+export function getMomentConfig(genre: string): GenreMomentConfig {
+  return MOMENT_CONFIGS[genre] ?? MOMENT_CONFIGS.ROMANCE
+}
+
 // ─── V2 Step-based story model ───
 
 export type StepType = 'beat' | 'chat' | 'choice' | 'reveal' | 'scene'

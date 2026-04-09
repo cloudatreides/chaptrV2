@@ -13,8 +13,19 @@ export interface AffinityParseResult {
 }
 
 export function parseAffinityDelta(reply: string): AffinityParseResult {
-  const match = reply.match(/\[AFFINITY:([+-]\d+)\]\s*$/)
+  // Also handle model outputting {"trustDelta": N} JSON instead of [AFFINITY:+N]
+  const trustJsonMatch = reply.match(/\{[^{}]*"trustDelta"\s*:\s*(-?\d+)[^{}]*\}/)
+  const cleanedReply = trustJsonMatch ? reply.replace(/\{[^{}]*"trustDelta"[^{}]*\}/g, '').trimEnd() : reply
+
+  const match = cleanedReply.match(/\[AFFINITY:([+-]\d+)\]\s*$/)
   if (!match) {
+    // If we found a trustDelta JSON, use that as the delta
+    if (trustJsonMatch) {
+      const td = Math.max(-5, Math.min(5, parseInt(trustJsonMatch[1], 10)))
+      const content = cleanedReply.replace(/\n?\[AFFINITY:[+-]\d+\]\s*$/, '').trim()
+      const reason = td >= 3 ? 'Really connected with you' : td >= 1 ? 'Enjoyed the conversation' : td === 0 ? 'Neutral exchange' : td >= -2 ? 'Felt a bit put off' : 'Didn\'t appreciate that'
+      return { content, delta: td, reason }
+    }
     return { content: reply.trim(), delta: 2, reason: 'Friendly conversation' }
   }
   const delta = parseInt(match[1], 10)

@@ -132,7 +132,13 @@ export function CastChatPage() {
 
       for await (const chunk of stream) {
         fullReply += chunk
-        setStreamingContent(fullReply)
+        // Strip any JSON artifacts (e.g. {"trustDelta": ...}) and [AFFINITY:] tags from streaming display
+        const displayText = fullReply
+          .replace(/\{[^{}]*"trustDelta"[^{}]*\}?/g, '')
+          .replace(/\{[^{}]*"trustDelta"[^{}]*/g, '')
+          .replace(/\n?\[AFFINITY:[+-]?\d*\]?\s*$/g, '')
+          .trimEnd()
+        setStreamingContent(displayText)
       }
 
       if (fullReply.trim()) {
@@ -240,11 +246,16 @@ export function CastChatPage() {
 
       for await (const chunk of stream) {
         fullReply += chunk
-        setStreamingContent(fullReply)
+        const displayText = fullReply
+          .replace(/\{[^{}]*"trustDelta"[^{}]*\}?/g, '')
+          .replace(/\{[^{}]*"trustDelta"[^{}]*/g, '')
+          .replace(/\n?\[AFFINITY:[+-]?\d*\]?\s*$/g, '')
+          .trimEnd()
+        setStreamingContent(displayText)
       }
 
       if (fullReply.trim()) {
-        const cleanReply = fullReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '').trim()
+        const cleanReply = fullReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '').replace(/\{[^{}]*"trustDelta"[^{}]*\}/g, '').trim()
         const charMsg: CastChatMessage = { role: 'character', content: cleanReply, timestamp: Date.now() }
         addCastChatMessage(characterId, charMsg)
 

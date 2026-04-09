@@ -4,7 +4,7 @@ import { useStore } from '../store/useStore'
 import { useAuth } from '../contexts/AuthContext'
 import { useActiveStory } from '../hooks/useActiveStory'
 import { CHARACTERS, getCharacter } from '../data/characters'
-import { resolveLoveInterestId, UNIVERSES } from '../data/storyData'
+import { resolveLoveInterestId, UNIVERSES, getUniverseGenre, getMomentConfig } from '../data/storyData'
 import { getQuestsForUniverse } from '../data/quests'
 
 export function YourStorySidebar() {
@@ -125,13 +125,13 @@ export function YourStorySidebar() {
         )}
       </div>
 
-      {/* Album */}
+      {/* Album / Dossier / etc */}
       <button
         className="w-full flex items-center gap-2.5 mt-4 px-4 py-3 rounded-xl text-textSecondary text-sm font-medium transition-all hover:text-textPrimary hover:bg-white/[0.03]"
         onClick={() => navigate('/album')}
       >
         <Camera size={14} />
-        <span>Album</span>
+        <span>{getMomentConfig(getUniverseGenre(selectedUniverse)).albumTitle}</span>
         {useStore.getState().storyMoments.length > 0 && (
           <span className="ml-auto text-textMuted text-[10px]">{useStore.getState().storyMoments.length}</span>
         )}

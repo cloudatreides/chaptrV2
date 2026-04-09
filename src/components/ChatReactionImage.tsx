@@ -49,7 +49,7 @@ export function ChatReactionImage({ imageUrl, characterName, onSaveToAlbum }: Pr
           </>
         ) : (
           <>
-            <ImagePlus size={12} /> Save to Album
+            <ImagePlus size={12} /> Save
           </>
         )}
       </motion.button>

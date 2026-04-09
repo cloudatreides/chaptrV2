@@ -4,7 +4,7 @@ import { Menu, Camera } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { useActiveStory } from '../hooks/useActiveStory'
-import { getActiveSteps, getTotalBeats, getCurrentBeatNumber, resolveLoveInterestId, resolveText, getStepsForUniverse, UNIVERSES } from '../data/storyData'
+import { getActiveSteps, getTotalBeats, getCurrentBeatNumber, resolveLoveInterestId, resolveText, getStepsForUniverse, UNIVERSES, getUniverseGenre, getMomentConfig } from '../data/storyData'
 import { GemCounter } from '../components/GemCounter'
 import { ChoicePoint } from '../components/ChoicePoint'
 import { ChatScene } from '../components/ChatScene'
@@ -65,6 +65,10 @@ export function StoryReaderPage() {
       navigate(selectedUniverse ? '/characters' : '/home', { replace: true })
     }
   }, [activeCharacter])
+
+  // Genre-aware moment config
+  const genre = getUniverseGenre(selectedUniverse)
+  const momentConfig = getMomentConfig(genre)
 
   // Compute active steps based on branch choices
   const universeSteps = getStepsForUniverse(selectedUniverse)
@@ -374,9 +378,10 @@ export function StoryReaderPage() {
         return roster?.name ?? id
       })
       const gender = activeCharacter?.gender === 'female' ? 'young woman' : 'young man'
+      const imgStyle = momentConfig.imageStyle
       const prompt = charIds.length === 1
-        ? `Anime style, selfie photo of two people: ${charDescs[0]} and a ${gender} (the protagonist), posing together, warm smiles, ${currentStep.title ?? 'academy'} setting, bright warm lighting, K-drama aesthetic, high quality anime art, casual candid selfie, ONLY these two people in the image`
-        : `Anime style, group selfie photo: ${charDescs.join(', ')} and a ${gender} (the protagonist), posing together, warm smiles, ${currentStep.title ?? 'academy'} setting, bright warm lighting, K-drama aesthetic, high quality anime art, fun candid moment`
+        ? `Anime style, ${imgStyle} of two people: ${charDescs[0]} and a ${gender} (the protagonist), ${currentStep.title ?? 'academy'} setting, high quality anime art, ONLY these two people in the image`
+        : `Anime style, ${imgStyle}: ${charDescs.join(', ')} and a ${gender} (the protagonist), ${currentStep.title ?? 'academy'} setting, high quality anime art`
       generateSceneImage({
         prompt,
         referenceImageUrl: selfieUrl,
@@ -714,7 +719,7 @@ export function StoryReaderPage() {
                     animate={{ rotate: 360 }}
                     transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                   />
-                  <p className="text-white/50 text-sm">Capturing moment...</p>
+                  <p className="text-white/50 text-sm">{momentConfig.captureLabel}</p>
                 </div>
               ) : captureMoment ? (
                 <>
@@ -728,7 +733,7 @@ export function StoryReaderPage() {
                     </div>
                   </div>
                   <div className="p-5 space-y-3">
-                    <p className="text-white/70 text-sm text-center">Save this moment to your album?</p>
+                    <p className="text-white/70 text-sm text-center">{momentConfig.savePrompt}</p>
                     <div className="flex gap-2">
                       <button
                         onClick={() => {
@@ -756,7 +761,7 @@ export function StoryReaderPage() {
                         className="cursor-pointer flex-1 py-2.5 rounded-xl text-white text-sm font-medium transition-opacity hover:opacity-90"
                         style={{ background: 'linear-gradient(135deg, #c84b9e, #8b5cf6)' }}
                       >
-                        Save
+                        {momentConfig.saveButton}
                       </button>
                     </div>
                   </div>
