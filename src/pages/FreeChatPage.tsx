@@ -60,7 +60,7 @@ function getFreeSuggestions(exchangeCount: number): string[] {
 // ─── Per-character chat state ───
 
 interface CharChatState {
-  messages: { role: 'user' | 'character'; content: string; actionData?: { label: string; emoji: string; gemCost: number; memeText?: string | null }; letterContent?: string; reactionImageUrl?: string }[]
+  messages: { role: 'user' | 'character'; content: string; actionData?: { label: string; emoji: string; gemCost: number; memeText?: string | null; dareText?: string | null }; letterContent?: string; reactionImageUrl?: string }[]
   exchangeCount: number
   hasOpener: boolean
   isLoadingOpener: boolean
@@ -383,7 +383,7 @@ export function FreeChatPage() {
     const actionMessage = {
       role: 'user' as const,
       content: `[ACTION: ${result.label}]`,
-      actionData: { label: result.label, emoji: result.emoji, gemCost: result.gemCost, memeText: result.memeText },
+      actionData: { label: result.label, emoji: result.emoji, gemCost: result.gemCost, memeText: result.memeText, dareText: result.dareText },
       letterContent: letterContent ?? undefined,
     }
     const newMessages = [...activeState.messages, actionMessage]
@@ -642,7 +642,7 @@ export function FreeChatPage() {
                 />
               ) : msg.actionData ? (
                 <div className="flex flex-col items-end gap-1.5">
-                  <ChatActionBubble label={msg.actionData.label} emoji={msg.actionData.emoji} gemCost={msg.actionData.gemCost} memeText={msg.actionData.memeText} />
+                  <ChatActionBubble label={msg.actionData.label} emoji={msg.actionData.emoji} gemCost={msg.actionData.gemCost} memeText={msg.actionData.memeText} dareText={msg.actionData.dareText} />
                   {msg.letterContent && (
                     <div
                       className="max-w-[300px] px-4 py-3 rounded-2xl text-[13px] leading-relaxed italic"

@@ -56,7 +56,7 @@ export const CHAT_ACTIONS: ChatAction[] = [
     gemCost: 1,
     affinityBoost: 3,
     minTier: 2,
-    promptInjection: 'wants to play truth or dare with you. Come up with a SPECIFIC, creative dare for them that fits the current mood and your relationship. Make it playful and bold but appropriate for your closeness level. State the dare clearly, then react — are you excited to see if they\'ll do it? Nervous? Smirking? Example: "I dare you to send me a voice note saying the cheesiest pickup line you know." Be specific, not vague.',
+    promptInjection: '', // dynamically set with random dare
   },
 
   // ── Gifts (universal, gem cost) ──
@@ -259,7 +259,7 @@ export function getAvailableActions(
 }
 
 /** IDs of actions that trigger a character reaction image in the chat thread */
-export const IMAGE_REACTION_ACTION_IDS = new Set(['love-letter', 'comfort'])
+export const IMAGE_REACTION_ACTION_IDS = new Set(['love-letter', 'comfort', 'mystery-box'])
 
 /** Build a FLUX portrait prompt for a character reacting to a romantic action.
  *  Takes the character's base portraitPrompt and swaps in a reaction-specific pose/expression. */
@@ -274,6 +274,7 @@ export function buildReactionImagePrompt(
     'love-letter': 'holding a handwritten letter close to their chest, eyes soft and glistening with emotion, gentle blush on cheeks, tender surprised smile, warm intimate lighting',
     'serenade': 'eyes closed with a peaceful moved expression, hand over heart, soft blush, listening to music, dreamy warm lighting, deeply touched',
     'comfort': 'arms open reaching out for a hug, soft vulnerable eyes glistening with tears, gentle grateful smile, warm golden lighting, emotionally moved',
+    'mystery-box': 'eyes wide with surprise and delight, holding a small gift box, mouth slightly open in excitement, playful curious expression, warm colorful lighting',
   }
 
   const modifier = reactionModifiers[actionId] ?? 'blushing, looking touched and emotional, warm lighting'
@@ -360,6 +361,76 @@ const MEME_POOL: Record<string, string[]> = {
 /** Pick a random meme description for a genre */
 export function getRandomMeme(genre: string): string {
   const pool = MEME_POOL[genre] ?? MEME_POOL.ROMANCE
+  return pool[Math.floor(Math.random() * pool.length)]
+}
+
+// ─── Dare Pool ───
+// Genre-aware dares that the player gives TO the character. The character must perform them.
+
+const DARE_POOL: Record<string, string[]> = {
+  ROMANCE: [
+    'confess your most embarrassing crush moment',
+    'say the cheesiest pickup line you know with a straight face',
+    'admit something you\'ve never told anyone',
+    'describe your ideal date in exactly three words',
+    'say something you\'ve been too scared to say to me',
+    'do your best impression of someone we both know',
+    'tell me what you really thought when we first met',
+    'describe me using only food comparisons',
+    'sing the first song that comes to mind right now',
+    'admit the last thing you lied about',
+  ],
+  THRILLER: [
+    'reveal one thing from your file that isn\'t redacted',
+    'admit the closest you\'ve come to blowing your cover',
+    'confess a mission rule you\'ve broken',
+    'tell me something your handler doesn\'t know',
+    'describe the worst decision you\'ve made in the field',
+    'admit who you trust less — me or command',
+    'say the one thing an operative should never say out loud',
+    'confess what you\'d do if this whole operation went sideways right now',
+  ],
+  HORROR: [
+    'describe the last nightmare you actually remember',
+    'admit what scares you more than anything',
+    'confess the one thing you saw that you can\'t explain',
+    'tell me what you\'d do if I disappeared right now',
+    'say what you think is actually happening here — no filter',
+    'admit the moment you realized something was really wrong',
+    'describe the sound that makes your blood run cold',
+  ],
+  MYSTERY: [
+    'reveal your prime suspect and why',
+    'admit the biggest mistake you\'ve made on this case',
+    'confess something about yourself that would make you a suspect',
+    'tell me the one clue everyone else is ignoring',
+    'describe the moment you knew this case was personal',
+    'admit who you think is lying to us',
+    'say what you think the real motive is',
+  ],
+  FANTASY: [
+    'reveal your true name — the one with power',
+    'admit what you\'d trade your magic for',
+    'confess the one bargain you regret making',
+    'describe the most dangerous thing you\'ve ever done with magic',
+    'tell me what the prophecy really says about us',
+    'admit what you saw in the enchanted mirror',
+    'say the one spell you were told never to cast',
+  ],
+  ADVENTURE: [
+    'admit the treasure you actually want most',
+    'confess the closest you\'ve come to giving up',
+    'describe the worst situation you\'ve talked your way out of',
+    'tell me what you\'d do if the map was wrong',
+    'admit the one rule of exploration you always break',
+    'say what you\'d name your autobiography',
+    'confess the real reason you became an adventurer',
+  ],
+}
+
+/** Pick a random dare for a genre */
+export function getRandomDare(genre: string): string {
+  const pool = DARE_POOL[genre] ?? DARE_POOL.ROMANCE
   return pool[Math.floor(Math.random() * pool.length)]
 }
 

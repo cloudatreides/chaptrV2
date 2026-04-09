@@ -24,7 +24,7 @@ interface GroupMessage {
   role: 'user' | 'character'
   content: string
   characterId?: string // for character messages
-  actionData?: { label: string; emoji: string; gemCost: number; memeText?: string | null }
+  actionData?: { label: string; emoji: string; gemCost: number; memeText?: string | null; dareText?: string | null }
   letterContent?: string
   reactionImageUrl?: string
 }
@@ -304,7 +304,7 @@ export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, 
       id: `action-${Date.now()}`,
       role: 'user',
       content: `[ACTION: ${result.label}]`,
-      actionData: { label: result.label, emoji: result.emoji, gemCost: result.gemCost, memeText: result.memeText },
+      actionData: { label: result.label, emoji: result.emoji, gemCost: result.gemCost, memeText: result.memeText, dareText: result.dareText },
       letterContent: letterContent ?? undefined,
     }
     const newMessages = [...messages, actionMessage]
@@ -463,7 +463,7 @@ export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, 
                   />
                 ) : msg.actionData ? (
                   <div className="flex flex-col items-end gap-1.5">
-                    <ChatActionBubble label={msg.actionData.label} emoji={msg.actionData.emoji} gemCost={msg.actionData.gemCost} memeText={msg.actionData.memeText} />
+                    <ChatActionBubble label={msg.actionData.label} emoji={msg.actionData.emoji} gemCost={msg.actionData.gemCost} memeText={msg.actionData.memeText} dareText={msg.actionData.dareText} />
                     {msg.letterContent && (
                       <div
                         className="max-w-[300px] px-4 py-3 rounded-2xl text-[13px] leading-relaxed italic"

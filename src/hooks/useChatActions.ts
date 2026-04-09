@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { useStore } from '../store/useStore'
-import { type ChatAction, getMysteryBoxBoost, IMAGE_REACTION_ACTION_IDS, buildReactionImagePrompt, getRandomMeme } from '../data/chatActions'
+import { type ChatAction, getMysteryBoxBoost, IMAGE_REACTION_ACTION_IDS, buildReactionImagePrompt, getRandomMeme, getRandomDare } from '../data/chatActions'
 import { getCharacter, CHARACTERS } from '../data/characters'
 import { getUniverseGenre } from '../data/storyData'
 
@@ -21,6 +21,7 @@ interface ActionResult {
   giftImagePrompt: string | null
   letterContent: string | null
   memeText: string | null
+  dareText: string | null
 }
 
 export function useChatActions({ characterId, universeId, characterMemories }: UseChatActionsParams) {
@@ -48,12 +49,20 @@ export function useChatActions({ characterId, universeId, characterMemories }: U
     let affinityBoost = action.affinityBoost
     let promptInjection = action.promptInjection
     let memeText: string | null = null
+    let dareText: string | null = null
 
     // Send a meme: pick a random meme and inject it
     if (action.id === 'send-meme') {
       const genre = getUniverseGenre(universeId)
       memeText = getRandomMeme(genre)
       promptInjection = `sent you a meme: "${memeText}". React to THIS SPECIFIC meme in character — do you find it hilarious, cringe, relatable, or do you roast their taste? Reference the actual meme content in your reaction.`
+    }
+
+    // Dare: pick a random dare the character must perform
+    if (action.id === 'dare') {
+      const genre = getUniverseGenre(universeId)
+      dareText = getRandomDare(genre)
+      promptInjection = `dares you to: "${dareText}". You MUST attempt the dare in your response. React in character — are you nervous, excited, embarrassed? Then actually DO IT. Perform the dare. Don't refuse or deflect. Commit to it fully, in your own style.`
     }
 
     // Mystery box: random affinity
@@ -95,6 +104,7 @@ export function useChatActions({ characterId, universeId, characterMemories }: U
       giftImagePrompt: action.giftImagePrompt ?? null,
       letterContent: null, // set asynchronously for love-letter actions
       memeText,
+      dareText,
     }
   }, [characterId, universeId, characterMemories, spendGems, setActionCooldown, isActionOnCooldown])
 
