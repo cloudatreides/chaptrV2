@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Send, ArrowRight } from 'lucide-react'
 import { CHARACTERS, getCharacter } from '../data/characters'
 import { getUniverseGenre } from '../data/storyData'
+import { getGenreSuggestions } from '../lib/suggestions'
 import { useStore } from '../store/useStore'
 import { useActiveStory } from '../hooks/useActiveStory'
 import { streamChatReply, summarizeChat, generateOpeningMessage, extractMemories, generateLoveLetter } from '../lib/claudeStream'
@@ -61,61 +62,6 @@ function getMoodTooltips(characterId: string): { desc: string; hint: string }[] 
   return MOOD_TOOLTIPS[characterId] ?? MOOD_TOOLTIPS.default
 }
 
-
-// Personality-aware reply suggestions
-type PersonalityType = 'quiet' | 'bold' | 'dreamer' | 'custom'
-
-function detectPersonality(bio: string | null): PersonalityType {
-  if (!bio) return 'bold'
-  const lower = bio.toLowerCase()
-  if (lower.includes('quiet') || lower.includes('listen')) return 'quiet'
-  if (lower.includes('bold') || lower.includes('say what i think') || lower.includes('go after it')) return 'bold'
-  if (lower.includes('dreamer') || lower.includes('notice things') || lower.includes('half in my head')) return 'dreamer'
-  return 'custom'
-}
-
-const SUGGESTIONS: Record<PersonalityType, Record<string, string[]>> = {
-  quiet: {
-    opening: ["Hi... I'm a bit shy, but hi.", "You seem interesting.", "I noticed you from across the room.", "Sorry if I'm quiet, I'm just taking it all in.", "I don't usually talk first, but here I am.", "Something about you made me want to say hello."],
-    mid: ["Tell me more about that.", "I like hearing you talk.", "That's really sweet.", "I've been thinking about what you said.", "You're easy to talk to, you know that?", "I feel like I can be myself around you."],
-    deep: ["I'm really glad we met.", "You make me feel safe.", "I don't want this moment to end.", "I've never told anyone this before.", "You understand me.", "Thank you for being patient with me."],
-  },
-  bold: {
-    opening: ["Okay, I'm intrigued. Tell me everything.", "I've heard about you. The real version.", "You're not like everyone else here, are you?", "I have a good feeling about you.", "Alright, you have my attention.", "Something tells me we're going to get along."],
-    mid: ["Wait, that's actually fascinating.", "I want to know the real you.", "You're full of surprises.", "I like that about you.", "Keep going, I'm listening.", "There's more to that story, isn't there?"],
-    deep: ["I trust you. Completely.", "This feels real.", "I've never felt this way before.", "Let's figure this out together.", "You changed something in me.", "I don't want to hold back anymore."],
-  },
-  dreamer: {
-    opening: ["This feels like fate, doesn't it?", "I had a feeling I'd meet someone like you.", "There's something magical about this moment.", "Have we met before? You feel so familiar.", "The universe brought us together.", "I feel like I've been waiting for this."],
-    mid: ["What's your favorite memory?", "Do you believe some things are meant to be?", "I keep thinking about you.", "Tell me about your dreams.", "I feel like we're connected somehow.", "There's something beautiful about this."],
-    deep: ["I think we were meant to find each other.", "Some things don't need words.", "This is exactly where I'm supposed to be.", "I never want to forget this feeling.", "You make the world feel brighter.", "What if this is the beginning of something amazing?"],
-  },
-  custom: {
-    opening: ["Hey! It's nice to meet you.", "Tell me about yourself.", "I'm curious about you.", "What brings you here?", "I feel like we'd get along.", "This is exciting, isn't it?"],
-    mid: ["That's really interesting.", "I like the way you think.", "I wasn't expecting that!", "Tell me more.", "You're really fun to talk to.", "I'm glad we're talking."],
-    deep: ["I trust you.", "I'm really glad I met you.", "I want to understand everything about you.", "This means a lot to me.", "Whatever happens, I'm with you.", "You make me want to be braver."],
-  },
-}
-
-function pickRandom(arr: string[], count: number, seed: number): string[] {
-  const shuffled = [...arr]
-  // Simple seeded shuffle so same exchangeCount gives consistent picks
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.abs((seed * 31 + i * 7) % (i + 1))
-    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-  }
-  return shuffled.slice(0, count)
-}
-
-function getSuggestions(bio: string | null, exchangeCount: number): string[] {
-  const type = detectPersonality(bio)
-  const pool = SUGGESTIONS[type]
-  let tier: string[]
-  if (exchangeCount <= 1) tier = pool.opening
-  else if (exchangeCount <= 4) tier = pool.mid
-  else tier = pool.deep
-  return pickRandom(tier, 3, exchangeCount)
-}
 
 // ─── MoodStage ───
 
@@ -232,6 +178,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
   })
   const [localMessages, setLocalMessages] = useState<{ role: 'user' | 'character'; content: string; actionData?: { label: string; emoji: string; gemCost: number }; letterContent?: string; reactionImageUrl?: string }[]>([])
   const [input, setInput] = useState('')
+  const [usedSuggestions, setUsedSuggestions] = useState<Set<string>>(new Set())
   const [isTyping, setIsTyping] = useState(false)
   const [streamedReply, setStreamedReply] = useState('')
   const [exchangeCount, setExchangeCount] = useState(0)
@@ -707,7 +654,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25 }}
           >
-            {getSuggestions(bio, exchangeCount).map((suggestion) => (
+            {getGenreSuggestions(bio, exchangeCount, getUniverseGenre(selectedUniverse), usedSuggestions).map((suggestion) => (
               <button
                 key={suggestion}
                 className="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap hover:brightness-125"
@@ -716,7 +663,10 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
                   border: '1px solid rgba(200,75,158,0.2)',
                   color: 'rgba(200,75,158,0.8)',
                 }}
-                onClick={() => handleSend(suggestion)}
+                onClick={() => {
+                  setUsedSuggestions((prev) => new Set(prev).add(suggestion))
+                  handleSend(suggestion)
+                }}
               >
                 {suggestion}
               </button>
