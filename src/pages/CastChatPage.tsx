@@ -465,13 +465,13 @@ export function CastChatPage() {
             </div>
             <p className="text-white font-bold text-lg">{castMember.name}</p>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-semibold px-2.5 py-1 rounded-lg" style={{ background: `${tier.color}22`, color: tier.color }}>
+              <span className="text-[10px] font-semibold px-2.5 py-1 rounded-lg" style={{ background: `${tier.color}33`, color: tier.color }}>
                 {tier.label} · {score}%
               </span>
-              <span className="text-white/30 text-[10px]">{castMember.universeLabel}</span>
+              <span className="text-white/50 text-[10px]">{castMember.universeLabel}</span>
             </div>
           </div>
-          <div className="w-full h-px bg-white/5" />
+          <div className="w-full h-px bg-white/10" />
         </div>
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-3">
@@ -485,9 +485,9 @@ export function CastChatPage() {
       <div className="hidden md:flex min-h-screen">
         <div className="page-container flex gap-0 flex-1">
           {/* Left — Chat */}
-          <div className="flex-1 flex flex-col min-h-screen" style={{ borderRight: '1px solid rgba(255,255,255,0.05)' }}>
+          <div className="flex-1 flex flex-col min-h-screen" style={{ borderRight: '1px solid rgba(255,255,255,0.10)' }}>
             {/* Desktop header */}
-            <div className="shrink-0 flex items-center gap-3 px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+            <div className="shrink-0 flex items-center gap-3 px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.10)' }}>
               <button onClick={() => navigate('/cast')} className="cursor-pointer flex items-center gap-2 text-white/50 text-sm hover:text-white/70 transition-colors">
                 <ArrowLeft size={18} /> Cast
               </button>
@@ -504,7 +504,7 @@ export function CastChatPage() {
                 <p className="text-white/30 text-[10px]">{castMember.universeLabel}</p>
               </div>
               <div className="ml-auto flex items-center gap-2">
-                <span className="text-[10px] font-semibold px-2.5 py-1 rounded-lg" style={{ background: `${tier.color}22`, color: tier.color }}>
+                <span className="text-[10px] font-semibold px-2.5 py-1 rounded-lg" style={{ background: `${tier.color}33`, color: tier.color }}>
                   {tier.label} · {score}%
                 </span>
                 <button
@@ -537,7 +537,7 @@ export function CastChatPage() {
                 )}
               </div>
               <p className="text-white font-bold text-xl">{castMember.name}</p>
-              <span className="text-[11px] font-semibold px-3 py-1.5 rounded-lg" style={{ background: `${tier.color}22`, color: tier.color }}>
+              <span className="text-[11px] font-semibold px-3 py-1.5 rounded-lg" style={{ background: `${tier.color}33`, color: tier.color }}>
                 {tier.label} · {score}%
               </span>
             </div>
@@ -545,15 +545,15 @@ export function CastChatPage() {
             {/* Bio */}
             {castMember.bio && (
               <div>
-                <p className="text-white/30 text-[10px] font-semibold tracking-[2px] uppercase mb-2">About</p>
-                <p className="text-white/50 text-sm leading-relaxed">{castMember.bio}</p>
+                <p className="text-white/50 text-[10px] font-semibold tracking-[2px] uppercase mb-2">About</p>
+                <p className="text-white/70 text-sm leading-relaxed">{castMember.bio}</p>
               </div>
             )}
 
             {/* Affinity bar */}
             <div>
-              <p className="text-white/30 text-[10px] font-semibold tracking-[2px] uppercase mb-2">Affinity</p>
-              <div className="w-full h-2 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }}>
+              <p className="text-white/50 text-[10px] font-semibold tracking-[2px] uppercase mb-2">Affinity</p>
+              <div className="w-full h-2 rounded-full" style={{ background: 'rgba(255,255,255,0.10)' }}>
                 <div className="h-full rounded-full transition-all duration-500" style={{ width: `${score}%`, background: `linear-gradient(90deg, ${tier.color}, #8b5cf6)` }} />
               </div>
               <AnimatePresence>
@@ -575,26 +575,26 @@ export function CastChatPage() {
                 )}
               </AnimatePresence>
               {!affinityChange && (
-                <p className="text-white/40 text-[10px] mt-1.5 leading-relaxed">Chat more to build affinity. Higher levels unlock deeper, more personal conversations.</p>
+                <p className="text-white/50 text-[10px] mt-1.5 leading-relaxed">Chat more to build affinity. Higher levels unlock deeper, more personal conversations.</p>
               )}
             </div>
 
             {/* Universe */}
             <div>
-              <p className="text-white/30 text-[10px] font-semibold tracking-[2px] uppercase mb-2">Universe</p>
-              <p className="text-white/70 text-sm">{castMember.universeLabel}</p>
+              <p className="text-white/50 text-[10px] font-semibold tracking-[2px] uppercase mb-2">Universe</p>
+              <p className="text-white/80 text-sm">{castMember.universeLabel}</p>
             </div>
 
             {/* Memories */}
             {allMemories.length > 0 && (
               <div>
                 <div className="flex items-center gap-1.5 mb-2">
-                  <Brain size={12} className="text-accent/50" />
-                  <p className="text-white/30 text-[10px] font-semibold tracking-[2px] uppercase">Memories</p>
+                  <Brain size={12} className="text-accent/70" />
+                  <p className="text-white/50 text-[10px] font-semibold tracking-[2px] uppercase">Memories</p>
                 </div>
                 <div className="flex flex-col gap-2">
                   {allMemories.map((mem, i) => (
-                    <div key={i} className="px-3 py-2 rounded-lg text-white/50 text-xs leading-relaxed" style={{ background: 'rgba(200,75,158,0.05)', border: '1px solid rgba(200,75,158,0.08)' }}>
+                    <div key={i} className="px-3 py-2 rounded-lg text-white/70 text-xs leading-relaxed" style={{ background: 'rgba(200,75,158,0.08)', border: '1px solid rgba(200,75,158,0.15)' }}>
                       {mem}
                     </div>
                   ))}
@@ -603,8 +603,8 @@ export function CastChatPage() {
             )}
 
             {/* Stats */}
-            <div className="mt-auto pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-              <div className="flex justify-between text-white/20 text-[10px]">
+            <div className="mt-auto pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.10)' }}>
+              <div className="flex justify-between text-white/40 text-[10px]">
                 <span>{messages.length} messages</span>
                 <span>{exchangeCount} exchanges</span>
               </div>

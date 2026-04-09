@@ -9,23 +9,64 @@ import { stylizeSelfie } from '../lib/togetherAi'
 import { getCroppedImg } from '../lib/cropImage'
 import { trackEvent, uploadSelfieToStorage } from '../lib/supabase'
 
-const ARCHETYPES = [
-  {
-    id: 'quiet',
-    label: 'The Quiet One',
-    bio: "I'm the quiet type who actually listens. People tell me things they don't tell anyone else — maybe because I never rush them.",
-  },
-  {
-    id: 'bold',
-    label: 'The Bold One',
-    bio: "I say what I think. Life's too short for small talk and polite smiles. If something matters, I go after it.",
-  },
-  {
-    id: 'dreamer',
-    label: 'The Dreamer',
-    bio: "I notice things other people miss — the way light hits a window, the pause before someone lies. I live half in my head and I like it there.",
-  },
+const ALL_ARCHETYPES = [
+  { id: 'quiet', label: 'The Quiet One', bio: "I'm the quiet type who actually listens. People tell me things they don't tell anyone else — maybe because I never rush them." },
+  { id: 'bold', label: 'The Bold One', bio: "I say what I think. Life's too short for small talk and polite smiles. If something matters, I go after it." },
+  { id: 'dreamer', label: 'The Dreamer', bio: "I notice things other people miss — the way light hits a window, the pause before someone lies. I live half in my head and I like it there." },
+  { id: 'protector', label: 'The Protector', bio: "I don't start fights, but I finish them. The people I care about don't get hurt — not on my watch." },
+  { id: 'flirt', label: 'The Flirt', bio: "I can't help it — I like the spark. A look, a smile, a well-timed compliment. Life's more fun when you keep people guessing." },
+  { id: 'cynic', label: 'The Cynic', bio: "I've seen enough to know how things usually end. I'm not pessimistic — I'm just paying attention." },
+  { id: 'golden', label: 'The Golden Child', bio: "I'm good at things. Annoyingly good. But underneath the shine, I'm terrified of the one thing I can't do: disappoint people." },
+  { id: 'rebel', label: 'The Rebel', bio: "Rules were made by people who wanted to stay comfortable. I'd rather be free and uncomfortable than safe and bored." },
+  { id: 'healer', label: 'The Healer', bio: "I feel what other people feel — sometimes before they do. It's a gift. It's also exhausting." },
+  { id: 'trickster', label: 'The Trickster', bio: "I keep things light because the world is heavy enough. If I'm laughing, I'm coping. If I'm joking, I'm deflecting. Don't look too close." },
+  { id: 'stoic', label: 'The Stoic', bio: "I don't waste energy on things I can't control. Calm isn't the absence of feeling — it's choosing not to let it drive." },
+  { id: 'romantic', label: 'The Romantic', bio: "I believe in the grand gesture, the love letter, the 2am confession. Some people call it naive. I call it brave." },
+  { id: 'strategist', label: 'The Strategist', bio: "I'm always three steps ahead. People think I'm calm — really I've just already planned for this." },
+  { id: 'wildcard', label: 'The Wildcard', bio: "I do things that don't make sense until they do. Chaos isn't the enemy — boredom is." },
+  { id: 'artist', label: 'The Artist', bio: "I see the world in textures and colours other people walk past. Creating isn't a hobby — it's how I breathe." },
+  { id: 'loner', label: 'The Lone Wolf', bio: "I'm not antisocial. I just don't need a crowd to feel whole. My own company has always been enough." },
+  { id: 'caretaker', label: 'The Caretaker', bio: "I remember your coffee order, your bad days, your allergies. Taking care of people isn't a burden — it's how I love." },
+  { id: 'provocateur', label: 'The Provocateur', bio: "I like uncomfortable truths more than comfortable lies. If my questions make you squirm, good — you needed to think." },
+  { id: 'optimist', label: 'The Optimist', bio: "I know the odds. I choose hope anyway. Not because I'm naive — because giving up has never fixed anything." },
+  { id: 'ghost', label: 'The Ghost', bio: "I come and go. Sometimes I vanish for days. It's not personal — I just need space to exist without being seen." },
+  { id: 'scholar', label: 'The Scholar', bio: "I'd rather read than talk. Knowledge isn't power — it's comfort. The more I understand, the less the world scares me." },
+  { id: 'performer', label: 'The Performer', bio: "Every room I walk into becomes a stage. I'm not showing off — I'm surviving. Attention is the only currency I trust." },
+  { id: 'empath', label: 'The Empath', bio: "I absorb other people's emotions like a sponge. It makes me a great friend and a terrible liar." },
+  { id: 'phoenix', label: 'The Phoenix', bio: "I've been knocked down more times than I can count. But I keep getting back up — angrier, wiser, and less willing to stay down." },
+  { id: 'detective', label: 'The Detective', bio: "I notice the detail everyone else misses — the hesitation, the cover story, the thing that doesn't add up. Truth always leaks." },
+  { id: 'idealist', label: 'The Idealist', bio: "I believe the world can be better. Not perfect — just kinder. And I'll fight for that even when it costs me." },
+  { id: 'shadow', label: 'The Shadow', bio: "I watch more than I speak. By the time you notice me, I already know your patterns, your tells, your exits." },
+  { id: 'charmer', label: 'The Charmer', bio: "I can talk my way into — or out of — almost anything. It's not manipulation. It's just... persuasion with a smile." },
+  { id: 'old-soul', label: 'The Old Soul', bio: "I've always felt older than my age. Small talk bores me. I want the 3am conversation about what makes you afraid." },
+  { id: 'hothead', label: 'The Hothead', bio: "I feel everything at full volume. My anger runs hot, my love runs hotter. I don't do anything halfway." },
+  { id: 'wallflower', label: 'The Wallflower', bio: "I bloom quietly. Most people don't notice me at first — but the ones who do tend to stay." },
+  { id: 'mentor', label: 'The Mentor', bio: "I've made enough mistakes to help you skip a few. I don't give advice to sound smart — I give it because I care." },
+  { id: 'drifter', label: 'The Drifter', bio: "I don't stay anywhere too long. Places, people, plans — I hold them loosely. Freedom is the only thing I grip tight." },
+  { id: 'perfectionist', label: 'The Perfectionist', bio: "If it's worth doing, it's worth doing right. People call me intense. I call it having standards." },
+  { id: 'comedian', label: 'The Comedian', bio: "If I can make you laugh, I can survive anything. Humour is my armour, my weapon, and my love language." },
+  { id: 'enigma', label: 'The Enigma', bio: "People can't figure me out, and I like it that way. Mystery isn't a wall — it's a filter for who's worth letting in." },
+  { id: 'nurturer', label: 'The Nurturer', bio: "I make sure everyone's eaten, rested, and okay — even when I'm falling apart. Caring for others is easier than caring for myself." },
+  { id: 'maverick', label: 'The Maverick', bio: "I don't follow trends — I set them. Convention is just peer pressure from dead people." },
+  { id: 'mediator', label: 'The Mediator', bio: "I see both sides of every argument. It makes me great at keeping peace — and terrible at picking one." },
+  { id: 'survivalist', label: 'The Survivalist', bio: "I've been through things that would break most people. They didn't break me — they made me harder to kill." },
+  { id: 'sage', label: 'The Sage', bio: "I speak when it matters and stay silent when it doesn't. Wisdom isn't about knowing everything — it's knowing what to ignore." },
+  { id: 'thrill-seeker', label: 'The Thrill Seeker', bio: "I need the rush — the edge, the risk, the moment where everything could go wrong. That's where I feel alive." },
+  { id: 'loyalist', label: 'The Loyalist', bio: "Once you're mine, you're mine forever. I don't do half-commitments. Betray my trust once, and we're done." },
+  { id: 'philosopher', label: 'The Philosopher', bio: "I question everything — even my own questions. Most people want answers. I just want better problems." },
+  { id: 'sweetheart', label: 'The Sweetheart', bio: "I believe in kindness even when it's not returned. The world is harsh enough — I'd rather be someone's soft place to land." },
+  { id: 'antagonist', label: 'The Antagonist', bio: "I push buttons because comfort breeds complacency. You'll hate me at first — then you'll realise I made you stronger." },
+  { id: 'adventurer', label: 'The Adventurer', bio: "I say yes first and figure out the details later. Life rewards the people who move — not the ones who plan." },
+  { id: 'introvert', label: 'The Deep Introvert', bio: "My inner world is richer than anything outside. I recharge alone, think in layers, and love in silence." },
+  { id: 'guardian', label: 'The Guardian', bio: "I stand between danger and the people I love. It's not heroism — it's instinct. I couldn't live with myself otherwise." },
+  { id: 'free-spirit', label: 'The Free Spirit', bio: "I follow my heart, even when it makes no sense. Structure suffocates me. I need room to wander, wonder, and be wrong." },
 ]
+
+function getRandomArchetypes(count: number, exclude?: string[]): typeof ALL_ARCHETYPES {
+  const pool = exclude ? ALL_ARCHETYPES.filter((a) => !exclude.includes(a.id)) : [...ALL_ARCHETYPES]
+  const shuffled = pool.sort(() => Math.random() - 0.5)
+  return shuffled.slice(0, count)
+}
 
 export function CreateCharacterPage() {
   const navigate = useNavigate()
@@ -41,6 +82,12 @@ export function CreateCharacterPage() {
   const [selectedArch, setSelectedArch] = useState<string | null>(null)
   const [custom, setCustom] = useState('')
   const [isCustom, setIsCustom] = useState(false)
+  const [displayedArchetypes, setDisplayedArchetypes] = useState(() => getRandomArchetypes(3))
+
+  const shufflePersonalities = () => {
+    setDisplayedArchetypes(getRandomArchetypes(3, displayedArchetypes.map((a) => a.id)))
+    setSelectedArch(null)
+  }
 
   // Selfie
   const [rawImage, setRawImage] = useState<string | null>(null)
@@ -64,7 +111,7 @@ export function CreateCharacterPage() {
   const isCropping = !!rawImage
   const hasPhoto = !!originalPhoto
   const finalPhoto = styledPhoto ?? originalPhoto
-  const bio = isCustom ? custom.trim() : ARCHETYPES.find((a) => a.id === selectedArch)?.bio ?? null
+  const bio = isCustom ? custom.trim() : ALL_ARCHETYPES.find((a) => a.id === selectedArch)?.bio ?? null
   const canCreate = name.trim().length > 0 && gender !== null && !isStylizing && !isCropping && !isUploading
 
   // ── Handlers ──
@@ -210,26 +257,41 @@ export function CreateCharacterPage() {
           <p className="text-textSecondary text-sm mb-3">Shapes how characters react to you.</p>
 
           <div className="space-y-2 mb-3">
-            {ARCHETYPES.map((arch) => (
-              <button
-                key={arch.id}
-                className="w-full text-left p-3 rounded-xl transition-all"
-                style={{
-                  background: selectedArch === arch.id && !isCustom ? 'rgba(200,75,158,0.12)' : '#13101c',
-                  border: selectedArch === arch.id && !isCustom ? '1px solid rgba(200,75,158,0.6)' : '1px solid #2a2040',
-                }}
-                onClick={() => { setSelectedArch(arch.id); setIsCustom(false) }}
-              >
-                <p className="text-textPrimary font-semibold text-sm mb-0.5">{arch.label}</p>
-                <p className="text-textSecondary text-xs leading-relaxed">{arch.bio}</p>
-              </button>
-            ))}
+            <AnimatePresence mode="popLayout">
+              {displayedArchetypes.map((arch) => (
+                <motion.button
+                  key={arch.id}
+                  layout
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.2 }}
+                  className="w-full text-left p-3 rounded-xl transition-all"
+                  style={{
+                    background: selectedArch === arch.id && !isCustom ? 'rgba(200,75,158,0.12)' : '#13101c',
+                    border: selectedArch === arch.id && !isCustom ? '1px solid rgba(200,75,158,0.6)' : '1px solid #2a2040',
+                  }}
+                  onClick={() => { setSelectedArch(arch.id); setIsCustom(false) }}
+                >
+                  <p className="text-textPrimary font-semibold text-sm mb-0.5">{arch.label}</p>
+                  <p className="text-textSecondary text-xs leading-relaxed">{arch.bio}</p>
+                </motion.button>
+              ))}
+            </AnimatePresence>
           </div>
 
-          <button className="flex items-center gap-2 text-accent text-xs font-medium mb-2" onClick={() => setIsCustom(!isCustom)}>
-            <Sparkles size={12} />
-            {isCustom ? 'Pick a preset instead' : 'Write your own'}
-          </button>
+          <div className="flex items-center gap-3 mb-2">
+            <button className="flex items-center gap-1.5 text-accent text-xs font-medium" onClick={shufflePersonalities}>
+              <RefreshCw size={12} />
+              Show more
+            </button>
+            <span className="text-white/10">|</span>
+            <button className="flex items-center gap-2 text-accent text-xs font-medium" onClick={() => setIsCustom(!isCustom)}>
+              <Sparkles size={12} />
+              {isCustom ? 'Pick a preset instead' : 'Write your own'}
+            </button>
+          </div>
+
           {isCustom && (
             <textarea
               className="w-full p-3 rounded-xl text-textPrimary text-sm leading-relaxed resize-none focus:outline-none"
