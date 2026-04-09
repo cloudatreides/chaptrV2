@@ -215,6 +215,7 @@ export function getResolvedActions(
       label: matchingVariant.label,
       emoji: matchingVariant.emoji,
       promptInjection: matchingVariant.promptInjection,
+      giftImagePrompt: matchingVariant.giftImagePrompt ?? action.giftImagePrompt,
     }
   })
 }
@@ -258,7 +259,7 @@ export function getAvailableActions(
 }
 
 /** IDs of actions that trigger a character reaction image in the chat thread */
-export const IMAGE_REACTION_ACTION_IDS = new Set(['love-letter', 'serenade'])
+export const IMAGE_REACTION_ACTION_IDS = new Set(['love-letter', 'comfort'])
 
 /** Build a FLUX portrait prompt for a character reacting to a romantic action.
  *  Takes the character's base portraitPrompt and swaps in a reaction-specific pose/expression. */
@@ -272,6 +273,7 @@ export function buildReactionImagePrompt(
   const reactionModifiers: Record<string, string> = {
     'love-letter': 'holding a handwritten letter close to their chest, eyes soft and glistening with emotion, gentle blush on cheeks, tender surprised smile, warm intimate lighting',
     'serenade': 'eyes closed with a peaceful moved expression, hand over heart, soft blush, listening to music, dreamy warm lighting, deeply touched',
+    'comfort': 'arms open reaching out for a hug, soft vulnerable eyes glistening with tears, gentle grateful smile, warm golden lighting, emotionally moved',
   }
 
   const modifier = reactionModifiers[actionId] ?? 'blushing, looking touched and emotional, warm lighting'

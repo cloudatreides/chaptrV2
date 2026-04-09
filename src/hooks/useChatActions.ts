@@ -18,6 +18,7 @@ interface ActionResult {
   promptInjection: string
   reactionImagePrompt: string | null
   sceneImagePrompt: string | null
+  giftImagePrompt: string | null
   letterContent: string | null
   memeText: string | null
 }
@@ -71,11 +72,15 @@ export function useChatActions({ characterId, universeId, characterMemories }: U
 
     // Build scene image prompt for actions that show both characters (uses Kontext with selfie)
     let sceneImagePrompt: string | null = null
-    if (action.id === 'coffee') {
+    if (action.id === 'coffee' || action.id === 'serenade') {
       const charData = getCharacter(characterId, universeId) ?? CHARACTERS[characterId]
       if (charData?.portraitPrompt) {
         const charDesc = charData.portraitPrompt.match(/portrait of (.+?)(?:,\s*(?:soft|clean|high))/i)?.[1] ?? charData.name
-        sceneImagePrompt = `Anime style, two people at a cozy café: a young person handing a warm coffee to ${charDesc}, warm smiles, gentle steam rising from the cup, soft warm café lighting, K-drama aesthetic, high quality anime art, intimate casual moment, ONLY these two people in the image`
+        if (action.id === 'coffee') {
+          sceneImagePrompt = `Anime style, two people at a cozy café: a young person handing a warm coffee to ${charDesc}, warm smiles, gentle steam rising from the cup, soft warm café lighting, K-drama aesthetic, high quality anime art, intimate casual moment, ONLY these two people in the image`
+        } else if (action.id === 'serenade') {
+          sceneImagePrompt = `Anime style, romantic scene of two people: a young person singing softly to ${charDesc}, who looks deeply moved with hand over heart and tears in eyes, soft golden lighting, intimate evening atmosphere, K-drama aesthetic, high quality anime art, emotional tender moment, ONLY these two people in the image`
+        }
       }
     }
 
@@ -87,6 +92,7 @@ export function useChatActions({ characterId, universeId, characterMemories }: U
       promptInjection,
       reactionImagePrompt,
       sceneImagePrompt,
+      giftImagePrompt: action.giftImagePrompt ?? null,
       letterContent: null, // set asynchronously for love-letter actions
       memeText,
     }
