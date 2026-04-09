@@ -940,7 +940,7 @@ export function LandingPage() {
             <div className="grid grid-cols-3 gap-6">
               {[
                 { quote: "I've replayed the same universe 3 times and got completely different endings each time. The characters actually remember what I said.", name: 'Chloe Tan', location: 'Singapore', avatar: '/avatar-chloe.webp' },
-                { quote: "This is what I wanted visual novels to be. It doesn't feel scripted at all — the AI characters have real personality and they react to everything.", name: 'Pimchanok W.', location: 'Thailand', avatar: '/avatar-pim.webp' },
+                { quote: "This is what I wanted visual novels to be. It doesn't feel scripted at all. The AI characters have real personality and they react to everything.", name: 'Pimchanok W.', location: 'Thailand', avatar: '/avatar-pim.webp' },
                 { quote: "Seeing my own face in the story scenes genuinely caught me off guard. It makes every choice feel so much more personal.", name: 'Putri Ayu', location: 'Indonesia', avatar: '/avatar-putri.webp' },
               ].map((t, i) => (
                 <motion.div

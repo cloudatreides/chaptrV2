@@ -102,6 +102,7 @@ export function CreateCharacterPage() {
   const [uploadedSelfieUrl, setUploadedSelfieUrl] = useState<string | null>(null)
   const uploadIdRef = useRef(crypto.randomUUID())
   const [dragging, setDragging] = useState(false)
+  const [selectedDefault, setSelectedDefault] = useState<string | null>(null)
 
   const onCropComplete = useCallback((_: Area, croppedPixels: Area) => {
     setCroppedAreaPixels(croppedPixels)
@@ -112,7 +113,7 @@ export function CreateCharacterPage() {
   const hasPhoto = !!originalPhoto
   const finalPhoto = styledPhoto ?? originalPhoto
   const bio = isCustom ? custom.trim() : ALL_ARCHETYPES.find((a) => a.id === selectedArch)?.bio ?? null
-  const canCreate = name.trim().length > 0 && gender !== null && !isStylizing && !isCropping && !isUploading
+  const canCreate = name.trim().length > 0 && gender !== null && (hasPhoto || !!selectedDefault) && !isStylizing && !isCropping && !isUploading
 
   // ── Handlers ──
 
@@ -137,6 +138,7 @@ export function CreateCharacterPage() {
     if (!rawImage || !croppedAreaPixels) return
     const cropped = await getCroppedImg(rawImage, croppedAreaPixels)
     setOriginalPhoto(cropped)
+    setSelectedDefault(null)
     setRawImage(null)
     setIsStylizing(true)
     const result = await stylizeSelfie(cropped)
@@ -174,10 +176,10 @@ export function CreateCharacterPage() {
     createCharacter({
       name: name.trim(),
       gender: gender!,
-      selfieUrl: uploadedSelfieUrl ?? finalPhoto ?? null,
+      selfieUrl: uploadedSelfieUrl ?? finalPhoto ?? selectedDefault ?? null,
       bio: bio || null,
     })
-    trackEvent('character_created', { gender, hasPhoto: !!finalPhoto, hasBio: !!bio })
+    trackEvent('character_created', { gender, hasPhoto: !!finalPhoto, hasDefault: !!selectedDefault, hasBio: !!bio })
     navigate('/characters')
   }
 
@@ -306,7 +308,40 @@ export function CreateCharacterPage() {
 
         {/* ── Section 3: Selfie (optional) ── */}
         <motion.div className="mb-6" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-          <label className="text-textMuted text-xs uppercase tracking-widest mb-2 block">Photo <span className="text-textMuted/50">optional</span></label>
+          <label className="text-textMuted text-xs uppercase tracking-widest mb-2 block">Photo</label>
+
+          {/* Default avatar picker — shown when no photo uploaded */}
+          {!hasPhoto && !isCropping && (
+            <div className="mb-3">
+              <p className="text-textSecondary text-xs mb-2">Pick a default or upload your own</p>
+              <div className="flex gap-3 mb-3">
+                {[
+                  { id: '/default-male.png', label: 'Male' },
+                  { id: '/default-female.png', label: 'Female' },
+                ].map((opt) => (
+                  <button
+                    key={opt.id}
+                    className="cursor-pointer flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all"
+                    style={{
+                      background: selectedDefault === opt.id ? 'rgba(200,75,158,0.15)' : '#13101c',
+                      border: selectedDefault === opt.id ? '2px solid #c84b9e' : '2px solid #2a2040',
+                    }}
+                    onClick={() => setSelectedDefault(selectedDefault === opt.id ? null : opt.id)}
+                  >
+                    <div className="w-16 h-16 rounded-full overflow-hidden">
+                      <img src={opt.id} alt={opt.label} className="w-full h-full object-cover" />
+                    </div>
+                    <span className="text-textSecondary text-[11px]">{opt.label}</span>
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex-1 h-px bg-white/10" />
+                <span className="text-textMuted text-[10px] uppercase tracking-widest">or</span>
+                <div className="flex-1 h-px bg-white/10" />
+              </div>
+            </div>
+          )}
 
           {isCropping ? (
             <div className="mb-3">
@@ -373,10 +408,12 @@ export function CreateCharacterPage() {
             </div>
           )}
 
-          <div className="flex items-start gap-2 px-3 py-2 rounded-xl" style={{ background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.15)' }}>
-            <Shield size={12} className="text-gem shrink-0 mt-0.5" />
-            <p className="text-textSecondary text-[11px]">Your anime-style photo is stored to personalise story scenes. Your original photo is never saved.</p>
-          </div>
+          {hasPhoto && (
+            <div className="flex items-start gap-2 px-3 py-2 rounded-xl" style={{ background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.15)' }}>
+              <Shield size={12} className="text-gem shrink-0 mt-0.5" />
+              <p className="text-textSecondary text-[11px]">Your anime-style photo is stored to personalise story scenes. Your original photo is never saved.</p>
+            </div>
+          )}
         </motion.div>
 
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); if (e.target) e.target.value = '' }} />

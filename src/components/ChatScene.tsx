@@ -547,7 +547,15 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.4 }}
               >
-                <img src={introImage} alt={character?.name} className="w-full h-auto" />
+                <img
+                  src={introImage}
+                  alt={character?.name}
+                  className="w-full h-auto"
+                  onError={(e) => {
+                    const parent = (e.target as HTMLImageElement).parentElement
+                    if (parent) parent.style.display = 'none'
+                  }}
+                />
               </motion.div>
             )}
             {/* Shimmer placeholder while image loads */}
