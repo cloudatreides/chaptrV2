@@ -35,7 +35,7 @@ export function ChatActionTray({ playerGender, characterGender, affinityScore, g
     ? characterGender
     : 'female' // default for variant resolution
 
-  const tierIndex = getTierIndex(affinityScore, genre)
+  const tierIndex = masterMode ? 4 : getTierIndex(affinityScore, genre)
   const { available, locked } = getAvailableActions(playerGender, resolvedCharGender, tierIndex)
 
   const categories: ActionCategory[] = ['playful', 'gift', 'emotional', 'romantic']

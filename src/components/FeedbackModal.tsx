@@ -108,9 +108,9 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
             className="fixed inset-0 z-50 flex items-center justify-center px-5 pointer-events-none"
           >
             <div
-              className="relative w-full max-w-sm rounded-2xl border border-border/50 p-6 pointer-events-auto"
+              className="relative w-full max-w-sm rounded-2xl border border-[#3d3060] p-6 pointer-events-auto shadow-2xl"
               style={{
-                background: 'radial-gradient(ellipse at 50% 0%, rgba(200,75,158,0.08) 0%, #1a1525 60%)',
+                background: '#1e1832',
               }}
             >
               {/* Close */}
@@ -167,7 +167,7 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
                         : 'What would make Chaptr better for you?'
                     }
                     rows={4}
-                    className="w-full bg-surfaceAlt rounded-xl p-3 text-textPrimary text-sm border border-border/50 focus:border-accent/50 focus:outline-none resize-none placeholder:text-textMuted"
+                    className="w-full bg-[#13101c] rounded-xl p-3 text-textPrimary text-sm border border-[#3d3060] focus:border-accent/60 focus:outline-none resize-none placeholder:text-textMuted/70"
                   />
 
                   {/* Image upload — bugs only */}
