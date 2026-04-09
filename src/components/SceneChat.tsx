@@ -456,6 +456,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
         characterMemories: characterMemories[activeCharId] ?? [],
         affinityScore: characterAffinities[activeCharId] ?? 0,
         isNote: action.label === 'Slip a Note',
+        recentMessages: activeState.messages.slice(-10).map(m => ({ role: m.role, content: m.content })),
       })
       result.promptInjection = `wrote you a heartfelt ${action.label === 'Slip a Note' ? 'note' : 'letter'}. Here is what it says: "${letterContent}"\n\nRead this carefully and react with deep, genuine emotion. Quote specific parts that moved you. This is vulnerable and real.`
       setIsTyping(false)

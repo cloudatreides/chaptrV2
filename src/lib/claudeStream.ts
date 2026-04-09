@@ -550,24 +550,30 @@ export async function generateLoveLetter(params: {
   characterMemories: string[]
   affinityScore: number
   isNote?: boolean
+  recentMessages?: { role: string; content: string }[]
 }): Promise<string> {
-  const { characterName, bio, characterMemories, affinityScore, isNote } = params
+  const { characterName, bio, characterMemories, affinityScore, isNote, recentMessages } = params
   const format = isNote ? 'a short handwritten note' : 'a short love letter'
   const memoryContext = characterMemories.length > 0
     ? `\nThings the protagonist knows about ${characterName}: ${characterMemories.slice(-5).join(', ')}`
     : ''
 
-  const system = `You are ghostwriting ${format} from a protagonist to ${characterName}.${bio ? ` The protagonist's personality: "${bio}"` : ''}${memoryContext}
+  // Include recent conversation so the letter can reference actual shared moments
+  const recentChat = recentMessages && recentMessages.length > 0
+    ? `\n\nRecent conversation between the protagonist and ${characterName}:\n${recentMessages.slice(-10).map(m => `${m.role === 'user' ? 'Protagonist' : characterName}: ${m.content.replace(/\[ACTION:.*?\]/g, '').trim()}`).filter(l => l.split(': ')[1]).join('\n')}`
+    : ''
+
+  const system = `You are ghostwriting ${format} from a protagonist to ${characterName}.${bio ? ` The protagonist's personality: "${bio}"` : ''}${memoryContext}${recentChat}
 Their relationship closeness: ${affinityScore}/100.
 
-Write ${isNote ? '2-3 sentences' : '3-5 sentences'}. Make it personal, specific, and emotionally honest. Reference shared moments or things they know about ${characterName} if possible. Don't be generic — make it feel like only THIS person could have written it to only THIS character.
+Write ${isNote ? '2-3 sentences' : '3-5 sentences'}. Make it personal, specific, and emotionally honest. Reference things from their conversations or shared moments. Don't be generic — make it feel like only THIS person could have written it to only THIS character.
 
-Output ONLY the letter text. No "Dear..." header unless it fits naturally. No sign-off. Just the raw, honest words.`
+IMPORTANT: Write the actual letter directly. Do NOT ask for more information, do NOT comment on the task, do NOT explain what you would write. Just write the letter as if you ARE the protagonist pouring their heart out. Output ONLY the letter text. No "Dear..." header unless it fits naturally. No sign-off. Just the raw, honest words.`
 
   try {
     const response = await makeClaudeRequest(system, `Write the ${isNote ? 'note' : 'letter'}.`, {
       temperature: 0.8,
-      maxTokens: 150,
+      maxTokens: 200,
     })
     if (!response.ok) return 'I keep thinking about you. I don\'t know when it started, but I can\'t stop.'
     const data = await response.json()

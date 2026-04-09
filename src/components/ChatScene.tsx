@@ -366,6 +366,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
         characterMemories: characterMemories[characterId] ?? [],
         affinityScore,
         isNote,
+        recentMessages: localMessages.slice(-10).map(m => ({ role: m.role, content: m.content })),
       })
       result.promptInjection = `wrote you a heartfelt ${isNote ? 'note' : 'letter'}. Here is what it says: "${letterContent}"\n\nRead this carefully and react with deep, genuine emotion. Quote specific parts that moved you. This is vulnerable and real.`
       setIsTyping(false)

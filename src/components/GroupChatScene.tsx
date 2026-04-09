@@ -294,6 +294,7 @@ export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, 
         characterMemories: characterMemories[primaryCharId] ?? [],
         affinityScore: characterAffinities[primaryCharId] ?? 0,
         isNote: action.label === 'Slip a Note',
+        recentMessages: messages.slice(-10).map(m => ({ role: m.role === 'user' ? 'user' : 'character', content: m.content })),
       })
       result.promptInjection = `wrote you a heartfelt ${action.label === 'Slip a Note' ? 'note' : 'letter'}. Here is what it says: "${letterContent}"\n\nRead this carefully and react with deep, genuine emotion. Quote specific parts that moved you. This is vulnerable and real.`
       setIsTyping(false)
