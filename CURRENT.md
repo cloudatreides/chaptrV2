@@ -5,50 +5,36 @@
 
 ## Done This Session
 
-### 4 New Manhwa Romance Stories
-Added 4 manhwa-style romance stories targeting 14-21 year old Asian female readers:
-1. **Rooftop Promise** (`rooftop-promise`) — Chaebol heir Dohyun plays piano secretly on the school rooftop
-2. **Fake Dating My Rival** (`fake-dating`) — Childhood rival Hajin becomes your fake boyfriend
-3. **Café 11:11** (`cafe-1111`) — Shy artist Sunwoo has been drawing you in his sketchbook
-4. **The Idol Next Door** (`idol-next-door`) — Missing K-pop idol Taehyun is hiding next door
+### First External Feedback — Fixes Applied
+Received feedback from Pim (Product) on 2026-04-09. Full log in `FEEDBACK.md`.
 
-Files: `src/data/stories/{rooftop-promise,fake-dating,cafe-1111,idol-next-door}.ts`, registered in story registry, storyData.ts universes, castRoster.ts (8 new characters), cover images in `public/`
+**Character personality overhaul** (`src/data/characters.ts`)
+- Rewrote Jiwon, Sora, Yuna system prompts — each now has explicit FLIRTING STYLE + VARIETY sections
+- Characters framed as magnetic/intriguing instead of guarded/deflecting
+- All carry "create chemistry, not distance" instruction
 
-### In-App Feedback Modal
-- `FeedbackModal.tsx` — Bug report (with optional screenshot upload) or Feature Idea
-- `FeedbackFab.tsx` — Global floating "Feedback" pill button (bottom-right, all pages)
-- Mounted globally in App.tsx inside GameStateSync
-- Submissions go to Supabase `feedback` table (migration: `002_feedback.sql`)
-- Auto-captures page URL + user agent for bug context
-- Improved modal contrast: solid `#1e1832` background, stronger `#3d3060` borders
+**Contextual AI suggestions** (`src/lib/claudeStream.ts` + all chat components)
+- Model now returns `[SUGGESTIONS: "..." | "..." | "..."]` contextual to what was just said
+- Components use AI suggestions when available, static pool as fallback
+- `generateOpeningMessage` returns `{ content, suggestions }` (breaking change — all consumers updated)
+- All streaming displays strip suggestion tags
 
-### Master Mode — Affinity Tier Bypass
-- Master mode now forces `tierIndex = 4` so all chat actions are unlocked
-- Previously only bypassed gem costs, not tier requirements
+**Romance chemistry from first exchange** (`src/lib/claudeStream.ts`)
+- Tiered: chemistry building at affinity >= 20, walls down at >= 56 (was only >= 56)
+- Romance rule rewritten: "butterflies not therapy"
 
-### Text Readability Sweep
-- Bumped all `text-white/10`, `/15`, `/20` to `/25`-`/50` across all pages
-- Affinity tier colors brightened: Stranger 0.3→0.5, Acquaintance 0.4→0.7, Friend 0.6→0.85
-- Action tray hover description bumped from white/50→white/80, gem/affinity labels 0.7→0.9
-
-### Chat Action Changes
-- Removed "Challenge" action (redundant with Dare)
-- Comfort: now costs 2 gems, generates FLUX reaction portrait (arms open for hug)
-- Mystery Box: now generates reaction portrait (surprised/delighted expression)
-- Dare: now shows picker with 3 random genre-aware options instead of firing randomly
-- Dare text + meme text now visible in chat message for better AI context
-- Action text label context-aware: "Your dare" / "Your meme" / "Your letter"
-- Added `getDareOptions()` to chatActions.ts
-
-### Bug Fixes
-- Fixed syntax error: extra braces around `characterAvatar()` in CastChatPage
-- Fixed dare not working: AI was ignoring dare prompt because message only showed `[ACTION: Dare]` with no content
+## Done Previous Sessions
+- 4 new manhwa romance stories (rooftop-promise, fake-dating, cafe-1111, idol-next-door)
+- In-app feedback modal + FAB
+- Master mode affinity tier bypass
+- Text readability sweep
+- Chat action changes (dare picker, comfort/mystery box portraits)
 
 ## Next
-- Test dare picker UI and verify character performs the chosen dare
-- Test all 4 new stories in-browser (play through, verify branching)
+- Test character responses in-browser — verify flirtier tone and contextual suggestions
+- Address remaining feedback: choices affecting story (P1), art style matching (P2), scene context (P2)
+- Test all 4 new stories in-browser
 - Run `002_feedback.sql` migration in Supabase dashboard
-- Debug coffee/serenade scene image generation (check browser console for Kontext logs)
 - GTM: narrow to Seoul Transfer + K-drama/manhwa fan communities
 
 ## Blockers
