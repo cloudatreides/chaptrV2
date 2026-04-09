@@ -313,8 +313,8 @@ export function CastChatPage() {
     <>
       {messages.length === 0 && !isStreaming && (
         <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center py-12">
-          <p className="text-white/20 text-sm">Start chatting with {castMember.name}</p>
-          <p className="text-white/10 text-xs">No exchange limit · Memories carry into stories</p>
+          <p className="text-white/50 text-sm">Start chatting with {castMember.name}</p>
+          <p className="text-white/30 text-xs">No exchange limit · Memories carry into stories</p>
         </div>
       )}
 
@@ -432,7 +432,7 @@ export function CastChatPage() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={`Say something to ${castMember.name}...`}
-          className="flex-1 bg-transparent text-white text-base placeholder:text-white/20 outline-none"
+          className="flex-1 bg-transparent text-white text-base placeholder:text-white/35 outline-none"
           disabled={isStreaming}
         />
         <button
@@ -444,7 +444,7 @@ export function CastChatPage() {
           <Send size={16} className="text-white" />
         </button>
       </form>
-      <p className="text-white/15 text-[10px] text-center mt-2">No exchange limit · Persistent thread</p>
+      <p className="text-white/30 text-[10px] text-center mt-2">No exchange limit · Persistent thread</p>
     </div>
   )
 

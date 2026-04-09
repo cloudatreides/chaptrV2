@@ -58,6 +58,7 @@ export function ChatActionTray({ playerGender, characterGender, affinityScore, g
     <>
       {/* Toggle button */}
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
         disabled={disabled}
         className="relative w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-all disabled:opacity-30"
@@ -189,7 +190,7 @@ export function ChatActionTray({ playerGender, characterGender, affinityScore, g
               </div>
 
               {filteredAvailable.length === 0 && filteredLocked.length === 0 && (
-                <p className="text-center text-white/20 text-xs py-4">No actions in this category</p>
+                <p className="text-center text-white/35 text-xs py-4">No actions in this category</p>
               )}
             </div>
 

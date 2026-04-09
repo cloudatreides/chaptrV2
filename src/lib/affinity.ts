@@ -12,19 +12,19 @@ export const AFFINITY_TIERS: AffinityTier[] = [
   {
     label: 'Stranger',
     min: 0, max: 15,
-    color: 'rgba(255,255,255,0.3)',
+    color: 'rgba(255,255,255,0.5)',
     promptModifier: 'You barely know this person. Keep your guard up. Polite but distant.',
   },
   {
     label: 'Acquaintance',
     min: 16, max: 35,
-    color: 'rgba(200,75,158,0.4)',
+    color: 'rgba(200,75,158,0.7)',
     promptModifier: 'You\'re getting to know this person. You\'re curious but still cautious. Small talk comes easier now.',
   },
   {
     label: 'Friend',
     min: 36, max: 55,
-    color: 'rgba(200,75,158,0.6)',
+    color: 'rgba(200,75,158,0.85)',
     promptModifier: 'You consider this person a friend. You can be more relaxed, share opinions freely, and joke around. You might bring up things they\'ve mentioned before.',
   },
   {
@@ -50,19 +50,19 @@ export const ROMANCE_AFFINITY_TIERS: AffinityTier[] = [
   {
     label: 'Stranger',
     min: 0, max: 15,
-    color: 'rgba(255,255,255,0.3)',
+    color: 'rgba(255,255,255,0.5)',
     promptModifier: 'You just met this person. You notice them but keep your distance. Maybe a stolen glance, but nothing more. Guarded and cool.',
   },
   {
     label: 'Acquaintance',
     min: 16, max: 35,
-    color: 'rgba(200,75,158,0.4)',
+    color: 'rgba(200,75,158,0.7)',
     promptModifier: 'You\'re noticing this person more than you should. You find excuses to talk to them. Small moments linger. You\'re curious and slightly nervous around them, though you\'d never admit it.',
   },
   {
     label: 'Drawn to them',
     min: 36, max: 55,
-    color: 'rgba(200,75,158,0.6)',
+    color: 'rgba(200,75,158,0.85)',
     promptModifier: 'There\'s real tension between you. You tease them, test them, look for excuses to be near them. When they say something genuine, it catches you off guard. Your guard is slipping and you both know it. You might say something accidentally honest, then try to cover it up.',
   },
   {
