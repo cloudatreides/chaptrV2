@@ -54,7 +54,7 @@ export const CHAT_ACTIONS: ChatAction[] = [
     gemCost: 1,
     affinityBoost: 3,
     minTier: 2,
-    promptInjection: 'dared you to do something bold. React in character — do you accept the dare, dare them back, or refuse with attitude?',
+    promptInjection: 'wants to play truth or dare with you. Come up with a SPECIFIC, creative dare for them that fits the current mood and your relationship. Make it playful and bold but appropriate for your closeness level. State the dare clearly, then react — are you excited to see if they\'ll do it? Nervous? Smirking? Example: "I dare you to send me a voice note saying the cheesiest pickup line you know." Be specific, not vague.',
   },
   {
     id: 'challenge',
@@ -199,7 +199,7 @@ export const CHAT_ACTIONS: ChatAction[] = [
 export const ACTION_DESCRIPTIONS: Record<string, string> = {
   'poke': 'A playful nudge to get their attention',
   'send-meme': 'Share something funny and see their reaction',
-  'dare': 'Dare them to do something bold',
+  'dare': 'Start a truth or dare — they\'ll dare you back',
   'challenge': 'Challenge them to a quick game',
   'coffee': 'Buy them a coffee — a casual, thoughtful gesture',
   'mystery-box': 'Send a surprise gift — could be anything!',
@@ -335,6 +335,76 @@ export function buildReactionImagePrompt(
     .replace(/,\s*clean (dark |simple )?background/gi, '')
 
   return `${base}, ${modifier}, clean soft-focus background, high quality anime art style`
+}
+
+// ─── Meme Pool ───
+// Genre-aware meme descriptions that get picked randomly and shown to both player and character.
+
+const MEME_POOL: Record<string, string[]> = {
+  ROMANCE: [
+    'distracted boyfriend meme but it\'s you staring at snacks instead of studying',
+    'that one SpongeBob meme captioned "me pretending to be fine after 3 hours of sleep"',
+    'the "this is fine" dog but the fire is just a pile of unread messages',
+    'drake meme — no to "going outside" / yes to "one more episode"',
+    'the awkward monkey puppet looking sideways',
+    'a cat sitting at a dinner table like a disappointed parent',
+    'the "guess I\'ll die" shrug guy but it\'s about doing laundry',
+    '"how it started vs how it\'s going" — both photos are you on the couch',
+    'that blinking white guy meme but it\'s about realizing it\'s already midnight',
+    'the woman yelling at a cat at a dinner table',
+  ],
+  THRILLER: [
+    'the "I\'m in danger" Ralph Wiggum meme but he\'s in a briefing room',
+    '"we\'ve been trying to reach you about your extended warranty" but it\'s a coded transmission',
+    'the conspiracy theory guy with red string and a corkboard',
+    'two Spider-Men pointing at each other — both are double agents',
+    '"understandable, have a great day" but to an interrogation suspect',
+    'the "this is fine" dog but the room is a compromised safe house',
+    '"you guys are getting paid?" but it\'s about field agent hazard pay',
+    'a dog in a lab coat captioned "I have no idea what I\'m doing" — at a weapons lab',
+  ],
+  HORROR: [
+    '"guess I\'ll die" but in a haunted house',
+    'the "this is fine" dog but the fire is supernatural',
+    'Scooby Doo unmasking meme — the monster was anxiety all along',
+    '"first time?" meme but at a séance',
+    'the astronaut "always has been" meme but about the house being haunted',
+    '"we don\'t do that here" Black Panther meme but about going into the basement alone',
+    'that cat being held like a baby, captioned "me after hearing literally any noise at 3am"',
+  ],
+  MYSTERY: [
+    'the conspiracy theory guy with red string connecting clues',
+    'Leonardo DiCaprio pointing at the TV — he spotted the clue',
+    '"it\'s the same picture" corporate meme but it\'s two suspects',
+    'the "math lady" meme trying to figure out the timeline',
+    '"always has been" astronaut meme but about the butler being suspicious',
+    '"am I a joke to you?" but it\'s the obvious clue everyone missed',
+    'Charlie Day conspiracy board from Always Sunny',
+  ],
+  FANTASY: [
+    '"one does not simply walk into Mordor" but it\'s about the enchanted forest',
+    'the "this is fine" dog but the fire is magical',
+    '"you shall not pass" but it\'s a locked enchanted door',
+    'surprised Pikachu face but about a prophecy coming true',
+    '"I\'m something of a wizard myself" Willem Dafoe meme',
+    '"we\'ve had one breakfast, yes — but what about second breakfast?"',
+    'the "guess I\'ll die" shrug but facing a dragon',
+  ],
+  ADVENTURE: [
+    '"the floor is lava" meme but it\'s literally lava',
+    '"this is fine" dog but the ship is sinking',
+    '"road work ahead? yeah I sure hope it does" but about an ancient map',
+    'Indiana Jones running from the boulder but it\'s a Monday',
+    '"you guys are getting paid?" but about treasure hunting',
+    'surprised Pikachu but about the treasure being friendship all along',
+    '"that sign can\'t stop me because I can\'t read" but it\'s an ancient warning',
+  ],
+}
+
+/** Pick a random meme description for a genre */
+export function getRandomMeme(genre: string): string {
+  const pool = MEME_POOL[genre] ?? MEME_POOL.ROMANCE
+  return pool[Math.floor(Math.random() * pool.length)]
 }
 
 /** Category display info */
