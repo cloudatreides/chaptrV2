@@ -354,7 +354,7 @@ export function CastChatPage() {
         const ad = msg.role === 'user' ? parseActionFromMessage(msg.content) : null
         return (
           <div key={msg.timestamp ?? i} className={`flex gap-2.5 ${msg.role === 'user' ? 'justify-end' : ''}`}>
-            {msg.role === 'character' && {characterAvatar()}}
+            {msg.role === 'character' && characterAvatar()}
             {msg.reactionImageUrl && msg.role === 'user' ? (
               <div className="max-w-[220px] rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(200,75,158,0.25)' }}>
                 <img src={msg.reactionImageUrl} alt="Gift" className="w-full h-auto" />
