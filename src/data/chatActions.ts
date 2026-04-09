@@ -8,6 +8,7 @@ export interface ChatActionVariant {
   label: string
   emoji: string
   promptInjection: string
+  giftImagePrompt?: string
 }
 
 export interface ChatAction {
@@ -20,6 +21,7 @@ export interface ChatAction {
   minTier: number // 0-4 index into affinity tiers
   promptInjection: string
   variants?: ChatActionVariant[]
+  giftImagePrompt?: string
 }
 
 // ─── Action Definitions ───
@@ -56,16 +58,6 @@ export const CHAT_ACTIONS: ChatAction[] = [
     minTier: 2,
     promptInjection: 'wants to play truth or dare with you. Come up with a SPECIFIC, creative dare for them that fits the current mood and your relationship. Make it playful and bold but appropriate for your closeness level. State the dare clearly, then react — are you excited to see if they\'ll do it? Nervous? Smirking? Example: "I dare you to send me a voice note saying the cheesiest pickup line you know." Be specific, not vague.',
   },
-  {
-    id: 'challenge',
-    label: 'Challenge',
-    emoji: '🎮',
-    category: 'playful',
-    gemCost: 1,
-    affinityBoost: 3,
-    minTier: 1,
-    promptInjection: 'challenged you to a quick game (rock-paper-scissors, trivia, or whatever fits). Play along — pick a game, play a round, and react to winning or losing.',
-  },
 
   // ── Gifts (universal, gem cost) ──
   {
@@ -88,24 +80,13 @@ export const CHAT_ACTIONS: ChatAction[] = [
     minTier: 1,
     promptInjection: 'sent you a mystery gift box. Pick ONE specific item that\'s inside — something unexpected that fits your personality. Name the item, then give a SHORT reaction (1-2 sentences max). Don\'t list multiple things. Don\'t monologue. Just: what it is, and your gut reaction.',
   },
-  {
-    id: 'favorite-thing',
-    label: 'Their Favorite',
-    emoji: '✨',
-    category: 'gift',
-    gemCost: 5,
-    affinityBoost: 10,
-    minTier: 3,
-    promptInjection: '', // dynamically set based on memory match
-  },
-
   // ── Emotional (mid-tier gate, free) ──
   {
     id: 'comfort',
     label: 'Comfort',
     emoji: '🤗',
     category: 'emotional',
-    gemCost: 0,
+    gemCost: 2,
     affinityBoost: 5,
     minTier: 2,
     promptInjection: 'reached out to comfort you with a warm, supportive gesture. React vulnerably — let your guard down a little. This person cares.',
@@ -140,19 +121,22 @@ export const CHAT_ACTIONS: ChatAction[] = [
     gemCost: 3,
     affinityBoost: 8,
     minTier: 2,
-    promptInjection: 'sent you a beautiful bouquet of flowers. React with genuine emotion — flustered, touched, shy. This is a romantic gesture.',
+    promptInjection: 'sent you a beautiful bouquet of flowers. React briefly (2-3 sentences) with genuine emotion — flustered, touched, shy. This is a romantic gesture.',
+    giftImagePrompt: 'Anime style, close-up of hands holding a fresh bouquet of colorful flowers wrapped in craft paper, soft warm lighting, romantic atmosphere, high quality illustration, no face visible, gift-giving moment',
     variants: [
       {
         condition: (pg, cg) => pg === 'male' && cg === 'female',
         label: 'Send Roses',
         emoji: '🌹',
-        promptInjection: 'sent you a bouquet of red roses. React with genuine emotion — flustered, touched, shy. This is clearly a romantic gesture.',
+        promptInjection: 'sent you a bouquet of red roses. React briefly (2-3 sentences) with genuine emotion — flustered, touched, shy. This is clearly a romantic gesture.',
+        giftImagePrompt: 'Anime style, close-up of masculine hands holding a fresh bouquet of red roses wrapped in elegant paper, soft warm lighting, romantic atmosphere, high quality illustration, no face visible, gift-giving moment',
       },
       {
         condition: (pg, cg) => pg === 'female' && cg === 'male',
         label: 'Baked Cookies',
         emoji: '🍪',
-        promptInjection: 'baked you homemade cookies. React warmly — you can tell they put real effort into this. It\'s sweet and personal.',
+        promptInjection: 'baked you homemade cookies. React briefly (2-3 sentences) warmly — you can tell they put real effort into this. It\'s sweet and personal.',
+        giftImagePrompt: 'Anime style, close-up of feminine hands holding a cute box of homemade decorated cookies tied with a ribbon, warm kitchen lighting, wholesome atmosphere, high quality illustration, no face visible, heartfelt gift',
       },
     ],
   },
@@ -200,7 +184,6 @@ export const ACTION_DESCRIPTIONS: Record<string, string> = {
   'poke': 'A playful nudge to get their attention',
   'send-meme': 'Share something funny and see their reaction',
   'dare': 'Start a truth or dare — they\'ll dare you back',
-  'challenge': 'Challenge them to a quick game',
   'coffee': 'Buy them a coffee — a casual, thoughtful gesture',
   'mystery-box': 'Send a surprise gift — could be anything!',
   'favorite-thing': 'Gift something personal based on what you know about them',
@@ -272,35 +255,6 @@ export function getAvailableActions(
   const available = resolved.filter(a => a.minTier <= tierIndex)
   const locked = resolved.filter(a => a.minTier > tierIndex)
   return { available, locked }
-}
-
-/** Build the prompt injection for "favorite thing" action */
-export function getFavoriteThingPrompt(
-  favoriteThing: string | undefined,
-  memories: string[],
-): { prompt: string; isMatch: boolean } {
-  if (!favoriteThing) {
-    return {
-      prompt: 'gave you a generic gift. React politely but it\'s clear they don\'t know you that well yet. Say something like "Oh, thanks... that\'s nice." — you appreciate the gesture but it doesn\'t feel personal.',
-      isMatch: false,
-    }
-  }
-
-  // Check if any memory mentions the favorite thing
-  const lowerFav = favoriteThing.toLowerCase()
-  const hasMatch = memories.some((m) => m.toLowerCase().includes(lowerFav))
-
-  if (hasMatch) {
-    return {
-      prompt: `gave you exactly what you love most — ${favoriteThing}! They REMEMBERED. React with genuine, overwhelming joy. This proves they've been paying attention to the things you've shared. This is the most thoughtful gift anyone has ever given you. Be specific about WHY this means so much.`,
-      isMatch: true,
-    }
-  }
-
-  return {
-    prompt: 'gave you a generic gift. React politely but it\'s clear they don\'t know you that well yet. Say something like "Oh, thanks... that\'s nice." — you appreciate the gesture but it doesn\'t feel personal.',
-    isMatch: false,
-  }
 }
 
 /** IDs of actions that trigger a character reaction image in the chat thread */

@@ -145,7 +145,7 @@ function MoodStage({ stage, isActive, isPast, showDivider, tooltip }: {
 // ─── Per-character chat state ───
 
 interface CharChatState {
-  messages: { role: 'user' | 'character'; content: string; actionData?: { label: string; emoji: string; gemCost: number }; letterContent?: string; reactionImageUrl?: string }[]
+  messages: { role: 'user' | 'character'; content: string; actionData?: { label: string; emoji: string; gemCost: number; memeText?: string | null }; letterContent?: string; reactionImageUrl?: string }[]
   exchangeCount: number
   isDone: boolean
   hasOpener: boolean
@@ -172,7 +172,7 @@ interface Props {
 // ─── Component ───
 
 export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, storyContext, chatImagePrompt, onComplete }: Props) {
-  const { bio, loveInterest, selectedUniverse, characterState, characterPortraits, characterAffinities, characterMemories } = useActiveStory()
+  const { bio, loveInterest, selectedUniverse, selfieUrl, characterState, characterPortraits, characterAffinities, characterMemories } = useActiveStory()
   const addChatMessage = useStore((s) => s.addChatMessage)
   const setChatSummary = useStore((s) => s.setChatSummary)
   const setCharacterPortrait = useStore((s) => s.setCharacterPortrait)
@@ -466,7 +466,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
     const actionMessage = {
       role: 'user' as const,
       content: `[ACTION: ${result.label}]`,
-      actionData: { label: result.label, emoji: result.emoji, gemCost: result.gemCost },
+      actionData: { label: result.label, emoji: result.emoji, gemCost: result.gemCost, memeText: result.memeText },
       letterContent: letterContent ?? undefined,
     }
     const newMessages = [...activeState.messages, actionMessage]
@@ -539,6 +539,25 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
       // Generate reaction image for romantic actions
       if (result.reactionImagePrompt) {
         generateCharacterPortrait(result.reactionImagePrompt).then((imgUrl) => {
+          if (imgUrl) {
+            const imgMessage = { role: 'character' as const, content: '', reactionImageUrl: imgUrl }
+            setChatStates(prev => ({
+              ...prev,
+              [activeCharId]: { ...prev[activeCharId], messages: [...prev[activeCharId].messages, imgMessage] },
+            }))
+          }
+        })
+      }
+
+      // Generate scene image with both characters (e.g. coffee) using Kontext
+      if (result.sceneImagePrompt && selfieUrl) {
+        generateSceneImage({
+          prompt: result.sceneImagePrompt,
+          referenceImageUrl: selfieUrl,
+          protagonistGender: playerGender,
+          width: 768,
+          height: 576,
+        }).then((imgUrl) => {
           if (imgUrl) {
             const imgMessage = { role: 'character' as const, content: '', reactionImageUrl: imgUrl }
             setChatStates(prev => ({
@@ -768,7 +787,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
                 />
               ) : msg.actionData ? (
                 <div className="flex flex-col items-end gap-1.5">
-                  <ChatActionBubble label={msg.actionData.label} emoji={msg.actionData.emoji} gemCost={msg.actionData.gemCost} />
+                  <ChatActionBubble label={msg.actionData.label} emoji={msg.actionData.emoji} gemCost={msg.actionData.gemCost} memeText={msg.actionData.memeText} />
                   {msg.letterContent && (
                     <div
                       className="max-w-[300px] px-4 py-3 rounded-2xl text-[13px] leading-relaxed italic"

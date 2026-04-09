@@ -1,7 +1,8 @@
 import { useCallback } from 'react'
 import { useStore } from '../store/useStore'
-import { type ChatAction, getMysteryBoxBoost, getFavoriteThingPrompt, IMAGE_REACTION_ACTION_IDS, buildReactionImagePrompt } from '../data/chatActions'
+import { type ChatAction, getMysteryBoxBoost, IMAGE_REACTION_ACTION_IDS, buildReactionImagePrompt, getRandomMeme } from '../data/chatActions'
 import { getCharacter, CHARACTERS } from '../data/characters'
+import { getUniverseGenre } from '../data/storyData'
 
 interface UseChatActionsParams {
   characterId: string
@@ -16,7 +17,9 @@ interface ActionResult {
   affinityBoost: number
   promptInjection: string
   reactionImagePrompt: string | null
+  sceneImagePrompt: string | null
   letterContent: string | null
+  memeText: string | null
 }
 
 export function useChatActions({ characterId, universeId, characterMemories }: UseChatActionsParams) {
@@ -43,18 +46,18 @@ export function useChatActions({ characterId, universeId, characterMemories }: U
     // Handle special cases
     let affinityBoost = action.affinityBoost
     let promptInjection = action.promptInjection
+    let memeText: string | null = null
+
+    // Send a meme: pick a random meme and inject it
+    if (action.id === 'send-meme') {
+      const genre = getUniverseGenre(universeId)
+      memeText = getRandomMeme(genre)
+      promptInjection = `sent you a meme: "${memeText}". React to THIS SPECIFIC meme in character — do you find it hilarious, cringe, relatable, or do you roast their taste? Reference the actual meme content in your reaction.`
+    }
 
     // Mystery box: random affinity
     if (action.id === 'mystery-box') {
       affinityBoost = getMysteryBoxBoost()
-    }
-
-    // Favorite thing: check memories for match
-    if (action.id === 'favorite-thing') {
-      const charData = getCharacter(characterId, universeId) ?? CHARACTERS[characterId]
-      const { prompt, isMatch } = getFavoriteThingPrompt(charData?.favoriteThing, characterMemories)
-      promptInjection = prompt
-      affinityBoost = isMatch ? 10 : 3
     }
 
     // Build reaction image prompt for romantic actions that trigger it
@@ -66,6 +69,16 @@ export function useChatActions({ characterId, universeId, characterMemories }: U
       }
     }
 
+    // Build scene image prompt for actions that show both characters (uses Kontext with selfie)
+    let sceneImagePrompt: string | null = null
+    if (action.id === 'coffee') {
+      const charData = getCharacter(characterId, universeId) ?? CHARACTERS[characterId]
+      if (charData?.portraitPrompt) {
+        const charDesc = charData.portraitPrompt.match(/portrait of (.+?)(?:,\s*(?:soft|clean|high))/i)?.[1] ?? charData.name
+        sceneImagePrompt = `Anime style, two people at a cozy café: a young person handing a warm coffee to ${charDesc}, warm smiles, gentle steam rising from the cup, soft warm café lighting, K-drama aesthetic, high quality anime art, intimate casual moment, ONLY these two people in the image`
+      }
+    }
+
     return {
       label: action.label,
       emoji: action.emoji,
@@ -73,7 +86,9 @@ export function useChatActions({ characterId, universeId, characterMemories }: U
       affinityBoost,
       promptInjection,
       reactionImagePrompt,
+      sceneImagePrompt,
       letterContent: null, // set asynchronously for love-letter actions
+      memeText,
     }
   }, [characterId, universeId, characterMemories, spendGems, setActionCooldown, isActionOnCooldown])
 

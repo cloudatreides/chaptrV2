@@ -5,7 +5,7 @@ import { getCharacter, CHARACTERS } from '../data/characters'
 import { useStore } from '../store/useStore'
 import { useActiveStory } from '../hooks/useActiveStory'
 import { streamChatReply, generateGroupReaction, extractMemories, generateLoveLetter } from '../lib/claudeStream'
-import { generateCharacterPortrait } from '../lib/togetherAi'
+import { generateCharacterPortrait, generateSceneImage } from '../lib/togetherAi'
 import { trackEvent } from '../lib/supabase'
 import { getAffinityGrowth } from '../lib/affinity'
 import { parseAffinityDelta } from '../lib/claudeStream'
@@ -24,7 +24,7 @@ interface GroupMessage {
   role: 'user' | 'character'
   content: string
   characterId?: string // for character messages
-  actionData?: { label: string; emoji: string; gemCost: number }
+  actionData?: { label: string; emoji: string; gemCost: number; memeText?: string | null }
   letterContent?: string
   reactionImageUrl?: string
 }
@@ -40,7 +40,7 @@ interface Props {
 // ─── Component ───
 
 export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, storyContext, onComplete }: Props) {
-  const { bio, loveInterest, selectedUniverse, characterState, characterPortraits, characterAffinities, characterMemories } = useActiveStory()
+  const { bio, loveInterest, selectedUniverse, selfieUrl, characterState, characterPortraits, characterAffinities, characterMemories } = useActiveStory()
   const addChatMessage = useStore((s) => s.addChatMessage)
   const setCharacterPortrait = useStore((s) => s.setCharacterPortrait)
   const updateAffinity = useStore((s) => s.updateAffinity)
@@ -304,7 +304,7 @@ export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, 
       id: `action-${Date.now()}`,
       role: 'user',
       content: `[ACTION: ${result.label}]`,
-      actionData: { label: result.label, emoji: result.emoji, gemCost: result.gemCost },
+      actionData: { label: result.label, emoji: result.emoji, gemCost: result.gemCost, memeText: result.memeText },
       letterContent: letterContent ?? undefined,
     }
     const newMessages = [...messages, actionMessage]
@@ -364,6 +364,21 @@ export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, 
         generateCharacterPortrait(result.reactionImagePrompt).then((imgUrl) => {
           if (imgUrl) {
             setMessages(prev => [...prev, { id: `reaction-${Date.now()}`, role: 'character', content: '', characterId: primaryCharId, reactionImageUrl: imgUrl }])
+          }
+        })
+      }
+
+      // Generate scene image with both characters (e.g. coffee) using Kontext
+      if (result.sceneImagePrompt && selfieUrl) {
+        generateSceneImage({
+          prompt: result.sceneImagePrompt,
+          referenceImageUrl: selfieUrl,
+          protagonistGender: playerGender,
+          width: 768,
+          height: 576,
+        }).then((imgUrl) => {
+          if (imgUrl) {
+            setMessages(prev => [...prev, { id: `scene-${Date.now()}`, role: 'character', content: '', characterId: primaryCharId, reactionImageUrl: imgUrl }])
           }
         })
       }
@@ -448,7 +463,7 @@ export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, 
                   />
                 ) : msg.actionData ? (
                   <div className="flex flex-col items-end gap-1.5">
-                    <ChatActionBubble label={msg.actionData.label} emoji={msg.actionData.emoji} gemCost={msg.actionData.gemCost} />
+                    <ChatActionBubble label={msg.actionData.label} emoji={msg.actionData.emoji} gemCost={msg.actionData.gemCost} memeText={msg.actionData.memeText} />
                     {msg.letterContent && (
                       <div
                         className="max-w-[300px] px-4 py-3 rounded-2xl text-[13px] leading-relaxed italic"

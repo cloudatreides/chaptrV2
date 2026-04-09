@@ -6,7 +6,7 @@ import { getCharacter, CHARACTERS } from '../data/characters'
 import { useStore } from '../store/useStore'
 import { useActiveStory } from '../hooks/useActiveStory'
 import { streamChatReply, generateOpeningMessage, extractMemories, generateLoveLetter } from '../lib/claudeStream'
-import { generateCharacterPortrait } from '../lib/togetherAi'
+import { generateCharacterPortrait, generateSceneImage } from '../lib/togetherAi'
 import { getStoryData } from '../data/stories'
 import { getUniverseGenre } from '../data/storyData'
 import { trackEvent } from '../lib/supabase'
@@ -60,7 +60,7 @@ function getFreeSuggestions(exchangeCount: number): string[] {
 // ─── Per-character chat state ───
 
 interface CharChatState {
-  messages: { role: 'user' | 'character'; content: string; actionData?: { label: string; emoji: string; gemCost: number }; letterContent?: string; reactionImageUrl?: string }[]
+  messages: { role: 'user' | 'character'; content: string; actionData?: { label: string; emoji: string; gemCost: number; memeText?: string | null }; letterContent?: string; reactionImageUrl?: string }[]
   exchangeCount: number
   hasOpener: boolean
   isLoadingOpener: boolean
@@ -123,7 +123,7 @@ function buildPlaythroughContext(
 export function FreeChatPage() {
   const navigate = useNavigate()
   const {
-    bio, loveInterest, selectedUniverse, characterState, characterPortraits, characterAffinities, characterMemories,
+    bio, loveInterest, selectedUniverse, selfieUrl, characterState, characterPortraits, characterAffinities, characterMemories,
     chatSummaries, choiceDescriptions, trustStatusLabel, revealSignature,
   } = useActiveStory()
   const addChatMessage = useStore((s) => s.addChatMessage)
@@ -383,7 +383,7 @@ export function FreeChatPage() {
     const actionMessage = {
       role: 'user' as const,
       content: `[ACTION: ${result.label}]`,
-      actionData: { label: result.label, emoji: result.emoji, gemCost: result.gemCost },
+      actionData: { label: result.label, emoji: result.emoji, gemCost: result.gemCost, memeText: result.memeText },
       letterContent: letterContent ?? undefined,
     }
     const newMessages = [...activeState.messages, actionMessage]
@@ -451,6 +451,25 @@ export function FreeChatPage() {
       // Generate reaction image for romantic actions
       if (result.reactionImagePrompt) {
         generateCharacterPortrait(result.reactionImagePrompt).then((imgUrl) => {
+          if (imgUrl) {
+            const imgMessage = { role: 'character' as const, content: '', reactionImageUrl: imgUrl }
+            setChatStates(prev => ({
+              ...prev,
+              [activeCharId]: { ...prev[activeCharId], messages: [...prev[activeCharId].messages, imgMessage] },
+            }))
+          }
+        })
+      }
+
+      // Generate scene image with both characters (e.g. coffee) using Kontext
+      if (result.sceneImagePrompt && selfieUrl) {
+        generateSceneImage({
+          prompt: result.sceneImagePrompt,
+          referenceImageUrl: selfieUrl,
+          protagonistGender: playerGender,
+          width: 768,
+          height: 576,
+        }).then((imgUrl) => {
           if (imgUrl) {
             const imgMessage = { role: 'character' as const, content: '', reactionImageUrl: imgUrl }
             setChatStates(prev => ({
@@ -623,7 +642,7 @@ export function FreeChatPage() {
                 />
               ) : msg.actionData ? (
                 <div className="flex flex-col items-end gap-1.5">
-                  <ChatActionBubble label={msg.actionData.label} emoji={msg.actionData.emoji} gemCost={msg.actionData.gemCost} />
+                  <ChatActionBubble label={msg.actionData.label} emoji={msg.actionData.emoji} gemCost={msg.actionData.gemCost} memeText={msg.actionData.memeText} />
                   {msg.letterContent && (
                     <div
                       className="max-w-[300px] px-4 py-3 rounded-2xl text-[13px] leading-relaxed italic"

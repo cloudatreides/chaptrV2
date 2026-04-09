@@ -4,6 +4,7 @@ interface Props {
   label: string
   emoji: string
   gemCost: number
+  memeText?: string | null
 }
 
 // Action-specific particle emojis displayed around the main emoji
@@ -28,12 +29,12 @@ const ACTION_PARTICLES: Record<string, string[]> = {
 }
 
 /** Renders a chat action as a styled sticker card in the message thread */
-export const ChatActionBubble = memo(function ChatActionBubble({ label, emoji, gemCost }: Props) {
+export const ChatActionBubble = memo(function ChatActionBubble({ label, emoji, gemCost, memeText }: Props) {
   const particles = ACTION_PARTICLES[emoji] ?? ['✨']
 
   return (
     <div
-      className="relative w-[140px] rounded-2xl overflow-hidden"
+      className={`relative rounded-2xl overflow-hidden ${memeText ? 'w-[220px]' : 'w-[140px]'}`}
       style={{
         background: 'linear-gradient(145deg, rgba(200,75,158,0.18) 0%, rgba(139,92,246,0.18) 50%, rgba(200,75,158,0.12) 100%)',
         border: '1px solid rgba(200,75,158,0.25)',
@@ -59,9 +60,12 @@ export const ChatActionBubble = memo(function ChatActionBubble({ label, emoji, g
         <span className="text-4xl relative z-10">{emoji}</span>
       </div>
 
-      {/* Label */}
+      {/* Label + meme text */}
       <div className="px-3 pb-3 text-center">
         <span className="text-white/90 text-xs font-medium">{label}</span>
+        {memeText && (
+          <p className="text-white/50 text-[10px] mt-1.5 leading-relaxed italic">"{memeText}"</p>
+        )}
         {gemCost > 0 && (
           <span className="block text-[9px] mt-0.5" style={{ color: 'rgba(251,191,36,0.5)' }}>
             -{gemCost} gems

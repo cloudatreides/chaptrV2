@@ -162,7 +162,7 @@ export function ChatActionTray({ playerGender, characterGender, affinityScore, g
                           </span>
                         )}
                         {action.gemCost === 0 && (
-                          <span className="text-[9px] text-white/40">free</span>
+                          <span className="text-[9px] text-white/60">free</span>
                         )}
                       </div>
                       {onCooldown && (
@@ -206,14 +206,14 @@ export function ChatActionTray({ playerGender, characterGender, affinityScore, g
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.1 }}
                   >
-                    <p className="text-[10px] text-white/50 leading-snug">
+                    <p className="text-[10px] text-white/80 leading-snug">
                       {ACTION_DESCRIPTIONS[hoveredData.id] ?? hoveredData.label}
                     </p>
                     <div className="flex items-center gap-3">
-                      <span className="flex items-center gap-1 text-[9px]" style={{ color: 'rgba(251,191,36,0.7)' }}>
+                      <span className="flex items-center gap-1 text-[9px]" style={{ color: 'rgba(251,191,36,0.9)' }}>
                         <Gem size={8} /> {hoveredData.gemCost > 0 ? hoveredData.gemCost : 'Free'}
                       </span>
-                      <span className="flex items-center gap-1 text-[9px]" style={{ color: 'rgba(200,75,158,0.7)' }}>
+                      <span className="flex items-center gap-1 text-[9px]" style={{ color: 'rgba(200,75,158,0.9)' }}>
                         <Heart size={8} /> +{hoveredData.affinityBoost}{hoveredData.id === 'mystery-box' ? '~8' : ''} affinity
                       </span>
                     </div>
