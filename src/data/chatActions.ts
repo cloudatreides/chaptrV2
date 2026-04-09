@@ -89,7 +89,7 @@ export const CHAT_ACTIONS: ChatAction[] = [
     gemCost: 2,
     affinityBoost: 5,
     minTier: 2,
-    promptInjection: 'reached out to comfort you with a warm, supportive gesture. React vulnerably — let your guard down a little. This person cares.',
+    promptInjection: 'reached out to comfort you. React in 2-3 sentences — let your guard down a little. Be vulnerable, not performative.',
   },
   {
     id: 'share-secret',
@@ -99,7 +99,7 @@ export const CHAT_ACTIONS: ChatAction[] = [
     gemCost: 0,
     affinityBoost: 7,
     minTier: 3,
-    promptInjection: 'told you they want to share a secret with you. React with genuine surprise and warmth — then share one of YOUR secrets back. Reveal something personal about your backstory that you haven\'t shared before.',
+    promptInjection: 'told you they want to share a secret. React briefly, then share ONE specific secret about yourself — something personal you haven\'t revealed before. Keep it to 2-3 sentences total.',
   },
   {
     id: 'ask-past',
@@ -109,7 +109,7 @@ export const CHAT_ACTIONS: ChatAction[] = [
     gemCost: 0,
     affinityBoost: 5,
     minTier: 2,
-    promptInjection: 'asked about your past — something personal, something real. Share a memory or backstory detail that reveals who you are beneath the surface. Be specific and honest.',
+    promptInjection: 'asked about your past. Share ONE specific memory or moment that shaped who you are. Be honest and concise — 2-3 sentences.',
   },
 
   // ── Romantic (tier-gated, gem cost) ──
@@ -166,13 +166,13 @@ export const CHAT_ACTIONS: ChatAction[] = [
     gemCost: 8,
     affinityBoost: 12,
     minTier: 4,
-    promptInjection: 'sang a song for you — just for you. React with deep emotion. Your walls are completely down. This is the most romantic gesture possible.',
+    promptInjection: 'sang a song for you — just for you. React in 2-3 sentences. Be raw and genuine — what does hearing this make you feel? Don\'t narrate what happened. Just react.',
     variants: [
       {
         condition: (pg, cg) => pg === 'female' && cg === 'male',
         label: 'Made You a Playlist',
         emoji: '🎧',
-        promptInjection: 'made you a personal playlist of songs that remind them of you. React with deep emotion — every song choice shows how well they know you. This is intimate and thoughtful.',
+        promptInjection: 'made you a personal playlist of songs that remind them of you. React in 2-3 sentences — mention one song that hit you hardest and why.',
       },
     ],
   },
