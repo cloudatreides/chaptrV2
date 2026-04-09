@@ -78,13 +78,24 @@ Unified message thread where multiple characters talk simultaneously. `GroupChat
 - **Schnell uses `aspect_ratio`** (not `width`/`height`) per Together AI API change. Kontext Pro still uses `width`/`height`.
 
 ### F7 — Chat Actions
-Interactive actions in all 6 chat surfaces. 13 actions across 4 categories (Playful, Gifts, Emotional, Romantic). Gender-adaptive variants, affinity tier-gating, gem economy, memory-system payoff loop. Letter writing for romantic actions. AI-generated reaction portraits for high-tier romantic actions.
+Interactive actions in all 6 chat surfaces. 11 actions across 4 categories (Playful, Gifts, Emotional, Romantic). Gender-adaptive variants, affinity tier-gating, gem economy. Key features:
+- **Send a Meme**: Genre-aware meme pool, random pick shown in bubble, character reacts to specific meme
+- **Dare**: Player dares the character from genre-aware pool, character must perform it
+- **Coffee**: Generates Kontext scene image of protagonist handing coffee to character (uses selfie reference)
+- **Serenade**: Generates Kontext scene image of protagonist singing to character
+- **Love Letter**: Async AI-generated letter content, character reacts emotionally
+- **Mystery Box**: Random affinity boost (1-8), reaction portrait generated
+- **Comfort**: Character reaction portrait generated
+- Master account (nicholas@zentry.com) has infinite gems and all tiers unlocked for playtesting.
 
 ### F8 — Per-User Game State Sync
 Full store state (chat threads, affinities, gems, progress, unlocks) synced to Supabase `user_game_state` table. Debounced auto-save on changes, cloud hydration on login, save-before-logout. Data survives logout/login cycles.
 
+### F9 — Genre-Aware Story Moments
+Selfie capture moments adapt per genre. Romance = "Album" with selfie photo style. Thriller = "Dossier" with surveillance aesthetic. Horror = "Evidence" with polaroid style. Mystery = "Case Files", Fantasy = "Memories", Adventure = "Journal". Config in `getMomentConfig()` drives all copy: capture spinner, save prompt, button text, album title, empty state, note placeholders, image generation style.
+
 ## Open Issues / Next Priorities
-1. Restore affinity tier-gating on actions (currently unlocked for testing)
-2. Test full playthrough on newer universes (scene images, branching, cast unlocks)
-3. Cost modeling before scaling
-4. Mobile polish on universe detail pages
+1. Test full playthrough on newer universes (scene images, branching, cast unlocks)
+2. Cost modeling before scaling — coffee/serenade scene images use Kontext ($0.20/image)
+3. Mobile polish on universe detail pages
+4. Playtest all genre-aware content (memes, dares, moments) across non-romance genres

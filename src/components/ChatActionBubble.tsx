@@ -4,7 +4,7 @@ interface Props {
   label: string
   emoji: string
   gemCost: number
-  memeText?: string | null
+  jokeText?: string | null
   dareText?: string | null
 }
 
@@ -30,12 +30,12 @@ const ACTION_PARTICLES: Record<string, string[]> = {
 }
 
 /** Renders a chat action as a styled sticker card in the message thread */
-export const ChatActionBubble = memo(function ChatActionBubble({ label, emoji, gemCost, memeText, dareText }: Props) {
+export const ChatActionBubble = memo(function ChatActionBubble({ label, emoji, gemCost, jokeText, dareText }: Props) {
   const particles = ACTION_PARTICLES[emoji] ?? ['✨']
 
   return (
     <div
-      className={`relative rounded-2xl overflow-hidden ${memeText || dareText ? 'w-[220px]' : 'w-[140px]'}`}
+      className={`relative rounded-2xl overflow-hidden ${jokeText || dareText ? 'w-[220px]' : 'w-[140px]'}`}
       style={{
         background: 'linear-gradient(145deg, rgba(200,75,158,0.18) 0%, rgba(139,92,246,0.18) 50%, rgba(200,75,158,0.12) 100%)',
         border: '1px solid rgba(200,75,158,0.25)',
@@ -61,11 +61,11 @@ export const ChatActionBubble = memo(function ChatActionBubble({ label, emoji, g
         <span className="text-4xl relative z-10">{emoji}</span>
       </div>
 
-      {/* Label + meme text */}
+      {/* Label + joke text */}
       <div className="px-3 pb-3 text-center">
         <span className="text-white/90 text-xs font-medium">{label}</span>
-        {memeText && (
-          <p className="text-white/50 text-[10px] mt-1.5 leading-relaxed italic">"{memeText}"</p>
+        {jokeText && (
+          <p className="text-white/50 text-[10px] mt-1.5 leading-relaxed italic">"{jokeText}"</p>
         )}
         {dareText && (
           <p className="text-white/50 text-[10px] mt-1.5 leading-relaxed italic">"{dareText}"</p>

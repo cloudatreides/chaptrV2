@@ -176,7 +176,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
     universeId: selectedUniverse,
     characterMemories: characterMemories[characterId] ?? [],
   })
-  const [localMessages, setLocalMessages] = useState<{ role: 'user' | 'character'; content: string; actionData?: { label: string; emoji: string; gemCost: number; memeText?: string | null; dareText?: string | null }; letterContent?: string; reactionImageUrl?: string }[]>([])
+  const [localMessages, setLocalMessages] = useState<{ role: 'user' | 'character'; content: string; actionData?: { label: string; emoji: string; gemCost: number; jokeText?: string | null; dareText?: string | null }; letterContent?: string; reactionImageUrl?: string }[]>([])
   const [input, setInput] = useState('')
   const [usedSuggestions, setUsedSuggestions] = useState<Set<string>>(new Set())
   const [isTyping, setIsTyping] = useState(false)
@@ -376,7 +376,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
     const actionMessage = {
       role: 'user' as const,
       content: `[ACTION: ${result.label}]`,
-      actionData: { label: result.label, emoji: result.emoji, gemCost: result.gemCost, memeText: result.memeText, dareText: result.dareText },
+      actionData: { label: result.label, emoji: result.emoji, gemCost: result.gemCost, jokeText: result.jokeText, dareText: result.dareText },
       letterContent: letterContent ?? undefined,
     }
     setLocalMessages((prev) => [...prev, actionMessage])
@@ -440,12 +440,13 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
         })
       }
 
-      // Generate scene image with both characters (e.g. coffee) using Kontext
-      if (result.sceneImagePrompt && selfieUrl) {
+      // Generate scene image with both characters (e.g. coffee/serenade)
+      if (result.sceneImagePrompt) {
         generateSceneImage({
           prompt: result.sceneImagePrompt,
-          referenceImageUrl: selfieUrl,
+          referenceImageUrl: selfieUrl ?? undefined,
           protagonistGender: character?.gender === 'female' ? 'female' : 'male',
+          includesProtagonist: !!selfieUrl,
           width: 768,
           height: 576,
         }).then((imgUrl) => {
@@ -581,7 +582,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
                 />
               ) : msg.actionData ? (
                 <div className="flex flex-col items-end gap-1.5">
-                  <ChatActionBubble label={msg.actionData.label} emoji={msg.actionData.emoji} gemCost={msg.actionData.gemCost} memeText={msg.actionData.memeText} dareText={msg.actionData.dareText} />
+                  <ChatActionBubble label={msg.actionData.label} emoji={msg.actionData.emoji} gemCost={msg.actionData.gemCost} jokeText={msg.actionData.jokeText} dareText={msg.actionData.dareText} />
                   {msg.letterContent && (
                     <div
                       className="max-w-[300px] px-4 py-3 rounded-2xl text-[13px] leading-relaxed italic"
