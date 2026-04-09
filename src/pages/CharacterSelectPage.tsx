@@ -39,10 +39,12 @@ export function CharacterSelectPage() {
         {/* Nav */}
         <div className="flex items-center justify-between pt-12 pb-2">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%)' }}>
-              <span className="text-white font-bold text-sm">C</span>
+            <div className="relative shrink-0" style={{ width: 28, height: 28 }}>
+              <div className="absolute" style={{ width: 17, height: 21, borderRadius: 3, background: '#7C3AED', transform: 'rotate(8deg)', top: 0, left: 5 }} />
+              <div className="absolute" style={{ width: 17, height: 21, borderRadius: 3, background: '#A78BFA', transform: 'rotate(3deg)', top: 1.5, left: 3.5 }} />
+              <div className="absolute" style={{ width: 17, height: 21, borderRadius: 3, background: '#E9D5FF', top: 3, left: 2 }} />
             </div>
-            <span className="text-textPrimary font-semibold">chaptr</span>
+            <span className="font-semibold" style={{ fontFamily: "'Syne', sans-serif", background: 'linear-gradient(180deg, #D4C4F0 0%, #B8A5E0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>chaptr</span>
           </div>
         </div>
 

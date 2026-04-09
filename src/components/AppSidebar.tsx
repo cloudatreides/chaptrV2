@@ -47,14 +47,12 @@ export function AppSidebar() {
         className="flex items-center gap-2 px-6 h-[72px] cursor-pointer"
         onClick={() => navigate('/home')}
       >
-        <div
-          className="flex items-center justify-center shrink-0 relative"
-          style={{ width: 28, height: 28, borderRadius: 7, background: 'linear-gradient(225deg, #c84b9e 0%, #8b5cf6 100%)' }}
-        >
-          <span className="text-white font-bold" style={{ fontSize: 14, fontFamily: "'Syne', sans-serif" }}>C</span>
-          <div className="absolute bg-white rounded-full" style={{ width: 5, height: 5, right: 2, bottom: 2, opacity: 0.9 }} />
+        <div className="relative shrink-0" style={{ width: 28, height: 28 }}>
+          <div className="absolute" style={{ width: 17, height: 21, borderRadius: 3, background: '#7C3AED', transform: 'rotate(8deg)', top: 0, left: 5 }} />
+          <div className="absolute" style={{ width: 17, height: 21, borderRadius: 3, background: '#A78BFA', transform: 'rotate(3deg)', top: 1.5, left: 3.5 }} />
+          <div className="absolute" style={{ width: 17, height: 21, borderRadius: 3, background: '#E9D5FF', top: 3, left: 2 }} />
         </div>
-        <span className="text-white font-semibold" style={{ fontFamily: "'Syne', sans-serif", fontSize: 17, letterSpacing: '-0.02em' }}>
+        <span style={{ fontFamily: "'Syne', sans-serif", fontSize: 17, letterSpacing: '-0.02em', background: 'linear-gradient(180deg, #D4C4F0 0%, #B8A5E0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }} className="font-semibold">
           chaptr
         </span>
       </div>

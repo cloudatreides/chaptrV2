@@ -575,7 +575,7 @@ export function LandingPage() {
           {/* Logo */}
           <div className="relative z-10 flex items-center gap-2 px-5 pt-10 safe-top">
             <LogoMark size={34} />
-            <span className="text-white font-semibold text-lg" style={{ fontFamily: SYNE, letterSpacing: '-0.02em' }}>chaptr</span>
+            <span className="font-semibold text-lg" style={{ fontFamily: SYNE, letterSpacing: '-0.02em', background: 'linear-gradient(180deg, #D4C4F0 0%, #B8A5E0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>chaptr</span>
           </div>
 
           {/* Hero text pinned to bottom */}
@@ -753,7 +753,7 @@ export function LandingPage() {
             <nav className="flex items-center justify-between px-8 lg:px-16 pt-7">
               <div className="flex items-center gap-2.5">
                 <LogoMark size={34} />
-                <span className="text-white font-semibold text-lg" style={{ fontFamily: SYNE, letterSpacing: '-0.02em' }}>chaptr</span>
+                <span className="font-semibold text-lg" style={{ fontFamily: SYNE, letterSpacing: '-0.02em', background: 'linear-gradient(180deg, #D4C4F0 0%, #B8A5E0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>chaptr</span>
               </div>
               <div className="flex items-center gap-8">
                 {[
@@ -1002,9 +1002,9 @@ export function LandingPage() {
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
                   <LogoMark size={28} small />
-                  <span className="text-white font-bold text-base" style={{ fontFamily: INTER }}>chaptr</span>
+                  <span className="font-bold text-base" style={{ fontFamily: "'Syne', sans-serif", background: 'linear-gradient(180deg, #D4C4F0 0%, #B8A5E0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>chaptr</span>
                 </div>
-                <p className="text-white/45 text-sm" style={{ fontFamily: INTER }}>Your face. Your story.</p>
+                <p className="text-white/45 text-sm" style={{ fontFamily: INTER }}>Step into your story.</p>
               </div>
 
               <div className="flex items-center gap-8">
@@ -1048,9 +1048,9 @@ function MobileFooter() {
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
             <LogoMark size={28} small />
-            <span className="text-white font-bold text-base" style={{ fontFamily: INTER }}>chaptr</span>
+            <span className="font-bold text-base" style={{ fontFamily: "'Syne', sans-serif", background: 'linear-gradient(180deg, #D4C4F0 0%, #B8A5E0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>chaptr</span>
           </div>
-          <p className="text-white/45 text-sm" style={{ fontFamily: INTER }}>Your face. Your story.</p>
+          <p className="text-white/45 text-sm" style={{ fontFamily: INTER }}>Step into your story.</p>
         </div>
         <div className="flex items-center justify-between">
           {['About', 'Privacy', 'Terms', 'Contact'].map((l) => (
@@ -1071,22 +1071,43 @@ function MobileFooter() {
   )
 }
 
-function LogoMark({ size, small }: { size: number; small?: boolean }) {
+function LogoMark({ size }: { size: number; small?: boolean }) {
+  const pageW = size * 0.6;
+  const pageH = size * 0.75;
   return (
-    <div
-      className="flex items-center justify-center shrink-0 relative"
-      style={{
-        width: size, height: size,
-        borderRadius: size * 0.24,
-        background: small
-          ? 'linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%)'
-          : 'linear-gradient(225deg, #c84b9e 0%, #8b5cf6 100%)',
-      }}
-    >
-      <span className="text-white font-bold" style={{ fontSize: size * 0.5, fontFamily: SYNE }}>C</span>
-      {!small && (
-        <div className="absolute bg-white rounded-full" style={{ width: size * 0.18, height: size * 0.18, right: size * 0.06, bottom: size * 0.06, opacity: 0.9 }} />
-      )}
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
+      {/* Back page */}
+      <div
+        className="absolute"
+        style={{
+          width: pageW, height: pageH,
+          borderRadius: size * 0.1,
+          background: '#7C3AED',
+          transform: 'rotate(8deg)',
+          top: 0, left: size * 0.18,
+        }}
+      />
+      {/* Middle page */}
+      <div
+        className="absolute"
+        style={{
+          width: pageW, height: pageH,
+          borderRadius: size * 0.1,
+          background: '#A78BFA',
+          transform: 'rotate(3deg)',
+          top: size * 0.05, left: size * 0.12,
+        }}
+      />
+      {/* Front page */}
+      <div
+        className="absolute"
+        style={{
+          width: pageW, height: pageH,
+          borderRadius: size * 0.1,
+          background: '#E9D5FF',
+          top: size * 0.1, left: size * 0.06,
+        }}
+      />
     </div>
   )
 }

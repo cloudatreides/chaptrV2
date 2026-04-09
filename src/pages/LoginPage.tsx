@@ -19,15 +19,20 @@ export function LoginPage() {
         className="flex flex-col items-center gap-8 w-full max-w-sm"
       >
         {/* Logo / wordmark */}
-        <div className="flex flex-col items-center gap-2">
-          <div
-            className="text-4xl font-bold tracking-tight text-textPrimary"
-            style={{ fontFamily: SERIF }}
-          >
-            Chaptr
+        <div className="flex flex-col items-center gap-3">
+          <div className="relative" style={{ width: 48, height: 48 }}>
+            <div className="absolute" style={{ width: 29, height: 36, borderRadius: 5, background: '#7C3AED', transform: 'rotate(8deg)', top: 0, left: 9 }} />
+            <div className="absolute" style={{ width: 29, height: 36, borderRadius: 5, background: '#A78BFA', transform: 'rotate(3deg)', top: 2, left: 6 }} />
+            <div className="absolute" style={{ width: 29, height: 36, borderRadius: 5, background: '#E9D5FF', top: 4, left: 3 }} />
           </div>
-          <p className="text-textSecondary text-sm text-center leading-relaxed">
-            Your face. Your story.<br />Step into an AI-powered narrative.
+          <div
+            className="text-4xl font-bold tracking-tight"
+            style={{ fontFamily: "'Syne', sans-serif", background: 'linear-gradient(180deg, #D4C4F0 0%, #B8A5E0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+          >
+            chaptr
+          </div>
+          <p className="text-white text-sm text-center font-bold" style={{ letterSpacing: '0.15em' }}>
+            step into your story.
           </p>
         </div>
 
