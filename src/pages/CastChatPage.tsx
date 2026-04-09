@@ -210,6 +210,15 @@ export function CastChatPage() {
     const userMsg: CastChatMessage = { role: 'user', content: msgContent, timestamp: Date.now() }
     addCastChatMessage(characterId, userMsg)
 
+    // Generate gift image (fire-and-forget) — shows as a user-side image
+    if (result.giftImagePrompt) {
+      generateCharacterPortrait(result.giftImagePrompt).then((imgUrl) => {
+        if (imgUrl && characterId) {
+          const imgMsg: CastChatMessage = { role: 'user', content: '', timestamp: Date.now(), reactionImageUrl: imgUrl }
+          addCastChatMessage(characterId, imgMsg)
+        }
+      })
+    }
 
     setIsStreaming(true)
     setStreamingContent('')
@@ -324,7 +333,11 @@ export function CastChatPage() {
         return (
           <div key={msg.timestamp ?? i} className={`flex gap-2.5 ${msg.role === 'user' ? 'justify-end' : ''}`}>
             {msg.role === 'character' && <CharacterAvatar />}
-            {msg.reactionImageUrl ? (
+            {msg.reactionImageUrl && msg.role === 'user' ? (
+              <div className="max-w-[220px] rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(200,75,158,0.25)' }}>
+                <img src={msg.reactionImageUrl} alt="Gift" className="w-full h-auto" />
+              </div>
+            ) : msg.reactionImageUrl ? (
               <ChatReactionImage
                 imageUrl={msg.reactionImageUrl}
                 characterName={charData?.name ?? ''}
