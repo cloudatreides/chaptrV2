@@ -1,7 +1,10 @@
+import { useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { useGameStateSync } from './hooks/useGameStateSync'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { FeedbackModal } from './components/FeedbackModal'
+import { FeedbackFab } from './components/FeedbackFab'
 import { LoginPage } from './pages/LoginPage'
 import { LandingPage } from './pages/LandingPage'
 
@@ -29,6 +32,8 @@ function GameStateSync({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
+
   return (
     <BrowserRouter>
       <AuthProvider>
@@ -57,6 +62,8 @@ export default function App() {
           <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <FeedbackFab onClick={() => setFeedbackOpen(true)} />
+        <FeedbackModal open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
         </GameStateSync>
       </AuthProvider>
     </BrowserRouter>
