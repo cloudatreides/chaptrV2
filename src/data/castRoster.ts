@@ -54,6 +54,18 @@ export const CAST_ROSTER: CastMember[] = [
   // Neon District
   { id: 'ghost', name: 'Ghost', universeId: 'neon-district', universeLabel: 'Neon District', base: false, bio: 'Sentient AI in a stolen android body. Cannot lie. Escaped from Axiom Systems and searching for personhood.', unlockHint: 'Meet Ghost during a Neon District story' },
   { id: 'tanaka', name: 'Inspector Tanaka', universeId: 'neon-district', universeLabel: 'Neon District', base: false, bio: 'Veteran detective, 52, Cybercrime Division. Twenty-five years of service and deeply distrustful of AI.', unlockHint: 'Meet Inspector Tanaka during a Neon District story' },
+  // Rooftop Promise
+  { id: 'dohyun', name: 'Dohyun', universeId: 'rooftop-promise', universeLabel: 'Rooftop Promise', base: false, bio: 'Chaebol heir who plays piano on the rooftop when no one is watching. Cold in the corridors, alive only at the keys.', unlockHint: 'Discover Dohyun during a Rooftop Promise story' },
+  { id: 'soyeon', name: 'Soyeon', universeId: 'rooftop-promise', universeLabel: 'Rooftop Promise', base: false, bio: 'Your desk neighbour and the school\'s social butterfly. Warm, sharp, and she\'s been watching Dohyun longer than you have.', unlockHint: 'Meet Soyeon during a Rooftop Promise story' },
+  // Fake Dating My Rival
+  { id: 'hajin', name: 'Hajin', universeId: 'fake-dating', universeLabel: 'Fake Dating My Rival', base: false, bio: 'Your childhood rival turned fake boyfriend. Annoyingly charming, surprisingly tender, and he agreed to the deal way too fast.', unlockHint: 'Meet Hajin during a Fake Dating My Rival story' },
+  { id: 'yejin', name: 'Yejin', universeId: 'fake-dating', universeLabel: 'Fake Dating My Rival', base: false, bio: 'Your best friend with forensic perception and a dry wit. She called this years ago and she\'s enjoying every minute.', unlockHint: 'Meet Yejin during a Fake Dating My Rival story' },
+  // Café 11:11
+  { id: 'sunwoo', name: 'Sunwoo', universeId: 'cafe-1111', universeLabel: 'Café 11:11', base: false, bio: 'Art student who draws in a café at 11:11 PM every night. Quiet, sincere, and his sketchbook is full of you.', unlockHint: 'Meet Sunwoo during a Café 11:11 story' },
+  { id: 'jieun', name: 'Jieun', universeId: 'cafe-1111', universeLabel: 'Café 11:11', base: false, bio: 'Owner of Café 11:11. Left corporate life to pour coffee and quietly root for her regulars\' love stories.', unlockHint: 'Meet Jieun during a Café 11:11 story' },
+  // The Idol Next Door
+  { id: 'taehyun', name: 'Taehyun', universeId: 'idol-next-door', universeLabel: 'The Idol Next Door', base: false, bio: 'ECLIPSE\'s missing vocalist hiding in the apartment next door. Charming on stage, raw in person, and surprisingly good at math.', unlockHint: 'Discover Taehyun during a The Idol Next Door story' },
+  { id: 'nari', name: 'Nari', universeId: 'idol-next-door', universeLabel: 'The Idol Next Door', base: false, bio: 'Your best friend and ECLIPSE superfan. Processing the fact that her bias lives next door with exactly the amount of drama you\'d expect.', unlockHint: 'Meet Nari during a The Idol Next Door story' },
 ]
 
 /** Color accent per universe for locked state hints */
@@ -73,6 +85,10 @@ export const UNIVERSE_COLORS: Record<string, string> = {
   'crimson-depths': '#f43f5e',
   'the-whisper-game': '#fbbf24',
   'neon-district': '#22d3ee',
+  'rooftop-promise': '#c084fc',
+  'fake-dating': '#fb7185',
+  'cafe-1111': '#fbbf24',
+  'idol-next-door': '#818cf8',
 }
 
 /** Get a cast member's full character data (universe-aware) */

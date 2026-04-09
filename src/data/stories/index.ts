@@ -14,6 +14,10 @@ import { CAMPUS_RIVALS_STEPS, CAMPUS_RIVALS_CHARACTERS, CAMPUS_RIVALS_BIBLE } fr
 import { CRIMSON_DEPTHS_STEPS, CRIMSON_DEPTHS_CHARACTERS, CRIMSON_DEPTHS_BIBLE } from './crimson-depths'
 import { WHISPER_GAME_STEPS, WHISPER_GAME_CHARACTERS, WHISPER_GAME_BIBLE } from './the-whisper-game'
 import { NEON_DISTRICT_STEPS, NEON_DISTRICT_CHARACTERS, NEON_DISTRICT_BIBLE } from './neon-district'
+import { ROOFTOP_PROMISE_STEPS, ROOFTOP_PROMISE_CHARACTERS, ROOFTOP_PROMISE_BIBLE } from './rooftop-promise'
+import { FAKE_DATING_STEPS, FAKE_DATING_CHARACTERS, FAKE_DATING_BIBLE } from './fake-dating'
+import { CAFE_1111_STEPS, CAFE_1111_CHARACTERS, CAFE_1111_BIBLE } from './cafe-1111'
+import { IDOL_NEXT_DOOR_STEPS, IDOL_NEXT_DOOR_CHARACTERS, IDOL_NEXT_DOOR_BIBLE } from './idol-next-door'
 
 export interface StoryData {
   steps: StoryStep[]
@@ -155,6 +159,42 @@ export const STORY_REGISTRY: Record<string, StoryData> = {
     primaryCharacterId: 'ghost',
     revealPerspective: 'Ghost remembers you as',
     signatureContext: 'a cyberpunk mystery about AI personhood and identity in Neo-Tokyo. The signature should capture the protagonist\'s moral stance — how they weighed humanity against machinery, justice against pragmatism, and what they decided a person really is.',
+  },
+  'rooftop-promise': {
+    steps: ROOFTOP_PROMISE_STEPS,
+    characters: ROOFTOP_PROMISE_CHARACTERS,
+    bible: ROOFTOP_PROMISE_BIBLE,
+    trustLabel: 'closeness',
+    primaryCharacterId: 'dohyun',
+    revealPerspective: 'Dohyun sees you as',
+    signatureContext: 'a manhwa romance about a chaebol heir who plays piano in secret on a school rooftop. The signature should capture how the protagonist earned his trust — through honesty or patience, through music or silence, and what the rooftop came to mean for both of them.',
+  },
+  'fake-dating': {
+    steps: FAKE_DATING_STEPS,
+    characters: FAKE_DATING_CHARACTERS,
+    bible: FAKE_DATING_BIBLE,
+    trustLabel: 'chemistry',
+    primaryCharacterId: 'hajin',
+    revealPerspective: 'Hajin sees you as',
+    signatureContext: 'a manhwa rom-com about childhood rivals who fake-date for a summer and forget how to stop. The signature should capture the moment the pretending became real — what broke through the act, what the protagonist means to someone who has known them since they were seven.',
+  },
+  'cafe-1111': {
+    steps: CAFE_1111_STEPS,
+    characters: CAFE_1111_CHARACTERS,
+    bible: CAFE_1111_BIBLE,
+    trustLabel: 'intimacy',
+    primaryCharacterId: 'sunwoo',
+    revealPerspective: 'Sunwoo sees you as',
+    signatureContext: 'a manhwa romance about an artist who has been secretly drawing the protagonist in a late-night café. The signature should capture the quality of being truly seen — through art, through patience, through the quiet ritual of showing up at the same time every night.',
+  },
+  'idol-next-door': {
+    steps: IDOL_NEXT_DOOR_STEPS,
+    characters: IDOL_NEXT_DOOR_CHARACTERS,
+    bible: IDOL_NEXT_DOOR_BIBLE,
+    trustLabel: 'trust',
+    primaryCharacterId: 'taehyun',
+    revealPerspective: 'Taehyun sees you as',
+    signatureContext: 'a manhwa romance about a K-pop idol hiding in the apartment next door. The signature should capture how the protagonist saw through the idol to the person — through thin walls, late-night tutoring, and the courage to keep a secret that mattered.',
   },
 }
 
