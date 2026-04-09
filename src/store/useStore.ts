@@ -182,6 +182,8 @@ interface StoreState {
 
   // ── Gems ──
   gemBalance: number
+  masterMode: boolean
+  setMasterMode: (v: boolean) => void
   spendGems: (amount: number) => boolean
 
   // ── Streaming state (ephemeral, not per-character) ──
@@ -510,7 +512,10 @@ export const useStore = create<StoreState>()(
 
       // ── Gems ──
       gemBalance: 50,
+      masterMode: false,
+      setMasterMode: (v) => set({ masterMode: v }),
       spendGems: (amount) => {
+        if (get().masterMode) return true // infinite gems
         const { gemBalance } = get()
         if (gemBalance < amount) return false
         set({ gemBalance: gemBalance - amount })

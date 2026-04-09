@@ -4,10 +4,13 @@ import { supabase } from '../lib/supabase'
 import { loadGameState, flushPendingSave, saveGameState } from '../lib/gameStateSync'
 import { useStore } from '../store/useStore'
 
+const MASTER_EMAIL = 'nicholas@zentry.com'
+
 interface AuthContextValue {
   session: Session | null
   user: User | null
   loading: boolean
+  isMaster: boolean
   signInWithGoogle: () => Promise<void>
   signOut: () => Promise<void>
 }
@@ -44,6 +47,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('chaptr-v2-uid', data.session.user.id)
         // Load cloud state for this user
         await hydrateFromCloud(data.session.user.id)
+        // Enable master mode for admin account
+        useStore.getState().setMasterMode(data.session.user.email === MASTER_EMAIL)
       }
       setSession(data.session)
       setLoading(false)
@@ -56,10 +61,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           localStorage.removeItem('chaptr-v2-story')
           localStorage.setItem('chaptr-v2-uid', session.user.id)
           await hydrateFromCloud(session.user.id)
+          useStore.getState().setMasterMode(session.user.email === MASTER_EMAIL)
           window.location.reload()
           return
         }
         localStorage.setItem('chaptr-v2-uid', session.user.id)
+        useStore.getState().setMasterMode(session.user.email === MASTER_EMAIL)
+      } else {
+        useStore.getState().setMasterMode(false)
       }
       setSession(session)
     })
@@ -110,7 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ session, user: session?.user ?? null, loading, signInWithGoogle, signOut }}>
+    <AuthContext.Provider value={{ session, user: session?.user ?? null, loading, isMaster: session?.user?.email === MASTER_EMAIL, signInWithGoogle, signOut }}>
       {children}
     </AuthContext.Provider>
   )

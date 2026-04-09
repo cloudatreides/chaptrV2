@@ -31,7 +31,8 @@ function ChoiceCard({ option, index, onSelect, image, hasBackdrop, disabled, isS
   const accentLight = isPremium ? ACCENT_PREMIUM_LIGHT : (ACCENT_LIGHT[index] ?? ACCENT_LIGHT[0])
 
   const gemBalance = useStore((s) => s.gemBalance)
-  const canAfford = !isPremium || (gemBalance >= (option.gemCost ?? 0))
+  const masterMode = useStore((s) => s.masterMode)
+  const canAfford = masterMode || !isPremium || (gemBalance >= (option.gemCost ?? 0))
   const [showInsufficient, setShowInsufficient] = useState(false)
 
   const handleClick = () => {

@@ -12,9 +12,10 @@ interface Props {
 
 export function ChoiceButton({ text, gemCost, index, selectedIndex, disabled, onSelect }: Props) {
   const gemBalance = useStore((s) => s.gemBalance)
+  const masterMode = useStore((s) => s.masterMode)
   const isSelected = selectedIndex === index
   const isDimmed = selectedIndex !== null && !isSelected
-  const canAfford = !gemCost || gemBalance >= gemCost
+  const canAfford = masterMode || !gemCost || gemBalance >= gemCost
   const isLocked = !!gemCost && !canAfford
 
   let cls = 'choice-btn'
