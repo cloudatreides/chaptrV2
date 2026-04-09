@@ -12,7 +12,7 @@ import { ChatActionTray } from '../components/ChatActionTray'
 import { ChatActionBubble } from '../components/ChatActionBubble'
 import { ChatReactionImage } from '../components/ChatReactionImage'
 import { useChatActions } from '../hooks/useChatActions'
-import { parseActionFromMessage, type ChatAction } from '../data/chatActions'
+import { parseActionFromMessage, type ChatAction, getDareOptions } from '../data/chatActions'
 import type { CastChatMessage } from '../store/useStore'
 
 export function CastChatPage() {
@@ -65,6 +65,10 @@ export function CastChatPage() {
     universeId: castMember?.universeId ?? null,
     characterMemories: allMemoriesForHook,
   })
+
+  // Dare picker state
+  const [dareOptions, setDareOptions] = useState<string[] | null>(null)
+  const [pendingDareAction, setPendingDareAction] = useState<ChatAction | null>(null)
 
   // Local map to track action data for rendered messages
 
@@ -186,6 +190,15 @@ export function CastChatPage() {
 
   const handleAction = useCallback(async (action: ChatAction) => {
     if (!characterId || !charData || isStreaming) return
+
+    // Dare: show picker instead of firing immediately
+    if (action.id === 'dare') {
+      const genre = getUniverseGenre(castMember?.universeId ?? null)
+      setDareOptions(getDareOptions(genre))
+      setPendingDareAction(action)
+      return
+    }
+
     const result = executeAction(action)
     if (!result) return
 
@@ -209,7 +222,7 @@ export function CastChatPage() {
     let msgContent = `[ACTION: ${result.label}]`
     if (letterContent) msgContent += `\n${letterContent}`
     if (result.dareText) msgContent += `\nI dare you to: ${result.dareText}`
-    if (result.memeText) msgContent += `\n"${result.memeText}"`
+    if (result.jokeText) msgContent += `\n"${result.jokeText}"`
     const userMsg: CastChatMessage = { role: 'user', content: msgContent, timestamp: Date.now() }
     addCastChatMessage(characterId, userMsg)
 
@@ -315,6 +328,63 @@ export function CastChatPage() {
     }
   }, [characterId, charData, isStreaming, messages, score, exchangeCount, playerChar, castMember, addCastChatMessage, setIsStreaming, updateGlobalAffinity, executeAction, allMemoriesForHook])
 
+  // Handle dare selection from picker
+  const handleDareSelect = useCallback(async (chosenDare: string) => {
+    if (!pendingDareAction || !characterId || !charData) return
+    setDareOptions(null)
+
+    const result = executeAction(pendingDareAction)
+    setPendingDareAction(null)
+    if (!result) return
+
+    // Override with chosen dare
+    result.dareText = chosenDare
+    result.promptInjection = `dares you to: "${chosenDare}". You MUST attempt the dare in your response. React in character — are you nervous, excited, embarrassed? Then actually DO IT. Perform the dare. Don't refuse or deflect. Commit to it fully, in your own style.`
+
+    // Fire the same flow as handleAction (from the action message onward)
+    let msgContent = `[ACTION: ${result.label}]\nI dare you to: ${chosenDare}`
+    const userMsg: CastChatMessage = { role: 'user', content: msgContent, timestamp: Date.now() }
+    addCastChatMessage(characterId, userMsg)
+
+    setIsStreaming(true)
+    setStreamingContent('')
+    const abortController = new AbortController()
+    abortRef.current = abortController
+    const recentMessages = [...messages, userMsg].slice(-20).map((m) => ({
+      role: m.role, content: m.content, characterId, timestamp: m.timestamp,
+    }))
+
+    try {
+      let fullReply = ''
+      const stream = streamChatReply({
+        characterId, messages: recentMessages,
+        storyContext: `This is a persistent chat outside of any story. The protagonist is chatting freely with ${charData.name}.\n\nACTION CONTEXT: The protagonist just ${result.promptInjection}\nThis is a deliberate gesture — react to it naturally and in character. Your reaction should reflect your personality and current relationship tier.\nDo NOT include an [AFFINITY] tag — the affinity change is handled separately.`,
+        exchangeNumber: exchangeCount + 1, maxExchanges: 999,
+        characterState: { junhoTrust: score }, bio: playerChar?.bio ?? null,
+        loveInterest: null, universeId: castMember?.universeId ?? null,
+        signal: abortController.signal, sceneContext: undefined,
+      })
+      for await (const chunk of stream) {
+        fullReply += chunk
+        const displayText = fullReply.replace(/\{[^{}]*"trustDelta"[^{}]*\}?/g, '').replace(/\{[^{}]*"trustDelta"[^{}]*/g, '').replace(/\n?\[AFFINITY:[+-]?\d*\]?\s*$/g, '').trimEnd()
+        setStreamingContent(displayText)
+      }
+      if (fullReply.trim()) {
+        const { content: cleanReply, delta } = parseAffinityDelta(fullReply)
+        const charMsg: CastChatMessage = { role: 'character', content: cleanReply, timestamp: Date.now() }
+        addCastChatMessage(characterId, charMsg)
+        if (delta !== 0 || result.affinityBoost > 0) {
+          updateGlobalAffinity(characterId, result.affinityBoost + delta)
+        }
+      }
+    } catch (err: any) {
+      if (err.name !== 'AbortError') console.error('Dare action error:', err)
+    } finally {
+      setIsStreaming(false)
+      setStreamingContent('')
+    }
+  }, [pendingDareAction, characterId, charData, messages, score, exchangeCount, playerChar, castMember, addCastChatMessage, setIsStreaming, updateGlobalAffinity, executeAction])
+
   // Collect character memories for sidebar
   const allMemories = (() => {
     const storyProg = useStore.getState().storyProgress
@@ -386,7 +456,7 @@ export function CastChatPage() {
                     }}
                   >
                     <span className="text-[10px] not-italic font-medium block mb-1.5" style={{ color: 'rgba(200,75,158,0.6)' }}>
-                      💌 Your letter
+                      {ad.userText.startsWith('I dare you to:') ? '🎲 Your dare' : ad.userText.startsWith('"') ? '😂 Your meme' : '💌 Your letter'}
                     </span>
                     {ad.userText}
                   </div>
@@ -449,6 +519,37 @@ export function CastChatPage() {
 
   const chatInput = (
     <div className="shrink-0 px-5 pb-5 pt-2 safe-bottom">
+      <AnimatePresence>
+        {dareOptions && (
+          <motion.div
+            className="mb-3 flex flex-col gap-2"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+          >
+            <p className="text-white/60 text-xs font-medium">🎲 Pick a dare:</p>
+            {dareOptions.map((dare) => (
+              <button
+                key={dare}
+                onClick={() => handleDareSelect(dare)}
+                className="cursor-pointer w-full text-left px-4 py-2.5 rounded-xl text-sm text-white/85 transition-all hover:brightness-125"
+                style={{
+                  background: 'rgba(96, 165, 250, 0.08)',
+                  border: '1px solid rgba(96, 165, 250, 0.15)',
+                }}
+              >
+                {dare}
+              </button>
+            ))}
+            <button
+              onClick={() => { setDareOptions(null); setPendingDareAction(null) }}
+              className="cursor-pointer text-white/30 text-xs hover:text-white/50 transition-colors"
+            >
+              Cancel
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <form
         onSubmit={(e) => { e.preventDefault(); handleSend() }}
         className="relative flex items-center gap-3 rounded-3xl px-4 py-2.5"
@@ -573,7 +674,7 @@ export function CastChatPage() {
           </div>
 
           {/* Right — Profile sidebar */}
-          <div className="w-[300px] shrink-0 p-6 flex flex-col gap-6 overflow-y-auto">
+          <div className="w-[300px] shrink-0 p-6 flex flex-col gap-6 overflow-y-auto sticky top-0 max-h-screen">
             {/* Avatar + name */}
             <div className="flex flex-col items-center gap-3">
               <div className="w-24 h-24 rounded-full overflow-hidden" style={{ border: `3px solid ${tier.color}`, background: '#1A1624' }}>

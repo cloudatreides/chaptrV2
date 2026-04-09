@@ -39,14 +39,14 @@ export const CHAT_ACTIONS: ChatAction[] = [
     promptInjection: 'poked you playfully. React naturally — are you amused, annoyed, or do you poke back?',
   },
   {
-    id: 'send-meme',
-    label: 'Send a Meme',
+    id: 'tell-joke',
+    label: 'Tell a Joke',
     emoji: '😂',
     category: 'playful',
     gemCost: 0,
     affinityBoost: 2,
     minTier: 1,
-    promptInjection: 'sent you a funny meme. React in character — do you find it hilarious, cringe, or roast them for their taste?',
+    promptInjection: 'told you a joke. React in character — do you find it hilarious, cringe, or roast them for their humor?',
   },
   {
     id: 'dare',
@@ -182,7 +182,7 @@ export const CHAT_ACTIONS: ChatAction[] = [
 
 export const ACTION_DESCRIPTIONS: Record<string, string> = {
   'poke': 'A playful nudge to get their attention',
-  'send-meme': 'Share something funny and see their reaction',
+  'tell-joke': 'Tell a joke and see their reaction',
   'dare': 'Start a truth or dare — they\'ll dare you back',
   'coffee': 'Buy them a coffee — a casual, thoughtful gesture',
   'mystery-box': 'Send a surprise gift — could be anything!',
@@ -294,73 +294,73 @@ export function buildReactionImagePrompt(
   return `${base}, ${modifier}, clean soft-focus background, high quality anime art style`
 }
 
-// ─── Meme Pool ───
-// Genre-aware meme descriptions that get picked randomly and shown to both player and character.
+// ─── Joke Pool ───
+// Genre-aware jokes that get picked randomly and shown to both player and character.
 
-const MEME_POOL: Record<string, string[]> = {
+const JOKE_POOL: Record<string, string[]> = {
   ROMANCE: [
-    'distracted boyfriend meme but it\'s you staring at snacks instead of studying',
-    'that one SpongeBob meme captioned "me pretending to be fine after 3 hours of sleep"',
-    'the "this is fine" dog but the fire is just a pile of unread messages',
-    'drake meme — no to "going outside" / yes to "one more episode"',
-    'the awkward monkey puppet looking sideways',
-    'a cat sitting at a dinner table like a disappointed parent',
-    'the "guess I\'ll die" shrug guy but it\'s about doing laundry',
-    '"how it started vs how it\'s going" — both photos are you on the couch',
-    'that blinking white guy meme but it\'s about realizing it\'s already midnight',
-    'the woman yelling at a cat at a dinner table',
+    'Are you a parking ticket? Because you\'ve got "fine" written all over you.',
+    'Do you have a map? I keep getting lost in your eyes.',
+    'I\'d tell you a chemistry joke, but I\'m afraid we wouldn\'t get a reaction.',
+    'Why did the phone break up with the WiFi? There was no connection.',
+    'I told my crush I liked her. She said "I like you too." I said "No, I LIKE like you." She said "I LIKE LIKE you too." We\'re still not dating.',
+    'What do you call two birds in love? Tweet-hearts.',
+    'I asked my date to meet me at the gym. She didn\'t show up. I guess we\'re not working out.',
+    'Why don\'t scientists trust atoms? Because they make up everything — kind of like my excuses to text you.',
+    'What did the blanket say to the bed? I\'ve got you covered.',
+    'My love language is acts of snackage.',
   ],
   THRILLER: [
-    'the "I\'m in danger" Ralph Wiggum meme but he\'s in a briefing room',
-    '"we\'ve been trying to reach you about your extended warranty" but it\'s a coded transmission',
-    'the conspiracy theory guy with red string and a corkboard',
-    'two Spider-Men pointing at each other — both are double agents',
-    '"understandable, have a great day" but to an interrogation suspect',
-    'the "this is fine" dog but the room is a compromised safe house',
-    '"you guys are getting paid?" but it\'s about field agent hazard pay',
-    'a dog in a lab coat captioned "I have no idea what I\'m doing" — at a weapons lab',
+    'Why did the spy break up with the internet? Too many leaks.',
+    'What\'s a secret agent\'s favorite type of shoe? Sneakers.',
+    'I\'d tell you a classified joke, but then I\'d have to debrief you.',
+    'Why don\'t spies ever get cold? They\'re always under cover.',
+    'What did the surveillance camera say? I\'ve got my eye on you.',
+    'How do secret agents communicate? Through covert-sation.',
+    'Why was the interrogation so boring? They kept going in circles.',
+    'I know a joke about a double agent, but it works both ways.',
   ],
   HORROR: [
-    '"guess I\'ll die" but in a haunted house',
-    'the "this is fine" dog but the fire is supernatural',
-    'Scooby Doo unmasking meme — the monster was anxiety all along',
-    '"first time?" meme but at a séance',
-    'the astronaut "always has been" meme but about the house being haunted',
-    '"we don\'t do that here" Black Panther meme but about going into the basement alone',
-    'that cat being held like a baby, captioned "me after hearing literally any noise at 3am"',
+    'What do ghosts serve for dessert? I scream.',
+    'Why don\'t skeletons fight each other? They don\'t have the guts.',
+    'What\'s a ghost\'s favorite room? The living room.',
+    'Why did the zombie go to school? He wanted to improve his dead-ucation.',
+    'What do you call a witch at the beach? A sand-witch.',
+    'Why don\'t vampires have more friends? Because they\'re a pain in the neck.',
+    'What\'s a demon\'s favorite meal? Deviled eggs.',
   ],
   MYSTERY: [
-    'the conspiracy theory guy with red string connecting clues',
-    'Leonardo DiCaprio pointing at the TV — he spotted the clue',
-    '"it\'s the same picture" corporate meme but it\'s two suspects',
-    'the "math lady" meme trying to figure out the timeline',
-    '"always has been" astronaut meme but about the butler being suspicious',
-    '"am I a joke to you?" but it\'s the obvious clue everyone missed',
-    'Charlie Day conspiracy board from Always Sunny',
+    'Why did the detective stay in bed? He was undercover.',
+    'What do you call a fake noodle? An impasta — the most delicious suspect.',
+    'I tried to write a mystery novel but couldn\'t figure out the ending. Still working on the case.',
+    'Why was the math book so good at solving crimes? It had all the problems figured out.',
+    'What do you call a detective who solves cases accidentally? Sheer-lock Holmes.',
+    'The butler didn\'t do it. He was too busy butling.',
+    'Why are detectives bad at football? They always investigate instead of scoring.',
   ],
   FANTASY: [
-    '"one does not simply walk into Mordor" but it\'s about the enchanted forest',
-    'the "this is fine" dog but the fire is magical',
-    '"you shall not pass" but it\'s a locked enchanted door',
-    'surprised Pikachu face but about a prophecy coming true',
-    '"I\'m something of a wizard myself" Willem Dafoe meme',
-    '"we\'ve had one breakfast, yes — but what about second breakfast?"',
-    'the "guess I\'ll die" shrug but facing a dragon',
+    'Why did the wizard fail at school? He couldn\'t spell.',
+    'What do you call a lazy dragon? A drag-on.',
+    'Why don\'t elves use social media? They prefer the elf-ernet.',
+    'What\'s a knight\'s favorite fish? A swordfish.',
+    'Why was the potion maker always calm? She knew how to keep her cool-dron.',
+    'How does a wizard ask someone out? "Want to go on a magic carpet date?"',
+    'Why did the orc go to therapy? Too much internal rage.',
   ],
   ADVENTURE: [
-    '"the floor is lava" meme but it\'s literally lava',
-    '"this is fine" dog but the ship is sinking',
-    '"road work ahead? yeah I sure hope it does" but about an ancient map',
-    'Indiana Jones running from the boulder but it\'s a Monday',
-    '"you guys are getting paid?" but about treasure hunting',
-    'surprised Pikachu but about the treasure being friendship all along',
-    '"that sign can\'t stop me because I can\'t read" but it\'s an ancient warning',
+    'Why did the pirate go to school? To improve his arrrticulation.',
+    'What\'s a treasure hunter\'s favorite letter? Arrrr... no wait, it\'s the C.',
+    'I tried to climb a mountain once. It was an uphill battle.',
+    'Why don\'t explorers ever get lost? They always find a way to make it an adventure.',
+    'What did the compass say to the map? "You\'re going in the right direction."',
+    'Why was the adventurer bad at cards? He always went all in.',
+    'What do you call a dinosaur that explores? A Veloci-tracker.',
   ],
 }
 
-/** Pick a random meme description for a genre */
-export function getRandomMeme(genre: string): string {
-  const pool = MEME_POOL[genre] ?? MEME_POOL.ROMANCE
+/** Pick a random joke for a genre */
+export function getRandomJoke(genre: string): string {
+  const pool = JOKE_POOL[genre] ?? JOKE_POOL.ROMANCE
   return pool[Math.floor(Math.random() * pool.length)]
 }
 
@@ -432,6 +432,17 @@ const DARE_POOL: Record<string, string[]> = {
 export function getRandomDare(genre: string): string {
   const pool = DARE_POOL[genre] ?? DARE_POOL.ROMANCE
   return pool[Math.floor(Math.random() * pool.length)]
+}
+
+/** Get 3 random dare options for the picker */
+export function getDareOptions(genre: string): string[] {
+  const pool = [...(DARE_POOL[genre] ?? DARE_POOL.ROMANCE)]
+  const options: string[] = []
+  while (options.length < 3 && pool.length > 0) {
+    const idx = Math.floor(Math.random() * pool.length)
+    options.push(pool.splice(idx, 1)[0])
+  }
+  return options
 }
 
 /** Category display info */
