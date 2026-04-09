@@ -249,7 +249,7 @@ export function AmbientPingModal({ ping, onDismiss }: Props) {
                   onChange={e => setInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleSend()}
                   placeholder="Reply..."
-                  className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-accent/50 transition-colors"
+                  className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm placeholder:text-white/35 focus:outline-none focus:border-accent/50 transition-colors"
                   disabled={isTyping}
                   autoFocus
                   enterKeyHint="send"

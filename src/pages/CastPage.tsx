@@ -495,7 +495,7 @@ export function CastPage() {
                           <p className="text-white/60 font-semibold text-sm">{cast.name}</p>
                           <p className="text-[11px] mt-0.5" style={{ color: `${uniColor}77` }}>{cast.universeLabel}</p>
                         </div>
-                        <Lock size={14} className="text-white/15 shrink-0" />
+                        <Lock size={14} className="text-white/30 shrink-0" />
                       </button>
 
                       {/* Hover popover */}
@@ -550,7 +550,7 @@ export function CastPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-white font-semibold text-sm">{gc.members.map((m) => m.name).join(', ')}</p>
                       <p className="text-white/30 text-xs mb-1">{gc.universe}</p>
-                      <p className="text-white/20 text-xs italic truncate">
+                      <p className="text-white/35 text-xs italic truncate">
                         {gc.speakerName}: "{gc.lastMsg?.content.slice(0, 45)}..."
                       </p>
                     </div>

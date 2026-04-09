@@ -382,8 +382,8 @@ export function CastGroupChatPage() {
           <div className="flex -space-x-2">
             {castMembers.map((cm) => <CharAvatar key={cm.id} charId={cm.id} size="w-10 h-10" />)}
           </div>
-          <p className="text-white/20 text-sm">Start a group chat with {castMembers.map((cm) => cm.name).join(' & ')}</p>
-          <p className="text-white/10 text-xs">Characters talk to each other too</p>
+          <p className="text-white/50 text-sm">Start a group chat with {castMembers.map((cm) => cm.name).join(' & ')}</p>
+          <p className="text-white/30 text-xs">Characters talk to each other too</p>
         </div>
       )}
 
@@ -558,7 +558,7 @@ export function CastGroupChatPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Say something to the group..."
-              className="flex-1 bg-transparent text-white text-base placeholder:text-white/20 outline-none"
+              className="flex-1 bg-transparent text-white text-base placeholder:text-white/35 outline-none"
               disabled={isTyping}
             />
             <button
@@ -570,7 +570,7 @@ export function CastGroupChatPage() {
               <Send size={16} className="text-white" />
             </button>
           </form>
-          <p className="text-white/15 text-[10px] text-center mt-2">Group chat · Characters react to each other</p>
+          <p className="text-white/30 text-[10px] text-center mt-2">Group chat · Characters react to each other</p>
         </div>
       </div>
 
@@ -642,7 +642,7 @@ export function CastGroupChatPage() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Say something to the group..."
-                  className="flex-1 bg-transparent text-white text-base placeholder:text-white/20 outline-none"
+                  className="flex-1 bg-transparent text-white text-base placeholder:text-white/35 outline-none"
                   disabled={isTyping}
                 />
                 <button
@@ -654,7 +654,7 @@ export function CastGroupChatPage() {
                   <Send size={16} className="text-white" />
                 </button>
               </form>
-              <p className="text-white/15 text-[10px] text-center mt-2">Group chat · Characters react to each other</p>
+              <p className="text-white/30 text-[10px] text-center mt-2">Group chat · Characters react to each other</p>
             </div>
           </div>
 
@@ -727,7 +727,7 @@ export function CastGroupChatPage() {
 
             {/* Stats */}
             <div className="mt-auto pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-              <div className="flex justify-between text-white/20 text-[10px]">
+              <div className="flex justify-between text-white/35 text-[10px]">
                 <span>{messages.length} messages</span>
                 <span>{exchangeCount} exchanges</span>
               </div>

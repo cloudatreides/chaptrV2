@@ -74,7 +74,7 @@ export function AlbumPage() {
       </div>
       <div>
         <p className="text-white/40 text-sm font-medium mb-1">{momentConfig.emptyLabel}</p>
-        <p className="text-white/20 text-xs leading-relaxed max-w-[260px]">
+        <p className="text-white/35 text-xs leading-relaxed max-w-[260px]">
           {momentConfig.emptyDescription}
         </p>
       </div>
@@ -169,7 +169,7 @@ export function AlbumPage() {
                     value={noteDraft}
                     onChange={(e) => setNoteDraft(e.target.value)}
                     placeholder={momentConfig.notePrompt}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-white/20 outline-none focus:border-accent/30 resize-none"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-white/35 outline-none focus:border-accent/30 resize-none"
                     rows={3}
                     autoFocus
                   />
@@ -197,7 +197,7 @@ export function AlbumPage() {
                   {selectedMoment.note ? (
                     <p className="text-white/60 text-sm italic">"{selectedMoment.note}"</p>
                   ) : (
-                    <p className="text-white/20 text-sm">{momentConfig.notePrompt}</p>
+                    <p className="text-white/35 text-sm">{momentConfig.notePrompt}</p>
                   )}
                 </button>
               )}

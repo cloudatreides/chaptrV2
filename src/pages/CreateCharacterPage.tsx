@@ -285,7 +285,7 @@ export function CreateCharacterPage() {
               <RefreshCw size={12} />
               Show more
             </button>
-            <span className="text-white/10">|</span>
+            <span className="text-white/25">|</span>
             <button className="flex items-center gap-2 text-accent text-xs font-medium" onClick={() => setIsCustom(!isCustom)}>
               <Sparkles size={12} />
               {isCustom ? 'Pick a preset instead' : 'Write your own'}

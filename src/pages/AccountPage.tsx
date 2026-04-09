@@ -245,12 +245,12 @@ export function AccountPage() {
                     animate={{ scale: [1, 1.4, 1.4], opacity: [0.3, 0, 0] }}
                     transition={{ duration: 2.5, repeat: Infinity, ease: 'easeOut', delay: 0.8 }}
                   />
-                  <Brain size={24} className="text-white/20" />
+                  <Brain size={24} className="text-white/35" />
                 </div>
                 <p className="text-white/30 text-sm font-medium" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                   Memory Building In Progress
                 </p>
-                <p className="text-white/15 text-xs text-center max-w-[240px] leading-relaxed">
+                <p className="text-white/30 text-xs text-center max-w-[240px] leading-relaxed">
                   Chat with characters and share things about yourself. They'll remember.
                 </p>
               </div>
