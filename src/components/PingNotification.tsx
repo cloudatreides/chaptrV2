@@ -55,9 +55,9 @@ export function PingNotification({ ping, onDismiss }: Props) {
       universeId: selectedUniverse,
       affinityScore,
       genre: getUniverseGenre(selectedUniverse),
-    }).then(msg => {
-      setPingMessage(msg)
-      setMessages([{ role: 'character', content: msg }])
+    }).then(result => {
+      setPingMessage(result.content)
+      setMessages([{ role: 'character', content: result.content }])
       setIsGenerating(false)
     }).catch(() => {
       const fallback = ping.staticMessage ?? '...'

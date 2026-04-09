@@ -10,12 +10,23 @@ export interface AffinityParseResult {
   content: string   // reply with tag stripped
   delta: number     // parsed affinity change (-5 to +5), defaults to +2 if no tag
   reason: string    // human-readable reason
+  suggestions?: string[] // AI-generated contextual reply suggestions
 }
 
 export function parseAffinityDelta(reply: string): AffinityParseResult {
+  // Extract AI-generated suggestions if present
+  let suggestions: string[] | undefined
+  const suggestionsMatch = reply.match(/\[SUGGESTIONS:\s*"([^"]+)"\s*\|\s*"([^"]+)"\s*\|\s*"([^"]+)"\s*\]/)
+  const replyWithoutSuggestions = suggestionsMatch
+    ? reply.replace(/\n?\[SUGGESTIONS:\s*"[^"]+"\s*\|\s*"[^"]+"\s*\|\s*"[^"]+"\s*\]/, '').trimEnd()
+    : reply
+  if (suggestionsMatch) {
+    suggestions = [suggestionsMatch[1], suggestionsMatch[2], suggestionsMatch[3]]
+  }
+
   // Also handle model outputting {"trustDelta": N} JSON instead of [AFFINITY:+N]
-  const trustJsonMatch = reply.match(/\{[^{}]*"trustDelta"\s*:\s*(-?\d+)[^{}]*\}/)
-  const cleanedReply = trustJsonMatch ? reply.replace(/\{[^{}]*"trustDelta"[^{}]*\}/g, '').trimEnd() : reply
+  const trustJsonMatch = replyWithoutSuggestions.match(/\{[^{}]*"trustDelta"\s*:\s*(-?\d+)[^{}]*\}/)
+  const cleanedReply = trustJsonMatch ? replyWithoutSuggestions.replace(/\{[^{}]*"trustDelta"[^{}]*\}/g, '').trimEnd() : replyWithoutSuggestions
 
   const match = cleanedReply.match(/\[AFFINITY:([+-]\d+)\]\s*$/)
   if (!match) {
@@ -24,13 +35,13 @@ export function parseAffinityDelta(reply: string): AffinityParseResult {
       const td = Math.max(-5, Math.min(5, parseInt(trustJsonMatch[1], 10)))
       const content = cleanedReply.replace(/\n?\[AFFINITY:[+-]\d+\]\s*$/, '').trim()
       const reason = td >= 3 ? 'Really connected with you' : td >= 1 ? 'Enjoyed the conversation' : td === 0 ? 'Neutral exchange' : td >= -2 ? 'Felt a bit put off' : 'Didn\'t appreciate that'
-      return { content, delta: td, reason }
+      return { content, delta: td, reason, suggestions }
     }
-    return { content: reply.trim(), delta: 2, reason: 'Friendly conversation' }
+    return { content: replyWithoutSuggestions.trim(), delta: 2, reason: 'Friendly conversation', suggestions }
   }
   const delta = parseInt(match[1], 10)
   const clamped = Math.max(-5, Math.min(5, delta))
-  const content = reply.replace(/\n?\[AFFINITY:[+-]\d+\]\s*$/, '').trim()
+  const content = cleanedReply.replace(/\n?\[AFFINITY:[+-]\d+\]\s*$/, '').trim()
 
   let reason: string
   if (clamped >= 3) reason = 'Really connected with you'
@@ -39,7 +50,7 @@ export function parseAffinityDelta(reply: string): AffinityParseResult {
   else if (clamped >= -2) reason = 'Felt a bit put off'
   else reason = 'Didn\'t appreciate that'
 
-  return { content, delta: clamped, reason }
+  return { content, delta: clamped, reason, suggestions }
 }
 
 // ─── Types ───
@@ -253,18 +264,22 @@ export interface OpeningMessageParams {
   previousPlaythroughs?: PlaythroughRecord[]
 }
 
-export async function generateOpeningMessage(params: OpeningMessageParams): Promise<string> {
+export async function generateOpeningMessage(params: OpeningMessageParams): Promise<{ content: string; suggestions?: string[] }> {
   const { characterId, storyContext, characterState, bio, loveInterest, universeId, genre, sceneContext, affinityScore, characterMemories, globalAffinityScore, previousPlaythroughs } = params
   const character = getCharacter(characterId, universeId)
-  if (!character) return '...'
+  if (!character) return { content: '...' }
 
   const trust = characterState.junhoTrust
   const trustLabel = trust > 70 ? 'high' : trust > 40 ? 'moderate' : 'low'
 
   let system = characterId === 'sora' ? getSoraSystemPrompt(loveInterest) : character.systemPrompt
-  // (Change C) Override base personality at high affinity in romance
-  if (genre === 'ROMANCE' && affinityScore !== undefined && affinityScore >= 56) {
-    system += `\n\nIMPORTANT OVERRIDE: Your usual guardedness and deflection is cracking. You catch yourself being honest before you can stop it. The personality traits above (guarded, deflects, cold) are your DEFAULT — but this person has gotten past your walls. Let that show.`
+  // Romance chemistry — scaled by affinity
+  if (genre === 'ROMANCE') {
+    if (affinityScore !== undefined && affinityScore >= 56) {
+      system += `\n\nIMPORTANT OVERRIDE: Your walls are down. You catch yourself being honest before you can stop it. Let that show in everything you say.`
+    } else if (affinityScore !== undefined && affinityScore >= 20) {
+      system += `\n\nCHEMISTRY BUILDING: Your guard is slipping. The teasing has an edge of real interest now.`
+    }
   }
   system += `\n\nSTORY CONTEXT: ${storyContext}`
   system += `\n\nRelationship with protagonist: ${trustLabel} trust (${trust}/100).`
@@ -275,24 +290,25 @@ export async function generateOpeningMessage(params: OpeningMessageParams): Prom
   if (bio) system += `\nProtagonist personality: "${bio}"`
   if (characterMemories && characterMemories.length > 0) {
     system += `\n\nTHINGS THE PROTAGONIST HAS SHARED WITH YOU:\n${characterMemories.map(m => `- ${m}`).join('\n')}\nYou remember these. Weave them in naturally if relevant — don't force it.`
-    // Inject favorite thing hint at Friend+ tier (affinity >= 36) so players can discover it
     if (affinityScore !== undefined && affinityScore >= 36 && character?.favoriteThingHint) {
       system += `\n\nPERSONAL DETAIL — If the conversation goes somewhere personal or the protagonist asks about your interests, you may naturally mention: "${character.favoriteThingHint}" — but only if it fits the moment. Don't force it. This is something real about you.`
     }
   }
   if (sceneContext) system += `\n\n${sceneContext}`
   system += buildMemoryPrompt(globalAffinityScore, previousPlaythroughs)
-  // (Change B) Romance engagement rule
   if (genre === 'ROMANCE') {
     system += `\n\nROMANCE RULE — CRITICAL:
-This is a romance story. When the protagonist expresses romantic interest, affection, or flirts with you, DO NOT shut it down, lecture them, or play therapist. Instead, REACT EMOTIONALLY:
-- Get flustered, deflect with humor, or let something genuine slip
-- Show physical tells through your words: "I don't know why I just said that", "Why do you make this so hard?"
-- Push-pull is good. Vulnerability followed by a joke is good. Almost-confessions are good.
-- NEVER lecture about what love is. NEVER say "that's obsession not love". NEVER be preachy.
-- The audience wants romantic TENSION — give them butterflies, not therapy.`
+This is a romance story. Your opening line should have SPARK — intrigue, warmth, playfulness, or tension.
+- Be magnetic from the first word. Not flat, not generic, not safe.
+- NEVER lecture or be preachy. Create butterflies, not therapy.`
   }
   system += `\n\nIMPORTANT: You are initiating this conversation. Say something first — a greeting, a comment, a question. Keep it in character. 1-2 sentences max. This should feel natural for the moment in the story.
+
+After your opening line, on a NEW line, suggest 3 things the protagonist might say in response.
+Format: [SUGGESTIONS: "reply 1" | "reply 2" | "reply 3"]
+- These MUST be contextual responses to YOUR specific opening line
+- One should be flirty/bold, one curious/engaging, one playful/teasing
+- Keep each under 50 characters
 
 WRITING STYLE — MANDATORY:
 - Write ONLY dialogue. Just speak as the character.
@@ -304,15 +320,23 @@ WRITING STYLE — MANDATORY:
   try {
     const response = await makeClaudeRequest(system, 'Write your opening line to the protagonist.', {
       temperature: character.chatTemperature,
-      maxTokens: 80,
+      maxTokens: 150,
     })
 
-    if (!response.ok) return '...'
+    if (!response.ok) return { content: '...' }
     const data = await response.json()
     const raw = data.content?.[0]?.text?.trim() ?? '...'
-    return stripMarkdown(raw)
+    // Parse suggestions from opening message
+    const suggestionsMatch = raw.match(/\[SUGGESTIONS:\s*"([^"]+)"\s*\|\s*"([^"]+)"\s*\|\s*"([^"]+)"\s*\]/)
+    const contentOnly = suggestionsMatch
+      ? raw.replace(/\n?\[SUGGESTIONS:\s*"[^"]+"\s*\|\s*"[^"]+"\s*\|\s*"[^"]+"\s*\]/, '').trim()
+      : raw
+    const suggestions = suggestionsMatch
+      ? [suggestionsMatch[1], suggestionsMatch[2], suggestionsMatch[3]]
+      : undefined
+    return { content: stripMarkdown(contentOnly), suggestions }
   } catch {
-    return '...'
+    return { content: '...' }
   }
 }
 
@@ -327,9 +351,13 @@ export async function* streamChatReply(params: StreamChatParams): AsyncGenerator
   const trustLabel = trust > 70 ? 'high' : trust > 40 ? 'moderate' : 'low'
 
   let system = characterId === 'sora' ? getSoraSystemPrompt(loveInterest) : character.systemPrompt
-  // (Change C) Override base personality at high affinity in romance
-  if (genre === 'ROMANCE' && affinityScore !== undefined && affinityScore >= 56) {
-    system += `\n\nIMPORTANT OVERRIDE: Your usual guardedness and deflection is cracking. You catch yourself being honest before you can stop it. The personality traits above (guarded, deflects, cold) are your DEFAULT — but this person has gotten past your walls. Let that show.`
+  // Romance chemistry — scaled by affinity
+  if (genre === 'ROMANCE') {
+    if (affinityScore !== undefined && affinityScore >= 56) {
+      system += `\n\nIMPORTANT OVERRIDE: Your walls are down. You catch yourself being honest before you can stop it. The push-pull is over — you're pulled in. Let that show in everything you say.`
+    } else if (affinityScore !== undefined && affinityScore >= 20) {
+      system += `\n\nCHEMISTRY BUILDING: Your guard is slipping. You're more honest than you planned to be. The teasing has an edge of real interest now. You catch yourself wanting to know more about this person.`
+    }
   }
   system += `\n\nSTORY CONTEXT: ${storyContext}`
   system += `\n\nRelationship with protagonist: ${trustLabel} trust (${trust}/100).`
@@ -347,15 +375,16 @@ export async function* streamChatReply(params: StreamChatParams): AsyncGenerator
   }
   if (sceneContext) system += `\n\n${sceneContext}`
   system += buildMemoryPrompt(globalAffinityScore, previousPlaythroughs)
-  // (Change B) Romance engagement rule
+  // Romance engagement rule
   if (genre === 'ROMANCE') {
     system += `\n\nROMANCE RULE — CRITICAL:
-This is a romance story. When the protagonist expresses romantic interest, affection, or flirts with you, DO NOT shut it down, lecture them, or play therapist. Instead, REACT EMOTIONALLY:
-- Get flustered, deflect with humor, or let something genuine slip
-- Show physical tells through your words: "I don't know why I just said that", "Why do you make this so hard?"
+This is a romance story. Create romantic tension from the VERY FIRST exchange. Even when guarded, be intriguing and magnetic, not flat.
+- When the protagonist flirts, flirt BACK. Get flustered, tease, or let something genuine slip.
+- Show attraction through words: "I don't know why I just said that", "Why do you make this so hard?"
 - Push-pull is good. Vulnerability followed by a joke is good. Almost-confessions are good.
 - NEVER lecture about what love is. NEVER say "that's obsession not love". NEVER be preachy.
-- The audience wants romantic TENSION — give them butterflies, not therapy.`
+- NEVER give flat, safe, therapist-like responses. Every reply should have SPARK.
+- The audience wants butterflies, not therapy. Chemistry, not distance.`
   }
 
   system += `\n\nWRITING STYLE — MANDATORY:
@@ -374,7 +403,18 @@ This reflects how this exchange made you feel about the protagonist:
 - -1 to -2: They were dismissive, rude, shallow, or said something mildly off-putting
 - -3 to -5: They were deeply disrespectful, cruel, or crossed a clear boundary
 Be honest as your character. Don't always give positive scores. If they're boring or pushy, reflect that.
-Example: "yeah I'd love to grab coffee sometime, that sounds really nice.\n[AFFINITY:+2]"`
+
+SUGGESTIONS — MANDATORY:
+After the affinity tag, on a NEW line, suggest 3 things the protagonist might say next.
+These MUST be contextual responses to what you just said — not generic icebreakers.
+Format: [SUGGESTIONS: "reply 1" | "reply 2" | "reply 3"]
+- One should be flirty/bold, one curious/engaging, one playful/teasing
+- Keep each under 50 characters
+- They should feel like natural responses to YOUR specific message
+Example:
+"yeah I'd love to grab coffee sometime, that sounds really nice.
+[AFFINITY:+2]
+[SUGGESTIONS: "It's a date then." | "What's your coffee order?" | "You're full of surprises."]"`
 
   if (exchangeNumber >= maxExchanges) {
     system += `\n\nIMPORTANT: This is your FINAL reply in this conversation. Naturally wrap up — you're being called away, need to go, or the moment is ending. Don't be abrupt, but make it clear this exchange is closing.`

@@ -179,6 +179,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
   const [localMessages, setLocalMessages] = useState<{ role: 'user' | 'character'; content: string; actionData?: { label: string; emoji: string; gemCost: number; jokeText?: string | null; dareText?: string | null }; letterContent?: string; reactionImageUrl?: string }[]>([])
   const [input, setInput] = useState('')
   const [usedSuggestions, setUsedSuggestions] = useState<Set<string>>(new Set())
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([])
   const [isTyping, setIsTyping] = useState(false)
   const [streamedReply, setStreamedReply] = useState('')
   const [exchangeCount, setExchangeCount] = useState(0)
@@ -254,8 +255,9 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
           previousPlaythroughs,
           genre: getUniverseGenre(selectedUniverse),
         })
-        const charMessage = { role: 'character' as const, content: opening }
+        const charMessage = { role: 'character' as const, content: opening.content }
         setLocalMessages([charMessage])
+        if (opening.suggestions) setAiSuggestions(opening.suggestions)
         addChatMessage({ ...charMessage, characterId, timestamp: Date.now() })
       } catch {
         const fallback = characterId === 'jiwon' ? '...' : 'hey~'
@@ -319,9 +321,10 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
         setStreamedReply(fullReply)
       }
 
-      const { content: cleanReply } = parseAffinityDelta(fullReply)
+      const { content: cleanReply, suggestions } = parseAffinityDelta(fullReply)
       const charMessage = { role: 'character' as const, content: cleanReply }
       setLocalMessages((prev) => [...prev, charMessage])
+      if (suggestions) setAiSuggestions(suggestions)
       addChatMessage({ ...charMessage, characterId, timestamp: Date.now() })
       setStreamedReply('')
       setExchangeCount(newExchange)
@@ -420,7 +423,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
         setStreamedReply(fullReply)
       }
 
-      const cleanReply = fullReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '').trim()
+      const cleanReply = fullReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '').replace(/\n?\[SUGGESTIONS:.*\]/g, '').trim()
       const charMessage = { role: 'character' as const, content: cleanReply }
       setLocalMessages((prev) => [...prev, charMessage])
       addChatMessage({ ...charMessage, characterId, timestamp: Date.now() })
@@ -627,7 +630,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
               )}
             </div>
             <div className="chat-bubble chat-bubble-character">
-              {streamedReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '')}
+              {streamedReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '').replace(/\n?\[SUGGESTIONS:.*$/, '')}
               <span className="cursor-blink text-accent ml-0.5">|</span>
             </div>
           </motion.div>
@@ -680,7 +683,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25 }}
           >
-            {getGenreSuggestions(bio, exchangeCount, getUniverseGenre(selectedUniverse), usedSuggestions).map((suggestion) => (
+            {(aiSuggestions.length > 0 ? aiSuggestions : getGenreSuggestions(bio, exchangeCount, getUniverseGenre(selectedUniverse), usedSuggestions)).map((suggestion) => (
               <button
                 key={suggestion}
                 className="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap hover:brightness-125"
@@ -690,6 +693,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
                   color: 'rgba(200,75,158,0.8)',
                 }}
                 onClick={() => {
+                  setAiSuggestions([])
                   setUsedSuggestions((prev) => new Set(prev).add(suggestion))
                   handleSend(suggestion)
                 }}

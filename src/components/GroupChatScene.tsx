@@ -348,7 +348,7 @@ export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, 
       })
       for await (const chunk of gen) { fullReply += chunk; setStreamedReply(fullReply) }
 
-      const cleanReply = fullReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '').trim()
+      const cleanReply = fullReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '').replace(/\n?\[SUGGESTIONS:.*\]/g, '').trim()
       const primaryMsg: GroupMessage = { id: `char-${primaryCharId}-${Date.now()}`, role: 'character', content: cleanReply, characterId: primaryCharId }
       setMessages(prev => [...prev, primaryMsg])
       addChatMessage({ role: 'character', content: cleanReply, characterId: primaryCharId, timestamp: Date.now() })
@@ -502,7 +502,7 @@ export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, 
                   <div className="flex items-end gap-2 justify-start">
                     <CharAvatar characterId={streamingCharId} />
                     <div className="chat-bubble chat-bubble-character">
-                      {streamedReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '')}
+                      {streamedReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '').replace(/\n?\[SUGGESTIONS:.*$/, '')}
                       <span className="cursor-blink text-accent ml-0.5">|</span>
                     </div>
                   </div>

@@ -228,8 +228,8 @@ export function FreeChatPage() {
       affinityScore: characterAffinities[activeCharId] ?? 0,
       characterMemories: characterMemories[activeCharId] ?? [],
       genre: getUniverseGenre(selectedUniverse),
-    }).then(opening => {
-      const charMessage = { role: 'character' as const, content: opening }
+    }).then(result => {
+      const charMessage = { role: 'character' as const, content: result.content }
       setChatStates(prev => ({
         ...prev,
         [activeCharId]: {
@@ -432,7 +432,7 @@ export function FreeChatPage() {
         setStreamedReply(fullReply)
       }
 
-      const cleanReply = fullReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '').trim()
+      const cleanReply = fullReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '').replace(/\n?\[SUGGESTIONS:.*\]/g, '').trim()
       const charMessage = { role: 'character' as const, content: cleanReply }
 
       setChatStates(prev => ({

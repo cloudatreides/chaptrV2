@@ -91,6 +91,7 @@ export function AmbientPingModal({ ping, onDismiss }: Props) {
           .replace(/\{[^{}]*"trustDelta"[^{}]*\}?/g, '')
           .replace(/\{[^{}]*"trustDelta"[^{}]*/g, '')
           .replace(/\n?\[AFFINITY:[+-]?\d*\]?\s*$/g, '')
+          .replace(/\n?\[SUGGESTIONS:.*$/g, '')
           .trimEnd()
         setStreamedReply(displayText)
       }
@@ -98,6 +99,7 @@ export function AmbientPingModal({ ping, onDismiss }: Props) {
       const cleanReply = fullReply
         .replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/g, '')
         .replace(/\{[^{}]*"trustDelta"[^{}]*\}/g, '')
+        .replace(/\n?\[SUGGESTIONS:.*\]/g, '')
         .trim()
       const charMessage = { role: 'character' as const, content: cleanReply }
       setMessages(prev => [...prev, charMessage])

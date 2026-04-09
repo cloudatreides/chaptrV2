@@ -141,6 +141,7 @@ export function CastChatPage() {
           .replace(/\{[^{}]*"trustDelta"[^{}]*\}?/g, '')
           .replace(/\{[^{}]*"trustDelta"[^{}]*/g, '')
           .replace(/\n?\[AFFINITY:[+-]?\d*\]?\s*$/g, '')
+          .replace(/\n?\[SUGGESTIONS:.*$/g, '')
           .trimEnd()
         setStreamingContent(displayText)
       }
@@ -276,12 +277,13 @@ export function CastChatPage() {
           .replace(/\{[^{}]*"trustDelta"[^{}]*\}?/g, '')
           .replace(/\{[^{}]*"trustDelta"[^{}]*/g, '')
           .replace(/\n?\[AFFINITY:[+-]?\d*\]?\s*$/g, '')
+          .replace(/\n?\[SUGGESTIONS:.*$/g, '')
           .trimEnd()
         setStreamingContent(displayText)
       }
 
       if (fullReply.trim()) {
-        const cleanReply = fullReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '').replace(/\{[^{}]*"trustDelta"[^{}]*\}/g, '').trim()
+        const cleanReply = fullReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '').replace(/\{[^{}]*"trustDelta"[^{}]*\}/g, '').replace(/\n?\[SUGGESTIONS:.*\]/g, '').trim()
         const charMsg: CastChatMessage = { role: 'character', content: cleanReply, timestamp: Date.now() }
         addCastChatMessage(characterId, charMsg)
 

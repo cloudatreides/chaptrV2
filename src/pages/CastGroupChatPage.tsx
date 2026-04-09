@@ -322,7 +322,7 @@ export function CastGroupChatPage() {
       }
 
       if (fullReply.trim()) {
-        const cleanReply = fullReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '').trim()
+        const cleanReply = fullReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '').replace(/\n?\[SUGGESTIONS:.*\]/g, '').trim()
         const charMsg: CastChatMessage = {
           role: 'character',
           content: cleanReply,

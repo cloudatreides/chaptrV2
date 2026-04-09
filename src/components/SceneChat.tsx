@@ -200,6 +200,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
   const [streamedReply, setStreamedReply] = useState('')
   const [input, setInput] = useState('')
   const [usedSuggestions, setUsedSuggestions] = useState<Set<string>>(new Set())
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const abortRef = useRef<AbortController | null>(null)
   const openerGeneratedFor = useRef<Set<string>>(new Set())
@@ -303,7 +304,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
       previousPlaythroughs,
       genre: getUniverseGenre(selectedUniverse),
     }).then(opening => {
-      const charMessage = { role: 'character' as const, content: opening }
+      const charMessage = { role: 'character' as const, content: opening.content }
       setChatStates(prev => ({
         ...prev,
         [activeCharId]: {
@@ -313,6 +314,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
           isLoadingOpener: false,
         },
       }))
+      if (opening.suggestions) setAiSuggestions(opening.suggestions)
       addChatMessage({ ...charMessage, characterId: activeCharId, timestamp: Date.now() })
     }).catch(() => {
       const fallback = activeCharId === 'sora' ? 'hey~' : '...'
@@ -398,7 +400,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
         setStreamedReply(fullReply)
       }
 
-      const { content: cleanReply } = parseAffinityDelta(fullReply)
+      const { content: cleanReply, suggestions } = parseAffinityDelta(fullReply)
       const charMessage = { role: 'character' as const, content: cleanReply }
 
       setChatStates(prev => ({
@@ -409,6 +411,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
           exchangeCount: newExchange,
         },
       }))
+      if (suggestions) setAiSuggestions(suggestions)
       addChatMessage({ ...charMessage, characterId: activeCharId, timestamp: Date.now() })
       setStreamedReply('')
       updateAffinity(activeCharId, getAffinityGrowth(newExchange))
@@ -519,7 +522,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
         setStreamedReply(fullReply)
       }
 
-      const cleanReply = fullReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '').trim()
+      const cleanReply = fullReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '').replace(/\n?\[SUGGESTIONS:.*\]/g, '').trim()
       const charMessage = { role: 'character' as const, content: cleanReply }
 
       setChatStates(prev => ({
@@ -833,7 +836,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
               )}
             </div>
             <div className="chat-bubble chat-bubble-character">
-              {streamedReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '')}
+              {streamedReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '').replace(/\n?\[SUGGESTIONS:.*$/, '')}
               <span className="cursor-blink text-accent ml-0.5">|</span>
             </div>
           </motion.div>
@@ -886,7 +889,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25 }}
           >
-            {getGenreSuggestions(bio, activeState.exchangeCount, getUniverseGenre(selectedUniverse), usedSuggestions).map(suggestion => (
+            {(aiSuggestions.length > 0 ? aiSuggestions : getGenreSuggestions(bio, activeState.exchangeCount, getUniverseGenre(selectedUniverse), usedSuggestions)).map(suggestion => (
               <button
                 key={suggestion}
                 className="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap hover:brightness-125"
@@ -897,6 +900,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
                 }}
                 onClick={() => {
                   setInput(suggestion)
+                  setAiSuggestions([])
                   setUsedSuggestions((prev) => new Set(prev).add(suggestion))
                 }}
               >
