@@ -86,7 +86,7 @@ export const CHAT_ACTIONS: ChatAction[] = [
     gemCost: 2,
     affinityBoost: 0, // random, handled specially
     minTier: 1,
-    promptInjection: 'sent you a mystery gift box. Imagine what is inside based on your personality — react to discovering it. Could be something you love or something hilariously wrong.',
+    promptInjection: 'sent you a mystery gift box. Pick ONE specific item that\'s inside — something unexpected that fits your personality. Name the item, then give a SHORT reaction (1-2 sentences max). Don\'t list multiple things. Don\'t monologue. Just: what it is, and your gut reaction.',
   },
   {
     id: 'favorite-thing',
