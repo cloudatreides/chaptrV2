@@ -2,8 +2,6 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
-const SERIF = "'Playfair Display', Georgia, serif"
-
 export function LoginPage() {
   const { signInWithGoogle } = useAuth()
 

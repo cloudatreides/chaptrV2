@@ -3,8 +3,6 @@ import { X } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
-const SERIF = "'Playfair Display', Georgia, serif"
-
 interface AuthModalProps {
   open: boolean
   onClose: () => void
