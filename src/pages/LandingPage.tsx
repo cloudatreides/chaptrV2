@@ -573,7 +573,7 @@ export function LandingPage() {
           <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(13,11,18,0) 0%, rgba(13,11,18,0.15) 35%, rgba(13,11,18,0.85) 55%, rgba(13,11,18,0.97) 68%, rgba(13,11,18,1) 78%)' }} />
 
           {/* Logo */}
-          <div className="relative z-10 flex items-center gap-2 px-5 pt-10 safe-top">
+          <div className="relative z-10 flex items-center gap-2 px-5 pt-10 safe-top" style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.7))' }}>
             <LogoMark size={34} />
             <span className="font-semibold text-lg" style={{ fontFamily: SYNE, letterSpacing: '-0.02em', background: 'linear-gradient(180deg, #D4C4F0 0%, #B8A5E0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>chaptr</span>
           </div>
