@@ -266,6 +266,10 @@ interface StoreState {
   completeTrip: () => void
   resetTrip: () => void
 
+  // ── City votes (demand signal for locked destinations) ──
+  cityVotes: string[]
+  voteCityRequest: (cityId: string) => void
+
   // ── Streaming state (ephemeral, not per-character) ──
   isStreaming: boolean
   setIsStreaming: (v: boolean) => void
@@ -607,6 +611,13 @@ export const useStore = create<StoreState>()(
         if (gemBalance < amount) return false
         set({ gemBalance: gemBalance - amount })
         return true
+      },
+
+      // ── City votes ──
+      cityVotes: [],
+      voteCityRequest: (cityId) => {
+        const votes = get().cityVotes
+        if (!votes.includes(cityId)) set({ cityVotes: [...votes, cityId] })
       },
 
       // ── Travel ──
@@ -969,6 +980,7 @@ export const useStore = create<StoreState>()(
         storyMoments: s.storyMoments,
         travelTrips: s.travelTrips,
         activeTripId: s.activeTripId,
+        cityVotes: s.cityVotes,
       }),
     }
   )
