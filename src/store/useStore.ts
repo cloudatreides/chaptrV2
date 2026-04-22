@@ -60,12 +60,69 @@ export interface PlayerCharacter {
   createdAt: number
 }
 
+// ─── Travel Types ───
+
+export interface TripScene {
+  id: string
+  timeOfDay: 'morning' | 'afternoon' | 'evening' | 'night'
+  location: string
+  activity: string
+  imagePrompt: string
+  protagonistVisible: boolean
+  prose: string | null
+  companionReaction: string | null
+}
+
+export interface TripDay {
+  dayNumber: number
+  theme: string
+  scenes: TripScene[]
+  plannedInChat: boolean
+  completed: boolean
+}
+
+export interface TripItinerary {
+  days: TripDay[]
+}
+
+export interface TripProgress {
+  destinationId: string
+  companionId: string
+  companionSliders: { chattiness: number; planningStyle: number; vibe: number }
+  currentDay: number
+  currentSceneIndex: number
+  phase: 'planning' | 'day' | 'recap' | 'complete'
+  planningChatHistory: ChatMessage[]
+  dayChatHistories: Record<number, ChatMessage[]>
+  itinerary: TripItinerary
+  sceneImages: Record<string, string>
+  travelAffinityScore: number
+  companionMemories: string[]
+  startedAt: number
+  totalEngagementMs: number
+}
+
+export const DEFAULT_TRIP_PROGRESS: Omit<TripProgress, 'destinationId' | 'companionId' | 'companionSliders'> = {
+  currentDay: 1,
+  currentSceneIndex: 0,
+  phase: 'planning',
+  planningChatHistory: [],
+  dayChatHistories: {},
+  itinerary: { days: [] },
+  sceneImages: {},
+  travelAffinityScore: 0,
+  companionMemories: [],
+  startedAt: Date.now(),
+  totalEngagementMs: 0,
+}
+
 export interface StoryProgress {
   currentStepIndex: number
+  currentChapter: number
   branchChoices: Record<string, string>
   chatHistory: ChatMessage[]
   chatSummaries: Record<string, string>
-  choiceDescriptions: { label: string; description: string }[]
+  choiceDescriptions: { label: string; description: string; sceneHint?: string }[]
   characterState: CharacterState
   trustStatusLabel: string
   revealSignature: string | null
@@ -80,6 +137,7 @@ export interface StoryProgress {
 
 export const DEFAULT_PROGRESS: StoryProgress = {
   currentStepIndex: 0,
+  currentChapter: 1,
   branchChoices: {},
   chatHistory: [],
   chatSummaries: {},
@@ -121,6 +179,8 @@ interface StoreState {
   // ── Progress actions (operate on active character+universe slot) ──
   setCurrentStepIndex: (i: number) => void
   advanceStep: () => void
+  setCurrentChapter: (chapter: number) => void
+  advanceChapter: () => void
   setBranchChoice: (choicePointId: string, optionId: string) => void
   addChatMessage: (msg: ChatMessage) => void
   setChatSummary: (stepId: string, summary: string) => void
@@ -185,6 +245,24 @@ interface StoreState {
   masterMode: boolean
   setMasterMode: (v: boolean) => void
   spendGems: (amount: number) => boolean
+
+  // ── Travel ──
+  travelTrips: Record<string, TripProgress>
+  activeTripId: string | null
+  startTrip: (destinationId: string, companionId: string, sliders: { chattiness: number; planningStyle: number; vibe: number }) => void
+  addTravelPlanningMessage: (msg: ChatMessage) => void
+  addTravelDayChatMessage: (day: number, msg: ChatMessage) => void
+  updateTripItinerary: (day: TripDay) => void
+  setTripScene: (sceneId: string, updates: Partial<TripScene>) => void
+  setTripSceneImage: (sceneId: string, url: string) => void
+  advanceTravelScene: () => void
+  advanceTravelDay: () => void
+  setTripPhase: (phase: TripProgress['phase']) => void
+  updateTravelAffinity: (delta: number) => void
+  addCompanionMemory: (memory: string) => void
+  addTravelEngagementTime: (ms: number) => void
+  completeTrip: () => void
+  resetTrip: () => void
 
   // ── Streaming state (ephemeral, not per-character) ──
   isStreaming: boolean
@@ -280,6 +358,13 @@ export const useStore = create<StoreState>()(
       advanceStep: () => set((s) => {
         const p = getProgress(s)
         return updateProgress(s, () => ({ currentStepIndex: p.currentStepIndex + 1 }))
+      }),
+
+      setCurrentChapter: (chapter) => set((s) => updateProgress(s, () => ({ currentChapter: chapter, currentStepIndex: 0 }))),
+
+      advanceChapter: () => set((s) => {
+        const p = getProgress(s)
+        return updateProgress(s, () => ({ currentChapter: p.currentChapter + 1, currentStepIndex: 0 }))
       }),
 
       setBranchChoice: (cpId, optionId) => set((s) => {
@@ -522,6 +607,237 @@ export const useStore = create<StoreState>()(
         return true
       },
 
+      // ── Travel ──
+      travelTrips: {},
+      activeTripId: null,
+
+      startTrip: (destinationId, companionId, sliders) => {
+        const charId = get().activeCharacterId
+        if (!charId) return
+        const tripId = `${charId}:${destinationId}`
+        set((s) => ({
+          travelTrips: {
+            ...s.travelTrips,
+            [tripId]: {
+              destinationId,
+              companionId,
+              companionSliders: sliders,
+              currentDay: 1,
+              currentSceneIndex: 0,
+              phase: 'planning',
+              planningChatHistory: [],
+              dayChatHistories: {},
+              itinerary: { days: [] },
+              sceneImages: {},
+              travelAffinityScore: 0,
+              companionMemories: [],
+              startedAt: Date.now(),
+              totalEngagementMs: 0,
+            },
+          },
+          activeTripId: tripId,
+        }))
+      },
+
+      addTravelPlanningMessage: (msg) => set((s) => {
+        const id = s.activeTripId
+        if (!id || !s.travelTrips[id]) return {}
+        const trip = s.travelTrips[id]
+        return {
+          travelTrips: {
+            ...s.travelTrips,
+            [id]: { ...trip, planningChatHistory: [...trip.planningChatHistory, msg] },
+          },
+        }
+      }),
+
+      addTravelDayChatMessage: (day, msg) => set((s) => {
+        const id = s.activeTripId
+        if (!id || !s.travelTrips[id]) return {}
+        const trip = s.travelTrips[id]
+        const dayMessages = trip.dayChatHistories[day] ?? []
+        return {
+          travelTrips: {
+            ...s.travelTrips,
+            [id]: {
+              ...trip,
+              dayChatHistories: { ...trip.dayChatHistories, [day]: [...dayMessages, msg] },
+            },
+          },
+        }
+      }),
+
+      updateTripItinerary: (day) => set((s) => {
+        const id = s.activeTripId
+        if (!id || !s.travelTrips[id]) return {}
+        const trip = s.travelTrips[id]
+        const existingDays = trip.itinerary.days.filter((d) => d.dayNumber !== day.dayNumber)
+        const updatedDays = [...existingDays, day].sort((a, b) => a.dayNumber - b.dayNumber)
+        return {
+          travelTrips: {
+            ...s.travelTrips,
+            [id]: { ...trip, itinerary: { days: updatedDays } },
+          },
+        }
+      }),
+
+      setTripScene: (sceneId, updates) => set((s) => {
+        const id = s.activeTripId
+        if (!id || !s.travelTrips[id]) return {}
+        const trip = s.travelTrips[id]
+        const updatedDays = trip.itinerary.days.map((day) => ({
+          ...day,
+          scenes: day.scenes.map((scene) =>
+            scene.id === sceneId ? { ...scene, ...updates } : scene
+          ),
+        }))
+        return {
+          travelTrips: {
+            ...s.travelTrips,
+            [id]: { ...trip, itinerary: { days: updatedDays } },
+          },
+        }
+      }),
+
+      setTripSceneImage: (sceneId, url) => set((s) => {
+        const id = s.activeTripId
+        if (!id || !s.travelTrips[id]) return {}
+        const trip = s.travelTrips[id]
+        return {
+          travelTrips: {
+            ...s.travelTrips,
+            [id]: { ...trip, sceneImages: { ...trip.sceneImages, [sceneId]: url } },
+          },
+        }
+      }),
+
+      advanceTravelScene: () => set((s) => {
+        const id = s.activeTripId
+        if (!id || !s.travelTrips[id]) return {}
+        const trip = s.travelTrips[id]
+        const currentDay = trip.itinerary.days.find((d) => d.dayNumber === trip.currentDay)
+        if (!currentDay) return {}
+        const nextIndex = trip.currentSceneIndex + 1
+        if (nextIndex >= currentDay.scenes.length) {
+          return {
+            travelTrips: {
+              ...s.travelTrips,
+              [id]: { ...trip, phase: 'recap' },
+            },
+          }
+        }
+        return {
+          travelTrips: {
+            ...s.travelTrips,
+            [id]: { ...trip, currentSceneIndex: nextIndex },
+          },
+        }
+      }),
+
+      advanceTravelDay: () => set((s) => {
+        const id = s.activeTripId
+        if (!id || !s.travelTrips[id]) return {}
+        const trip = s.travelTrips[id]
+        const updatedDays = trip.itinerary.days.map((d) =>
+          d.dayNumber === trip.currentDay ? { ...d, completed: true } : d
+        )
+        const nextDay = trip.currentDay + 1
+        const totalDays = trip.itinerary.days.length
+        if (nextDay > totalDays && totalDays > 0) {
+          return {
+            travelTrips: {
+              ...s.travelTrips,
+              [id]: { ...trip, itinerary: { days: updatedDays }, phase: 'complete' },
+            },
+          }
+        }
+        return {
+          travelTrips: {
+            ...s.travelTrips,
+            [id]: {
+              ...trip,
+              itinerary: { days: updatedDays },
+              currentDay: nextDay,
+              currentSceneIndex: 0,
+              phase: 'day',
+            },
+          },
+        }
+      }),
+
+      setTripPhase: (phase) => set((s) => {
+        const id = s.activeTripId
+        if (!id || !s.travelTrips[id]) return {}
+        return {
+          travelTrips: {
+            ...s.travelTrips,
+            [id]: { ...s.travelTrips[id], phase },
+          },
+        }
+      }),
+
+      updateTravelAffinity: (delta) => set((s) => {
+        const id = s.activeTripId
+        if (!id || !s.travelTrips[id]) return {}
+        const trip = s.travelTrips[id]
+        return {
+          travelTrips: {
+            ...s.travelTrips,
+            [id]: {
+              ...trip,
+              travelAffinityScore: Math.max(0, Math.min(100, trip.travelAffinityScore + delta)),
+            },
+          },
+        }
+      }),
+
+      addCompanionMemory: (memory) => set((s) => {
+        const id = s.activeTripId
+        if (!id || !s.travelTrips[id]) return {}
+        const trip = s.travelTrips[id]
+        if (trip.companionMemories.includes(memory)) return {}
+        return {
+          travelTrips: {
+            ...s.travelTrips,
+            [id]: {
+              ...trip,
+              companionMemories: [...trip.companionMemories, memory].slice(-20),
+            },
+          },
+        }
+      }),
+
+      addTravelEngagementTime: (ms) => set((s) => {
+        const id = s.activeTripId
+        if (!id || !s.travelTrips[id]) return {}
+        const trip = s.travelTrips[id]
+        return {
+          travelTrips: {
+            ...s.travelTrips,
+            [id]: { ...trip, totalEngagementMs: trip.totalEngagementMs + ms },
+          },
+        }
+      }),
+
+      completeTrip: () => set((s) => {
+        const id = s.activeTripId
+        if (!id || !s.travelTrips[id]) return {}
+        return {
+          travelTrips: {
+            ...s.travelTrips,
+            [id]: { ...s.travelTrips[id], phase: 'complete' },
+          },
+        }
+      }),
+
+      resetTrip: () => set((s) => {
+        const id = s.activeTripId
+        if (!id) return {}
+        const newTrips = { ...s.travelTrips }
+        delete newTrips[id]
+        return { travelTrips: newTrips, activeTripId: null }
+      }),
+
       // ── Streaming (ephemeral) ──
       isStreaming: false,
       setIsStreaming: (v) => set({ isStreaming: v }),
@@ -550,7 +866,7 @@ export const useStore = create<StoreState>()(
     }),
     {
       name: 'chaptr-v2-story',
-      version: 7,
+      version: 8,
       migrate: (persisted: any, version: number) => {
         if (version < 2 && persisted) {
           // Migrate from flat store to multi-character
@@ -616,6 +932,10 @@ export const useStore = create<StoreState>()(
         if (version < 7 && persisted) {
           persisted.storyMoments = persisted.storyMoments ?? []
         }
+        if (version < 8 && persisted) {
+          persisted.travelTrips = persisted.travelTrips ?? {}
+          persisted.activeTripId = persisted.activeTripId ?? null
+        }
         return persisted
       },
       partialize: (s) => ({
@@ -633,6 +953,8 @@ export const useStore = create<StoreState>()(
         groupCastThreads: s.groupCastThreads,
         favoriteCastIds: s.favoriteCastIds,
         storyMoments: s.storyMoments,
+        travelTrips: s.travelTrips,
+        activeTripId: s.activeTripId,
       }),
     }
   )

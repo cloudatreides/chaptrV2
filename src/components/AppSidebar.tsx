@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { BookOpen, Users, Sparkles, Camera, LogOut, Star, MessageCircle, User } from 'lucide-react'
+import { BookOpen, Users, Sparkles, Camera, LogOut, Star, MessageCircle, User, Plane } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { useStore } from '../store/useStore'
 import { CAST_ROSTER, getCastCharacter } from '../data/castRoster'
@@ -9,10 +9,14 @@ export function AppSidebar() {
   const location = useLocation()
   const navigate = useNavigate()
   const { user, signOut } = useAuth()
+  const characters = useStore((s) => s.characters)
+  const activeCharacterId = useStore((s) => s.activeCharacterId)
+  const activeChar = characters.find((c) => c.id === activeCharacterId)
   const selectedUniverse = useStore((s) => s.selectedUniverse)
   const albumLabel = getMomentConfig(getUniverseGenre(selectedUniverse)).albumTitle
   const NAV_ITEMS = [
     { icon: BookOpen, label: 'My Story', path: '/home' },
+    { icon: Plane, label: 'Travel', path: '/travel' },
     { icon: Users, label: 'Characters To Meet', path: '/cast' },
     { icon: Sparkles, label: 'Your Twins', path: '/characters' },
     { icon: Camera, label: albumLabel, path: '/album' },
@@ -152,7 +156,9 @@ export function AppSidebar() {
           className="cursor-pointer flex items-center gap-2.5 rounded-lg px-3 py-2.5 w-full text-left transition-colors hover:bg-white/[0.03]"
           style={{ background: location.pathname === '/account' ? 'rgba(200,75,158,0.08)' : 'transparent' }}
         >
-          {user?.user_metadata?.avatar_url ? (
+          {activeChar?.selfieUrl ? (
+            <img src={activeChar.selfieUrl} alt="" className="w-5 h-5 rounded-full object-cover" />
+          ) : user?.user_metadata?.avatar_url ? (
             <img src={user.user_metadata.avatar_url} alt="" className="w-5 h-5 rounded-full object-cover" />
           ) : (
             <User size={18} style={{ color: location.pathname === '/account' ? '#c84b9e' : 'rgba(255,255,255,0.33)' }} />
