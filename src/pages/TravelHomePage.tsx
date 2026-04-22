@@ -11,26 +11,24 @@ const SG = "'Space Grotesk', sans-serif"
 
 const AVAILABLE = DESTINATIONS.filter((d) => !d.locked)
 
-const MOCK_AVATARS = [
-  'https://i.pravatar.cc/80?img=1',
-  'https://i.pravatar.cc/80?img=5',
-  'https://i.pravatar.cc/80?img=8',
-  'https://i.pravatar.cc/80?img=12',
-  'https://i.pravatar.cc/80?img=15',
-  'https://i.pravatar.cc/80?img=20',
-  'https://i.pravatar.cc/80?img=25',
-  'https://i.pravatar.cc/80?img=32',
-  'https://i.pravatar.cc/80?img=36',
-  'https://i.pravatar.cc/80?img=44',
+const MOCK_VISITORS = [
+  { initial: 'M', gradient: 'linear-gradient(135deg, #7C3AED, #A78BFA)' },
+  { initial: 'K', gradient: 'linear-gradient(135deg, #EC4899, #F9A8D4)' },
+  { initial: 'S', gradient: 'linear-gradient(135deg, #3B82F6, #93C5FD)' },
+  { initial: 'Y', gradient: 'linear-gradient(135deg, #F59E0B, #FCD34D)' },
+  { initial: 'R', gradient: 'linear-gradient(135deg, #10B981, #6EE7B7)' },
+  { initial: 'H', gradient: 'linear-gradient(135deg, #8B5CF6, #C4B5FD)' },
+  { initial: 'L', gradient: 'linear-gradient(135deg, #EF4444, #FCA5A5)' },
+  { initial: 'N', gradient: 'linear-gradient(135deg, #06B6D4, #67E8F9)' },
 ]
 
 function getVisitors(destId: string) {
   let hash = 0
   for (let i = 0; i < destId.length; i++) hash = (hash * 31 + destId.charCodeAt(i)) | 0
   const count = 3 + (Math.abs(hash) % 45)
-  const start = Math.abs(hash) % MOCK_AVATARS.length
-  const avatars = Array.from({ length: Math.min(4, count) }, (_, i) => MOCK_AVATARS[(start + i) % MOCK_AVATARS.length])
-  return { count, avatars }
+  const start = Math.abs(hash) % MOCK_VISITORS.length
+  const visitors = Array.from({ length: Math.min(4, count) }, (_, i) => MOCK_VISITORS[(start + i) % MOCK_VISITORS.length])
+  return { count, visitors }
 }
 
 export function TravelHomePage() {
@@ -394,22 +392,22 @@ export function TravelHomePage() {
                         </h3>
                       </div>
                       {!selectedDest.locked && (() => {
-                        const { count, avatars } = getVisitors(selectedDest.id)
+                        const { count, visitors } = getVisitors(selectedDest.id)
                         return (
-                          <div className="flex items-center gap-1.5">
-                            <div className="flex -space-x-2">
-                              {avatars.map((url, i) => (
-                                <img
+                          <div className="flex items-center gap-2">
+                            <div className="flex -space-x-1.5">
+                              {visitors.map((v, i) => (
+                                <div
                                   key={i}
-                                  src={url}
-                                  className="w-6 h-6 rounded-full object-cover"
-                                  style={{ border: '2px solid #151020', zIndex: avatars.length - i }}
-                                  alt=""
-                                />
+                                  className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
+                                  style={{ background: v.gradient, border: '2px solid rgba(21,16,32,0.95)', zIndex: visitors.length - i }}
+                                >
+                                  {v.initial}
+                                </div>
                               ))}
                             </div>
                             <span className="text-white/40 text-[11px] font-medium" style={{ fontFamily: SG }}>
-                              {count}
+                              {count} exploring
                             </span>
                           </div>
                         )
