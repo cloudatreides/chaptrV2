@@ -562,7 +562,7 @@ export function HomePage() {
       <div className="hidden md:flex h-screen overflow-hidden">
         <AppSidebar />
         <div className="flex-1 overflow-y-auto px-8 lg:px-12 py-10">
-          <div className="max-w-[1100px]">
+          <div className="page-container">
             {/* Header row */}
             <div className="flex items-start justify-between mb-6">
               <div>
@@ -659,21 +659,21 @@ function DesktopTravelContent({ hasCharacters }: { hasCharacters: boolean }) {
         </button>
       )}
 
-      {/* Destinations — hero + grid */}
-      <div className="grid grid-cols-3 gap-4" style={{ gridTemplateRows: 'auto auto' }}>
-        {/* Tokyo — featured, spans 2 cols */}
+      {/* Destinations — 2-col: Tokyo large left, Seoul right */}
+      <div className="grid grid-cols-2 gap-4">
+        {/* Tokyo — featured */}
         {hero && (
           <button
             onClick={() => {
               if (!hasCharacters) { navigate('/create-character'); return }
               navigate(`/travel/${hero.id}`)
             }}
-            className="cursor-pointer group rounded-2xl overflow-hidden relative col-span-2 row-span-1"
+            className="cursor-pointer group rounded-2xl overflow-hidden relative"
             style={{ border: '1px solid rgba(124,58,237,0.2)' }}
           >
-            <div className="relative h-[260px] overflow-hidden">
+            <div className="relative h-[280px] overflow-hidden">
               <img src={hero.heroImage} alt={hero.city} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-              <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(13,11,18,0.95) 0%, rgba(13,11,18,0.4) 40%, rgba(13,11,18,0) 70%)' }} />
+              <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(13,11,18,0.95) 0%, rgba(13,11,18,0.3) 50%, rgba(13,11,18,0) 70%)' }} />
               <div className="absolute bottom-0 left-0 right-0 p-5 flex items-end justify-between">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
@@ -694,48 +694,48 @@ function DesktopTravelContent({ hasCharacters }: { hasCharacters: boolean }) {
           </button>
         )}
 
-        {/* Seoul — tall card beside Tokyo */}
+        {/* Seoul — matching height */}
         {otherAvailable[0] && (
           <button
             onClick={() => {
               if (!hasCharacters) { navigate('/create-character'); return }
               navigate(`/travel/${otherAvailable[0].id}`)
             }}
-            className="cursor-pointer group rounded-2xl overflow-hidden relative row-span-1"
+            className="cursor-pointer group rounded-2xl overflow-hidden relative"
             style={{ border: '1px solid rgba(124,58,237,0.15)' }}
           >
-            <div className="relative h-[260px] overflow-hidden">
+            <div className="relative h-[280px] overflow-hidden">
               <img src={otherAvailable[0].heroImage} alt={otherAvailable[0].city} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
               <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(13,11,18,0.9) 0%, rgba(13,11,18,0.2) 50%, transparent 70%)' }} />
-              <div className="absolute bottom-0 left-0 right-0 p-4">
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <span className="text-base">{otherAvailable[0].countryEmoji}</span>
-                  <p className="text-white text-lg font-bold" style={{ fontFamily: SG }}>{otherAvailable[0].city}</p>
+              <div className="absolute bottom-0 left-0 right-0 p-5">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xl">{otherAvailable[0].countryEmoji}</span>
+                  <p className="text-white text-2xl font-bold" style={{ fontFamily: SG }}>{otherAvailable[0].city}</p>
                 </div>
-                <p className="text-[11px]" style={{ color: '#A78BFA', fontFamily: SG }}>{otherAvailable[0].vibeTags.join(' · ')}</p>
-                <p className="text-[11px] mt-1" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: SG }}>{otherAvailable[0].description}</p>
+                <p className="text-[12px]" style={{ color: '#A78BFA', fontFamily: SG }}>{otherAvailable[0].vibeTags.join(' · ')}</p>
+                <p className="text-[12px] mt-1" style={{ color: 'rgba(255,255,255,0.5)', fontFamily: SG }}>{otherAvailable[0].description}</p>
               </div>
             </div>
           </button>
         )}
 
-        {/* Locked destinations — same row, smaller cards */}
+        {/* Locked destinations — same 2-col grid row */}
         {locked.map((dest) => (
           <div
             key={dest.id}
             className="rounded-2xl overflow-hidden relative"
             style={{ border: '1px solid rgba(255,255,255,0.06)' }}
           >
-            <div className="relative h-[160px] overflow-hidden">
+            <div className="relative h-[180px] overflow-hidden">
               <img src={dest.heroImage} alt={dest.city} className="w-full h-full object-cover" style={{ filter: 'brightness(0.65) saturate(0.7)' }} />
               <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(13,11,18,0.9) 0%, rgba(13,11,18,0.2) 50%, transparent 70%)' }} />
               <div className="absolute inset-0 flex items-center justify-center">
                 <span className="text-white/50 text-xs font-medium px-3 py-1.5 rounded-full" style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)', fontFamily: SG }}>Coming soon</span>
               </div>
-              <div className="absolute bottom-0 left-0 right-0 p-4">
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <span className="text-base">{dest.countryEmoji}</span>
-                  <p className="text-lg font-bold" style={{ color: 'rgba(255,255,255,0.7)', fontFamily: SG }}>{dest.city}</p>
+              <div className="absolute bottom-0 left-0 right-0 p-5">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xl">{dest.countryEmoji}</span>
+                  <p className="text-xl font-bold" style={{ color: 'rgba(255,255,255,0.7)', fontFamily: SG }}>{dest.city}</p>
                 </div>
                 <p className="text-[11px]" style={{ color: '#6B5F7A', fontFamily: SG }}>{dest.vibeTags.join(' · ')}</p>
               </div>
