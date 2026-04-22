@@ -12,10 +12,10 @@ const INTER = 'Inter, sans-serif'
 // ─── Travel destinations (smoke test — Tokyo only active) ───
 
 const DESTINATIONS = [
-  { city: 'Tokyo', vibe: 'Neon · Ramen · Shrines', image: '/hero-landing.jpeg', accent: '#A78BFA', comingSoon: false },
-  { city: 'Seoul', vibe: 'K-pop · Cafés · Markets', image: '/seoul-night.jpg', accent: '#D4799A', comingSoon: true },
-  { city: 'Paris', vibe: 'Art · Wine · Romance', image: '/midnight-paris.jpeg', accent: '#E05263', comingSoon: true },
-  { city: 'Bangkok', vibe: 'Temples · Street food · Chaos', image: '/edge-of-atlas.jpeg', accent: '#FFB74D', comingSoon: true },
+  { city: 'Tokyo', vibe: 'Neon · Ramen · Shrines', image: '/dest-tokyo.jpeg', accent: '#A78BFA', comingSoon: false },
+  { city: 'Seoul', vibe: 'K-pop · Cafés · Markets', image: '/dest-seoul.jpeg', accent: '#D4799A', comingSoon: false },
+  { city: 'Paris', vibe: 'Art · Wine · Romance', image: '/dest-paris.jpeg', accent: '#E05263', comingSoon: true },
+  { city: 'Bangkok', vibe: 'Temples · Street food · Chaos', image: '/dest-bangkok.jpeg', accent: '#FFB74D', comingSoon: true },
 ]
 
 // Pick a diverse set of stories for the showcase
@@ -295,9 +295,8 @@ export function LandingPage() {
           <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(13,11,18,0.8) 0%, rgba(13,11,18,0) 15%)' }} />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(13,11,18,0) 15%, rgba(13,11,18,0.85) 50%, rgba(13,11,18,1) 65%)' }} />
 
-          <div className="relative z-10 page-container mx-auto">
-            {/* Nav */}
-            <nav className="flex items-center justify-between px-8 lg:px-20 h-16 rounded-b-2xl" style={{ background: 'rgba(13,11,18,0.6)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
+          <div className="relative z-10 w-full" style={{ background: 'rgba(13,11,18,0.35)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+            <nav className="flex items-center justify-between px-8 lg:px-20 h-16 page-container mx-auto">
               <div className="flex items-center gap-2.5">
                 <LogoMark size={34} />
                 <span className="font-semibold text-lg" style={{ fontFamily: "'Syne', sans-serif", letterSpacing: '-0.02em', background: 'linear-gradient(180deg, #D4C4F0 0%, #B8A5E0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>chaptr</span>
