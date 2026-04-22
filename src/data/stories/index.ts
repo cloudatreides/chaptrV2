@@ -20,7 +20,7 @@ import { CAFE_1111_STEPS, CAFE_1111_CHARACTERS, CAFE_1111_BIBLE } from './cafe-1
 import { IDOL_NEXT_DOOR_STEPS, IDOL_NEXT_DOOR_CHARACTERS, IDOL_NEXT_DOOR_BIBLE } from './idol-next-door'
 import { SEOUL_TRANSFER_CHAPTERS, SEOUL_TRANSFER_CHAPTER_BRIEFS, SEOUL_TRANSFER_TOTAL_CHAPTERS } from './seoul-transfer'
 import { CHARACTERS } from '../characters'
-import { CHARACTER_BIBLE, STORY_STEPS } from '../storyData'
+import { CHARACTER_BIBLE, STORY_STEPS, CHAPTER_BRIEFS } from '../storyData'
 
 export interface StoryData {
   steps: StoryStep[]
@@ -49,8 +49,8 @@ export const STORY_REGISTRY: Record<string, StoryData> = {
     primaryCharacterId: 'jiwon',
     revealPerspective: 'Jiwon sees you as',
     signatureContext: 'a K-pop romance set at Seoul Arts Academy. The signature should capture the emotional quality of the protagonist\'s connection with Jiwon — through boldness or patience, what they risked, and what the rooftop came to mean.',
-    chapters: SEOUL_TRANSFER_CHAPTERS,
-    chapterBriefs: SEOUL_TRANSFER_CHAPTER_BRIEFS,
+    chapters: { 1: STORY_STEPS, ...SEOUL_TRANSFER_CHAPTERS },
+    chapterBriefs: { ...CHAPTER_BRIEFS, ...SEOUL_TRANSFER_CHAPTER_BRIEFS },
     totalChapters: SEOUL_TRANSFER_TOTAL_CHAPTERS,
   },
   'hollow-manor': {

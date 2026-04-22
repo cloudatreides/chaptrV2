@@ -15,6 +15,7 @@ export function TravelCityPage() {
   const characters = useStore((s) => s.characters)
   const activeChar = characters.find((c) => c.id === activeCharacterId)
   const startTrip = useStore((s) => s.startTrip)
+  const createCharacter = useStore((s) => s.createCharacter)
 
   const [selectedCompanion, setSelectedCompanion] = useState<string | null>(null)
   const [showCustomize, setShowCustomize] = useState(false)
@@ -38,7 +39,11 @@ export function TravelCityPage() {
   }
 
   function handleStartTrip() {
-    if (!selectedCompanion || !activeCharacterId) return
+    if (!selectedCompanion) return
+    let charId = activeCharacterId
+    if (!charId) {
+      charId = createCharacter({ name: 'Traveler', gender: 'female', selfieUrl: null, bio: null })
+    }
     startTrip(destination!.id, selectedCompanion, sliders)
     navigate('/travel/trip')
   }
@@ -222,7 +227,7 @@ export function TravelCityPage() {
           <motion.button
             whileTap={{ scale: 0.98 }}
             onClick={handleStartTrip}
-            disabled={!selectedCompanion || !activeCharacterId}
+            disabled={!selectedCompanion}
             className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-semibold text-white transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
             style={{
               fontFamily: "'Space Grotesk', sans-serif",
@@ -236,11 +241,6 @@ export function TravelCityPage() {
             }
           </motion.button>
 
-          {!activeCharacterId && (
-            <p className="text-red-400/60 text-xs mt-3" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Create a character first to start traveling
-            </p>
-          )}
         </div>
       </div>
     </div>

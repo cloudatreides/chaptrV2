@@ -18,7 +18,7 @@ export const DESTINATIONS: Destination[] = [
     country: 'Japan',
     countryEmoji: '🇯🇵',
     vibeTags: ['Neon Streets', 'Ramen Culture', 'Hidden Shrines'],
-    heroImage: '/travel/tokyo-hero.jpg',
+    heroImage: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&q=80',
     tripDays: 5,
     description: 'Neon-lit nights, quiet temples, and the best food on Earth.',
     locked: false,
@@ -65,13 +65,52 @@ VIBE:
     id: 'seoul',
     city: 'Seoul',
     country: 'South Korea',
-    countryEmoji: '🇰��',
+    countryEmoji: '🇰🇷',
     vibeTags: ['K-Culture', 'Street Food', 'Night Markets'],
-    heroImage: '/travel/seoul-hero.jpg',
+    heroImage: 'https://images.unsplash.com/photo-1517154421773-0529f29ea451?w=800&q=80',
     tripDays: 5,
     description: 'K-pop energy, soju nights, and palaces hiding in plain sight.',
-    locked: true,
-    locationKnowledge: '',
+    locked: false,
+    locationKnowledge: `SEOUL LOCAL KNOWLEDGE — Use this to ground your recommendations in real places. Be specific, opinionated, and personal — like a friend who lives here.
+
+NEIGHBORHOODS:
+- Gangnam: Glossy, upscale. COEX Mall underground, Bongeunsa Temple for contrast. Good coffee shops everywhere.
+- Hongdae: University district. Street performers, indie shops, clubs, live music. The creative heart of Seoul. Best nightlife for non-Koreans.
+- Itaewon: International district. Diverse food scene, rooftop bars, Yongsan Park nearby. More relaxed vibe.
+- Myeongdong: Shopping central. K-beauty flagship stores, street food stalls everywhere. Touristy but the food is legit.
+- Bukchon/Samcheong-dong: Traditional hanok villages between two palaces. Narrow alleys, tea houses, galleries. Best in early morning.
+- Ikseon-dong: Tiny hanok alley turned hipster cafe district. Instagram-famous but genuinely charming. Go on weekdays.
+- Euljiro: Old industrial district going through a revival. Hidden bars behind printing shops, retro vibes, the "Brooklyn of Seoul."
+- Jongno: Historic center. Gwangjang Market, Cheonggyecheon Stream, Insadong for traditional crafts.
+
+FOOD (be specific with types, not restaurant names):
+- Korean BBQ: Samgyeopsal (pork belly) is the classic. Cook it yourself at table grills. Pair with soju and lettuce wraps.
+- Street food: Tteokbokki (spicy rice cakes), hotteok (sweet pancakes), odeng (fish cake skewers), mandu (dumplings). Myeongdong and Gwangjang Market are the spots.
+- Fried chicken: Korean fried chicken is its own category. Yangnyeom (sweet-spicy glazed) or plain crispy. Always with beer (chimaek culture).
+- Jjigae/Stew: Kimchi jjigae, sundubu-jjigae (soft tofu), budae-jjigae (army stew with ramyeon). Comfort food, especially in winter.
+- Bibimbap: Mixed rice bowl. Jeonju-style is the gold standard but good everywhere.
+- Convenience stores: CU and GS25 have surprisingly good triangle kimbap, instant ramyeon stations, and snacks. Banana milk is a must.
+- Cafe culture: Seoul has more cafes per capita than almost anywhere. Multi-story themed cafes, rooftop cafes, hanok cafes. Coffee quality is high.
+
+EXPERIENCES:
+- Gyeongbokgung Palace — rent a hanbok (traditional dress) for free entry and great photos. Go for the guard-changing ceremony.
+- N Seoul Tower — take the cable car up Namsan Mountain. Lock wall is touristy but the sunset view is real.
+- Bukchon Hanok Village — traditional houses on steep narrow streets. Respect residents (it's a real neighborhood, not a theme park).
+- Gwangjang Market — oldest market in Seoul. Bindaetteok (mung bean pancakes), mayak kimbap (addictive mini rolls). Go hungry.
+- Han River Parks — rent bikes, order chicken delivery to the park (yes, they deliver to your exact bench), watch the Banpo Bridge fountain show at night.
+- Lotte World / Everland — theme parks if that's your thing. Lotte World is indoor, convenient. Everland is better but far.
+- Jjimjilbang — Korean spa/sauna. Dragon Hill Spa in Yongsan is the famous one. Egg sauna, sleeping rooms, the works.
+
+TRANSPORT:
+- T-money card for everything (subway, bus, convenience stores). Seoul subway is clean, efficient, and well-signed in English.
+- Subway runs until ~midnight. Taxis are cheap and safe (Kakao Taxi app is the Korean Uber).
+- Walking is great in individual neighborhoods but Seoul is spread out — subway between areas.
+
+VIBE:
+- Seoul moves fast. It's a city obsessed with the new — trends cycle in weeks, not months. But ancient palaces sit untouched between skyscrapers.
+- K-culture is everywhere and it's genuine, not performative. People take food, fashion, and skincare seriously.
+- Nightlife goes late. Really late. 2am is early. Some neighborhoods don't really start until midnight.
+- Koreans are warm once you break through initial formality. A few Korean phrases go a long way. "Kamsahamnida" (thank you) opens doors.`,
   },
   {
     id: 'paris',
@@ -79,7 +118,7 @@ VIBE:
     country: 'France',
     countryEmoji: '🇫🇷',
     vibeTags: ['Café Culture', 'Art Everywhere', 'Golden Hour'],
-    heroImage: '/travel/paris-hero.jpg',
+    heroImage: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80',
     tripDays: 5,
     description: 'Every corner is a painting. Every meal is a memory.',
     locked: true,
@@ -91,7 +130,7 @@ VIBE:
     country: 'United States',
     countryEmoji: '🇺🇸',
     vibeTags: ['Never Sleeps', 'Pizza & Bagels', 'Concrete Jungle'],
-    heroImage: '/travel/new-york-hero.jpg',
+    heroImage: 'https://images.unsplash.com/photo-1534430480872-3498386e7856?w=800&q=80',
     tripDays: 5,
     description: 'Eight million stories, and yours is about to start.',
     locked: true,

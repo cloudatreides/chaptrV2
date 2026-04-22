@@ -24,6 +24,7 @@ import { UniverseDetailPage } from './pages/UniverseDetailPage'
 import { AccountPage } from './pages/AccountPage'
 import { AlbumPage } from './pages/AlbumPage'
 import { TravelHomePage } from './pages/TravelHomePage'
+import { StoriesHomePage } from './pages/StoriesHomePage'
 import { TravelCityPage } from './pages/TravelCityPage'
 import { TravelReaderPage } from './pages/TravelReaderPage'
 import { TermsPage } from './pages/TermsPage'
@@ -62,6 +63,7 @@ export default function App() {
           <Route path="/free-chat" element={<ProtectedRoute><FreeChatPage /></ProtectedRoute>} />
           <Route path="/quest/:questId" element={<ProtectedRoute><QuestPage /></ProtectedRoute>} />
           <Route path="/album" element={<ProtectedRoute><AlbumPage /></ProtectedRoute>} />
+          <Route path="/stories" element={<ProtectedRoute><StoriesHomePage /></ProtectedRoute>} />
           <Route path="/travel" element={<ProtectedRoute><TravelHomePage /></ProtectedRoute>} />
           <Route path="/travel/trip" element={<ProtectedRoute><TravelReaderPage /></ProtectedRoute>} />
           <Route path="/travel/:destinationId" element={<ProtectedRoute><TravelCityPage /></ProtectedRoute>} />

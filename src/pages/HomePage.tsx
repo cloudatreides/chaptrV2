@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, Plus, Pencil, Sparkles, MessageCircle, Heart, LogOut, Lock, Users } from 'lucide-react'
+import { ArrowRight, Plus, Pencil, MessageCircle, LogOut, Lock, Users, Compass, BookOpen, ChevronRight, Plane, Camera } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { UNIVERSES, GENRE_FILTERS } from '../data/storyData'
 import { useAuth } from '../contexts/AuthContext'
@@ -13,31 +13,10 @@ import { getCharacter, CHARACTERS } from '../data/characters'
 import { CAST_ROSTER, UNIVERSE_COLORS, getCastCharacter } from '../data/castRoster'
 import { AppSidebar } from '../components/AppSidebar'
 import { AmbientPingModal } from '../components/AmbientPingModal'
+import { DESTINATIONS } from '../data/travel/destinations'
 import type { AmbientPingDef } from '../data/ambientPings'
 
-// Mock player counts for universe cards
-const UNIVERSE_PLAYERS: Record<string, number> = {
-  'seoul-transfer': 12400,
-  'sakura-academy': 8700,
-  'midnight-paris': 7300,
-  'campus-rivals': 6100,
-  'hollow-manor': 5200,
-  'crimson-depths': 4600,
-  'the-whisper-game': 3900,
-  'the-last-signal': 3800,
-  'neon-district': 3200,
-  'the-inheritance': 2800,
-  'sky-pirates': 2500,
-  'edge-of-atlas': 2100,
-  'the-drift': 1900,
-  'phantom-protocol': 1600,
-  'fae-court': 1400,
-}
-
-function formatPlayerCount(n: number): string {
-  if (n >= 1000) return `${(n / 1000).toFixed(1).replace(/\.0$/, '')}k`
-  return String(n)
-}
+const SG = "'Space Grotesk', sans-serif"
 
 function getStepCount(universeId: string): number {
   if (universeId === 'seoul-transfer') return STORY_STEPS.length
@@ -50,6 +29,304 @@ function getChapterLabel(stepIndex: number, total: number): string {
   const chapter = Math.min(Math.ceil(((stepIndex + 1) / total) * 5), 5)
   return `Chapter ${chapter} of 5`
 }
+
+// ─── Mode Toggle ───
+
+function ModeToggle({ mode, setMode }: { mode: 'travel' | 'stories'; setMode: (m: 'travel' | 'stories') => void }) {
+  return (
+    <div
+      className="flex items-center rounded-xl p-[3px]"
+      style={{ background: '#111016', border: '1px solid rgba(255,255,255,0.03)' }}
+    >
+      <button
+        onClick={() => setMode('travel')}
+        className="cursor-pointer flex items-center justify-center gap-1.5 rounded-[10px] px-5 py-2 transition-all text-[13px] font-semibold flex-1"
+        style={{
+          background: mode === 'travel' ? '#7C3AED' : 'transparent',
+          color: mode === 'travel' ? '#fff' : 'rgba(255,255,255,0.3)',
+          fontFamily: SG,
+        }}
+      >
+        <Compass size={14} /> Travel
+      </button>
+      <button
+        onClick={() => setMode('stories')}
+        className="cursor-pointer flex items-center justify-center gap-1.5 rounded-[10px] px-5 py-2 transition-all text-[13px] font-semibold flex-1"
+        style={{
+          background: mode === 'stories' ? '#c84b9e' : 'transparent',
+          color: mode === 'stories' ? '#fff' : 'rgba(255,255,255,0.3)',
+          fontFamily: SG,
+        }}
+      >
+        <BookOpen size={14} /> Stories
+      </button>
+    </div>
+  )
+}
+
+// ─── Mode Description ───
+
+function ModeDescription({ mode }: { mode: 'travel' | 'stories' }) {
+  const isTravel = mode === 'travel'
+  return (
+    <motion.div
+      key={mode}
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2 }}
+      className="rounded-xl p-3.5"
+      style={{
+        background: isTravel ? 'rgba(124,58,237,0.04)' : 'rgba(200,75,158,0.04)',
+        border: `1px solid ${isTravel ? 'rgba(124,58,237,0.12)' : 'rgba(200,75,158,0.12)'}`,
+      }}
+    >
+      <p className="text-[13px] font-semibold mb-1" style={{ color: isTravel ? '#A78BFA' : '#c84b9e', fontFamily: SG }}>
+        {isTravel ? '✈️  Travel Mode' : '📖  Story Mode'}
+      </p>
+      <p className="text-[11px] leading-[1.5]" style={{ color: '#8B8B90', fontFamily: SG }}>
+        {isTravel
+          ? 'Pick a real city, choose an AI companion, and live your dream trip scene by scene. Explore streets, eat local food, and chat with your companion — all with your face in every scene.'
+          : 'Star in 20+ interactive stories across romance, horror, mystery, and more. Make choices that shape the plot, chat with AI characters who remember everything, and see yourself in every scene.'}
+      </p>
+    </motion.div>
+  )
+}
+
+// ─── Travel Content ───
+
+function TravelContent({ hasCharacters }: { hasCharacters: boolean }) {
+  const navigate = useNavigate()
+  const activeCharacterId = useStore((s) => s.activeCharacterId)
+  const travelTrips = useStore((s) => s.travelTrips)
+
+  const activeTrip = activeCharacterId
+    ? Object.entries(travelTrips).find(([key, trip]) => key.startsWith(`${activeCharacterId}:`) && trip.phase !== 'complete')
+    : null
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* Continue Trip */}
+      {activeTrip && (
+        <div>
+          <p className="text-[10px] font-semibold tracking-[2px] uppercase mb-2" style={{ color: 'rgba(167,139,250,0.4)', fontFamily: SG }}>
+            CONTINUE YOUR TRIP
+          </p>
+          <button
+            onClick={() => navigate('/travel/trip')}
+            className="cursor-pointer w-full flex items-center gap-3.5 rounded-2xl p-3.5 text-left"
+            style={{ background: '#1A1628', border: '1px solid rgba(124,58,237,0.12)' }}
+          >
+            <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0">
+              <img
+                src={DESTINATIONS.find((d) => d.id === activeTrip[1].destinationId)?.heroImage ?? ''}
+                alt="" className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-semibold tracking-[1px] mb-0.5" style={{ color: '#A78BFA', fontFamily: SG }}>
+                TRAVEL · DAY {activeTrip[1].currentDay}
+              </p>
+              <p className="text-white text-sm font-semibold" style={{ fontFamily: SG }}>
+                {DESTINATIONS.find((d) => d.id === activeTrip[1].destinationId)?.city ?? 'Trip'}
+              </p>
+              <p className="text-white/40 text-xs truncate" style={{ fontFamily: SG }}>
+                {activeTrip[1].phase === 'planning' ? 'Still planning...' : 'Exploring'}
+              </p>
+            </div>
+            <ChevronRight size={16} className="text-white/20 shrink-0" />
+          </button>
+        </div>
+      )}
+
+      {/* Plan Trip CTA */}
+      <motion.button
+        onClick={() => {
+          if (!hasCharacters) { navigate('/create-character'); return }
+          navigate('/travel/tokyo')
+        }}
+        className="cursor-pointer w-full h-12 rounded-xl flex items-center justify-center gap-2 text-white font-semibold text-sm"
+        style={{ background: 'linear-gradient(90deg, #7C3AED, #A78BFA)', fontFamily: SG }}
+        whileTap={{ scale: 0.98 }}
+      >
+        <Plane size={16} /> {activeTrip ? 'Plan a new trip' : 'Plan your first trip'}
+      </motion.button>
+
+      {/* Destinations */}
+      <div>
+        <p className="text-[10px] font-semibold tracking-[2px] uppercase mb-2.5" style={{ color: 'rgba(107,98,117,0.5)', fontFamily: SG }}>
+          DESTINATIONS
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          {DESTINATIONS.map((dest) => (
+            <button
+              key={dest.id}
+              onClick={() => !dest.locked && navigate(`/travel/${dest.id}`)}
+              disabled={dest.locked}
+              className="cursor-pointer rounded-xl overflow-hidden text-left flex flex-col"
+              style={{ border: `1px solid ${dest.locked ? 'rgba(255,255,255,0.04)' : 'rgba(124,58,237,0.15)'}` }}
+            >
+              <div className="relative h-[90px] overflow-hidden">
+                <img
+                  src={dest.heroImage}
+                  alt={dest.city}
+                  className="w-full h-full object-cover"
+                  style={{ filter: dest.locked ? 'brightness(0.4) saturate(0.5)' : undefined }}
+                />
+                {!dest.locked && (
+                  <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded text-[7px] font-bold tracking-[1px] text-white" style={{ background: '#7C3AED', fontFamily: SG }}>AVAILABLE</div>
+                )}
+                {dest.locked && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-white/30 text-[10px] font-medium px-2 py-1 rounded-full" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)', fontFamily: SG }}>Coming soon</span>
+                  </div>
+                )}
+              </div>
+              <div className="p-3" style={{ background: dest.locked ? '#13101c' : '#151020' }}>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm">{dest.countryEmoji}</span>
+                  <p className="text-sm font-bold" style={{ color: dest.locked ? 'rgba(255,255,255,0.45)' : '#fff', fontFamily: SG }}>{dest.city}</p>
+                </div>
+                <p className="text-[10px] mt-0.5" style={{ color: dest.locked ? '#4A4255' : '#A78BFA', fontFamily: SG }}>
+                  {dest.vibeTags.join(' · ')}
+                </p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Stories Content (Homepage preview — top 5 per genre) ───
+
+const PREVIEW_GENRES = GENRE_FILTERS.filter((g) => g !== 'ALL')
+
+function StoriesContent({ hasCharacters, activePlaythrough, activeUniverse, firstSceneImage, handleResume }: {
+  hasCharacters: boolean
+  activePlaythrough: any
+  activeUniverse: any
+  firstSceneImage: string | null
+  handleResume: () => void
+}) {
+  const navigate = useNavigate()
+  const [genreFilter, setGenreFilter] = useState('ALL')
+  const unlocked = UNIVERSES.filter((u) => !u.locked)
+  const visibleGenres = genreFilter === 'ALL' ? PREVIEW_GENRES : [genreFilter]
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* Genre filters */}
+      <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
+        {GENRE_FILTERS.map((g) => (
+          <button
+            key={g}
+            onClick={() => setGenreFilter(g)}
+            className="cursor-pointer shrink-0 text-[10px] font-semibold px-3 py-1.5 rounded-full transition-colors"
+            style={{
+              background: genreFilter === g ? 'rgba(200,75,158,0.15)' : 'rgba(255,255,255,0.04)',
+              color: genreFilter === g ? '#c84b9e' : 'rgba(255,255,255,0.35)',
+              border: `1px solid ${genreFilter === g ? 'rgba(200,75,158,0.25)' : 'rgba(255,255,255,0.06)'}`,
+              fontFamily: SG,
+            }}
+          >
+            {g[0] + g.slice(1).toLowerCase()}
+          </button>
+        ))}
+      </div>
+
+      {/* Upload selfie CTA if no characters */}
+      {!hasCharacters && (
+        <button
+          onClick={() => navigate('/create-character')}
+          className="cursor-pointer w-full flex items-center gap-3 rounded-xl p-3.5 text-left"
+          style={{ background: '#111016', border: '1px solid rgba(200,75,158,0.12)' }}
+        >
+          <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ background: 'rgba(200,75,158,0.12)' }}>
+            <Camera size={18} style={{ color: '#c84b9e' }} />
+          </div>
+          <div className="flex-1">
+            <p className="text-white text-[13px] font-semibold" style={{ fontFamily: SG }}>Upload selfie to star in stories</p>
+            <p className="text-[11px]" style={{ color: '#6B6275', fontFamily: SG }}>Your face appears in every scene</p>
+          </div>
+          <ChevronRight size={16} className="text-white/20 shrink-0" />
+        </button>
+      )}
+
+      {/* Continue Story */}
+      {hasCharacters && activePlaythrough && activeUniverse && (
+        <div>
+          <p className="text-[10px] font-semibold tracking-[2px] uppercase mb-2" style={{ color: 'rgba(200,75,158,0.4)', fontFamily: SG }}>
+            CONTINUE READING
+          </p>
+          <button
+            onClick={handleResume}
+            className="cursor-pointer w-full flex items-center gap-3.5 rounded-2xl p-3.5 text-left"
+            style={{ background: '#1A1628', border: '1px solid rgba(200,75,158,0.12)' }}
+          >
+            {firstSceneImage && (
+              <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0">
+                <img src={firstSceneImage} alt="" className="w-full h-full object-cover" />
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-semibold tracking-[1px] mb-0.5" style={{ color: '#c84b9e', fontFamily: SG }}>
+                STORY · {getChapterLabel(activePlaythrough.progress.currentStepIndex, getStepCount(activePlaythrough.universeId)).toUpperCase()}
+              </p>
+              <p className="text-white text-sm font-semibold" style={{ fontFamily: SG }}>{activeUniverse.title}</p>
+              <p className="text-white/40 text-xs" style={{ fontFamily: SG }}>
+                Playing as {activePlaythrough.character.name}
+              </p>
+            </div>
+            <ChevronRight size={16} className="text-white/20 shrink-0" />
+          </button>
+        </div>
+      )}
+
+      {/* Genre rows — top 5 each */}
+      {visibleGenres.map((genre) => {
+        const items = unlocked.filter((u) => u.genre === genre).slice(0, 5)
+        if (items.length === 0) return null
+        return (
+          <div key={genre}>
+            <p className="text-[10px] font-semibold tracking-[2px] uppercase mb-2" style={{ color: 'rgba(200,75,158,0.35)', fontFamily: SG }}>
+              {genre}
+            </p>
+            <div className="flex gap-2.5 overflow-x-auto scrollbar-none pb-1">
+              {items.map((u) => (
+                <button
+                  key={u.id}
+                  onClick={() => navigate(`/universes/${u.id}`)}
+                  className="cursor-pointer shrink-0 w-[130px] rounded-xl overflow-hidden group text-left"
+                  style={{ background: '#13101c', border: '1px solid rgba(255,255,255,0.06)' }}
+                >
+                  <div className="h-[100px] overflow-hidden relative">
+                    <img src={u.image} alt={u.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(19,16,28,0.9) 0%, transparent 60%)' }} />
+                    <div className="absolute bottom-0 left-0 right-0 px-2 pb-1.5">
+                      <p className="text-white text-[10px] font-semibold leading-tight" style={{ fontFamily: SG }}>{u.title}</p>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )
+      })}
+
+      {/* See all button */}
+      <button
+        onClick={() => navigate('/stories')}
+        className="cursor-pointer w-full h-11 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold"
+        style={{ background: 'rgba(200,75,158,0.08)', border: '1px solid rgba(200,75,158,0.15)', color: '#c84b9e', fontFamily: SG }}
+      >
+        See all stories <ArrowRight size={14} />
+      </button>
+    </div>
+  )
+}
+
+// ─── Main HomePage ───
 
 export function HomePage() {
   const navigate = useNavigate()
@@ -64,45 +341,59 @@ export function HomePage() {
   const addAmbientPing = useStore((s) => s.addAmbientPing)
   const updateLastSessionTimestamp = useStore((s) => s.updateLastSessionTimestamp)
   const dismissAmbientPing = useStore((s) => s.dismissAmbientPing)
+  const unlockedCastIds = useStore((s) => s.unlockedCastIds)
+  const favoriteCastIds = useStore((s) => s.favoriteCastIds)
+  const castChatThreads = useStore((s) => s.castChatThreads)
+  const groupCastThreads = useStore((s) => s.groupCastThreads)
 
+  const [mode, setMode] = useState<'travel' | 'stories'>('travel')
   const [activePingModal, setActivePingModal] = useState<AmbientPingDef | null>(null)
-  const [genreFilter, setGenreFilter] = useState('ALL')
 
   const userName = session?.user?.user_metadata?.full_name?.split(' ')[0] ?? characters[0]?.name ?? 'You'
   const hasCharacters = characters.length > 0
 
-  // ─── Ambient pings: check on mount ───
+  // ─── Ambient pings ───
   useEffect(() => {
     if (!hasCharacters) return
-
     const hoursInactive = (Date.now() - lastSessionTimestamp) / (1000 * 60 * 60)
     const alreadyFiredIds = ambientPings.map((p) => p.id)
     const eligible = getEligibleAmbientPings(globalAffinities, hoursInactive, alreadyFiredIds)
-
-    // Fire up to 2 pings per session
     const toFire = eligible.slice(0, 2)
     for (const def of toFire) {
       addAmbientPing({
-        id: def.id,
-        characterId: def.characterId,
-        universeId: def.universeId,
-        message: def.message,
-        timestamp: Date.now(),
-        read: false,
-        replies: [],
+        id: def.id, characterId: def.characterId, universeId: def.universeId,
+        message: def.message, timestamp: Date.now(), read: false, replies: [],
       })
     }
-
     updateLastSessionTimestamp()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ─── Unread ambient pings ───
   const unreadPings = ambientPings.filter((p) => !p.read)
   const unreadCount = unreadPings.length
 
-  const unlockedCastIds = useStore((s) => s.unlockedCastIds)
+  // ─── Active playthrough ───
+  const activePlaythrough = characters
+    .map((char) => {
+      const entries = Object.entries(storyProgress)
+        .filter(([key]) => key.startsWith(char.id + ':'))
+        .map(([key, prog]) => ({ universeId: key.split(':')[1], progress: prog }))
+        .filter(({ progress }) => progress.currentStepIndex > 0)
+      const best = entries.sort((a, b) => b.progress.currentStepIndex - a.progress.currentStepIndex)[0]
+      return best ? { character: char, universeId: best.universeId, progress: best.progress } : null
+    })
+    .filter(Boolean)[0]
 
-  // ─── Cast roster: unlocked + locked characters ───
+  const activeUniverse = activePlaythrough ? UNIVERSES.find((u) => u.id === activePlaythrough.universeId) : null
+  const firstSceneImage = activePlaythrough?.progress?.sceneImages ? Object.values(activePlaythrough.progress.sceneImages)[0] as string | null : null
+
+  const handleResume = () => {
+    if (!activePlaythrough) return
+    setActiveCharacter(activePlaythrough.character.id)
+    setSelectedUniverse(activePlaythrough.universeId)
+    navigate('/story')
+  }
+
+  // ─── Cast ───
   const unlockedCast = useMemo(() => {
     return CAST_ROSTER
       .filter((c) => unlockedCastIds.includes(c.id))
@@ -118,132 +409,57 @@ export function HomePage() {
     return CAST_ROSTER.filter((c) => !unlockedCastIds.includes(c.id))
   }, [unlockedCastIds])
 
-  // Find active playthrough (most recent character with progress)
-  const activePlaythrough = characters
-    .map((char) => {
-      const entries = Object.entries(storyProgress)
-        .filter(([key]) => key.startsWith(char.id + ':'))
-        .map(([key, prog]) => ({ universeId: key.split(':')[1], progress: prog }))
-        .filter(({ progress }) => progress.currentStepIndex > 0)
-      const best = entries.sort((a, b) => b.progress.currentStepIndex - a.progress.currentStepIndex)[0]
-      return best ? { character: char, universeId: best.universeId, progress: best.progress } : null
-    })
-    .filter(Boolean)[0]
-
-  const activeUniverse = activePlaythrough
-    ? UNIVERSES.find((u) => u.id === activePlaythrough.universeId)
-    : null
-
-  const handleResume = () => {
-    if (!activePlaythrough) return
-    setActiveCharacter(activePlaythrough.character.id)
-    setSelectedUniverse(activePlaythrough.universeId)
-    navigate('/story')
-  }
-
-  const handleNewStory = () => navigate('/home')
-
-  const handleEditCharacters = () => navigate('/characters')
-
-  // Get all universe progress for current characters
-  const universeCards = UNIVERSES.filter((u) => !u.locked && (genreFilter === 'ALL' || u.genre === genreFilter))
-
-  // Get first scene image safely
-  const firstSceneImage = activePlaythrough?.progress?.sceneImages
-    ? Object.values(activePlaythrough.progress.sceneImages)[0]
-    : null
-
-  // ─── Ambient ping card helper ───
   const handleOpenPing = (ping: typeof ambientPings[0]) => {
-    // Find the matching def from all ambient pings
     const allDefs = getEligibleAmbientPings(globalAffinities, Infinity, [])
     const def = allDefs.find((d) => d.id === ping.id) ?? {
-      id: ping.id,
-      characterId: ping.characterId,
-      universeId: ping.universeId,
-      affinityMin: 0,
-      hoursInactive: 0,
-      message: ping.message,
+      id: ping.id, characterId: ping.characterId, universeId: ping.universeId,
+      affinityMin: 0, hoursInactive: 0, message: ping.message,
       contextHint: 'A character is reaching out to the protagonist while they are away from the story.',
       maxReplies: 3,
     }
     setActivePingModal(def)
   }
 
-  // ─── Characters To Meet section (shared between mobile + desktop) ───
-  const CastSection = ({ className = '', delay = 0 }: { className?: string; delay?: number }) => {
+  // ─── Shared: Cast Section ───
+  const CastSection = ({ delay = 0 }: { delay?: number }) => {
     if (unlockedCast.length === 0 && lockedCast.length === 0) return null
     return (
-      <motion.div className={className} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay }}>
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay }}>
         <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-1.5">
-            <Heart size={12} className="text-accent/50" />
-            <p className="text-accent/50 text-[10px] font-semibold tracking-[2px] uppercase">Characters To Meet</p>
-          </div>
-          <button onClick={() => navigate('/cast')} className="cursor-pointer text-accent text-xs font-medium flex items-center gap-1 hover:text-accent/80 transition-colors active:opacity-75">
-            Explore All <ArrowRight size={12} />
+          <p className="text-[10px] font-semibold tracking-[2px] uppercase" style={{ color: 'rgba(107,98,117,0.5)', fontFamily: SG }}>YOUR CAST</p>
+          <button onClick={() => navigate('/cast')} className="cursor-pointer text-xs font-medium flex items-center gap-1 transition-colors" style={{ color: 'rgba(200,75,158,0.55)', fontFamily: SG }}>
+            See all <ArrowRight size={12} />
           </button>
         </div>
-        <div className="flex gap-3 overflow-x-auto scrollbar-none pb-1">
-          {/* Unlocked — tappable */}
+        <div className="flex gap-4 overflow-x-auto scrollbar-none pb-1">
           {unlockedCast.map(({ id, score, tier, charData }) => (
-            <button
-              key={id}
-              onClick={() => navigate(`/cast/${id}`)}
-              className="cursor-pointer shrink-0 flex flex-col items-center gap-1.5 active:opacity-75 transition-opacity"
-            >
-              <div className="relative">
-                <div
-                  className="w-12 h-12 rounded-full overflow-hidden"
-                  style={{ border: `2px solid ${tier.color}`, background: 'rgba(200,75,158,0.1)' }}
-                >
-                  {charData?.staticPortrait ? (
-                    <img src={charData.staticPortrait} alt={charData.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-accent text-sm font-semibold">
-                      {charData?.avatar ?? id[0]?.toUpperCase()}
-                    </div>
-                  )}
-                </div>
-                {score > 0 && (
-                  <svg className="absolute inset-0 w-12 h-12 -rotate-90" viewBox="0 0 48 48">
-                    <circle cx="24" cy="24" r="22" fill="none" stroke={tier.color} strokeWidth="2" strokeDasharray={`${(score / 100) * 138} 138`} strokeLinecap="round" opacity={0.4} />
-                  </svg>
-                )}
+            <button key={id} onClick={() => navigate(`/cast/${id}`)} className="cursor-pointer shrink-0 flex flex-col items-center gap-1.5">
+              <div className="w-12 h-12 rounded-full overflow-hidden" style={{ border: `2px solid ${tier.color}`, background: 'rgba(200,75,158,0.1)' }}>
+                {charData?.staticPortrait
+                  ? <img src={charData.staticPortrait} alt={charData.name} className="w-full h-full object-cover" />
+                  : <div className="w-full h-full flex items-center justify-center text-sm font-semibold" style={{ color: '#c84b9e' }}>{charData?.avatar ?? id[0]?.toUpperCase()}</div>
+                }
               </div>
-              <p className="text-white/70 text-[10px] font-semibold">{charData?.name ?? id}</p>
-              <p className="text-[9px] font-medium" style={{ color: tier.color }}>{tier.label}</p>
+              <p className="text-white/70 text-[10px] font-semibold" style={{ fontFamily: SG }}>{charData?.name ?? id}</p>
             </button>
           ))}
-          {/* Locked — show real name + avatar, tappable to /cast */}
           {lockedCast.slice(0, 4).map((c) => {
             const charData = getCastCharacter(c)
             const uniColor = UNIVERSE_COLORS[c.universeId] ?? '#555'
             return (
-              <button
-                key={c.id}
-                onClick={() => navigate('/cast')}
-                className="cursor-pointer shrink-0 flex flex-col items-center gap-1.5 active:opacity-75 transition-opacity"
-              >
+              <button key={c.id} onClick={() => navigate('/cast')} className="cursor-pointer shrink-0 flex flex-col items-center gap-1.5">
                 <div className="relative">
-                  <div
-                    className="w-12 h-12 rounded-full overflow-hidden"
-                    style={{ border: `2px solid ${uniColor}33`, background: '#1A1624' }}
-                  >
-                    {charData?.staticPortrait ? (
-                      <img src={charData.staticPortrait} alt={c.name} className="w-full h-full object-cover" style={{ filter: 'grayscale(0.4) brightness(0.6)' }} />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-sm opacity-50">
-                        {charData?.avatar ?? c.name[0]}
-                      </div>
-                    )}
+                  <div className="w-12 h-12 rounded-full overflow-hidden" style={{ border: `2px solid ${uniColor}33`, background: '#1A1624' }}>
+                    {charData?.staticPortrait
+                      ? <img src={charData.staticPortrait} alt={c.name} className="w-full h-full object-cover" style={{ filter: 'grayscale(0.4) brightness(0.6)' }} />
+                      : <div className="w-full h-full flex items-center justify-center text-sm opacity-50">{charData?.avatar ?? c.name[0]}</div>
+                    }
                   </div>
                   <div className="absolute inset-0 w-12 h-12 rounded-full flex items-center justify-center bg-black/20">
                     <Lock size={10} className="text-white/30" />
                   </div>
                 </div>
-                <p className="text-white/40 text-[10px] font-semibold">{c.name}</p>
-                <p className="text-[9px] font-medium" style={{ color: `${uniColor}66` }}>{c.universeLabel}</p>
+                <p className="text-white/40 text-[10px] font-semibold" style={{ fontFamily: SG }}>{c.name}</p>
               </button>
             )
           })}
@@ -252,18 +468,16 @@ export function HomePage() {
     )
   }
 
-  // ─── Ambient ping cards (shared) ───
+  // ─── Shared: Ping Cards ───
   const PingCards = ({ delay = 0 }: { delay?: number }) => {
     if (unreadPings.length === 0) return null
     return (
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay }}>
         <div className="flex items-center gap-1.5 mb-2">
           <MessageCircle size={12} className="text-accent/50" />
-          <p className="text-accent/50 text-[10px] font-semibold tracking-[2px] uppercase">Messages</p>
+          <p className="text-[10px] font-semibold tracking-[2px] uppercase" style={{ color: 'rgba(200,75,158,0.4)', fontFamily: SG }}>Messages</p>
           {unreadCount > 0 && (
-            <span className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold text-white" style={{ background: '#c84b9e' }}>
-              {unreadCount}
-            </span>
+            <span className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold text-white" style={{ background: '#c84b9e' }}>{unreadCount}</span>
           )}
         </div>
         <div className="flex flex-col gap-2">
@@ -273,15 +487,11 @@ export function HomePage() {
               <button
                 key={ping.id}
                 onClick={() => handleOpenPing(ping)}
-                className="cursor-pointer w-full flex items-center gap-3 rounded-xl p-3 text-left transition-all hover:brightness-110 active:brightness-90"
+                className="cursor-pointer w-full flex items-center gap-3 rounded-xl p-3 text-left"
                 style={{ background: 'rgba(200,75,158,0.06)', border: '1px solid rgba(200,75,158,0.12)' }}
               >
                 <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm overflow-hidden shrink-0 relative" style={{ background: 'rgba(200,75,158,0.15)' }}>
-                  {charData?.staticPortrait ? (
-                    <img src={charData.staticPortrait} alt={charData.name} className="w-full h-full object-cover" />
-                  ) : (
-                    charData?.avatar ?? '💬'
-                  )}
+                  {charData?.staticPortrait ? <img src={charData.staticPortrait} alt={charData.name} className="w-full h-full object-cover" /> : (charData?.avatar ?? '💬')}
                   <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#0a090f]" style={{ background: '#22c55e' }} />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -300,432 +510,358 @@ export function HomePage() {
   return (
     <div className="bg-bg min-h-screen min-h-dvh">
       {/* ═══ MOBILE ═══ */}
-      <div className="md:hidden flex flex-col min-h-screen min-h-dvh px-5 pt-14 pb-5 gap-4">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col gap-1 cursor-pointer" onClick={() => navigate('/account')}>
-            <p className="text-accent text-[11px] font-semibold tracking-[2px] uppercase">Welcome back</p>
-            <h1 className="text-white font-bold text-[26px]">{userName}</h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={signOut}
-              className="cursor-pointer w-9 h-9 rounded-full flex items-center justify-center transition-colors hover:bg-white/5 active:bg-white/10"
-              title="Log out"
-            >
-              <LogOut size={16} className="text-white/30" />
-            </button>
-            <div className="relative">
-              <div className="w-11 h-11 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #c84b9e, #8b5cf6)' }}>
-                <span className="text-white font-bold text-lg tracking-tight" style={{ fontFamily: 'Georgia, serif' }}>c.</span>
-              </div>
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: '#c84b9e', border: '2px solid #0a090f' }}>
-                  {unreadCount}
-                </span>
+      <div className="md:hidden flex flex-col min-h-screen min-h-dvh">
+        <div className="flex-1 overflow-y-auto px-5 pt-14 pb-5 flex flex-col gap-4">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[11px] font-semibold tracking-[2px] uppercase" style={{ color: 'rgba(107,98,117,0.5)', fontFamily: SG }}>
+                {hasCharacters ? 'Welcome back' : 'WELCOME TO CHAPTR'}
+              </p>
+              <h1 className="text-white font-bold text-[24px]" style={{ fontFamily: SG }}>Where to next?</h1>
+            </div>
+            <div className="flex items-center gap-2">
+              {hasCharacters && (
+                <button onClick={signOut} className="cursor-pointer w-9 h-9 rounded-full flex items-center justify-center hover:bg-white/5"><LogOut size={16} className="text-white/30" /></button>
               )}
             </div>
           </div>
+
+          {/* Toggle */}
+          <ModeToggle mode={mode} setMode={setMode} />
+
+          {/* Mode Description */}
+          <AnimatePresence mode="wait">
+            <ModeDescription mode={mode} />
+          </AnimatePresence>
+
+          {/* Ping cards */}
+          {hasCharacters && <PingCards delay={0.05} />}
+
+          {/* Mode content */}
+          <AnimatePresence mode="wait">
+            <motion.div key={mode} initial={{ opacity: 0, x: mode === 'travel' ? -10 : 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+              {mode === 'travel'
+                ? <TravelContent hasCharacters={hasCharacters} />
+                : <StoriesContent hasCharacters={hasCharacters} activePlaythrough={activePlaythrough} activeUniverse={activeUniverse} firstSceneImage={firstSceneImage} handleResume={handleResume} />
+              }
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Cast */}
+          {hasCharacters && <CastSection delay={0.08} />}
         </div>
 
-        {/* Empty state — first-time user */}
-        {!hasCharacters && (
-          <motion.div
-            className="flex-1 flex flex-col items-center justify-center gap-5 py-8"
-            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-          >
-            <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(200,75,158,0.15), rgba(139,92,246,0.15))', border: '1px solid rgba(200,75,158,0.2)' }}>
-              <Sparkles size={28} className="text-accent" />
-            </div>
-            <div className="text-center">
-              <h2 className="text-white font-bold text-xl mb-2">Create your first Twin</h2>
-              <p className="text-white/40 text-sm leading-relaxed max-w-[260px]">
-                Upload a selfie, pick a personality, and step into an AI-powered story where you're the main character.
-              </p>
-            </div>
-            <motion.button
-              onClick={() => navigate('/create-character')}
-              className="cursor-pointer flex items-center gap-2 text-white font-semibold text-[15px] px-8 py-3.5 rounded-xl"
-              style={{ background: 'linear-gradient(135deg, #c84b9e, #8b5cf6)' }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              Get Started <ArrowRight size={18} />
-            </motion.button>
-          </motion.div>
-        )}
-
-        {/* Ambient Ping Cards */}
-        {hasCharacters && <PingCards delay={0.05} />}
-
-        {/* Continue Story */}
-        {hasCharacters && activePlaythrough && activeUniverse && (
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-            <p className="text-accent/50 text-[10px] font-semibold tracking-[2px] uppercase mb-2">Continue Story</p>
-            <button
-              onClick={handleResume}
-              className="cursor-pointer w-full text-left rounded-2xl overflow-hidden"
-              style={{ background: 'linear-gradient(160deg, #161220, #1a1428)', border: '1px solid rgba(200,75,158,0.1)' }}
-            >
-              {firstSceneImage && (
-                <div className="w-full h-[100px] overflow-hidden">
-                  <img src={firstSceneImage} alt="" className="w-full h-full object-cover" />
-                </div>
-              )}
-              <div className="px-4 py-3 flex flex-col gap-2">
-                <p className="text-accent text-[10px] font-semibold tracking-[1px]">{activeUniverse.title}</p>
-                <p className="text-white font-semibold text-base">
-                  {getChapterLabel(activePlaythrough.progress.currentStepIndex, getStepCount(activePlaythrough.universeId))}
-                </p>
-                {/* Progress bar */}
-                <div className="w-full h-[5px] rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }}>
-                  <div
-                    className="h-full rounded-full"
-                    style={{
-                      width: `${Math.min(((activePlaythrough.progress.currentStepIndex + 1) / getStepCount(activePlaythrough.universeId)) * 100, 100)}%`,
-                      background: 'linear-gradient(90deg, #c84b9e, #8b5cf6)',
-                    }}
-                  />
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full overflow-hidden shrink-0" style={{ background: 'rgba(200,75,158,0.15)' }}>
-                    {activePlaythrough.character.selfieUrl ? (
-                      <img src={activePlaythrough.character.selfieUrl} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-accent text-[9px] font-semibold">
-                        {activePlaythrough.character.name[0]?.toUpperCase()}
-                      </div>
-                    )}
-                  </div>
-                  <p className="text-white/50 text-[11px]">
-                    Playing as {activePlaythrough.character.name}
-                  </p>
-                </div>
-              </div>
+        {/* Bottom tab bar */}
+        <div className="shrink-0 flex items-center justify-center px-5 py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.04)', background: '#0D0B12' }}>
+          <div className="flex items-center gap-10">
+            <button onClick={() => {}} className="cursor-pointer flex flex-col items-center gap-1">
+              <Users size={20} style={{ color: '#A78BFA' }} />
+              <span className="text-[10px] font-semibold" style={{ color: '#A78BFA', fontFamily: SG }}>Home</span>
             </button>
-          </motion.div>
-        )}
-
-        {/* Characters To Meet */}
-        {hasCharacters && <CastSection delay={0.08} />}
-
-        {/* Your Universes */}
-        {hasCharacters && (
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <p className="text-accent/50 text-[10px] font-semibold tracking-[2px] uppercase mb-2">Your Universes</p>
-            <div className="flex gap-1.5 mb-3 overflow-x-auto scrollbar-none">
-              {GENRE_FILTERS.map((g) => (
-                <button
-                  key={g}
-                  onClick={() => setGenreFilter(g)}
-                  className="cursor-pointer shrink-0 text-[10px] font-semibold px-3 py-1.5 rounded-full transition-colors"
-                  style={{
-                    background: genreFilter === g ? 'rgba(200,75,158,0.15)' : 'rgba(255,255,255,0.04)',
-                    color: genreFilter === g ? '#c84b9e' : 'rgba(255,255,255,0.35)',
-                    border: `1px solid ${genreFilter === g ? 'rgba(200,75,158,0.25)' : 'rgba(255,255,255,0.06)'}`,
-                  }}
-                >
-                  {g[0] + g.slice(1).toLowerCase()}
-                </button>
-              ))}
-            </div>
-            <div className="flex gap-2.5 overflow-x-auto scrollbar-none pb-1">
-              {universeCards.map((u) => (
-                <button
-                  key={u.id}
-                  onClick={() => navigate(`/universes/${u.id}`)}
-                  className="cursor-pointer shrink-0 w-[130px] rounded-xl overflow-hidden group active:opacity-75 transition-opacity text-left"
-                  style={{ background: '#13101c', border: '1px solid rgba(255,255,255,0.06)' }}
-                >
-                  <div className="h-[100px] overflow-hidden">
-                    <img src={u.image} alt={u.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                  </div>
-                  <div className="px-2 py-2">
-                    <span className="text-accent text-[8px] font-semibold tracking-[1px] uppercase">{u.genreTag}</span>
-                    <p className="text-white text-[10px] font-semibold leading-tight mt-0.5">{u.title}</p>
-                    <div className="flex items-center gap-1 mt-1">
-                      <Users size={9} className="text-white/40" />
-                      <span className="text-white/40 text-[9px]">{formatPlayerCount(UNIVERSE_PLAYERS[u.id] ?? 0)}</span>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {/* Your Twins */}
-        {hasCharacters && (
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-accent/50 text-[10px] font-semibold tracking-[2px] uppercase">Your Twins</p>
-              <button onClick={handleEditCharacters} className="cursor-pointer text-accent text-xs font-medium flex items-center gap-1">
-                <Pencil size={14} /> Edit
-              </button>
-            </div>
-            <div className="flex gap-4">
-              {characters.map((char) => (
-                <button
-                  key={char.id}
-                  onClick={() => navigate(`/edit-character/${char.id}`)}
-                  className="cursor-pointer flex flex-col items-center gap-1.5 active:opacity-75 transition-opacity"
-                >
-                  <div className="w-14 h-14 rounded-full overflow-hidden" style={{ border: '2px solid rgba(200,75,158,0.4)', background: 'rgba(200,75,158,0.1)' }}>
-                    {char.selfieUrl ? (
-                      <img src={char.selfieUrl} alt={char.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-accent text-lg font-semibold">
-                        {char.name[0]?.toUpperCase()}
-                      </div>
-                    )}
-                  </div>
-                  <p className="text-white/75 text-[11px] font-semibold">{char.name}</p>
-                </button>
-              ))}
-              {characters.length < 3 && (
-                <button onClick={() => navigate('/create-character')} className="cursor-pointer flex flex-col items-center gap-1.5 active:opacity-75 transition-opacity">
-                  <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ border: '1.5px dashed rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.02)' }}>
-                    <Plus size={20} className="text-white/40" />
-                  </div>
-                  <p className="text-white/30 text-[11px] font-medium">New</p>
-                </button>
-              )}
-            </div>
-          </motion.div>
-        )}
-
-
-        {/* New Story CTA */}
-        {hasCharacters && (
-          <motion.button
-            onClick={handleNewStory}
-            className="cursor-pointer w-full h-[52px] rounded-xl flex items-center justify-center gap-2 text-white font-semibold text-[15px] mt-auto"
-            style={{ background: 'linear-gradient(135deg, #c84b9e, #8b5cf6)' }}
-            initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            Start New Story <ArrowRight size={18} />
-          </motion.button>
-        )}
+            <button onClick={() => setMode('stories')} className="cursor-pointer flex flex-col items-center gap-1">
+              <BookOpen size={20} style={{ color: 'rgba(255,255,255,0.3)' }} />
+              <span className="text-[10px] font-medium" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: SG }}>Stories</span>
+            </button>
+            <button onClick={() => setMode('travel')} className="cursor-pointer flex flex-col items-center gap-1">
+              <Compass size={20} style={{ color: 'rgba(255,255,255,0.3)' }} />
+              <span className="text-[10px] font-medium" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: SG }}>Travel</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* ═══ DESKTOP ═══ */}
       <div className="hidden md:flex h-screen overflow-hidden">
         <AppSidebar />
-        <div className="flex-1 min-h-screen overflow-y-auto px-8 lg:px-12 py-12">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-10">
-            <div>
-              <p className="text-accent text-xs font-semibold tracking-[2px] uppercase">Welcome back</p>
-              <h1 className="text-white font-bold text-3xl">{userName}</h1>
-            </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleNewStory}
-                className="cursor-pointer flex items-center gap-2.5 text-white font-semibold text-sm px-6 py-3 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
-                style={{ background: 'linear-gradient(135deg, #c84b9e, #8b5cf6)' }}
-              >
-                <Plus size={16} /> New Story
-              </button>
-              <button
-                onClick={signOut}
-                className="cursor-pointer w-10 h-10 rounded-full flex items-center justify-center transition-colors hover:bg-white/5 active:bg-white/10"
-                title="Log out"
-              >
-                <LogOut size={16} className="text-white/30" />
-              </button>
-            </div>
-          </div>
-
-          <div className="flex gap-8">
-            {/* Left column — main content */}
-            <div className="flex-1 flex flex-col gap-8">
-              {/* FTUE — Create first character */}
-              {!hasCharacters && (
-                <motion.div
-                  className="rounded-2xl p-6 flex items-center gap-6"
-                  style={{ background: 'linear-gradient(160deg, #161220, #1a1428)', border: '1px solid rgba(200,75,158,0.15)' }}
-                  initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-                >
-                  <div className="w-14 h-14 rounded-full flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, rgba(200,75,158,0.15), rgba(139,92,246,0.15))', border: '1px solid rgba(200,75,158,0.2)' }}>
-                    <Sparkles size={24} className="text-accent" />
-                  </div>
-                  <div className="flex-1">
-                    <h2 className="text-white font-bold text-lg mb-1">Create your first Twin</h2>
-                    <p className="text-white/40 text-sm leading-relaxed">
-                      Upload a selfie, pick a personality, and step into a story where you're the main character.
-                    </p>
-                  </div>
-                  <motion.button
-                    onClick={() => navigate('/create-character')}
-                    className="cursor-pointer flex items-center gap-2 text-white font-semibold px-6 py-3 rounded-xl shrink-0"
-                    style={{ background: 'linear-gradient(135deg, #c84b9e, #8b5cf6)' }}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    Get Started <ArrowRight size={16} />
-                  </motion.button>
-                </motion.div>
-              )}
-
-              {/* Ambient Ping Cards */}
-              {hasCharacters && <PingCards delay={0.05} />}
-
-              {/* Continue Story */}
-              {hasCharacters && activePlaythrough && activeUniverse && (
-                <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-                  <p className="text-accent/50 text-[10px] font-semibold tracking-[2px] uppercase mb-3">Continue Story</p>
-                  <button
-                    onClick={handleResume}
-                    className="cursor-pointer w-full text-left rounded-2xl overflow-hidden group"
-                    style={{ background: 'linear-gradient(160deg, #161220, #1a1428)', border: '1px solid rgba(200,75,158,0.1)', boxShadow: '0 4px 30px rgba(0,0,0,0.3)' }}
-                  >
-                    <div className="flex">
-                      {firstSceneImage && (
-                        <div className="w-[280px] h-[180px] overflow-hidden shrink-0">
-                          <img src={firstSceneImage} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                        </div>
-                      )}
-                      <div className="flex-1 px-6 py-5 flex flex-col justify-center gap-3">
-                        <p className="text-accent text-[11px] font-semibold tracking-[1px]">{activeUniverse.title}</p>
-                        <p className="text-white font-semibold text-xl">
-                          {getChapterLabel(activePlaythrough.progress.currentStepIndex, getStepCount(activePlaythrough.universeId))}
-                        </p>
-                        <div className="w-full max-w-[300px] h-[5px] rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }}>
-                          <div
-                            className="h-full rounded-full"
-                            style={{
-                              width: `${Math.min(((activePlaythrough.progress.currentStepIndex + 1) / getStepCount(activePlaythrough.universeId)) * 100, 100)}%`,
-                              background: 'linear-gradient(90deg, #c84b9e, #8b5cf6)',
-                            }}
-                          />
-                        </div>
-                        <div className="flex items-center gap-2 text-white/60 text-sm">
-                          Resume as {activePlaythrough.character.name} <ArrowRight size={14} />
-                        </div>
-                      </div>
-                    </div>
-                  </button>
-                </motion.div>
-              )}
-
-              {/* Characters To Meet */}
-              <CastSection delay={0.08} />
-
-              {/* Universes */}
-              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-accent/50 text-[10px] font-semibold tracking-[2px] uppercase">Your Universes</p>
-                </div>
-                <div className="flex gap-2 mb-4">
-                  {GENRE_FILTERS.map((g) => (
-                    <button
-                      key={g}
-                      onClick={() => setGenreFilter(g)}
-                      className="cursor-pointer text-[11px] font-semibold px-3.5 py-1.5 rounded-full transition-colors"
-                      style={{
-                        background: genreFilter === g ? 'rgba(200,75,158,0.15)' : 'rgba(255,255,255,0.04)',
-                        color: genreFilter === g ? '#c84b9e' : 'rgba(255,255,255,0.35)',
-                        border: `1px solid ${genreFilter === g ? 'rgba(200,75,158,0.25)' : 'rgba(255,255,255,0.06)'}`,
-                      }}
-                    >
-                      {g[0] + g.slice(1).toLowerCase()}
-                    </button>
-                  ))}
-                </div>
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                  {universeCards.map((u) => (
-                    <button
-                      key={u.id}
-                      onClick={() => navigate(`/universes/${u.id}`)}
-                      className="cursor-pointer rounded-xl overflow-hidden group text-left"
-                      style={{ background: '#13101c', border: '1px solid rgba(255,255,255,0.06)' }}
-                    >
-                      <div className="relative h-[140px] overflow-hidden">
-                        <img src={u.image} alt={u.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                      </div>
-                      <div className="px-3 py-2.5">
-                        <span className="text-accent text-[9px] font-semibold tracking-[1px] uppercase">{u.genreTag}</span>
-                        <p className="text-white text-sm font-semibold mt-0.5">{u.title}</p>
-                        <div className="flex items-center gap-1.5 mt-1">
-                          <Users size={11} className="text-white/40" />
-                          <span className="text-white/40 text-[11px]">{formatPlayerCount(UNIVERSE_PLAYERS[u.id] ?? 0)} played</span>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-
-            </div>
-
-            {/* Right sidebar — Characters */}
-            <motion.div
-              className="w-[260px] shrink-0"
-              initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 }}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-accent/50 text-[10px] font-semibold tracking-[2px] uppercase">Your Twins</p>
+        <div className="flex-1 overflow-y-auto px-8 lg:px-12 py-10">
+          <div className="max-w-[1100px]">
+            {/* Header row */}
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                {hasCharacters && <p className="text-[12px] mb-1" style={{ color: '#6B6275', fontFamily: SG }}>Welcome back 👋</p>}
+                <h1 className="text-white font-bold text-[36px]" style={{ fontFamily: SG }}>Where to next?</h1>
+              </div>
+              <div className="flex items-center gap-3">
                 {hasCharacters && (
-                  <button onClick={handleEditCharacters} className="cursor-pointer text-accent text-xs font-medium flex items-center gap-1 hover:text-accent/80 transition-colors">
-                    <Pencil size={14} /> Edit
+                  <button onClick={() => navigate('/characters')} className="cursor-pointer flex items-center gap-2 text-white/50 text-sm px-4 py-2.5 rounded-lg hover:bg-white/5 transition-colors" style={{ fontFamily: SG }}>
+                    <Pencil size={14} /> Your Twins
                   </button>
                 )}
+                <button onClick={signOut} className="cursor-pointer w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/5"><LogOut size={16} className="text-white/30" /></button>
               </div>
+            </div>
 
-              <div className="flex flex-col gap-3">
-                {characters.map((char) => (
-                  <button
-                    key={char.id}
-                    onClick={() => navigate(`/edit-character/${char.id}`)}
-                    className="cursor-pointer w-full flex items-center gap-3 rounded-xl p-3 text-left transition-all hover:brightness-110 active:brightness-90"
-                    style={{ background: '#111016', border: '1px solid rgba(200,75,158,0.08)' }}
-                  >
-                    <div className="w-12 h-12 rounded-full overflow-hidden shrink-0" style={{ border: '2px solid rgba(200,75,158,0.3)', background: 'rgba(200,75,158,0.1)' }}>
-                      {char.selfieUrl ? (
-                        <img src={char.selfieUrl} alt={char.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-accent font-semibold">
-                          {char.name[0]?.toUpperCase()}
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                      <p className="text-white/85 font-semibold text-sm">{char.name}</p>
-                      <p className="text-white/30 text-xs">{char.gender === 'female' ? 'Female' : 'Male'} · {char.bio ? char.bio.slice(0, 30) : 'No bio'}</p>
-                    </div>
-                  </button>
-                ))}
-
-                {characters.length < 3 && (
-                  <button
-                    onClick={() => navigate('/create-character')}
-                    className="cursor-pointer w-full flex items-center justify-center gap-2 rounded-xl p-4 transition-all hover:brightness-125 active:brightness-90"
-                    style={{ border: '1.5px dashed rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.01)' }}
-                  >
-                    <Plus size={16} className="text-white/40" />
-                    <p className="text-white/45 text-sm font-medium">Create Twin</p>
-                  </button>
-                )}
+            {/* Toggle + Description row */}
+            <div className="flex items-start gap-6 mb-8">
+              <div className="w-[300px] shrink-0">
+                <ModeToggle mode={mode} setMode={setMode} />
               </div>
-            </motion.div>
+              <div className="flex-1">
+                <AnimatePresence mode="wait">
+                  <ModeDescription mode={mode} />
+                </AnimatePresence>
+              </div>
+            </div>
+
+            {/* Ping cards */}
+            {hasCharacters && <div className="mb-6"><PingCards delay={0.05} /></div>}
+
+            {/* Mode content */}
+            <AnimatePresence mode="wait">
+              <motion.div key={mode} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                {mode === 'travel'
+                  ? <DesktopTravelContent hasCharacters={hasCharacters} />
+                  : <DesktopStoriesContent hasCharacters={hasCharacters} activePlaythrough={activePlaythrough} activeUniverse={activeUniverse} firstSceneImage={firstSceneImage} handleResume={handleResume} />
+                }
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Cast */}
+            {hasCharacters && <div className="mt-8"><CastSection delay={0.1} /></div>}
           </div>
         </div>
       </div>
 
-      {/* ─── Ambient Ping Modal ─── */}
+      {/* Ambient Ping Modal */}
       <AnimatePresence>
         {activePingModal && (
           <AmbientPingModal
             ping={activePingModal}
-            onDismiss={() => {
-              dismissAmbientPing(activePingModal.id)
-              setActivePingModal(null)
-            }}
+            onDismiss={() => { dismissAmbientPing(activePingModal.id); setActivePingModal(null) }}
           />
         )}
       </AnimatePresence>
+    </div>
+  )
+}
+
+// ─── Desktop Travel Content ───
+
+function DesktopTravelContent({ hasCharacters }: { hasCharacters: boolean }) {
+  const navigate = useNavigate()
+  const activeCharacterId = useStore((s) => s.activeCharacterId)
+  const travelTrips = useStore((s) => s.travelTrips)
+
+  const activeTrip = activeCharacterId
+    ? Object.entries(travelTrips).find(([key, trip]) => key.startsWith(`${activeCharacterId}:`) && trip.phase !== 'complete')
+    : null
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Continue trip + new trip CTA side by side */}
+      <div className="flex gap-4">
+        {activeTrip && (
+          <button
+            onClick={() => navigate('/travel/trip')}
+            className="cursor-pointer flex-1 flex items-center gap-4 rounded-2xl p-4 text-left"
+            style={{ background: '#1A1628', border: '1px solid rgba(124,58,237,0.12)' }}
+          >
+            <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0">
+              <img src={DESTINATIONS.find((d) => d.id === activeTrip[1].destinationId)?.heroImage ?? ''} alt="" className="w-full h-full object-cover" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-semibold tracking-[1px] mb-0.5" style={{ color: '#A78BFA', fontFamily: SG }}>
+                DAY {activeTrip[1].currentDay} · {DESTINATIONS.find((d) => d.id === activeTrip[1].destinationId)?.city?.toUpperCase()}
+              </p>
+              <p className="text-white text-[15px] font-semibold" style={{ fontFamily: SG }}>
+                {DESTINATIONS.find((d) => d.id === activeTrip[1].destinationId)?.city}
+              </p>
+              <p className="text-white/40 text-xs" style={{ fontFamily: SG }}>
+                {activeTrip[1].phase === 'planning' ? 'Still planning...' : 'Exploring'}
+              </p>
+            </div>
+            <ChevronRight size={18} className="text-white/20 shrink-0" />
+          </button>
+        )}
+        <button
+          onClick={() => {
+            if (!hasCharacters) { navigate('/create-character'); return }
+            navigate('/travel/tokyo')
+          }}
+          className="cursor-pointer rounded-2xl flex flex-col items-center justify-center gap-2 transition-all hover:brightness-125"
+          style={{
+            width: activeTrip ? 280 : '100%',
+            height: activeTrip ? undefined : 90,
+            background: activeTrip ? 'rgba(124,58,237,0.08)' : 'linear-gradient(90deg, #7C3AED, #A78BFA)',
+            border: '1px solid rgba(124,58,237,0.2)',
+            fontFamily: SG,
+          }}
+        >
+          {activeTrip ? <Plus size={22} style={{ color: '#A78BFA' }} /> : <Plane size={20} className="text-white" />}
+          <span className="text-sm font-semibold" style={{ color: activeTrip ? '#A78BFA' : '#fff' }}>
+            {activeTrip ? 'Plan a new trip' : 'Plan your first trip'}
+          </span>
+        </button>
+      </div>
+
+      {/* Destinations */}
+      <div>
+        <p className="text-[11px] font-semibold tracking-[2px] uppercase mb-3" style={{ color: 'rgba(107,98,117,0.5)', fontFamily: SG }}>DESTINATIONS</p>
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+          {DESTINATIONS.map((dest) => (
+            <button
+              key={dest.id}
+              onClick={() => !dest.locked && navigate(`/travel/${dest.id}`)}
+              disabled={dest.locked}
+              className="cursor-pointer rounded-2xl overflow-hidden text-left flex flex-col"
+              style={{ border: `1px solid ${dest.locked ? 'rgba(255,255,255,0.04)' : 'rgba(124,58,237,0.15)'}` }}
+            >
+              <div className="relative h-[140px] overflow-hidden">
+                <img
+                  src={dest.heroImage}
+                  alt={dest.city}
+                  className="w-full h-full object-cover"
+                  style={{ filter: dest.locked ? 'brightness(0.4) saturate(0.5)' : undefined }}
+                />
+                {!dest.locked && (
+                  <div className="absolute top-3 left-3 px-2 py-1 rounded-md text-[9px] font-bold tracking-[1px] text-white" style={{ background: '#7C3AED', fontFamily: SG }}>AVAILABLE</div>
+                )}
+                {dest.locked && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-white/30 text-xs font-medium px-3 py-1.5 rounded-full" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)', fontFamily: SG }}>Coming soon</span>
+                  </div>
+                )}
+              </div>
+              <div className="p-4" style={{ background: dest.locked ? '#13101c' : '#151020' }}>
+                <div className="flex items-center gap-2">
+                  <span className="text-base">{dest.countryEmoji}</span>
+                  <p className="text-lg font-bold" style={{ color: dest.locked ? 'rgba(255,255,255,0.45)' : '#fff', fontFamily: SG }}>{dest.city}</p>
+                </div>
+                <p className="text-[11px] mt-1" style={{ color: dest.locked ? '#4A4255' : '#A78BFA', fontFamily: SG }}>
+                  {dest.vibeTags.join(' · ')}
+                </p>
+                <p className="text-[11px] mt-1.5 line-clamp-2" style={{ color: dest.locked ? '#3D3748' : 'rgba(255,255,255,0.4)', fontFamily: SG }}>
+                  {dest.description}
+                </p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Desktop Stories Content (Homepage preview — top 5 per genre) ───
+
+function DesktopStoriesContent({ hasCharacters, activePlaythrough, activeUniverse, firstSceneImage, handleResume }: {
+  hasCharacters: boolean
+  activePlaythrough: any
+  activeUniverse: any
+  firstSceneImage: string | null
+  handleResume: () => void
+}) {
+  const navigate = useNavigate()
+  const [genreFilter, setGenreFilter] = useState('ALL')
+  const unlocked = UNIVERSES.filter((u) => !u.locked)
+  const visibleGenres = genreFilter === 'ALL' ? PREVIEW_GENRES : [genreFilter]
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Genre filters */}
+      <div className="flex gap-2 overflow-x-auto scrollbar-none">
+        {GENRE_FILTERS.map((g) => (
+          <button
+            key={g}
+            onClick={() => setGenreFilter(g)}
+            className="cursor-pointer shrink-0 text-[11px] font-semibold px-3.5 py-1.5 rounded-full transition-colors"
+            style={{
+              background: genreFilter === g ? 'rgba(200,75,158,0.15)' : 'rgba(255,255,255,0.04)',
+              color: genreFilter === g ? '#c84b9e' : 'rgba(255,255,255,0.35)',
+              border: `1px solid ${genreFilter === g ? 'rgba(200,75,158,0.25)' : 'rgba(255,255,255,0.06)'}`,
+              fontFamily: SG,
+            }}
+          >
+            {g[0] + g.slice(1).toLowerCase()}
+          </button>
+        ))}
+      </div>
+
+      {/* Upload selfie CTA */}
+      {!hasCharacters && (
+        <button
+          onClick={() => navigate('/create-character')}
+          className="cursor-pointer w-full max-w-[520px] flex items-center gap-4 rounded-xl p-4 text-left"
+          style={{ background: '#111016', border: '1px solid rgba(200,75,158,0.12)' }}
+        >
+          <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0" style={{ background: 'rgba(200,75,158,0.12)' }}>
+            <Camera size={20} style={{ color: '#c84b9e' }} />
+          </div>
+          <div className="flex-1">
+            <p className="text-white text-[15px] font-semibold" style={{ fontFamily: SG }}>Upload selfie to star in stories</p>
+            <p className="text-[13px]" style={{ color: '#6B6275', fontFamily: SG }}>Your face appears in every scene</p>
+          </div>
+          <ChevronRight size={18} className="text-white/20 shrink-0" />
+        </button>
+      )}
+
+      {/* Continue story */}
+      {hasCharacters && activePlaythrough && activeUniverse && (
+        <div>
+          <p className="text-[11px] font-semibold tracking-[2px] uppercase mb-3" style={{ color: 'rgba(200,75,158,0.4)', fontFamily: SG }}>CONTINUE READING</p>
+          <button
+            onClick={handleResume}
+            className="cursor-pointer w-full max-w-[520px] flex items-center gap-4 rounded-2xl p-4 text-left group"
+            style={{ background: '#1A1628', border: '1px solid rgba(200,75,158,0.12)' }}
+          >
+            {firstSceneImage && (
+              <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0">
+                <img src={firstSceneImage} alt="" className="w-full h-full object-cover" />
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-semibold tracking-[1px] mb-0.5" style={{ color: '#c84b9e', fontFamily: SG }}>
+                {getChapterLabel(activePlaythrough.progress.currentStepIndex, getStepCount(activePlaythrough.universeId)).toUpperCase()} · {activeUniverse.genreTag}
+              </p>
+              <p className="text-white text-[15px] font-semibold" style={{ fontFamily: SG }}>{activeUniverse.title}</p>
+              <p className="text-white/40 text-xs mt-0.5" style={{ fontFamily: SG }}>Playing as {activePlaythrough.character.name}</p>
+            </div>
+            <ChevronRight size={18} className="text-white/20 shrink-0" />
+          </button>
+        </div>
+      )}
+
+      {/* Genre rows — top 5 each */}
+      {visibleGenres.map((genre) => {
+        const items = unlocked.filter((u) => u.genre === genre).slice(0, 5)
+        if (items.length === 0) return null
+        return (
+          <div key={genre}>
+            <p className="text-[11px] font-semibold tracking-[2px] uppercase mb-3" style={{ color: 'rgba(200,75,158,0.35)', fontFamily: SG }}>
+              {genre}
+            </p>
+            <div className="flex gap-3 overflow-x-auto scrollbar-none pb-1">
+              {items.map((u) => (
+                <button
+                  key={u.id}
+                  onClick={() => navigate(`/universes/${u.id}`)}
+                  className="cursor-pointer shrink-0 w-[180px] rounded-xl overflow-hidden group text-left"
+                  style={{ background: '#13101c', border: '1px solid rgba(255,255,255,0.06)' }}
+                >
+                  <div className="relative h-[140px] overflow-hidden">
+                    <img src={u.image} alt={u.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(19,16,28,0.9) 0%, transparent 50%)' }} />
+                    <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                      <span className="text-[8px] font-semibold tracking-[1px] uppercase" style={{ color: '#c84b9e', fontFamily: SG }}>{u.genreTag}</span>
+                      <p className="text-white text-[12px] font-semibold leading-tight mt-0.5" style={{ fontFamily: SG }}>{u.title}</p>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )
+      })}
+
+      {/* See all button */}
+      <button
+        onClick={() => navigate('/stories')}
+        className="cursor-pointer w-full max-w-[320px] h-11 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold"
+        style={{ background: 'rgba(200,75,158,0.08)', border: '1px solid rgba(200,75,158,0.15)', color: '#c84b9e', fontFamily: SG }}
+      >
+        See all stories <ArrowRight size={14} />
+      </button>
     </div>
   )
 }

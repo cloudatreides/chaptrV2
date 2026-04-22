@@ -7,7 +7,7 @@ import { useActiveStory } from '../hooks/useActiveStory'
 import { generateRevealSignature } from '../lib/claudeStream'
 import { getAffinityTier } from '../lib/affinity'
 import { getCharacter, CHARACTERS } from '../data/characters'
-import { getRevealPerspective } from '../data/storyData'
+import { getRevealPerspective } from '../data/storyHelpers'
 import { generateSceneImage } from '../lib/togetherAi'
 import { trackEvent, savePlaythrough } from '../lib/supabase'
 

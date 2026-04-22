@@ -3,7 +3,8 @@ import { BookOpen, Users, Sparkles, Camera, LogOut, Star, MessageCircle, User, P
 import { useAuth } from '../contexts/AuthContext'
 import { useStore } from '../store/useStore'
 import { CAST_ROSTER, getCastCharacter } from '../data/castRoster'
-import { getUniverseGenre, getMomentConfig } from '../data/storyData'
+import { getMomentConfig } from '../data/storyData'
+import { getUniverseGenre } from '../data/storyHelpers'
 
 export function AppSidebar() {
   const location = useLocation()
@@ -15,10 +16,10 @@ export function AppSidebar() {
   const selectedUniverse = useStore((s) => s.selectedUniverse)
   const albumLabel = getMomentConfig(getUniverseGenre(selectedUniverse)).albumTitle
   const NAV_ITEMS = [
-    { icon: BookOpen, label: 'My Story', path: '/home' },
+    { icon: BookOpen, label: 'Home', path: '/home' },
     { icon: Plane, label: 'Travel', path: '/travel' },
+    { icon: Sparkles, label: 'Stories', path: '/stories' },
     { icon: Users, label: 'Characters To Meet', path: '/cast' },
-    { icon: Sparkles, label: 'Your Twins', path: '/characters' },
     { icon: Camera, label: albumLabel, path: '/album' },
   ]
   const favoriteCastIds = useStore((s) => s.favoriteCastIds)

@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 import { useStore } from '../store/useStore'
 import { type ChatAction, getMysteryBoxBoost, IMAGE_REACTION_ACTION_IDS, buildReactionImagePrompt, getRandomJoke, getRandomDare } from '../data/chatActions'
 import { getCharacter, CHARACTERS } from '../data/characters'
-import { getUniverseGenre } from '../data/storyData'
+import { getUniverseGenre } from '../data/storyHelpers'
 
 interface UseChatActionsParams {
   characterId: string

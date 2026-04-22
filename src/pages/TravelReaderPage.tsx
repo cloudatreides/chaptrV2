@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Send, Loader2, MapPin, ChevronRight } from 'lucide-react'
+import { ArrowLeft, Send, Loader2, MapPin, ChevronRight, Lock, Check, Play, ChevronDown, Camera } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { getDestination } from '../data/travel/destinations'
 import { getTravelCompanion } from '../data/travel/companions'
@@ -23,7 +23,7 @@ export function TravelReaderPage() {
     addTravelPlanningMessage, addTravelDayChatMessage, updateTripItinerary,
     setTripScene, setTripSceneImage, advanceTravelScene, advanceTravelDay,
     setTripPhase, updateTravelAffinity, addCompanionMemory, addTravelEngagementTime,
-    completeTrip, resetTrip, setIsStreaming, isStreaming,
+    completeTrip, resetTrip, setIsStreaming, isStreaming, updateCompanionSliders,
   } = store
 
   const trip = activeTripId ? travelTrips[activeTripId] : null
@@ -40,6 +40,9 @@ export function TravelReaderPage() {
   const [suggestions, setSuggestions] = useState<string[]>([])
   const [sceneProse, setSceneProse] = useState('')
   const [isGeneratingItinerary, setIsGeneratingItinerary] = useState(false)
+  const [showCompanionSettings, setShowCompanionSettings] = useState(false)
+  const [imageLoadingSceneId, setImageLoadingSceneId] = useState<string | null>(null)
+  const [isGeneratingChatImage, setIsGeneratingChatImage] = useState(false)
   const chatEndRef = useRef<HTMLDivElement>(null)
   const abortRef = useRef<AbortController | null>(null)
   const engagementRef = useRef<number>(Date.now())
@@ -206,6 +209,43 @@ export function TravelReaderPage() {
     }
   }, [input, trip, companion, destination, isStreaming, activeChar])
 
+  async function handleShowMe() {
+    if (!trip || !companion || !destination || isGeneratingChatImage || isStreaming) return
+
+    const isPlanning = trip.phase === 'planning'
+    const msgs = isPlanning ? trip.planningChatHistory : (trip.dayChatHistories[trip.currentDay] ?? [])
+    const lastCompanionMsg = [...msgs].reverse().find((m) => m.role === 'character')
+    if (!lastCompanionMsg) return
+
+    setIsGeneratingChatImage(true)
+
+    const currentScene = getCurrentScene()
+    const locationContext = currentScene ? `${currentScene.location}, ${destination.city}` : destination.city
+    const imagePrompt = `anime style, cinematic scene: ${lastCompanionMsg.content.slice(0, 200)}. Setting: ${locationContext}. Atmospheric lighting, detailed background, travel photography mood.`
+
+    try {
+      const url = await generateTravelImage(imagePrompt, activeChar?.selfieUrl)
+      if (url) {
+        const imageMsg: ChatMessage = {
+          role: 'character',
+          content: `📸 Here's what I'm talking about...`,
+          characterId: trip.companionId,
+          timestamp: Date.now(),
+          imageUrl: url,
+        }
+        if (isPlanning) {
+          addTravelPlanningMessage(imageMsg)
+        } else {
+          addTravelDayChatMessage(trip.currentDay, imageMsg)
+        }
+      }
+    } catch (e) {
+      console.error('Show me image error:', e)
+    } finally {
+      setIsGeneratingChatImage(false)
+    }
+  }
+
   async function handleStartExploring() {
     if (!trip || !destination || isGeneratingItinerary) return
     setIsGeneratingItinerary(true)
@@ -242,9 +282,12 @@ export function TravelReaderPage() {
     abortRef.current = new AbortController()
 
     if (!trip.sceneImages[scene.id]) {
+      setImageLoadingSceneId(scene.id)
       generateTravelImage(scene.imagePrompt, scene.protagonistVisible ? activeChar?.selfieUrl : undefined)
-        .then((url) => { if (url) setTripSceneImage(scene.id, url) })
-        .catch(() => {})
+        .then((url) => {
+          if (url) setTripSceneImage(scene.id, url)
+        })
+        .finally(() => setImageLoadingSceneId(null))
     }
 
     try {
@@ -275,6 +318,18 @@ export function TravelReaderPage() {
   }
 
   function handleContinueToChat() {
+    const scene = getCurrentScene()
+    if (scene && trip) {
+      const sceneImg = trip.sceneImages[scene.id]
+      const recapMsg: ChatMessage = {
+        role: 'character',
+        content: `📍 ${scene.location} — ${scene.activity}`,
+        characterId: '__scene_recap__',
+        timestamp: Date.now(),
+        imageUrl: sceneImg || undefined,
+      }
+      addTravelDayChatMessage(trip.currentDay, recapMsg)
+    }
     setViewMode('chat')
   }
 
@@ -362,6 +417,47 @@ export function TravelReaderPage() {
   const messages = trip.phase === 'planning'
     ? trip.planningChatHistory
     : (trip.dayChatHistories[trip.currentDay] ?? [])
+
+  const planningReady = trip.phase === 'planning' && messages.length >= 6
+
+  const arcSegments = [
+    {
+      id: 'planning',
+      label: 'Plan your trip',
+      status: trip.phase === 'planning' ? 'active' as const : 'done' as const,
+    },
+    {
+      id: 'start-exploring',
+      label: `Start exploring ${destination.city}`,
+      status: (trip.phase === 'planning'
+        ? (planningReady ? 'ready' : 'locked')
+        : 'done') as 'locked' | 'ready' | 'active' | 'done',
+      action: planningReady ? handleStartExploring : undefined,
+    },
+    ...Array.from({ length: destination.tripDays }, (_, i) => {
+      const dayNum = i + 1
+      const dayData = trip.itinerary.days.find((d) => d.dayNumber === dayNum)
+      const isCurrent = trip.phase === 'day' && trip.currentDay === dayNum
+      const isRecap = trip.phase === 'recap' && trip.currentDay === dayNum
+      const isDone = dayData?.completed ?? false
+      const isFuture = !dayData && trip.currentDay < dayNum
+      return {
+        id: `day-${dayNum}`,
+        label: dayData ? `Day ${dayNum}: ${dayData.theme}` : `Day ${dayNum}`,
+        status: (isDone ? 'done' : isCurrent || isRecap ? 'active' : isFuture || !dayData ? 'locked' : 'locked') as 'locked' | 'ready' | 'active' | 'done',
+        scenes: dayData?.scenes.map((s, si) => ({
+          label: s.location,
+          done: !!s.prose,
+          active: isCurrent && si === trip.currentSceneIndex,
+        })),
+      }
+    }),
+    {
+      id: 'complete',
+      label: 'Trip complete',
+      status: (trip.phase === 'complete' ? 'done' : 'locked') as 'locked' | 'ready' | 'active' | 'done',
+    },
+  ]
 
   return (
     <div className="flex h-dvh" style={{ background: '#0A0810' }}>
@@ -453,67 +549,131 @@ export function TravelReaderPage() {
             )}
 
             {/* Scene View */}
-            {viewMode === 'scene' && currentScene && (
+            {viewMode === 'scene' && currentScene && (() => {
+              const currentDay = trip.itinerary.days.find((d) => d.dayNumber === trip.currentDay)
+              const sceneIndex = currentDay?.scenes.findIndex((s) => s.id === currentScene.id) ?? 0
+              const totalScenes = currentDay?.scenes.length ?? 1
+              const sceneImg = trip.sceneImages[currentScene.id]
+
+              return (
               <motion.div
                 key={`scene-${currentScene.id}`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="px-5 md:px-[60px] py-6"
+                className="relative"
               >
-                {/* Scene Image */}
-                {trip.sceneImages[currentScene.id] && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.98 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="rounded-xl overflow-hidden mb-5"
-                    style={{ aspectRatio: '16/9' }}
-                  >
-                    <img
-                      src={trip.sceneImages[currentScene.id]}
-                      alt={currentScene.location}
-                      className="w-full h-full object-cover"
-                    />
-                  </motion.div>
-                )}
+                {/* Hero image with gradient fade */}
+                <div className="relative w-full" style={{ height: sceneImg ? 360 : imageLoadingSceneId === currentScene.id ? 200 : 0 }}>
+                  {sceneImg && (
+                    <>
+                      <img
+                        src={sceneImg}
+                        alt={currentScene.location}
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                      <div
+                        className="absolute inset-0"
+                        style={{ background: 'linear-gradient(180deg, rgba(10,8,16,0) 40%, rgba(10,8,16,1) 100%)' }}
+                      />
+                    </>
+                  )}
 
-                {/* Scene Meta */}
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-white/30 text-xs uppercase tracking-wider" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                    {currentScene.timeOfDay}
-                  </span>
-                  <span className="text-white/20">·</span>
-                  <span className="text-white/50 text-xs" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                    {currentScene.location}
-                  </span>
+                  {/* Loading placeholder while image generates */}
+                  {!sceneImg && imageLoadingSceneId === currentScene.id && (
+                    <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'rgba(124,58,237,0.03)' }}>
+                      <div className="flex items-center gap-2 text-white/20">
+                        <Loader2 size={14} className="animate-spin" />
+                        <span className="text-xs" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Generating scene...</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                {/* Prose */}
-                <div
-                  className="text-white/80 text-[15px] leading-relaxed mb-6 whitespace-pre-wrap"
-                  style={{ fontFamily: "'Source Serif 4', Georgia, serif" }}
-                >
-                  {sceneProse || currentScene.prose || ''}
-                </div>
+                <div className="relative z-10 px-5 md:px-[60px]" style={{ marginTop: sceneImg ? -20 : 16 }}>
+                  {/* Scene progress bar */}
+                  <div className="flex gap-1 mb-4">
+                    {Array.from({ length: totalScenes }, (_, i) => (
+                      <div
+                        key={i}
+                        className="h-[3px] flex-1 rounded-full"
+                        style={{ background: i <= sceneIndex ? '#7C3AED' : 'rgba(255,255,255,0.08)' }}
+                      />
+                    ))}
+                  </div>
 
-                {/* Scene Actions */}
-                {!isStreaming && (sceneProse || currentScene.prose) && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex flex-col sm:flex-row gap-3"
-                  >
-                    <button
-                      onClick={handleContinueToChat}
-                      className="flex-1 py-3 rounded-xl text-white font-medium text-sm cursor-pointer"
-                      style={{ fontFamily: "'Space Grotesk', sans-serif", background: 'linear-gradient(135deg, #7C3AED, #c84b9e)' }}
+                  {/* Day & location label */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="text-purple-400/70 text-[10px] font-semibold tracking-[2px] uppercase"
+                        style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                      >
+                        Day {trip.currentDay} — {currentScene.location}
+                      </span>
+                    </div>
+                    <span
+                      className="text-white/25 text-[10px]"
+                      style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                     >
-                      Chat with {companion.character.name}
-                    </button>
-                  </motion.div>
+                      Scene {sceneIndex + 1} of {totalScenes}
+                    </span>
+                  </div>
+
+                  {/* Prose */}
+                  <div
+                    className="text-white/85 text-[15px] leading-[1.8] mb-8 whitespace-pre-wrap max-w-[640px]"
+                    style={{ fontFamily: "'Source Serif 4', Georgia, serif" }}
+                  >
+                    {sceneProse || currentScene.prose || ''}
+                    {isStreaming && <span className="inline-block w-0.5 h-4 bg-purple-400/60 ml-0.5 animate-pulse align-text-bottom" />}
+                  </div>
+
+                  {/* Scene Actions */}
+                  {!isStreaming && (sceneProse || currentScene.prose) && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex flex-col gap-3 max-w-[400px] pb-8"
+                    >
+                      <button
+                        onClick={handleContinueToChat}
+                        className="py-3 px-5 rounded-xl text-white font-medium text-sm cursor-pointer"
+                        style={{ fontFamily: "'Space Grotesk', sans-serif", background: 'linear-gradient(135deg, #7C3AED, #c84b9e)' }}
+                      >
+                        Chat with {companion.character.name}
+                      </button>
+                      <button
+                        onClick={handleNextScene}
+                        className="py-3 px-5 rounded-xl text-white/60 font-medium text-sm cursor-pointer transition-colors hover:text-white/80"
+                        style={{ fontFamily: "'Space Grotesk', sans-serif", background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+                      >
+                        Skip to next scene
+                      </button>
+                    </motion.div>
+                  )}
+                </div>
+
+                {/* Companion typing indicator during streaming */}
+                {isStreaming && (
+                  <div className="px-5 md:px-[60px] pb-6">
+                    <div className="flex items-center gap-2">
+                      {companion.character.staticPortrait ? (
+                        <img src={companion.character.staticPortrait} alt="" className="w-5 h-5 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-5 h-5 rounded-full flex items-center justify-center text-[8px]" style={{ background: '#2D2538' }}>
+                          {companion.character.avatar}
+                        </div>
+                      )}
+                      <span className="text-white/30 text-xs italic" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                        {companion.character.name} is writing...
+                      </span>
+                    </div>
+                  </div>
                 )}
               </motion.div>
-            )}
+              )
+            })()}
 
             {/* Chat View */}
             {viewMode === 'chat' && (
@@ -526,7 +686,41 @@ export function TravelReaderPage() {
               >
                 {/* Messages */}
                 <div className="space-y-4">
-                  {messages.map((msg, i) => (
+                  {messages.map((msg, i) => {
+                    if (msg.characterId === '__scene_recap__') {
+                      return (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="flex justify-center my-2"
+                        >
+                          <div
+                            className="rounded-xl overflow-hidden"
+                            style={{ maxWidth: 360, background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.12)' }}
+                          >
+                            {msg.imageUrl && (
+                              <img
+                                src={msg.imageUrl}
+                                alt=""
+                                className="w-full"
+                                style={{ aspectRatio: '16/9', objectFit: 'cover' }}
+                              />
+                            )}
+                            <div className="px-3 py-2">
+                              <p
+                                className="text-white/50 text-xs"
+                                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                              >
+                                {msg.content}
+                              </p>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )
+                    }
+
+                    return (
                     <motion.div
                       key={i}
                       initial={{ opacity: 0, y: 8 }}
@@ -541,8 +735,16 @@ export function TravelReaderPage() {
                           borderBottomLeftRadius: msg.role !== 'user' ? 4 : undefined,
                         }}
                       >
+                        {msg.imageUrl && (
+                          <img
+                            src={msg.imageUrl}
+                            alt=""
+                            className="rounded-lg mb-2 w-full"
+                            style={{ maxWidth: 320, aspectRatio: '16/9', objectFit: 'cover' }}
+                          />
+                        )}
                         <p
-                          className="text-[14px] leading-relaxed"
+                          className="text-[14px] leading-relaxed whitespace-pre-wrap"
                           style={{
                             fontFamily: "'Space Grotesk', sans-serif",
                             color: msg.role === 'user' ? '#fff' : 'rgba(255,255,255,0.8)',
@@ -552,7 +754,8 @@ export function TravelReaderPage() {
                         </p>
                       </div>
                     </motion.div>
-                  ))}
+                    )
+                  })}
 
                   {/* Streaming indicator */}
                   {isStreaming && streamedText && (
@@ -561,7 +764,7 @@ export function TravelReaderPage() {
                         className="max-w-[80%] rounded-2xl px-4 py-2.5"
                         style={{ background: 'rgba(255,255,255,0.06)', borderBottomLeftRadius: 4 }}
                       >
-                        <p className="text-[14px] leading-relaxed text-white/80" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                        <p className="text-[14px] leading-relaxed text-white/80 whitespace-pre-wrap" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                           {parseAffinityDelta(streamedText).content}
                         </p>
                       </div>
@@ -585,6 +788,37 @@ export function TravelReaderPage() {
         {/* Bottom Controls */}
         {viewMode === 'chat' && (
           <div className="shrink-0 px-5 md:px-[60px] pb-5 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+            {/* Inline phase actions — compact, non-intrusive (no planning CTA here — sidebar only) */}
+            {!isStreaming && trip.phase === 'day' && currentScene && !currentScene.prose && (
+              <button
+                onClick={handlePlayScene}
+                className="flex items-center gap-2 mb-3 py-1.5 px-3 rounded-lg text-xs cursor-pointer transition-colors hover:bg-purple-500/15"
+                style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'rgba(200,180,255,0.9)', background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.15)' }}
+              >
+                <MapPin size={10} /> Go to {currentScene.location}
+              </button>
+            )}
+
+            {!isStreaming && trip.phase === 'day' && currentScene?.prose && (
+              <button
+                onClick={handleNextScene}
+                className="flex items-center gap-2 mb-3 py-1.5 px-3 rounded-lg text-xs cursor-pointer transition-colors hover:bg-purple-500/15"
+                style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'rgba(200,180,255,0.9)', background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.15)' }}
+              >
+                Next scene <ChevronRight size={10} />
+              </button>
+            )}
+
+            {!isStreaming && trip.phase === 'recap' && (
+              <button
+                onClick={handleNextDay}
+                className="flex items-center gap-2 mb-3 py-1.5 px-3 rounded-lg text-xs cursor-pointer transition-colors hover:bg-purple-500/15"
+                style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'rgba(200,180,255,0.9)', background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.15)' }}
+              >
+                <Play size={10} /> {trip.currentDay >= destination.tripDays ? 'Complete your trip' : `Start Day ${trip.currentDay + 1}`}
+              </button>
+            )}
+
             {/* Suggestions */}
             {suggestions.length > 0 && !isStreaming && (
               <div className="flex gap-2 mb-3 overflow-x-auto pb-1">
@@ -606,50 +840,6 @@ export function TravelReaderPage() {
               </div>
             )}
 
-            {/* Action buttons */}
-            {!isStreaming && trip.phase === 'planning' && messages.length >= 6 && (
-              <button
-                onClick={handleStartExploring}
-                className="w-full mb-3 py-2.5 rounded-xl text-sm font-medium text-white cursor-pointer"
-                style={{ fontFamily: "'Space Grotesk', sans-serif", background: 'linear-gradient(135deg, #7C3AED, #c84b9e)' }}
-              >
-                Start exploring {destination.city}
-              </button>
-            )}
-
-            {!isStreaming && trip.phase === 'day' && currentScene && !currentScene.prose && (
-              <button
-                onClick={handlePlayScene}
-                className="w-full mb-3 py-2.5 rounded-xl text-sm font-medium text-white cursor-pointer"
-                style={{ fontFamily: "'Space Grotesk', sans-serif", background: 'linear-gradient(135deg, #7C3AED, #c84b9e)' }}
-              >
-                <span className="flex items-center justify-center gap-2">
-                  <MapPin size={14} />
-                  Go to {currentScene.location}
-                </span>
-              </button>
-            )}
-
-            {!isStreaming && trip.phase === 'day' && currentScene?.prose && (
-              <button
-                onClick={handleNextScene}
-                className="w-full mb-3 py-2.5 rounded-xl text-sm font-medium text-white cursor-pointer flex items-center justify-center gap-2"
-                style={{ fontFamily: "'Space Grotesk', sans-serif", background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(124,58,237,0.2)' }}
-              >
-                Next <ChevronRight size={14} />
-              </button>
-            )}
-
-            {!isStreaming && trip.phase === 'recap' && (
-              <button
-                onClick={handleNextDay}
-                className="w-full mb-3 py-2.5 rounded-xl text-sm font-medium text-white cursor-pointer"
-                style={{ fontFamily: "'Space Grotesk', sans-serif", background: 'linear-gradient(135deg, #7C3AED, #c84b9e)' }}
-              >
-                {trip.currentDay >= destination.tripDays ? 'Complete your trip' : `Start Day ${trip.currentDay + 1}`}
-              </button>
-            )}
-
             {/* Input */}
             <form
               onSubmit={(e) => { e.preventDefault(); handleSend() }}
@@ -669,6 +859,20 @@ export function TravelReaderPage() {
                 }}
               />
               <button
+                type="button"
+                onClick={handleShowMe}
+                disabled={isStreaming || isGeneratingChatImage || messages.filter((m) => m.role === 'character').length === 0}
+                className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed transition-colors hover:bg-purple-500/10"
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+                title="Generate a photo of what we're talking about"
+              >
+                {isGeneratingChatImage ? (
+                  <Loader2 size={16} className="text-purple-400 animate-spin" />
+                ) : (
+                  <Camera size={16} className="text-purple-400/70" />
+                )}
+              </button>
+              <button
                 type="submit"
                 disabled={!input.trim() || isStreaming}
                 className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
@@ -683,6 +887,159 @@ export function TravelReaderPage() {
             </form>
           </div>
         )}
+      </div>
+
+      {/* Trip Arc Sidebar — desktop only */}
+      <div
+        className="hidden lg:flex flex-col shrink-0 w-[260px] overflow-y-auto pt-6 pb-16 px-5"
+        style={{ borderLeft: '1px solid rgba(255,255,255,0.06)', background: '#0C0A14' }}
+      >
+        <p
+          className="text-white/30 text-[10px] font-semibold tracking-[2px] uppercase mb-5"
+          style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+        >
+          Trip Progress
+        </p>
+        <div className="space-y-1">
+          {arcSegments.map((seg, i) => {
+            const isReady = seg.status === 'ready'
+            const isActive = seg.status === 'active'
+            const isDone = seg.status === 'done'
+            const isLocked = seg.status === 'locked'
+
+            return (
+              <div key={seg.id}>
+                <motion.button
+                  onClick={isReady && seg.action ? seg.action : undefined}
+                  disabled={!isReady || isGeneratingItinerary}
+                  animate={isReady ? { boxShadow: ['0 0 0px rgba(124,58,237,0)', '0 0 12px rgba(124,58,237,0.3)', '0 0 0px rgba(124,58,237,0)'] } : {}}
+                  transition={isReady ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } : {}}
+                  className={`w-full flex items-center gap-2.5 py-2 px-2.5 rounded-lg text-left transition-all ${
+                    isReady ? 'cursor-pointer hover:bg-purple-500/10' : 'cursor-default'
+                  }`}
+                  style={{
+                    background: isActive ? 'rgba(124,58,237,0.1)' : isReady ? 'rgba(124,58,237,0.05)' : 'transparent',
+                    border: isActive ? '1px solid rgba(124,58,237,0.2)' : isReady ? '1px solid rgba(124,58,237,0.2)' : '1px solid transparent',
+                  }}
+                >
+                  <div
+                    className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center"
+                    style={{
+                      background: isDone ? '#7C3AED' : isActive ? 'rgba(124,58,237,0.3)' : isReady ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.06)',
+                      border: isActive ? '2px solid #7C3AED' : undefined,
+                    }}
+                  >
+                    {isDone && <Check size={10} className="text-white" />}
+                    {isActive && <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />}
+                    {isReady && <Play size={8} className="text-purple-400 ml-0.5" />}
+                    {isLocked && <Lock size={8} className="text-white/20" />}
+                  </div>
+                  <span
+                    className="text-xs leading-tight"
+                    style={{
+                      fontFamily: "'Space Grotesk', sans-serif",
+                      color: isDone ? 'rgba(255,255,255,0.5)' : isActive ? '#fff' : isReady ? 'rgba(200,180,255,0.9)' : 'rgba(255,255,255,0.2)',
+                      fontWeight: isActive || isReady ? 600 : 400,
+                    }}
+                  >
+                    {seg.label}
+                  </span>
+                </motion.button>
+
+                {/* Scene sub-items for active/done days */}
+                {'scenes' in seg && seg.scenes && (isActive || isDone) && (
+                  <div className="ml-5 pl-3 space-y-0.5 mb-1" style={{ borderLeft: '1px solid rgba(124,58,237,0.15)' }}>
+                    {seg.scenes.map((sc, si) => (
+                      <div key={si} className="flex items-center gap-2 py-1">
+                        <div
+                          className="shrink-0 w-1.5 h-1.5 rounded-full"
+                          style={{
+                            background: sc.done ? '#7C3AED' : sc.active ? '#A78BFA' : 'rgba(255,255,255,0.1)',
+                            boxShadow: sc.active ? '0 0 6px rgba(167,139,250,0.5)' : undefined,
+                          }}
+                        />
+                        <span
+                          className="text-[11px] truncate"
+                          style={{
+                            fontFamily: "'Space Grotesk', sans-serif",
+                            color: sc.done ? 'rgba(255,255,255,0.4)' : sc.active ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.15)',
+                          }}
+                        >
+                          {sc.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Connector line between segments */}
+                {i < arcSegments.length - 1 && (
+                  <div className="flex justify-start ml-[19px]">
+                    <div className="w-px h-2" style={{ background: isDone ? 'rgba(124,58,237,0.4)' : 'rgba(255,255,255,0.06)' }} />
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Companion Settings */}
+        <div className="mt-auto pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <button
+            onClick={() => setShowCompanionSettings(!showCompanionSettings)}
+            className="w-full flex items-center gap-2 py-1.5 cursor-pointer"
+          >
+            {companion.character.staticPortrait ? (
+              <img src={companion.character.staticPortrait} alt="" className="w-6 h-6 rounded-full object-cover" />
+            ) : (
+              <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs" style={{ background: '#2D2538' }}>
+                {companion.character.avatar}
+              </div>
+            )}
+            <span className="text-white/50 text-xs flex-1 text-left" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              {companion.character.name}
+            </span>
+            <ChevronDown size={12} className={`text-white/30 transition-transform ${showCompanionSettings ? 'rotate-180' : ''}`} />
+          </button>
+
+          <AnimatePresence>
+            {showCompanionSettings && trip && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="pt-3 space-y-4">
+                  {[
+                    { key: 'chattiness' as const, left: 'Brief', right: 'Chatty' },
+                    { key: 'planningStyle' as const, left: 'Spontaneous', right: 'Planner' },
+                    { key: 'vibe' as const, left: 'Playful', right: 'Thoughtful' },
+                  ].map((s) => (
+                    <div key={s.key}>
+                      <div className="flex justify-between mb-1.5">
+                        <span className="text-white/25 text-[10px]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{s.left}</span>
+                        <span className="text-white/25 text-[10px]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{s.right}</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        value={trip.companionSliders[s.key]}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value)
+                          updateCompanionSliders({ ...trip.companionSliders, [s.key]: val })
+                        }}
+                        className="w-full accent-purple-500"
+                        style={{ height: 3 }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   )

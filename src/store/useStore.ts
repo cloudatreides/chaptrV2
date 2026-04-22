@@ -8,6 +8,7 @@ export interface ChatMessage {
   content: string
   characterId: string
   timestamp: number
+  imageUrl?: string
 }
 
 export interface CharacterState {
@@ -258,6 +259,7 @@ interface StoreState {
   advanceTravelScene: () => void
   advanceTravelDay: () => void
   setTripPhase: (phase: TripProgress['phase']) => void
+  updateCompanionSliders: (sliders: { chattiness: number; planningStyle: number; vibe: number }) => void
   updateTravelAffinity: (delta: number) => void
   addCompanionMemory: (memory: string) => void
   addTravelEngagementTime: (ms: number) => void
@@ -772,6 +774,17 @@ export const useStore = create<StoreState>()(
           travelTrips: {
             ...s.travelTrips,
             [id]: { ...s.travelTrips[id], phase },
+          },
+        }
+      }),
+
+      updateCompanionSliders: (sliders) => set((s) => {
+        const id = s.activeTripId
+        if (!id || !s.travelTrips[id]) return {}
+        return {
+          travelTrips: {
+            ...s.travelTrips,
+            [id]: { ...s.travelTrips[id], companionSliders: sliders },
           },
         }
       }),

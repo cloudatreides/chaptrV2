@@ -1,4 +1,5 @@
-import { getBibleForUniverse, resolveText } from '../../data/storyData'
+import { resolveText } from '../../data/storyData'
+import { getBibleForUniverse } from '../../data/storyHelpers'
 import { streamSSE, makeClaudeRequest, buildMemoryPrompt } from './core'
 import type { PlaythroughRecord } from '../../store/useStore'
 

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { MapPin, Lock } from 'lucide-react'
+import { MapPin } from 'lucide-react'
 import { AppSidebar } from '../components/AppSidebar'
 import { useStore } from '../store/useStore'
 import { DESTINATIONS } from '../data/travel/destinations'
@@ -65,33 +65,52 @@ export function TravelHomePage() {
                 transition={{ delay: i * 0.08 }}
                 onClick={() => !dest.locked && navigate(`/travel/${dest.id}`)}
                 disabled={dest.locked}
-                className="relative rounded-2xl overflow-hidden text-left cursor-pointer group"
+                className="rounded-2xl overflow-hidden text-left cursor-pointer group flex flex-col"
                 style={{
                   background: '#151020',
-                  border: '1px solid rgba(255,255,255,0.06)',
-                  aspectRatio: '16/10',
+                  border: `1px solid ${dest.locked ? 'rgba(255,255,255,0.04)' : 'rgba(124,58,237,0.12)'}`,
                 }}
               >
-                {/* Gradient overlay */}
-                <div className="absolute inset-0" style={{
-                  background: dest.locked
-                    ? 'linear-gradient(180deg, rgba(15,13,20,0.3) 0%, rgba(15,13,20,0.9) 100%)'
-                    : 'linear-gradient(180deg, rgba(15,13,20,0) 30%, rgba(15,13,20,0.85) 100%)',
-                }} />
+                {/* Hero image */}
+                <div className="relative h-[180px] overflow-hidden">
+                  <img
+                    src={dest.heroImage}
+                    alt={dest.city}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    style={{ filter: dest.locked ? 'brightness(0.35) saturate(0.4)' : undefined }}
+                    loading="lazy"
+                  />
+                  {!dest.locked && (
+                    <div className="absolute top-3 left-3 px-2 py-1 rounded-md text-[9px] font-bold tracking-[1px] text-white" style={{ background: '#7C3AED', fontFamily: "'Space Grotesk', sans-serif" }}>AVAILABLE</div>
+                  )}
+                  {dest.locked && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span
+                        className="text-white/30 text-sm font-medium px-4 py-2 rounded-full"
+                        style={{ fontFamily: "'Space Grotesk', sans-serif", background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}
+                      >
+                        Coming soon
+                      </span>
+                    </div>
+                  )}
+                </div>
 
-                {/* Content */}
-                <div className="absolute bottom-0 left-0 right-0 p-5">
+                {/* Content — solid background, not overlapping image */}
+                <div className="p-4" style={{ background: dest.locked ? '#12101a' : '#151020' }}>
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-lg">{dest.countryEmoji}</span>
                     <h3
-                      className="text-white text-xl font-bold"
-                      style={{ fontFamily: "'Syne', sans-serif", letterSpacing: '-0.01em' }}
+                      className="text-xl font-bold"
+                      style={{
+                        fontFamily: "'Syne', sans-serif",
+                        letterSpacing: '-0.01em',
+                        color: dest.locked ? 'rgba(255,255,255,0.4)' : '#fff',
+                      }}
                     >
                       {dest.city}
                     </h3>
-                    {dest.locked && <Lock size={14} className="text-white/30" />}
                   </div>
-                  <p className="text-white/50 text-sm mb-3" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                  <p className="text-sm mb-3" style={{ fontFamily: "'Space Grotesk', sans-serif", color: dest.locked ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.5)' }}>
                     {dest.description}
                   </p>
                   <div className="flex gap-2 flex-wrap">
@@ -102,7 +121,7 @@ export function TravelHomePage() {
                         style={{
                           fontFamily: "'Space Grotesk', sans-serif",
                           background: dest.locked ? 'rgba(255,255,255,0.04)' : 'rgba(124,58,237,0.12)',
-                          color: dest.locked ? 'rgba(255,255,255,0.3)' : 'rgba(200,180,255,0.8)',
+                          color: dest.locked ? 'rgba(255,255,255,0.25)' : 'rgba(200,180,255,0.8)',
                           fontWeight: 500,
                         }}
                       >
@@ -111,26 +130,6 @@ export function TravelHomePage() {
                     ))}
                   </div>
                 </div>
-
-                {/* Locked overlay */}
-                {dest.locked && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span
-                      className="text-white/30 text-sm font-medium px-4 py-2 rounded-full"
-                      style={{ fontFamily: "'Space Grotesk', sans-serif", background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(4px)' }}
-                    >
-                      Coming soon
-                    </span>
-                  </div>
-                )}
-
-                {/* Hover glow */}
-                {!dest.locked && (
-                  <div
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    style={{ background: 'radial-gradient(ellipse at center, rgba(124,58,237,0.06) 0%, transparent 70%)' }}
-                  />
-                )}
               </motion.button>
             ))}
           </div>

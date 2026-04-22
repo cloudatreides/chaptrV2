@@ -25,8 +25,12 @@ function buildSliderModifiers(sliders: CompanionSliders): string {
 
   if (sliders.chattiness < 30) {
     parts.push('You tend toward comfortable silence. You observe more than you narrate. When you do speak, it lands.')
+    parts.push('RESPONSE LENGTH: Keep replies to 2-3 sentences. Be punchy and direct. No long paragraphs.')
   } else if (sliders.chattiness > 70) {
     parts.push('You talk a lot and love it. You point things out, tell stories about places, react to everything. Your energy is infectious.')
+    parts.push('RESPONSE LENGTH: You can write longer replies — 2-3 paragraphs is natural for you. Paint vivid pictures with your words.')
+  } else {
+    parts.push('RESPONSE LENGTH: Keep replies to 1-2 short paragraphs. Conversational, not essay-length.')
   }
 
   if (sliders.planningStyle < 30) {

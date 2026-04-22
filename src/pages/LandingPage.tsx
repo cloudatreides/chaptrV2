@@ -1,136 +1,47 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, BookOpen, Sparkles, Camera, MessageCircle, GitBranch } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { ArrowRight, Globe, BookOpen, ChevronRight } from 'lucide-react'
 import { AuthModal } from '../components/AuthModal'
+import { UNIVERSES } from '../data/storyData'
 
-
-const STEPS: { num: string; icon: React.ReactNode; title: string; desc: string; img: string; widget?: 'morph' | 'universes' | 'choices' }[] = [
-  {
-    num: '01',
-    icon: <Camera size={20} className="text-accent" />,
-    title: 'Upload your selfie',
-    desc: 'AI transforms your photo into an anime character. You become the protagonist.',
-    img: '/step1-upload.jpeg',
-    widget: 'morph',
-  },
-  {
-    num: '02',
-    icon: <MessageCircle size={20} className="text-gem" />,
-    title: 'Pick your world',
-    desc: 'Romance, horror, mystery — choose a universe and step into the story.',
-    img: '/step2-world.jpeg',
-    widget: 'universes',
-  },
-  {
-    num: '03',
-    icon: <GitBranch size={20} className="text-accentLight" />,
-    title: 'Shape the ending',
-    desc: 'Your choices create branching paths. 4 possible endings — each one uniquely yours.',
-    img: '/step3-story.jpeg',
-    widget: 'choices',
-  },
-]
-
-const SERIF = "'Playfair Display', Georgia, serif"
 const SG = 'Space Grotesk, sans-serif'
-const SYNE = "'Syne', sans-serif"
 const INTER = 'Inter, sans-serif'
 
-// ─── Typewriter Headline ───
+// ─── Travel destinations (smoke test — Tokyo only active) ───
 
-function TypewriterHeadline({ fontSize, style }: { fontSize: number; style?: React.CSSProperties }) {
-  const lines = ['Your face.', 'Your story.']
-  const [displayedChars, setDisplayedChars] = useState(0)
-  const [showCursor, setShowCursor] = useState(true)
-  const fullText = lines.join('\n')
+const DESTINATIONS = [
+  { city: 'Tokyo', vibe: 'Neon · Ramen · Shrines', image: '/hero-landing.jpeg', accent: '#A78BFA', comingSoon: false },
+  { city: 'Seoul', vibe: 'K-pop · Cafés · Markets', image: '/seoul-night.jpg', accent: '#D4799A', comingSoon: true },
+  { city: 'Paris', vibe: 'Art · Wine · Romance', image: '/midnight-paris.jpeg', accent: '#E05263', comingSoon: true },
+  { city: 'Bangkok', vibe: 'Temples · Street food · Chaos', image: '/edge-of-atlas.jpeg', accent: '#FFB74D', comingSoon: true },
+]
 
-  useEffect(() => {
-    if (displayedChars >= fullText.length) {
-      // Hide cursor after a beat
-      const t = setTimeout(() => setShowCursor(false), 1500)
-      return () => clearTimeout(t)
-    }
-    const delay = fullText[displayedChars] === '.' ? 300 : fullText[displayedChars] === '\n' ? 400 : 60
-    const t = setTimeout(() => setDisplayedChars(prev => prev + 1), delay)
-    return () => clearTimeout(t)
-  }, [displayedChars, fullText])
+// Pick a diverse set of stories for the showcase
+const SHOWCASE_STORIES = UNIVERSES.filter(u => !u.locked).slice(0, 8)
 
-  const visible = fullText.slice(0, displayedChars)
-  const [line1, line2] = visible.split('\n')
-
-  return (
-    <h1
-      className="text-white font-bold"
-      style={{
-        fontSize,
-        letterSpacing: fontSize > 50 ? -2 : -1,
-        lineHeight: 1.05,
-        fontFamily: SERIF,
-        textShadow: fontSize > 50 ? '0 4px 40px rgba(0,0,0,0.5)' : undefined,
-        ...style,
-      }}
-    >
-      {line1}
-      {line2 !== undefined && <br />}
-      {line2 ?? ''}
-      {showCursor && (
-        <motion.span
-          className="inline-block ml-0.5"
-          style={{ color: '#c84b9e', fontWeight: 300 }}
-          animate={{ opacity: [1, 0] }}
-          transition={{ duration: 0.6, repeat: Infinity, repeatType: 'reverse' }}
-        >
-          |
-        </motion.span>
-      )}
-    </h1>
-  )
-}
-
-// ─── Character Avatar (static portrait cropped from scene image) ───
-
-function CharAvatar({ size = 28 }: { size?: number }) {
-  return (
-    <div
-      className="rounded-full overflow-hidden shrink-0"
-      style={{ width: size, height: size, background: 'rgba(200,75,158,0.15)' }}
-    >
-      <img
-        src="/jiwon-portrait.png"
-        alt="Jiwon"
-        className="w-full h-full object-cover"
-      />
-    </div>
-  )
-}
-
-// ─── Selfie → Anime Morph ───
+// ─── Selfie → Anime Morph (kept from production) ───
 
 function SelfieMorph({ height, className }: { height: number; className?: string }) {
   return (
     <div className={`relative w-full overflow-hidden ${className ?? ''}`} style={{ height, backgroundColor: '#1a1525' }}>
-      {/* "Selfie" layer — real photo */}
       <div
         className="absolute inset-0 bg-cover"
         style={{ backgroundImage: 'url(/step1-selfie.jpeg)', backgroundPosition: 'center 20%' }}
       />
-      {/* "Anime" layer — AI-transformed version, fades in over selfie */}
       <motion.div
         className="absolute inset-0 bg-cover"
         style={{ backgroundImage: 'url(/step1-anime.png)', backgroundPosition: 'center 20%' }}
         animate={{ opacity: [0, 0, 1, 1, 0, 0] }}
         transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', times: [0, 0.15, 0.4, 0.6, 0.85, 1] }}
       />
-      {/* Anime tint overlay */}
       <motion.div
         className="absolute inset-0"
         style={{ background: 'linear-gradient(135deg, rgba(200,75,158,0.2) 0%, rgba(139,92,246,0.15) 100%)' }}
         animate={{ opacity: [0, 0, 1, 1, 0, 0] }}
         transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', times: [0, 0.15, 0.4, 0.6, 0.85, 1] }}
       />
-      {/* Label that swaps */}
       <div className="absolute bottom-3 right-3 flex gap-1.5">
         <motion.span
           className="text-[10px] font-semibold px-2 py-0.5 rounded-md"
@@ -149,393 +60,92 @@ function SelfieMorph({ height, className }: { height: number; className?: string
           anime
         </motion.span>
       </div>
-      {/* Bottom gradient */}
       <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(17,16,22,0) 50%, rgba(17,16,22,0.8) 100%)' }} />
     </div>
   )
 }
 
-// ─── Story Universe Showcase ───
 
-const UNIVERSE_CARDS = [
-  { title: 'The Seoul Transfer', tag: 'K-POP ROMANCE', image: '/seoul-night.jpg', accent: '#c84b9e' },
-  { title: 'Hollow Manor', tag: 'SUPERNATURAL HORROR', image: '/hollow-manor.svg', accent: '#7c3aed' },
-  { title: 'The Last Signal', tag: 'NOIR MYSTERY', image: '/last-signal.svg', accent: '#0ea5e9' },
-]
+// ─── Section Header (standardized) ───
 
-function StoryUniverses({ height, className }: { height: number; className?: string }) {
-  const [activeIdx, setActiveIdx] = useState(0)
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveIdx(prev => (prev + 1) % UNIVERSE_CARDS.length)
-    }, 2600)
-    return () => clearInterval(interval)
-  }, [])
-
+function SectionHeader({ tag, title, description, className }: { tag: string; title: string; description?: string; className?: string }) {
   return (
-    <div className={`relative w-full overflow-hidden ${className ?? ''}`} style={{ height, backgroundColor: '#0d0b14' }}>
-      {/* Crossfading background images */}
-      {UNIVERSE_CARDS.map((card, i) => (
-        <motion.div
-          key={card.title}
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${card.image})` }}
-          animate={{ opacity: i === activeIdx ? 1 : 0 }}
-          transition={{ duration: 0.7, ease: 'easeInOut' }}
-        />
-      ))}
-
-      {/* Dark overlay */}
-      <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(13,11,20,0.35) 0%, rgba(13,11,20,0.7) 55%, rgba(13,11,20,0.95) 100%)' }} />
-
-      {/* Story info */}
-      <div className="absolute inset-0 flex flex-col justify-end px-4 pb-4">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeIdx}
-            className="flex flex-col gap-1"
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.35 }}
-          >
-            <span
-              className="text-[9px] font-bold tracking-[1.5px] px-2 py-0.5 rounded self-start"
-              style={{
-                background: `rgba(${UNIVERSE_CARDS[activeIdx].accent === '#c84b9e' ? '200,75,158' : UNIVERSE_CARDS[activeIdx].accent === '#7c3aed' ? '124,58,237' : '14,165,233'},0.25)`,
-                color: UNIVERSE_CARDS[activeIdx].accent,
-                fontFamily: INTER,
-              }}
-            >
-              {UNIVERSE_CARDS[activeIdx].tag}
-            </span>
-            <p className="text-white font-semibold text-sm" style={{ fontFamily: INTER }}>
-              {UNIVERSE_CARDS[activeIdx].title}
-            </p>
-          </motion.div>
-        </AnimatePresence>
-
-        {/* Dot indicators */}
-        <div className="flex items-center gap-1.5 mt-2.5">
-          {UNIVERSE_CARDS.map((_, i) => (
-            <motion.div
-              key={i}
-              className="rounded-full"
-              animate={{
-                width: i === activeIdx ? 16 : 4,
-                background: i === activeIdx ? UNIVERSE_CARDS[activeIdx].accent : 'rgba(255,255,255,0.4)',
-              }}
-              style={{ height: 4 }}
-              transition={{ duration: 0.3 }}
-            />
-          ))}
-        </div>
-      </div>
+    <div className={`flex flex-col gap-2 ${className ?? ''}`}>
+      <span className="text-[#A78BFA] font-semibold text-[10px] md:text-xs tracking-[2px] md:tracking-[3px] uppercase" style={{ fontFamily: SG }}>
+        {tag}
+      </span>
+      <h2 className="text-white font-bold text-xl md:text-[32px] leading-tight" style={{ fontFamily: SG }}>
+        {title}
+      </h2>
+      {description && (
+        <p className="text-[#B0A8BF] text-xs md:text-[15px] leading-relaxed max-w-[600px]" style={{ fontFamily: SG }}>
+          {description}
+        </p>
+      )}
     </div>
   )
 }
 
-// ─── Choice Cards ───
+// ─── Destination Card ───
 
-function ChoiceCards({ height, className }: { height: number; className?: string }) {
-  const [chosen, setChosen] = useState<0 | 1 | null>(null)
-
-  const choices = [
-    { text: 'Trust him', hint: 'Let him in. See what happens.', color: '#c84b9e', rgb: '200,75,158' },
-    { text: 'Walk away', hint: 'Keep your distance. For now.', color: '#8b5cf6', rgb: '139,92,246' },
-  ]
-
-  useEffect(() => {
-    let i = 0
-    const seq: (0 | 1 | null)[] = [null, 0, null, 1]
-    const interval = setInterval(() => {
-      i = (i + 1) % seq.length
-      setChosen(seq[i])
-    }, 1800)
-    return () => clearInterval(interval)
-  }, [])
-
+function DestinationCard({ dest }: { dest: typeof DESTINATIONS[number] }) {
   return (
-    <div
-      className={`relative w-full flex flex-col items-center justify-center gap-3 px-5 ${className ?? ''}`}
-      style={{ height, backgroundColor: '#111016' }}
-    >
-      <p className="text-white/45 text-[10px] tracking-[1.5px] uppercase font-medium" style={{ fontFamily: INTER }}>
-        What do you do?
-      </p>
-      <div className="w-full flex gap-3">
-        {choices.map((choice, i) => (
-          <motion.div
-            key={i}
-            className="flex-1 rounded-xl p-3 flex flex-col gap-1 cursor-pointer"
-            animate={{
-              background: chosen === i ? `rgba(${choice.rgb},0.12)` : 'rgba(255,255,255,0.03)',
-              borderColor: chosen === i ? choice.color : 'rgba(255,255,255,0.08)',
-              scale: chosen === i ? 1.03 : 1,
-            }}
-            style={{ border: '1px solid', borderColor: 'rgba(255,255,255,0.08)' }}
-            transition={{ duration: 0.3 }}
-          >
-            <p
-              className="text-sm font-semibold"
-              style={{ color: chosen === i ? choice.color : 'rgba(255,255,255,0.6)', fontFamily: INTER, transition: 'color 0.3s' }}
-            >
-              {choice.text}
-            </p>
-            <p className="text-[10px] leading-snug" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: INTER }}>
-              {choice.hint}
-            </p>
-          </motion.div>
-        ))}
-      </div>
-      {/* Bottom gradient */}
-      <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to bottom, rgba(17,16,22,0) 60%, rgba(17,16,22,0.6) 100%)' }} />
-    </div>
-  )
-}
-
-// ─── Step image renderer (static or animated widget) ───
-
-function StepImage({ step, height, className }: { step: typeof STEPS[number]; height: number; className?: string }) {
-  if (step.widget === 'morph') return <SelfieMorph height={height} className={className} />
-  if (step.widget === 'universes') return <StoryUniverses height={height} className={className} />
-  if (step.widget === 'choices') return <ChoiceCards height={height} className={className} />
-  return (
-    <div
-      className={`relative w-full bg-cover bg-center ${className ?? ''}`}
-      style={{ height, backgroundImage: `url(${step.img})`, backgroundColor: '#1a1525' }}
-    >
-      <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(17,16,22,0) 50%, rgba(17,16,22,0.8) 100%)' }} />
-    </div>
-  )
-}
-
-// ─── Live Chat Demo ───
-
-const CHAT_SCRIPT = [
-  { role: 'character' as const, name: 'Jiwon', text: 'you\'re the new transfer student, right? ...I was hoping I\'d run into you.' },
-  { role: 'user' as const, name: 'You', text: 'You were looking for me?' },
-  { role: 'character' as const, name: 'Jiwon', text: 'maybe. is that so hard to believe?' },
-]
-
-function ChatDemo({ compact }: { compact?: boolean }) {
-  const [visibleMessages, setVisibleMessages] = useState<number>(0)
-  const [typingCharIdx, setTypingCharIdx] = useState(0)
-  const [isTyping, setIsTyping] = useState(false)
-  const [phase, setPhase] = useState<'waiting' | 'typing' | 'done'>('waiting')
-
-  const currentMsg = CHAT_SCRIPT[visibleMessages]
-  const isCharacterMsg = currentMsg?.role === 'character'
-
-  // Start the sequence after headline finishes (~2.5s)
-  useEffect(() => {
-    const t = setTimeout(() => {
-      setPhase('typing')
-      if (CHAT_SCRIPT[0].role === 'character') setIsTyping(true)
-    }, 2800)
-    return () => clearTimeout(t)
-  }, [])
-
-  // Type out character messages char by char
-  useEffect(() => {
-    if (phase !== 'typing') return
-    if (visibleMessages >= CHAT_SCRIPT.length) {
-      setPhase('done')
-      return
-    }
-
-    const msg = CHAT_SCRIPT[visibleMessages]
-
-    if (msg.role === 'character') {
-      // Typing indicator for 600ms, then start revealing
-      if (isTyping && typingCharIdx === 0) {
-        const t = setTimeout(() => setIsTyping(false), 600)
-        return () => clearTimeout(t)
-      }
-      if (!isTyping && typingCharIdx < msg.text.length) {
-        const t = setTimeout(() => setTypingCharIdx(prev => prev + 1), 28)
-        return () => clearTimeout(t)
-      }
-      if (!isTyping && typingCharIdx >= msg.text.length) {
-        // Message complete — pause, then next
-        const t = setTimeout(() => {
-          setVisibleMessages(prev => prev + 1)
-          setTypingCharIdx(0)
-          if (visibleMessages + 1 < CHAT_SCRIPT.length && CHAT_SCRIPT[visibleMessages + 1].role === 'character') {
-            setIsTyping(true)
-          }
-        }, 1000)
-        return () => clearTimeout(t)
-      }
-    } else {
-      // User messages appear instantly after a brief pause
-      const t = setTimeout(() => {
-        setVisibleMessages(prev => prev + 1)
-        setTypingCharIdx(0)
-        if (visibleMessages + 1 < CHAT_SCRIPT.length && CHAT_SCRIPT[visibleMessages + 1].role === 'character') {
-          setIsTyping(true)
-        }
-      }, 800)
-      return () => clearTimeout(t)
-    }
-  }, [phase, visibleMessages, typingCharIdx, isTyping])
-
-  const getCompletedMessages = useCallback(() => {
-    const msgs: { role: 'user' | 'character'; name: string; text: string }[] = []
-    for (let i = 0; i < visibleMessages; i++) {
-      msgs.push(CHAT_SCRIPT[i])
-    }
-    return msgs
-  }, [visibleMessages])
-
-  const showMessages = phase !== 'waiting'
-  const completed = getCompletedMessages()
-  const currentlyTyping = showMessages && visibleMessages < CHAT_SCRIPT.length ? CHAT_SCRIPT[visibleMessages] : null
-  const partialText = currentlyTyping?.role === 'character' && !isTyping
-    ? currentlyTyping.text.slice(0, typingCharIdx)
-    : null
-
-  return (
-    <div
-      className="w-full rounded-2xl overflow-hidden"
-      style={{
-        maxWidth: compact ? 280 : 380,
-        background: 'rgba(17,16,22,0.85)',
-        border: '1px solid rgba(200,75,158,0.15)',
-        backdropFilter: 'blur(20px)',
-      }}
-    >
-      {/* Chat header — matches app ChatScene header */}
-      <div className="flex items-center gap-2 px-3 py-2 border-b border-white/5">
-        <CharAvatar size={compact ? 26 : 32} />
-        <div>
-          <p className="text-white/80 text-xs font-medium" style={{ fontFamily: INTER }}>Jiwon</p>
-          <p className="text-white/45 text-[10px]" style={{ fontFamily: INTER }}>Seoul Transfer · Romance</p>
-        </div>
-        {/* Mood stages like the app */}
-        <div className="ml-auto flex items-center gap-1.5">
-          {['guarded', 'warming up'].map((stage, i) => (
-            <span
-              key={stage}
-              className="text-[9px] italic"
-              style={{ color: i === 0 ? '#e060b8' : 'rgba(255,255,255,0.4)', fontWeight: i === 0 ? 600 : 400 }}
-            >
-              {stage}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Messages */}
-      <div className={`flex flex-col gap-2 px-3 ${compact ? 'py-2.5' : 'py-3'}`} style={{ minHeight: compact ? 120 : 160 }}>
-        <AnimatePresence>
-          {completed.map((msg, i) => (
-            <motion.div
-              key={i}
-              className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              {/* Intro scene image — first character message only, like the app */}
-              {i === 0 && msg.role === 'character' && (
-                <motion.div
-                  className="rounded-lg overflow-hidden mb-1.5"
-                  style={{ width: compact ? 160 : 200, height: compact ? 100 : 120 }}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.4 }}
-                >
-                  <img src="/jiwon-portrait.png" alt="Jiwon" className="w-full h-full object-cover object-center" />
-                </motion.div>
-              )}
-              <div className={`flex items-end gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                {msg.role === 'character' && <CharAvatar size={compact ? 22 : 26} />}
-                <div
-                  className={`${compact ? 'text-xs' : 'text-[13px]'} leading-relaxed px-3 py-2 rounded-2xl max-w-[80%]`}
-                  style={{
-                    background: msg.role === 'user'
-                      ? 'linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%)'
-                      : 'rgba(255,255,255,0.06)',
-                    color: msg.role === 'user' ? '#fff' : 'rgba(255,255,255,0.7)',
-                    fontFamily: INTER,
-                    borderBottomRightRadius: msg.role === 'user' ? 6 : undefined,
-                    borderBottomLeftRadius: msg.role === 'character' ? 6 : undefined,
-                  }}
-                >
-                  {msg.text}
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-
-        {/* Currently typing character message */}
-        {isTyping && isCharacterMsg && (
-          <motion.div className="flex items-end gap-2 justify-start" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <CharAvatar size={compact ? 22 : 26} />
-            <div
-              className={`${compact ? 'text-xs' : 'text-[13px]'} px-3 py-2 rounded-2xl flex gap-1`}
-              style={{ background: 'rgba(255,255,255,0.06)', borderBottomLeftRadius: 6 }}
-            >
-              <span className="typing-dot" style={{ animationDelay: '0ms', width: 4, height: 4 }} />
-              <span className="typing-dot" style={{ animationDelay: '150ms', width: 4, height: 4 }} />
-              <span className="typing-dot" style={{ animationDelay: '300ms', width: 4, height: 4 }} />
-            </div>
-          </motion.div>
-        )}
-
-        {partialText !== null && (
-          <div className="flex items-end gap-2 justify-start">
-            <CharAvatar size={compact ? 22 : 26} />
-            <div
-              className={`${compact ? 'text-xs' : 'text-[13px]'} leading-relaxed px-3 py-2 rounded-2xl max-w-[80%]`}
-              style={{
-                background: 'rgba(255,255,255,0.06)',
-                color: 'rgba(255,255,255,0.7)',
-                fontFamily: INTER,
-                borderBottomLeftRadius: 6,
-              }}
-            >
-              {partialText}
-              <motion.span
-                className="inline-block ml-0.5"
-                style={{ color: '#c84b9e' }}
-                animate={{ opacity: [1, 0] }}
-                transition={{ duration: 0.4, repeat: Infinity, repeatType: 'reverse' }}
-              >
-                |
-              </motion.span>
-            </div>
+    <div className="rounded-2xl overflow-hidden flex flex-col flex-1 min-w-0" style={{ background: '#111016', border: '1px solid rgba(255,255,255,0.03)' }}>
+      <div className="relative w-full h-24 md:h-40 overflow-hidden">
+        <img src={dest.image} alt={dest.city} className="w-full h-full object-cover" />
+        {dest.comingSoon && (
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+            <span className="text-white/60 text-[10px] font-semibold tracking-wider uppercase" style={{ fontFamily: SG }}>Coming Soon</span>
           </div>
         )}
-
-        {/* User message appearing */}
-        {currentlyTyping?.role === 'user' && (
-          <motion.div
-            className="flex justify-end"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.2 }}
-          >
-            <div
-              className={`${compact ? 'text-xs' : 'text-[13px]'} leading-relaxed px-3 py-2 rounded-2xl max-w-[85%]`}
-              style={{
-                background: 'linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%)',
-                color: '#fff',
-                fontFamily: INTER,
-                borderBottomRightRadius: 6,
-              }}
-            >
-              {currentlyTyping.text}
-            </div>
-          </motion.div>
-        )}
+      </div>
+      <div className="flex flex-col gap-1 p-3 md:p-4">
+        <p className="text-white font-semibold text-sm md:text-base" style={{ fontFamily: SG }}>{dest.city}</p>
+        <p className="text-xs md:text-[11px]" style={{ color: dest.accent, fontFamily: SG }}>{dest.vibe}</p>
       </div>
     </div>
   )
 }
+
+// ─── Story Card ───
+
+function StoryCard({ story, size = 'md' }: { story: typeof UNIVERSES[number]; size?: 'sm' | 'md' }) {
+  const navigate = useNavigate()
+  return (
+    <div
+      className="rounded-xl md:rounded-2xl overflow-hidden flex flex-col cursor-pointer group"
+      style={{ background: '#111016', border: '1px solid rgba(255,255,255,0.03)', width: size === 'sm' ? 160 : undefined, flexShrink: size === 'sm' ? 0 : undefined }}
+      onClick={() => navigate(`/universe/${story.id}`)}
+    >
+      <div className="relative w-full h-24 md:h-44 overflow-hidden">
+        <img src={story.image} alt={story.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 50%, #111016 100%)' }} />
+      </div>
+      <div className="flex flex-col gap-1 p-2.5 md:p-4">
+        <span className="text-[8px] md:text-[10px] font-semibold tracking-[1px] uppercase" style={{ color: '#A78BFA', fontFamily: SG }}>{story.genreTag}</span>
+        <p className="text-white font-semibold text-[11px] md:text-sm" style={{ fontFamily: SG }}>{story.title}</p>
+      </div>
+    </div>
+  )
+}
+
+// ─── Logo Mark ───
+
+function LogoMark({ size }: { size: number }) {
+  const pageW = size * 0.6
+  const pageH = size * 0.75
+  return (
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
+      <div className="absolute" style={{ width: pageW, height: pageH, borderRadius: size * 0.1, background: '#7C3AED', transform: 'rotate(8deg)', top: 0, left: size * 0.18 }} />
+      <div className="absolute" style={{ width: pageW, height: pageH, borderRadius: size * 0.1, background: '#A78BFA', transform: 'rotate(3deg)', top: size * 0.05, left: size * 0.12 }} />
+      <div className="absolute" style={{ width: pageW, height: pageH, borderRadius: size * 0.1, background: '#E9D5FF', top: size * 0.1, left: size * 0.06 }} />
+    </div>
+  )
+}
+
+// ═══════════════════════════════════
+//  LANDING PAGE
+// ═══════════════════════════════════
 
 export function LandingPage() {
   const navigate = useNavigate()
@@ -550,489 +160,294 @@ export function LandingPage() {
     }
   }
 
-  // trackEvent('landing_view') — disabled until chaptr_events table is created in Supabase
-
   return (
-    <div className="bg-bg">
+    <div className="bg-[#0D0B12]">
       <AuthModal open={showAuth} onClose={() => setShowAuth(false)} />
 
-      {/* ══════════════════════
-          MOBILE
-      ══════════════════════ */}
+      {/* ═══ MOBILE ═══ */}
       <div className="md:hidden">
 
         {/* Hero */}
         <div className="relative flex flex-col overflow-hidden" style={{ minHeight: '100svh' }}>
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: 'url(/hero-landing.jpeg)', imageRendering: 'auto' }}
-          />
-          {/* Top vignette */}
+          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/hero-landing.jpeg)' }} />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(13,11,18,0.75) 0%, rgba(13,11,18,0) 22%)' }} />
-          {/* Bottom book-page fade */}
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(13,11,18,0) 0%, rgba(13,11,18,0.15) 35%, rgba(13,11,18,0.85) 55%, rgba(13,11,18,0.97) 68%, rgba(13,11,18,1) 78%)' }} />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(13,11,18,0) 0%, rgba(13,11,18,0.85) 45%, rgba(13,11,18,1) 65%)' }} />
 
           {/* Logo */}
           <div className="relative z-10 flex items-center gap-2 px-5 pt-10 safe-top">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full" style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full" style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(12px)' }}>
               <LogoMark size={34} />
-              <span className="font-semibold text-lg" style={{ fontFamily: SYNE, letterSpacing: '-0.02em', background: 'linear-gradient(180deg, #D4C4F0 0%, #B8A5E0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>chaptr</span>
+              <span className="font-semibold text-lg" style={{ fontFamily: "'Syne', sans-serif", letterSpacing: '-0.02em', background: 'linear-gradient(180deg, #D4C4F0 0%, #B8A5E0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>chaptr</span>
             </div>
           </div>
 
-          {/* Hero text pinned to bottom */}
-          <div className="relative z-10 mt-auto px-5 pb-8 flex flex-col gap-4 safe-bottom">
+          {/* Hero content */}
+          <div className="relative z-10 mt-auto px-5 pb-6 flex flex-col gap-4 safe-bottom">
             <motion.div className="flex flex-col gap-3" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <TypewriterHeadline fontSize={34} style={{ lineHeight: 1 }} />
-              <p className="text-white/75 text-sm leading-relaxed" style={{ maxWidth: 300, fontFamily: INTER, textShadow: '0 1px 8px rgba(0,0,0,0.9)' }}>
-                Upload a selfie. Chat with AI characters. Make choices that change the ending. Every story is uniquely yours.
+              <span className="text-[#A78BFA] font-semibold text-[11px] tracking-[2px]" style={{ fontFamily: SG }}>AI-POWERED EXPERIENCES</span>
+              <h1 className="text-white font-bold text-[34px] leading-[1]" style={{ fontFamily: SG, letterSpacing: -1 }}>
+                Live any story.<br />Go anywhere.
+              </h1>
+              <p className="text-[#B0A8BF] text-sm leading-relaxed" style={{ fontFamily: SG, maxWidth: 320 }}>
+                Choose an interactive story or plan a trip with an AI companion — then live every moment through scenes with your face in them.
               </p>
             </motion.div>
 
-            {/* Live chat demo */}
-            <ChatDemo compact />
+            {/* Two Path Cards */}
+            <div className="flex flex-col gap-2.5">
+              <PathCard
+                icon={<Globe size={20} className="text-[#A78BFA]" />}
+                title="Travel Mode"
+                desc="Pick a city, choose a companion, live it scene by scene"
+                borderColor="rgba(124,58,237,0.25)"
+                iconBg="rgba(124,58,237,0.2)"
+              />
+              <PathCard
+                icon={<BookOpen size={20} className="text-[#D4799A]" />}
+                title="Story Mode"
+                desc="Star in interactive stories — romance, horror, mystery, and more"
+                borderColor="rgba(212,121,154,0.25)"
+                iconBg="rgba(212,121,154,0.2)"
+              />
+            </div>
 
             <motion.button
-              className="btn-accent flex items-center justify-center gap-2"
-              style={{ fontFamily: SG, minHeight: 52 }}
+              className="flex items-center justify-center gap-2 rounded-full text-white font-bold text-base"
+              style={{ fontFamily: SG, minHeight: 52, background: 'linear-gradient(90deg, #7C3AED, #A78BFA)' }}
               onClick={handleCTA}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35 }}
               whileTap={{ scale: 0.97 }}
             >
-              Start Your Story <ArrowRight size={18} />
+              Start Your Adventure <ArrowRight size={18} />
             </motion.button>
 
-            <motion.p
-              className="text-white/60 text-xs text-center"
-              style={{ fontFamily: INTER, textShadow: '0 2px 12px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.8)' }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-            >
-              Free to play · No downloads · New story every time
-            </motion.p>
+            <p className="text-[#6B6275] text-xs text-center" style={{ fontFamily: SG }}>
+              12.4K adventures started this week
+            </p>
           </div>
         </div>
 
-        {/* Mobile — How It Works */}
-        <section className="py-12 px-5 flex flex-col gap-8" style={{ background: '#0A090F' }}>
-          <div className="flex flex-col items-center text-center gap-2">
-            <span className="text-accent/70 font-semibold text-[10px] tracking-[2px] uppercase" style={{ fontFamily: INTER }}>
-              HOW IT WORKS
-            </span>
-            <h2 className="text-white font-bold" style={{ fontSize: 24, letterSpacing: -0.5, fontFamily: SERIF, lineHeight: 1.2 }}>
-              Three steps into<br />your story
+        {/* How It Works */}
+        <section className="py-10 px-5 flex flex-col gap-6" style={{ background: '#0A090F' }}>
+          <div className="flex flex-col items-center text-center gap-3">
+            <span className="text-[#A78BFA]/70 font-semibold text-[10px] tracking-[2px] uppercase" style={{ fontFamily: SG }}>HOW IT WORKS</span>
+            <h2 className="text-white font-bold text-[24px] leading-tight" style={{ fontFamily: SG }}>
+              You're the<br />main character.
             </h2>
-          </div>
-          <div className="flex flex-col gap-4">
-            {STEPS.map((step, i) => (
-              <motion.div
-                key={step.num}
-                className="rounded-2xl overflow-hidden"
-                style={{ background: '#111016', border: '1px solid rgba(42,32,64,0.5)' }}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-              >
-                <div className="relative overflow-hidden">
-                  <StepImage step={step} height={160} />
-                  <div className="absolute bottom-3 left-3 z-10">
-                    <span
-                      className="text-white/90 font-bold text-[10px] tracking-[1px] px-2 py-1 rounded-md"
-                      style={{ background: 'rgba(200,75,158,0.6)', backdropFilter: 'blur(8px)' }}
-                    >
-                      {step.num}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 p-4 pb-5">
-                  <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style={{ background: 'rgba(200,75,158,0.08)' }}>
-                    {step.icon}
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <p className="text-white font-semibold text-[15px]" style={{ fontFamily: INTER }}>{step.title}</p>
-                    <p className="text-white/40 text-[13px] leading-relaxed" style={{ fontFamily: INTER }}>{step.desc}</p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </section>
-
-        {/* Mobile — What Makes It Different */}
-        <section style={{ background: '#0A090F' }} className="pb-4 relative overflow-hidden">
-          {/* Ambient glow */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] h-[200px] rounded-full opacity-30" style={{ background: 'radial-gradient(ellipse, rgba(200,75,158,0.2) 0%, transparent 70%)' }} />
-
-          <div className="relative z-10 flex flex-col gap-2 px-5 pt-10 pb-6">
-            <div className="flex items-center gap-2 mb-1">
-              <Sparkles size={12} className="text-accent/60" />
-              <p className="text-accent/60 font-semibold text-[10px] tracking-[2px] uppercase" style={{ fontFamily: INTER }}>NOT JUST A VISUAL NOVEL</p>
-            </div>
-            <h2 className="text-white font-bold" style={{ fontSize: 26, lineHeight: 1.2, fontFamily: SERIF }}>
-              Stories that<br />respond to you
-            </h2>
-            <p className="text-white/40 text-sm leading-relaxed" style={{ fontFamily: INTER }}>
-              Every conversation and choice creates a story that's never been told before. Characters remember what you said. Your personality shapes how they react.
+            <p className="text-[#B0A8BF] text-[13px] leading-relaxed max-w-[320px]" style={{ fontFamily: SG }}>
+              Upload a selfie and AI puts you in every scene — whether you're exploring Tokyo or starring in a K-drama.
             </p>
           </div>
-          <div className="relative z-10 flex flex-col gap-3 px-4 pb-10">
-            {[
-              { label: 'You\'re the Main Character', detail: 'Your face, anime-styled, as the protagonist', icon: <Camera size={16} className="text-accentLight" /> },
-              { label: 'Characters That Remember', detail: 'Real conversations, not scripted dialogue trees', icon: <MessageCircle size={16} className="text-accent" /> },
-              { label: 'Branching Paths', detail: '4 unique endings based on your choices', icon: <GitBranch size={16} className="text-gem" /> },
-            ].map((item, i) => (
-              <motion.div
-                key={item.label}
-                className="rounded-2xl p-4 flex items-start gap-3"
-                style={{ background: 'linear-gradient(135deg, rgba(17,16,22,0.9) 0%, rgba(22,18,32,0.9) 100%)', border: '1px solid rgba(200,75,158,0.1)', boxShadow: '0 2px 20px rgba(0,0,0,0.3)' }}
-                initial={{ opacity: 0, y: 14 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-              >
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(200,75,158,0.1)', border: '1px solid rgba(200,75,158,0.08)' }}>
-                  {item.icon}
-                </div>
-                <div>
-                  <p className="text-white/80 font-medium text-sm" style={{ fontFamily: INTER }}>{item.label}</p>
-                  <p className="text-white/35 text-[13px] mt-0.5" style={{ fontFamily: INTER }}>{item.detail}</p>
-                </div>
-              </motion.div>
-            ))}
+          <div className="flex flex-col gap-4">
+            {/* Step 1 — Upload selfie (uses existing morph component) */}
+            <StepCard num="01" title="Upload your selfie" desc="Snap a photo and AI transforms it into your character. You become the protagonist in every scene.">
+              <SelfieMorph height={160} className="rounded-t-2xl" />
+            </StepCard>
+            {/* Step 2 — Pick mode */}
+            <StepCard num="02" title="Pick travel or story mode" desc="Explore Tokyo with an AI companion, or star in a K-drama romance. Choose your adventure — travel the world or live a story.">
+              <div className="relative w-full h-[160px] bg-cover bg-center rounded-t-2xl overflow-hidden" style={{ backgroundImage: 'url(/step2-mobile.jpeg)', backgroundColor: '#111016' }} />
+            </StepCard>
+            {/* Step 3 — See yourself */}
+            <StepCard num="03" title="See yourself in every scene" desc="Your face. Their world. AI generates cinematic scenes starring you — and you chat with characters who remember everything.">
+              <div className="relative w-full h-[160px] bg-cover bg-center rounded-t-2xl overflow-hidden" style={{ backgroundImage: 'url(/step3-mobile.jpeg)', backgroundColor: '#111016' }} />
+            </StepCard>
           </div>
         </section>
 
-        {/* Mobile — Final CTA */}
-        <section className="px-5 py-14 flex flex-col items-center text-center safe-bottom relative overflow-hidden" style={{ background: '#0A090F' }}>
-          {/* Ambient glow orbs */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[250px] rounded-full" style={{ background: 'radial-gradient(ellipse, rgba(200,75,158,0.12) 0%, transparent 70%)' }} />
-          <div className="absolute bottom-0 right-0 w-[200px] h-[200px] rounded-full" style={{ background: 'radial-gradient(ellipse, rgba(139,92,246,0.08) 0%, transparent 70%)' }} />
-
-          <div className="relative z-10 flex flex-col items-center gap-5">
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(200,75,158,0.15) 0%, rgba(139,92,246,0.15) 100%)', border: '1px solid rgba(200,75,158,0.2)', boxShadow: '0 0 40px rgba(200,75,158,0.1)' }}>
-              <BookOpen size={28} className="text-accent" />
-            </div>
-            <h3 className="text-white font-bold text-xl" style={{ fontFamily: SERIF }}>Your story is waiting</h3>
-            <p className="text-white/40 text-sm" style={{ fontFamily: INTER, maxWidth: 280 }}>One selfie. One choice. A story that's entirely yours.</p>
-            <button
-              className="btn-accent flex items-center justify-center gap-2 max-w-xs"
-              style={{ fontFamily: SG, minHeight: 52 }}
-              onClick={handleCTA}
-            >
-              Begin Now <ArrowRight size={18} />
-            </button>
+        {/* Travel Mode */}
+        <section className="py-10 px-5 flex flex-col gap-5" style={{ background: '#0A090F' }}>
+          <SectionHeader
+            tag="TRAVEL MODE"
+            title="Explore the world, scene by scene"
+            description="Pick a city, choose a companion, and live your dream trip through AI-generated scenes."
+          />
+          <div className="grid grid-cols-2 gap-2.5">
+            {DESTINATIONS.map(d => <DestinationCard key={d.city} dest={d} />)}
           </div>
         </section>
 
+        {/* Interactive Stories */}
+        <section className="py-10 px-5 flex flex-col gap-5" style={{ background: '#0D0B12' }}>
+          <SectionHeader
+            tag="INTERACTIVE STORIES"
+            title="15+ stories to star in"
+            description="Romance, horror, mystery — upload a selfie and become the main character. Your choices change the ending."
+          />
+          <div className="flex gap-2.5 overflow-x-auto pb-2 -mx-5 px-5 scrollbar-hide">
+            {SHOWCASE_STORIES.map(s => <StoryCard key={s.id} story={s} size="sm" />)}
+          </div>
+        </section>
+
+        {/* Footer */}
         <MobileFooter />
       </div>
 
-      {/* ══════════════════════
-          DESKTOP
-      ══════════════════════ */}
+      {/* ═══ DESKTOP ═══ */}
       <div className="hidden md:block">
 
-        {/* ── Desktop Hero ── */}
-        <div className="relative" style={{ minHeight: 900 }}>
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{
-              backgroundImage: 'image-set(url(/hero-desktop.png) 1x, url(/hero-desktop@2x.jpg) 2x)',
-              imageRendering: 'auto',
-            }}
-          />
-          {/* Layered scrims for depth */}
-          <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 70% 60% at 50% 55%, rgba(13,11,18,0.55) 0%, rgba(13,11,18,0) 100%)' }} />
+        {/* Hero */}
+        <div className="relative" style={{ minHeight: 700 }}>
+          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/hero-desktop@2x.jpg)' }} />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(13,11,18,0.8) 0%, rgba(13,11,18,0) 15%)' }} />
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(0deg, #0A090F 0%, rgba(10,9,15,0) 30%)' }} />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(13,11,18,0) 15%, rgba(13,11,18,0.85) 50%, rgba(13,11,18,1) 65%)' }} />
 
           <div className="relative z-10 page-container mx-auto">
             {/* Nav */}
-            <nav className="flex items-center justify-between px-8 lg:px-16 pt-7">
+            <nav className="flex items-center justify-between px-8 lg:px-20 h-16">
               <div className="flex items-center gap-2.5">
                 <LogoMark size={34} />
-                <span className="font-semibold text-lg" style={{ fontFamily: SYNE, letterSpacing: '-0.02em', background: 'linear-gradient(180deg, #D4C4F0 0%, #B8A5E0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>chaptr</span>
+                <span className="font-semibold text-lg" style={{ fontFamily: "'Syne', sans-serif", letterSpacing: '-0.02em', background: 'linear-gradient(180deg, #D4C4F0 0%, #B8A5E0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>chaptr</span>
               </div>
               <div className="flex items-center gap-8">
-                {[
-                  { label: 'How It Works', id: 'how-it-works' },
-                  { label: 'Why Chaptr', id: 'why-chaptr' },
-                ].map(({ label, id }) => (
-                  <span
-                    key={label}
-                    className="text-white/50 text-sm font-medium cursor-pointer hover:text-white transition-colors"
-                    style={{ fontFamily: SG }}
-                    onClick={() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })}
-                  >{label}</span>
-                ))}
+                <span className="text-[#A78BFA] text-sm font-medium cursor-pointer" style={{ fontFamily: SG }}>Travel</span>
+                <span className="text-white/50 text-sm font-medium cursor-pointer hover:text-white transition-colors" style={{ fontFamily: SG }}>Stories</span>
+                <span className="text-white/50 text-sm font-medium cursor-pointer hover:text-white transition-colors" style={{ fontFamily: SG }}>Characters</span>
                 <button
-                  className="text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-all hover:opacity-90"
-                  style={{ background: 'linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%)', minHeight: 44 }}
+                  className="text-white text-sm font-semibold px-5 py-2 rounded-full transition-all hover:opacity-90"
+                  style={{ background: 'linear-gradient(90deg, #7C3AED, #A78BFA)' }}
                   onClick={handleCTA}
                 >
-                  Start Reading
+                  Get Started
                 </button>
               </div>
             </nav>
 
-            {/* Hero content — two column: text left, chat demo right */}
-            <div className="flex items-center justify-between gap-12 px-8 lg:px-16" style={{ paddingTop: 130 }}>
-              {/* Left: text + CTA */}
-              <div className="flex flex-col gap-6 flex-1 max-w-xl">
-
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}>
-                  <TypewriterHeadline fontSize={72} />
-                </motion.div>
-
-                <motion.p
-                  className="text-white/60 text-lg leading-relaxed"
-                  style={{ maxWidth: 420, fontFamily: INTER, textShadow: '0 1px 12px rgba(0,0,0,0.9)' }}
-                  initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
-                >
-                  Upload a selfie. Chat with AI characters. Make choices that change the ending. Every playthrough is uniquely yours.
-                </motion.p>
-
-                <motion.div className="flex flex-col gap-3" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
-                  <button
-                    className="self-start flex items-center justify-center gap-2.5 text-white font-semibold text-base transition-all hover:scale-[1.02] hover:shadow-lg"
-                    style={{ height: 54, paddingLeft: 36, paddingRight: 36, borderRadius: 12, background: 'linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%)', fontFamily: SG }}
-                    onClick={handleCTA}
-                  >
-                    Start Your Story <ArrowRight size={18} />
-                  </button>
-                  <span className="text-white/50 text-sm" style={{ fontFamily: INTER, textShadow: '0 2px 12px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.8)' }}>Free to play · No downloads · New story every time</span>
-                </motion.div>
-              </div>
-
-              {/* Right: live chat demo */}
-              <motion.div
-                className="shrink-0"
-                initial={{ opacity: 0, x: 24 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4, duration: 0.5 }}
+            {/* Hero content — centered */}
+            <div className="flex flex-col items-center text-center gap-5 pt-24 pb-16 px-8">
+              <motion.span className="text-[#A78BFA] font-semibold text-xs tracking-[3px]" style={{ fontFamily: SG }} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                AI-POWERED EXPERIENCES
+              </motion.span>
+              <motion.h1
+                className="text-white font-bold text-[64px] leading-[1]"
+                style={{ fontFamily: SG, letterSpacing: -2 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
               >
-                <ChatDemo />
-              </motion.div>
+                Live any story.<br />Go anywhere.
+              </motion.h1>
+              <motion.p
+                className="text-[#B0A8BF] text-lg leading-relaxed max-w-[560px]"
+                style={{ fontFamily: SG }}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                Choose an interactive story or plan a trip with an AI companion — then live every moment through scenes with your face in them.
+              </motion.p>
+              <motion.button
+                className="flex items-center gap-2 text-white font-bold text-base rounded-full px-8 py-4 mt-2"
+                style={{ background: 'linear-gradient(90deg, #7C3AED, #A78BFA)', fontFamily: SG }}
+                onClick={handleCTA}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                whileHover={{ scale: 1.02 }}
+              >
+                Start Your Adventure <ArrowRight size={18} />
+              </motion.button>
+              <motion.p className="text-[#6B6275] text-[13px]" style={{ fontFamily: SG }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
+                12.4K adventures started this week
+              </motion.p>
+            </div>
+
+            {/* Two Path Cards */}
+            <div className="flex gap-6 px-8 lg:px-20 pb-16">
+              <PathCard
+                icon={<Globe size={24} className="text-[#A78BFA]" />}
+                title="Travel Mode"
+                desc="Pick a city, choose an AI companion, and live your dream trip scene by scene — Tokyo, Seoul, Paris, and more."
+                borderColor="rgba(124,58,237,0.25)"
+                iconBg="rgba(124,58,237,0.2)"
+                desktop
+              />
+              <PathCard
+                icon={<BookOpen size={24} className="text-[#D4799A]" />}
+                title="Story Mode"
+                desc="Star in interactive stories — romance, horror, mystery. Upload a selfie and your choices change the ending."
+                borderColor="rgba(212,121,154,0.25)"
+                iconBg="rgba(212,121,154,0.2)"
+                desktop
+              />
             </div>
           </div>
         </div>
 
-        {/* ── Desktop How It Works ── */}
-        <section id="how-it-works" className="py-28" style={{ background: '#0A090F' }}>
+        {/* How It Works */}
+        <section className="py-16" style={{ background: '#0A090F' }}>
           <div className="page-container mx-auto px-8 lg:px-20">
-            <div className="flex flex-col items-center text-center gap-3 mb-16">
-              <span className="text-accent/60 font-semibold text-[10px] tracking-[2px] uppercase" style={{ fontFamily: INTER }}>
-                HOW IT WORKS
-              </span>
-              <h2 className="text-white font-bold" style={{ fontSize: 44, letterSpacing: -1, fontFamily: SERIF }}>
-                Three steps into your story
-              </h2>
-              <p className="text-white/35 text-base" style={{ fontFamily: INTER, maxWidth: 440 }}>
-                From selfie to story in under a minute. Every detail shaped by your choices.
+            <div className="flex flex-col items-center text-center gap-3 mb-12">
+              <span className="text-[#A78BFA]/70 font-semibold text-xs tracking-[3px] uppercase" style={{ fontFamily: SG }}>HOW IT WORKS</span>
+              <h2 className="text-white font-bold text-[40px]" style={{ fontFamily: SG }}>You're the main character.</h2>
+              <p className="text-[#B0A8BF] text-base leading-relaxed max-w-[600px]" style={{ fontFamily: SG }}>
+                Upload a selfie and AI puts you in every scene — whether you're exploring Tokyo or starring in a K-drama.
               </p>
             </div>
-
             <div className="grid grid-cols-3 gap-6">
-              {STEPS.map((step, i) => (
-                <motion.div
-                  key={step.num}
-                  className="rounded-2xl overflow-hidden flex flex-col group"
-                  style={{ background: '#111016', border: '1px solid rgba(42,32,64,0.4)' }}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.12 }}
-                >
-                  <div className="relative w-full overflow-hidden">
-                    <StepImage step={step} height={220} />
-                    <div className="absolute inset-0 group-hover:bg-black/10 transition-colors" />
-                    <div className="absolute bottom-3 left-4 z-10">
-                      <span
-                        className="text-white/90 font-bold text-xs tracking-[1px] px-2.5 py-1 rounded-md"
-                        style={{ background: 'rgba(200,75,158,0.5)', backdropFilter: 'blur(8px)' }}
-                      >
-                        {step.num}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3 p-5 pb-6">
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(200,75,158,0.08)' }}>
-                      {step.icon}
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <p className="text-white font-semibold text-lg" style={{ fontFamily: INTER }}>{step.title}</p>
-                      <p className="text-white/35 text-sm leading-relaxed" style={{ fontFamily: INTER }}>{step.desc}</p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+              <StepCard num="01" title="Upload your selfie" desc="Snap a photo and AI transforms it into your character. You become the protagonist in every scene." desktop>
+                <SelfieMorph height={200} className="rounded-t-2xl" />
+              </StepCard>
+              <StepCard num="02" title="Pick travel or story mode" desc="Explore Tokyo with an AI companion, or star in a K-drama romance. Choose your adventure — travel the world or live a story." desktop>
+                <div className="relative w-full h-[200px] bg-cover bg-center rounded-t-2xl overflow-hidden" style={{ backgroundImage: 'url(/step2-desktop.jpeg)', backgroundColor: '#111016' }} />
+              </StepCard>
+              <StepCard num="03" title="See yourself in every scene" desc="Your face. Their world. AI generates cinematic scenes starring you — and you chat with characters who remember everything." desktop>
+                <div className="relative w-full h-[200px] bg-cover bg-center rounded-t-2xl overflow-hidden" style={{ backgroundImage: 'url(/step3-desktop.jpeg)', backgroundColor: '#111016' }} />
+              </StepCard>
             </div>
           </div>
         </section>
 
-        {/* ── Desktop Why Chaptr ── */}
-        <section id="why-chaptr" className="pb-28 relative overflow-hidden" style={{ background: '#0A090F' }}>
-          {/* Ambient glow orbs */}
-          <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full" style={{ background: 'radial-gradient(ellipse, rgba(200,75,158,0.1) 0%, transparent 70%)' }} />
-          <div className="absolute top-40 left-[15%] w-[300px] h-[300px] rounded-full" style={{ background: 'radial-gradient(ellipse, rgba(139,92,246,0.06) 0%, transparent 70%)' }} />
-
-          <div className="page-container mx-auto px-8 lg:px-20 relative z-10">
-            {/* Divider */}
-            <div className="h-px mb-24 mx-auto" style={{ background: 'linear-gradient(90deg, transparent, rgba(200,75,158,0.25), transparent)', maxWidth: 600 }} />
-
-            <div className="flex flex-col items-center text-center gap-3 mb-14">
-              <p className="text-accent/50 font-semibold text-[10px] tracking-[3px] uppercase" style={{ fontFamily: INTER }}>NOT JUST A VISUAL NOVEL</p>
-              <h2 className="text-white font-bold" style={{ fontSize: 44, lineHeight: 1.2, fontFamily: SERIF }}>
-                Stories that respond to you
-              </h2>
-              <p className="text-white/40 text-base" style={{ maxWidth: 480, fontFamily: INTER }}>
-                Every conversation and choice creates a story that's never been told before.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-3 gap-6">
-              {[
-                { title: 'You\'re the Main Character', desc: 'Your selfie, transformed into anime, as the main character. It\'s your face in every scene.', icon: <Camera size={20} className="text-accent" />, img: '/card-youre-in-it.webp', iconBg: 'rgba(212,121,154,0.12)' },
-                { title: 'Characters That Remember', desc: 'Real freeform conversations, not scripted dialogue trees. Characters have personalities, moods, and memory.', icon: <MessageCircle size={20} className="text-accent" />, img: '/card-characters-remember.webp', iconBg: 'rgba(212,121,154,0.15)' },
-                { title: 'Branching Paths', desc: '4 unique endings based on the choices you make. Your conversations shift the story in ways you won\'t expect.', icon: <GitBranch size={20} className="text-[#9B7EC8]" />, img: '/card-branching-paths.webp', iconBg: 'rgba(155,126,200,0.15)' },
-              ].map((item, i) => (
-                <motion.div
-                  key={item.title}
-                  className="rounded-2xl overflow-hidden flex flex-col relative group"
-                  style={{ background: '#13111A', border: '1px solid rgba(45,37,56,0.3)', boxShadow: '0 4px 40px rgba(0,0,0,0.3)' }}
-                  initial={{ opacity: 0, y: 14 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                >
-                  <div className="relative w-full h-[180px] overflow-hidden">
-                    <img src={item.img} alt={item.title} className="w-full h-full object-cover" />
-                    <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, transparent 50%, #13111A 100%)' }} />
-                  </div>
-                  <div className="flex flex-col gap-4 p-6 pt-5">
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: item.iconBg }}>
-                      {item.icon}
-                    </div>
-                    <div>
-                      <p className="text-[#E8E3F0] font-semibold text-lg mb-2" style={{ fontFamily: SG }}>{item.title}</p>
-                      <p className="text-white/35 text-sm leading-relaxed" style={{ fontFamily: INTER }}>{item.desc}</p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+        {/* Travel Mode */}
+        <section className="py-16" style={{ background: '#0A090F' }}>
+          <div className="page-container mx-auto px-8 lg:px-20">
+            <SectionHeader
+              tag="TRAVEL MODE"
+              title="Explore the world, scene by scene"
+              description="Pick a city, choose a companion, and live your dream trip through AI-generated scenes."
+              className="mb-8"
+            />
+            <div className="grid grid-cols-4 gap-4">
+              {DESTINATIONS.map(d => <DestinationCard key={d.city} dest={d} />)}
             </div>
           </div>
         </section>
 
-        {/* ── Desktop Social Proof ── */}
-        <section className="py-20 relative overflow-hidden" style={{ background: '#0A090F' }}>
-          <div className="page-container mx-auto px-8 lg:px-20 relative z-10">
-            <div className="flex flex-col items-center text-center gap-3 mb-14">
-              <p className="text-accent/50 font-semibold text-[10px] tracking-[3px] uppercase" style={{ fontFamily: INTER }}>WHAT READERS ARE SAYING</p>
-              <h2 className="text-white font-bold" style={{ fontSize: 36, lineHeight: 1.2, fontFamily: SERIF }}>
-                Stories that stay with you
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-3 gap-6">
-              {[
-                { quote: "I've replayed the same universe 3 times and got completely different endings each time. The characters actually remember what I said.", name: 'Chloe Tan', location: 'Singapore', avatar: '/avatar-chloe.webp' },
-                { quote: "This is what I wanted visual novels to be. It doesn't feel scripted at all. The AI characters have real personality and they react to everything.", name: 'Pimchanok W.', location: 'Thailand', avatar: '/avatar-pim.webp' },
-                { quote: "Seeing my own face in the story scenes genuinely caught me off guard. It makes every choice feel so much more personal.", name: 'Putri Ayu', location: 'Indonesia', avatar: '/avatar-putri.webp' },
-              ].map((t, i) => (
-                <motion.div
-                  key={t.name}
-                  className="rounded-2xl p-7 flex flex-col justify-between gap-6"
-                  style={{ background: '#13111A', border: '1px solid rgba(45,37,56,0.3)' }}
-                  initial={{ opacity: 0, y: 14 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                >
-                  <p className="text-white/60 text-sm leading-relaxed" style={{ fontFamily: INTER }}>"{t.quote}"</p>
-                  <div className="flex items-center gap-3">
-                    <img src={t.avatar} alt={t.name} className="w-9 h-9 rounded-full object-cover" />
-                    <div>
-                      <p className="text-[#E8E3F0] text-sm font-semibold" style={{ fontFamily: SG }}>{t.name}</p>
-                      <p className="text-white/30 text-xs" style={{ fontFamily: INTER }}>{t.location}</p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+        {/* Interactive Stories */}
+        <section className="py-16" style={{ background: '#0D0B12' }}>
+          <div className="page-container mx-auto px-8 lg:px-20">
+            <SectionHeader
+              tag="INTERACTIVE STORIES"
+              title="15+ stories to star in"
+              description="Romance, horror, mystery — upload a selfie and become the main character. Your choices change the ending."
+              className="mb-8"
+            />
+            <div className="grid grid-cols-4 gap-5">
+              {SHOWCASE_STORIES.map(s => <StoryCard key={s.id} story={s} />)}
             </div>
           </div>
         </section>
 
-        {/* ── Desktop Final CTA ── */}
-        <section className="relative overflow-hidden" style={{ height: 400 }}>
-          {/* Background image */}
-          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/cta-bg.webp)' }} />
-          <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at center, rgba(13,11,18,0.7) 0%, rgba(13,11,18,0.88) 60%, rgba(13,11,18,0.96) 100%)' }} />
-
-          <div className="relative z-10 h-full flex flex-col items-center justify-center text-center gap-7">
-            <motion.div
-              className="flex flex-col items-center gap-7"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-            >
-              <p className="text-accent/50 font-semibold text-[10px] tracking-[3px] uppercase" style={{ fontFamily: INTER }}>YOUR CHAPTER BEGINS</p>
-              <h3 className="text-white font-bold" style={{ fontSize: 44, fontFamily: SERIF }}>Your story is waiting</h3>
-              <p className="text-white/50 text-base" style={{ fontFamily: INTER, maxWidth: 400 }}>
-                One selfie. One choice. A story that's entirely yours.
-              </p>
-              <button
-                className="flex items-center justify-center gap-2.5 text-white font-bold text-base transition-all hover:scale-[1.02]"
-                style={{ height: 56, paddingLeft: 44, paddingRight: 44, borderRadius: 32, background: 'linear-gradient(135deg, #c84b9e 0%, #8b5cf6 100%)', fontFamily: SG, boxShadow: '0 0 32px rgba(200,75,158,0.4), 0 4px 24px rgba(200,75,158,0.25)', letterSpacing: 0.5 }}
-                onClick={handleCTA}
-              >
-                Begin Now <ArrowRight size={18} />
-              </button>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* ── Desktop Footer ── */}
-        <footer style={{ background: '#07060B', borderTop: '1px solid rgba(42,32,64,0.3)' }}>
-          <div className="page-container mx-auto px-8 lg:px-20 py-10">
-            <div className="flex items-start justify-between">
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                  <LogoMark size={28} small />
-                  <span className="font-bold text-base" style={{ fontFamily: "'Syne', sans-serif", background: 'linear-gradient(180deg, #D4C4F0 0%, #B8A5E0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>chaptr</span>
-                </div>
-                <p className="text-white/45 text-sm" style={{ fontFamily: INTER }}>Step into your story.</p>
-              </div>
-
-              <div className="flex items-center gap-8">
-                {['About', 'Privacy', 'Terms', 'Contact'].map((l) => (
-                  <span key={l} className="text-white/40 text-sm font-medium cursor-pointer hover:text-white transition-colors" style={{ fontFamily: INTER }}>{l}</span>
-                ))}
-              </div>
-
-              <div className="flex items-center gap-3">
-                {[
-                  { icon: <span className="text-xs font-bold">IG</span>, label: 'IG' },
-                  { icon: <span className="text-xs font-bold">YT</span>, label: 'YT' },
-                  { icon: <span className="text-xs font-bold">&times;</span>, label: 'X' },
-                ].map(({ icon, label }) => (
-                  <div key={label} className="w-9 h-9 rounded-xl flex items-center justify-center text-white/40 cursor-pointer hover:text-white transition-colors" style={{ background: 'rgba(42,32,64,0.3)', border: '1px solid rgba(42,32,64,0.4)' }}>
-                    {icon}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="h-px mt-8 mb-6" style={{ background: 'rgba(42,32,64,0.3)' }} />
+        {/* Footer */}
+        <footer style={{ background: '#080808', borderTop: '1px solid #1F1F23' }}>
+          <div className="page-container mx-auto px-8 lg:px-20 py-8">
             <div className="flex items-center justify-between">
-              <p className="text-white/40 text-xs" style={{ fontFamily: INTER }}>2026 Chaptr. All rights reserved.</p>
-              <p className="text-white/40 text-xs" style={{ fontFamily: INTER }}>Made by Cloud Labs</p>
+              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-2">
+                  <LogoMark size={28} />
+                  <span className="font-medium text-base text-white" style={{ fontFamily: SG }}>chaptr</span>
+                </div>
+                <span className="text-[#6B6275] text-xs" style={{ fontFamily: SG }}>AI-powered travel & interactive stories</span>
+              </div>
+              <div className="flex items-center gap-6">
+                {['Travel', 'Stories', 'Privacy', 'Twitter/X'].map(l => (
+                  <span key={l} className="text-[#6B6275] text-[13px] cursor-pointer hover:text-white transition-colors" style={{ fontFamily: SG }}>{l}</span>
+                ))}
+              </div>
             </div>
+            <div className="h-px mt-6 mb-4" style={{ background: '#1F1F23' }} />
+            <p className="text-[#6B6275]/40 text-[11px]" style={{ fontFamily: SG }}>© 2025 chaptr. All rights reserved.</p>
           </div>
         </footer>
       </div>
@@ -1040,76 +455,72 @@ export function LandingPage() {
   )
 }
 
-/* ─── Shared components ─── */
+// ─── Shared Components ───
 
-function MobileFooter() {
+function PathCard({ icon, title, desc, borderColor, iconBg, desktop }: {
+  icon: React.ReactNode; title: string; desc: string; borderColor: string; iconBg: string; desktop?: boolean
+}) {
   return (
-    <footer style={{ background: '#07060B' }}>
-      <div className="h-px" style={{ background: 'rgba(42,32,64,0.3)' }} />
-      <div className="flex flex-col gap-6 px-5 py-8 pb-10 safe-bottom">
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <LogoMark size={28} small />
-            <span className="font-bold text-base" style={{ fontFamily: "'Syne', sans-serif", background: 'linear-gradient(180deg, #D4C4F0 0%, #B8A5E0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>chaptr</span>
-          </div>
-          <p className="text-white/45 text-sm" style={{ fontFamily: INTER }}>Step into your story.</p>
-        </div>
-        <div className="flex items-center justify-between">
-          {['About', 'Privacy', 'Terms', 'Contact'].map((l) => (
-            <span key={l} className="text-white/40 text-sm font-medium" style={{ fontFamily: INTER }}>{l}</span>
-          ))}
-        </div>
-        <div className="flex items-center gap-4">
-          {['IG', 'YT', 'X'].map((s) => (
-            <div key={s} className="w-9 h-9 rounded-xl flex items-center justify-center text-white/40 text-xs font-semibold" style={{ background: 'rgba(42,32,64,0.3)', border: '1px solid rgba(42,32,64,0.4)' }}>{s}</div>
-          ))}
-        </div>
-        <div className="flex flex-col gap-1">
-          <p className="text-white/40 text-xs" style={{ fontFamily: INTER }}>2026 Chaptr. All rights reserved.</p>
-          <p className="text-white/40 text-xs" style={{ fontFamily: INTER }}>Made by Cloud Labs</p>
-        </div>
+    <div
+      className={`rounded-2xl flex items-center gap-3 ${desktop ? 'flex-1 p-6 gap-5' : 'p-3.5'}`}
+      style={{ background: 'rgba(26,22,40,0.6)', border: `1px solid ${borderColor}` }}
+    >
+      <div className={`rounded-xl flex items-center justify-center shrink-0 ${desktop ? 'w-14 h-14' : 'w-11 h-11'}`} style={{ background: iconBg }}>
+        {icon}
       </div>
-    </footer>
+      <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+        <p className={`text-white font-bold ${desktop ? 'text-lg' : 'text-[15px]'}`} style={{ fontFamily: SG }}>{title}</p>
+        <p className={`text-[#B0A8BF] leading-snug ${desktop ? 'text-sm' : 'text-[11px]'}`} style={{ fontFamily: SG }}>{desc}</p>
+      </div>
+      <ChevronRight size={desktop ? 20 : 16} className="text-white/20 shrink-0" />
+    </div>
   )
 }
 
-function LogoMark({ size }: { size: number; small?: boolean }) {
-  const pageW = size * 0.6;
-  const pageH = size * 0.75;
+function StepCard({ num, title, desc, children, desktop }: {
+  num: string; title: string; desc: string; children: React.ReactNode; desktop?: boolean
+}) {
   return (
-    <div className="relative shrink-0" style={{ width: size, height: size }}>
-      {/* Back page */}
-      <div
-        className="absolute"
-        style={{
-          width: pageW, height: pageH,
-          borderRadius: size * 0.1,
-          background: '#7C3AED',
-          transform: 'rotate(8deg)',
-          top: 0, left: size * 0.18,
-        }}
-      />
-      {/* Middle page */}
-      <div
-        className="absolute"
-        style={{
-          width: pageW, height: pageH,
-          borderRadius: size * 0.1,
-          background: '#A78BFA',
-          transform: 'rotate(3deg)',
-          top: size * 0.05, left: size * 0.12,
-        }}
-      />
-      {/* Front page */}
-      <div
-        className="absolute"
-        style={{
-          width: pageW, height: pageH,
-          borderRadius: size * 0.1,
-          background: '#E9D5FF',
-          top: size * 0.1, left: size * 0.06,
-        }}
-      />
-    </div>
+    <motion.div
+      className="rounded-2xl overflow-hidden flex flex-col"
+      style={{ background: '#111016', border: '1px solid rgba(255,255,255,0.03)' }}
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+    >
+      <div className="relative overflow-hidden">
+        {children}
+        <div className="absolute top-3 left-3 z-10">
+          <span className="text-white font-bold text-[10px] tracking-[1px] px-2 py-1 rounded-md" style={{ background: 'rgba(124,58,237,0.6)', backdropFilter: 'blur(8px)' }}>
+            {num}
+          </span>
+        </div>
+      </div>
+      <div className={`flex flex-col gap-1.5 ${desktop ? 'p-5' : 'p-4'}`}>
+        <p className={`text-white font-bold ${desktop ? 'text-lg' : 'text-[15px]'}`} style={{ fontFamily: SG }}>{title}</p>
+        <p className={`text-[#B0A8BF] leading-relaxed ${desktop ? 'text-[13px]' : 'text-xs'}`} style={{ fontFamily: SG }}>{desc}</p>
+      </div>
+    </motion.div>
+  )
+}
+
+function MobileFooter() {
+  return (
+    <footer style={{ background: '#080808' }}>
+      <div className="h-px" style={{ background: '#1F1F23' }} />
+      <div className="flex flex-col gap-5 px-5 py-8 pb-10 safe-bottom">
+        <div className="flex items-center gap-2">
+          <LogoMark size={28} />
+          <span className="font-medium text-base text-white" style={{ fontFamily: SG }}>chaptr</span>
+        </div>
+        <p className="text-[#6B6275] text-xs" style={{ fontFamily: SG }}>AI-powered travel & interactive stories</p>
+        <div className="flex gap-6">
+          {['Travel', 'Stories', 'Privacy', 'Twitter/X'].map(l => (
+            <span key={l} className="text-[#6B6275] text-sm" style={{ fontFamily: SG }}>{l}</span>
+          ))}
+        </div>
+        <p className="text-[#6B6275]/40 text-[11px]" style={{ fontFamily: SG }}>© 2025 chaptr. All rights reserved.</p>
+      </div>
+    </footer>
   )
 }

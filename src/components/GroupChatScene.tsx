@@ -9,7 +9,7 @@ import { generateCharacterPortrait, generateSceneImage } from '../lib/togetherAi
 import { trackEvent } from '../lib/supabase'
 import { getAffinityGrowth } from '../lib/affinity'
 import { parseAffinityDelta } from '../lib/claudeStream'
-import { getUniverseGenre } from '../data/storyData'
+import { getUniverseGenre } from '../data/storyHelpers'
 import type { SceneCharacter } from '../data/storyData'
 import { ChatActionTray } from './ChatActionTray'
 import { ChatActionBubble } from './ChatActionBubble'

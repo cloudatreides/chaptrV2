@@ -4,7 +4,8 @@ import { useStore } from '../store/useStore'
 import { useAuth } from '../contexts/AuthContext'
 import { useActiveStory } from '../hooks/useActiveStory'
 import { CHARACTERS, getCharacter } from '../data/characters'
-import { resolveLoveInterestId, UNIVERSES, getUniverseGenre, getMomentConfig } from '../data/storyData'
+import { resolveLoveInterestId, UNIVERSES, getMomentConfig } from '../data/storyData'
+import { getUniverseGenre } from '../data/storyHelpers'
 import { getQuestsForUniverse } from '../data/quests'
 
 export function YourStorySidebar() {
