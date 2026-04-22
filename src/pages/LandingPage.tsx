@@ -184,7 +184,6 @@ export function LandingPage() {
           {/* Hero content */}
           <div className="relative z-10 mt-auto px-5 pb-6 flex flex-col gap-4 safe-bottom">
             <motion.div className="flex flex-col gap-3" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <span className="text-[#A78BFA] font-semibold text-[11px] tracking-[2px]" style={{ fontFamily: SG }}>INTERACTIVE EXPERIENCES</span>
               <h1 className="text-white font-bold text-[34px] leading-[1]" style={{ fontFamily: SG, letterSpacing: -1 }}>
                 Live any story.<br />Go anywhere.
               </h1>
@@ -314,9 +313,6 @@ export function LandingPage() {
           <div className="relative z-10 page-container mx-auto">
             {/* Hero content — centered */}
             <div className="flex flex-col items-center text-center gap-5 pt-24 pb-16 px-8">
-              <motion.span className="text-[#A78BFA] font-semibold text-xs tracking-[3px]" style={{ fontFamily: SG }} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                INTERACTIVE EXPERIENCES
-              </motion.span>
               <motion.h1
                 className="text-white font-bold text-[64px] leading-[1]"
                 style={{ fontFamily: SG, letterSpacing: -2 }}
