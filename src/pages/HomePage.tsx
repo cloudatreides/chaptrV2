@@ -85,8 +85,8 @@ function ModeDescription({ mode }: { mode: 'travel' | 'stories' }) {
       </p>
       <p className="text-[11px] leading-[1.5]" style={{ color: '#8B8B90', fontFamily: SG }}>
         {isTravel
-          ? 'Pick a real city, choose an AI companion, and live your dream trip scene by scene. Explore streets, eat local food, and chat with your companion — all with your face in every scene.'
-          : 'Star in 20+ interactive stories across romance, horror, mystery, and more. Make choices that shape the plot, chat with AI characters who remember everything, and see yourself in every scene.'}
+          ? 'Pick a real city, choose a companion, and live your dream trip scene by scene. Explore streets, eat local food, and chat with your companion — all with your face in every scene.'
+          : 'Star in 20+ interactive stories across romance, horror, mystery, and more. Make choices that shape the plot, chat with characters who remember everything, and see yourself in every scene.'}
       </p>
     </motion.div>
   )

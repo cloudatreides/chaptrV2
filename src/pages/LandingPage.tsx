@@ -184,12 +184,12 @@ export function LandingPage() {
           {/* Hero content */}
           <div className="relative z-10 mt-auto px-5 pb-6 flex flex-col gap-4 safe-bottom">
             <motion.div className="flex flex-col gap-3" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <span className="text-[#A78BFA] font-semibold text-[11px] tracking-[2px]" style={{ fontFamily: SG }}>AI-POWERED EXPERIENCES</span>
+              <span className="text-[#A78BFA] font-semibold text-[11px] tracking-[2px]" style={{ fontFamily: SG }}>INTERACTIVE EXPERIENCES</span>
               <h1 className="text-white font-bold text-[34px] leading-[1]" style={{ fontFamily: SG, letterSpacing: -1 }}>
                 Live any story.<br />Go anywhere.
               </h1>
               <p className="text-[#B0A8BF] text-sm leading-relaxed" style={{ fontFamily: SG, maxWidth: 320 }}>
-                Choose an interactive story or plan a trip with an AI companion — then live every moment through scenes with your face in them.
+                Choose an interactive story or plan a trip with a companion — then live every moment through scenes with your face in them.
               </p>
             </motion.div>
 
@@ -201,6 +201,7 @@ export function LandingPage() {
                 desc="Pick a city, choose a companion, live it scene by scene"
                 borderColor="rgba(124,58,237,0.25)"
                 iconBg="rgba(124,58,237,0.2)"
+                onClick={() => document.getElementById('travel-section')?.scrollIntoView({ behavior: 'smooth' })}
               />
               <PathCard
                 icon={<BookOpen size={20} className="text-[#D4799A]" />}
@@ -208,6 +209,7 @@ export function LandingPage() {
                 desc="Star in interactive stories — romance, horror, mystery, and more"
                 borderColor="rgba(212,121,154,0.25)"
                 iconBg="rgba(212,121,154,0.2)"
+                onClick={() => document.getElementById('stories-section')?.scrollIntoView({ behavior: 'smooth' })}
               />
             </div>
 
@@ -237,31 +239,31 @@ export function LandingPage() {
               You're the<br />main character.
             </h2>
             <p className="text-[#B0A8BF] text-[13px] leading-relaxed max-w-[320px]" style={{ fontFamily: SG }}>
-              Upload a selfie and AI puts you in every scene — whether you're exploring Tokyo or starring in a K-drama.
+              Upload a selfie and you're in every scene — whether you're exploring Tokyo or starring in a K-drama.
             </p>
           </div>
           <div className="flex flex-col gap-4">
             {/* Step 1 — Upload selfie (uses existing morph component) */}
-            <StepCard num="01" title="Upload your selfie" desc="Snap a photo and AI transforms it into your character. You become the protagonist in every scene.">
+            <StepCard num="01" title="Upload your selfie" desc="Snap a photo and become the protagonist. Your face appears in every scene, every chapter.">
               <SelfieMorph height={160} className="rounded-t-2xl" />
             </StepCard>
             {/* Step 2 — Pick mode */}
-            <StepCard num="02" title="Pick travel or story mode" desc="Explore Tokyo with an AI companion, or star in a K-drama romance. Choose your adventure — travel the world or live a story.">
+            <StepCard num="02" title="Pick travel or story mode" desc="Explore Tokyo with a companion, or star in a K-drama romance. Choose your adventure — travel the world or live a story.">
               <div className="relative w-full h-[160px] bg-cover bg-center rounded-t-2xl overflow-hidden" style={{ backgroundImage: 'url(/step2-mobile.jpeg)', backgroundColor: '#111016' }} />
             </StepCard>
             {/* Step 3 — See yourself */}
-            <StepCard num="03" title="See yourself in every scene" desc="Your face. Their world. AI generates cinematic scenes starring you — and you chat with characters who remember everything.">
+            <StepCard num="03" title="See yourself in every scene" desc="Your face. Their world. Cinematic scenes starring you — and characters who remember everything you say.">
               <div className="relative w-full h-[160px] bg-cover bg-center rounded-t-2xl overflow-hidden" style={{ backgroundImage: 'url(/step3-mobile.jpeg)', backgroundColor: '#111016' }} />
             </StepCard>
           </div>
         </section>
 
         {/* Travel Mode */}
-        <section className="py-10 px-5 flex flex-col gap-5" style={{ background: '#0A090F' }}>
+        <section id="travel-section" className="py-10 px-5 flex flex-col gap-5" style={{ background: '#0A090F' }}>
           <SectionHeader
             tag="TRAVEL MODE"
             title="Explore the world, scene by scene"
-            description="Pick a city, choose a companion, and live your dream trip through AI-generated scenes."
+            description="Pick a city, choose a companion, and live your dream trip scene by scene."
           />
           <div className="grid grid-cols-2 gap-2.5">
             {DESTINATIONS.map(d => <DestinationCard key={d.city} dest={d} />)}
@@ -269,7 +271,7 @@ export function LandingPage() {
         </section>
 
         {/* Interactive Stories */}
-        <section className="py-10 px-5 flex flex-col gap-5" style={{ background: '#0D0B12' }}>
+        <section id="stories-section" className="py-10 px-5 flex flex-col gap-5" style={{ background: '#0D0B12' }}>
           <SectionHeader
             tag="INTERACTIVE STORIES"
             title="15+ stories to star in"
@@ -317,7 +319,7 @@ export function LandingPage() {
             {/* Hero content — centered */}
             <div className="flex flex-col items-center text-center gap-5 pt-24 pb-16 px-8">
               <motion.span className="text-[#A78BFA] font-semibold text-xs tracking-[3px]" style={{ fontFamily: SG }} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                AI-POWERED EXPERIENCES
+                INTERACTIVE EXPERIENCES
               </motion.span>
               <motion.h1
                 className="text-white font-bold text-[64px] leading-[1]"
@@ -335,7 +337,7 @@ export function LandingPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                Choose an interactive story or plan a trip with an AI companion — then live every moment through scenes with your face in them.
+                Choose an interactive story or plan a trip with a companion — then live every moment through scenes with your face in them.
               </motion.p>
               <motion.button
                 className="flex items-center gap-2 text-white font-bold text-base rounded-full px-8 py-4 mt-2"
@@ -358,10 +360,11 @@ export function LandingPage() {
               <PathCard
                 icon={<Globe size={24} className="text-[#A78BFA]" />}
                 title="Travel Mode"
-                desc="Pick a city, choose an AI companion, and live your dream trip scene by scene — Tokyo, Seoul, Paris, and more."
+                desc="Pick a city, choose a companion, and live your dream trip scene by scene — Tokyo, Seoul, Paris, and more."
                 borderColor="rgba(124,58,237,0.25)"
                 iconBg="rgba(124,58,237,0.2)"
                 desktop
+                onClick={() => document.getElementById('travel-section-desktop')?.scrollIntoView({ behavior: 'smooth' })}
               />
               <PathCard
                 icon={<BookOpen size={24} className="text-[#D4799A]" />}
@@ -369,6 +372,7 @@ export function LandingPage() {
                 desc="Star in interactive stories — romance, horror, mystery. Upload a selfie and your choices change the ending."
                 borderColor="rgba(212,121,154,0.25)"
                 iconBg="rgba(212,121,154,0.2)"
+                onClick={() => document.getElementById('stories-section-desktop')?.scrollIntoView({ behavior: 'smooth' })}
                 desktop
               />
             </div>
@@ -382,17 +386,17 @@ export function LandingPage() {
               <span className="text-[#A78BFA]/70 font-semibold text-xs tracking-[3px] uppercase" style={{ fontFamily: SG }}>HOW IT WORKS</span>
               <h2 className="text-white font-bold text-[40px]" style={{ fontFamily: SG }}>You're the main character.</h2>
               <p className="text-[#B0A8BF] text-base leading-relaxed max-w-[600px]" style={{ fontFamily: SG }}>
-                Upload a selfie and AI puts you in every scene — whether you're exploring Tokyo or starring in a K-drama.
+                Upload a selfie and you're in every scene — whether you're exploring Tokyo or starring in a K-drama.
               </p>
             </div>
             <div className="grid grid-cols-3 gap-6">
-              <StepCard num="01" title="Upload your selfie" desc="Snap a photo and AI transforms it into your character. You become the protagonist in every scene." desktop>
+              <StepCard num="01" title="Upload your selfie" desc="Snap a photo and become the protagonist. Your face appears in every scene, every chapter." desktop>
                 <SelfieMorph height={200} className="rounded-t-2xl" />
               </StepCard>
-              <StepCard num="02" title="Pick travel or story mode" desc="Explore Tokyo with an AI companion, or star in a K-drama romance. Choose your adventure — travel the world or live a story." desktop>
+              <StepCard num="02" title="Pick travel or story mode" desc="Explore Tokyo with a companion, or star in a K-drama romance. Choose your adventure — travel the world or live a story." desktop>
                 <div className="relative w-full h-[200px] bg-cover bg-center rounded-t-2xl overflow-hidden" style={{ backgroundImage: 'url(/step2-desktop.jpeg)', backgroundColor: '#111016' }} />
               </StepCard>
-              <StepCard num="03" title="See yourself in every scene" desc="Your face. Their world. AI generates cinematic scenes starring you — and you chat with characters who remember everything." desktop>
+              <StepCard num="03" title="See yourself in every scene" desc="Your face. Their world. Cinematic scenes starring you — and characters who remember everything you say." desktop>
                 <div className="relative w-full h-[200px] bg-cover bg-center rounded-t-2xl overflow-hidden" style={{ backgroundImage: 'url(/step3-desktop.jpeg)', backgroundColor: '#111016' }} />
               </StepCard>
             </div>
@@ -400,12 +404,12 @@ export function LandingPage() {
         </section>
 
         {/* Travel Mode */}
-        <section className="py-16" style={{ background: '#0A090F' }}>
+        <section id="travel-section-desktop" className="py-16" style={{ background: '#0A090F' }}>
           <div className="page-container mx-auto px-8 lg:px-20">
             <SectionHeader
               tag="TRAVEL MODE"
               title="Explore the world, scene by scene"
-              description="Pick a city, choose a companion, and live your dream trip through AI-generated scenes."
+              description="Pick a city, choose a companion, and live your dream trip scene by scene."
               className="mb-8"
             />
             <div className="grid grid-cols-4 gap-4">
@@ -415,7 +419,7 @@ export function LandingPage() {
         </section>
 
         {/* Interactive Stories */}
-        <section className="py-16" style={{ background: '#0D0B12' }}>
+        <section id="stories-section-desktop" className="py-16" style={{ background: '#0D0B12' }}>
           <div className="page-container mx-auto px-8 lg:px-20">
             <SectionHeader
               tag="INTERACTIVE STORIES"
@@ -438,7 +442,7 @@ export function LandingPage() {
                   <LogoMark size={28} />
                   <span className="font-medium text-base text-white" style={{ fontFamily: SG }}>chaptr</span>
                 </div>
-                <span className="text-[#6B6275] text-xs" style={{ fontFamily: SG }}>AI-powered travel & interactive stories</span>
+                <span className="text-[#6B6275] text-xs" style={{ fontFamily: SG }}>Interactive travel & stories</span>
               </div>
               <div className="flex items-center gap-6">
                 {['Travel', 'Stories', 'Privacy', 'Twitter/X'].map(l => (
@@ -457,12 +461,13 @@ export function LandingPage() {
 
 // ─── Shared Components ───
 
-function PathCard({ icon, title, desc, borderColor, iconBg, desktop }: {
-  icon: React.ReactNode; title: string; desc: string; borderColor: string; iconBg: string; desktop?: boolean
+function PathCard({ icon, title, desc, borderColor, iconBg, desktop, onClick }: {
+  icon: React.ReactNode; title: string; desc: string; borderColor: string; iconBg: string; desktop?: boolean; onClick?: () => void
 }) {
   return (
     <div
-      className={`rounded-2xl flex items-center gap-3 ${desktop ? 'flex-1 p-6 gap-5' : 'p-3.5'}`}
+      onClick={onClick}
+      className={`rounded-2xl flex items-center gap-3 cursor-pointer transition-colors hover:bg-white/[0.02] ${desktop ? 'flex-1 p-6 gap-5' : 'p-3.5'}`}
       style={{ background: 'rgba(26,22,40,0.6)', border: `1px solid ${borderColor}` }}
     >
       <div className={`rounded-xl flex items-center justify-center shrink-0 ${desktop ? 'w-14 h-14' : 'w-11 h-11'}`} style={{ background: iconBg }}>
@@ -513,7 +518,7 @@ function MobileFooter() {
           <LogoMark size={28} />
           <span className="font-medium text-base text-white" style={{ fontFamily: SG }}>chaptr</span>
         </div>
-        <p className="text-[#6B6275] text-xs" style={{ fontFamily: SG }}>AI-powered travel & interactive stories</p>
+        <p className="text-[#6B6275] text-xs" style={{ fontFamily: SG }}>Interactive travel & stories</p>
         <div className="flex gap-6">
           {['Travel', 'Stories', 'Privacy', 'Twitter/X'].map(l => (
             <span key={l} className="text-[#6B6275] text-sm" style={{ fontFamily: SG }}>{l}</span>
