@@ -183,20 +183,38 @@ function ContinueCard({ type, title, subtitle, meta, image, onClick }: {
 
 function ModeToggle({ mode, setMode }: { mode: 'travel' | 'stories'; setMode: (m: 'travel' | 'stories') => void }) {
   return (
-    <div className="flex items-center rounded-xl p-[3px]" style={{ background: '#111016', border: '1px solid rgba(255,255,255,0.03)' }}>
+    <div className="flex gap-3">
       <button
         onClick={() => setMode('travel')}
-        className="cursor-pointer flex items-center justify-center gap-1.5 rounded-[10px] px-5 py-2 transition-all text-[13px] font-semibold flex-1"
-        style={{ background: mode === 'travel' ? '#7C3AED' : 'transparent', color: mode === 'travel' ? '#fff' : 'rgba(255,255,255,0.3)', fontFamily: SG }}
+        className="cursor-pointer flex-1 rounded-xl p-3.5 text-left transition-all"
+        style={{
+          background: mode === 'travel' ? 'rgba(124,58,237,0.1)' : 'rgba(255,255,255,0.02)',
+          border: `1px solid ${mode === 'travel' ? 'rgba(124,58,237,0.25)' : 'rgba(255,255,255,0.05)'}`,
+        }}
       >
-        <Compass size={14} /> Travel
+        <div className="flex items-center gap-1.5 mb-1">
+          <Compass size={14} style={{ color: mode === 'travel' ? '#A78BFA' : 'rgba(255,255,255,0.25)' }} />
+          <span className="text-[13px] font-semibold" style={{ color: mode === 'travel' ? '#fff' : 'rgba(255,255,255,0.3)', fontFamily: SG }}>Travel Mode</span>
+        </div>
+        <p className="text-[11px] leading-snug" style={{ color: mode === 'travel' ? 'rgba(167,139,250,0.6)' : 'rgba(255,255,255,0.15)', fontFamily: SG }}>
+          Explore real cities with a companion
+        </p>
       </button>
       <button
         onClick={() => setMode('stories')}
-        className="cursor-pointer flex items-center justify-center gap-1.5 rounded-[10px] px-5 py-2 transition-all text-[13px] font-semibold flex-1"
-        style={{ background: mode === 'stories' ? '#c84b9e' : 'transparent', color: mode === 'stories' ? '#fff' : 'rgba(255,255,255,0.3)', fontFamily: SG }}
+        className="cursor-pointer flex-1 rounded-xl p-3.5 text-left transition-all"
+        style={{
+          background: mode === 'stories' ? 'rgba(200,75,158,0.1)' : 'rgba(255,255,255,0.02)',
+          border: `1px solid ${mode === 'stories' ? 'rgba(200,75,158,0.25)' : 'rgba(255,255,255,0.05)'}`,
+        }}
       >
-        <BookOpen size={14} /> Stories
+        <div className="flex items-center gap-1.5 mb-1">
+          <BookOpen size={14} style={{ color: mode === 'stories' ? '#e88bc4' : 'rgba(255,255,255,0.25)' }} />
+          <span className="text-[13px] font-semibold" style={{ color: mode === 'stories' ? '#fff' : 'rgba(255,255,255,0.3)', fontFamily: SG }}>Story Mode</span>
+        </div>
+        <p className="text-[11px] leading-snug" style={{ color: mode === 'stories' ? 'rgba(232,139,196,0.6)' : 'rgba(255,255,255,0.15)', fontFamily: SG }}>
+          Star in stories where you shape the plot
+        </p>
       </button>
     </div>
   )
@@ -568,7 +586,7 @@ export function HomePage() {
             )}
 
             {/* Browse */}
-            <div className="mb-8 max-w-[300px]">
+            <div className="mb-8 max-w-[480px]">
               <ModeToggle mode={mode} setMode={setMode} />
             </div>
 
