@@ -11,6 +11,27 @@ const SG = "'Space Grotesk', sans-serif"
 
 const AVAILABLE = DESTINATIONS.filter((d) => !d.locked)
 
+const MOCK_AVATARS = [
+  'https://i.pravatar.cc/80?img=1',
+  'https://i.pravatar.cc/80?img=5',
+  'https://i.pravatar.cc/80?img=8',
+  'https://i.pravatar.cc/80?img=12',
+  'https://i.pravatar.cc/80?img=15',
+  'https://i.pravatar.cc/80?img=20',
+  'https://i.pravatar.cc/80?img=25',
+  'https://i.pravatar.cc/80?img=32',
+  'https://i.pravatar.cc/80?img=36',
+  'https://i.pravatar.cc/80?img=44',
+]
+
+function getVisitors(destId: string) {
+  let hash = 0
+  for (let i = 0; i < destId.length; i++) hash = (hash * 31 + destId.charCodeAt(i)) | 0
+  const count = 3 + (Math.abs(hash) % 45)
+  const start = Math.abs(hash) % MOCK_AVATARS.length
+  const avatars = Array.from({ length: Math.min(4, count) }, (_, i) => MOCK_AVATARS[(start + i) % MOCK_AVATARS.length])
+  return { count, avatars }
+}
 
 export function TravelHomePage() {
   const navigate = useNavigate()
@@ -362,14 +383,37 @@ export function TravelHomePage() {
                     </button>
                   </div>
                   <div className="p-5">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <span className="text-xl">{selectedDest.countryEmoji}</span>
-                      <h3
-                        className="text-2xl font-bold text-white"
-                        style={{ fontFamily: "'Syne', sans-serif", letterSpacing: '-0.01em' }}
-                      >
-                        {selectedDest.city}
-                      </h3>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">{selectedDest.countryEmoji}</span>
+                        <h3
+                          className="text-2xl font-bold text-white"
+                          style={{ fontFamily: "'Syne', sans-serif", letterSpacing: '-0.01em' }}
+                        >
+                          {selectedDest.city}
+                        </h3>
+                      </div>
+                      {!selectedDest.locked && (() => {
+                        const { count, avatars } = getVisitors(selectedDest.id)
+                        return (
+                          <div className="flex items-center gap-1.5">
+                            <div className="flex -space-x-2">
+                              {avatars.map((url, i) => (
+                                <img
+                                  key={i}
+                                  src={url}
+                                  className="w-6 h-6 rounded-full object-cover"
+                                  style={{ border: '2px solid #151020', zIndex: avatars.length - i }}
+                                  alt=""
+                                />
+                              ))}
+                            </div>
+                            <span className="text-white/40 text-[11px] font-medium" style={{ fontFamily: SG }}>
+                              {count}
+                            </span>
+                          </div>
+                        )
+                      })()}
                     </div>
                     <p className="text-white/50 text-sm mb-3" style={{ fontFamily: SG }}>
                       {selectedDest.description}

@@ -250,6 +250,7 @@ interface StoreState {
   // ── Travel ──
   travelTrips: Record<string, TripProgress>
   activeTripId: string | null
+  setActiveTripId: (id: string) => void
   startTrip: (destinationId: string, companionId: string, sliders: { chattiness: number; planningStyle: number; vibe: number }) => void
   addTravelPlanningMessage: (msg: ChatMessage) => void
   addTravelDayChatMessage: (day: number, msg: ChatMessage) => void
@@ -623,6 +624,8 @@ export const useStore = create<StoreState>()(
       // ── Travel ──
       travelTrips: {},
       activeTripId: null,
+
+      setActiveTripId: (id) => set({ activeTripId: id }),
 
       startTrip: (destinationId, companionId, sliders) => {
         const charId = get().activeCharacterId
