@@ -659,94 +659,90 @@ function DesktopTravelContent({ hasCharacters }: { hasCharacters: boolean }) {
         </button>
       )}
 
-      {/* Hero destination — full-width aspirational card */}
-      {hero && (
-        <button
-          onClick={() => {
-            if (!hasCharacters) { navigate('/create-character'); return }
-            navigate(`/travel/${hero.id}`)
-          }}
-          className="cursor-pointer group w-full rounded-2xl overflow-hidden relative"
-          style={{ border: '1px solid rgba(124,58,237,0.2)' }}
-        >
-          <div className="relative h-[240px] overflow-hidden">
-            <img src={hero.heroImage} alt={hero.city} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-            <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(13,11,18,0.95) 0%, rgba(13,11,18,0.4) 40%, rgba(13,11,18,0) 70%)' }} />
-            <div className="absolute bottom-0 left-0 right-0 p-6 flex items-end justify-between">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xl">{hero.countryEmoji}</span>
-                  <h3 className="text-white text-2xl font-bold" style={{ fontFamily: SG }}>{hero.city}</h3>
+      {/* Destinations — hero + grid */}
+      <div className="grid grid-cols-3 gap-4" style={{ gridTemplateRows: 'auto auto' }}>
+        {/* Tokyo — featured, spans 2 cols */}
+        {hero && (
+          <button
+            onClick={() => {
+              if (!hasCharacters) { navigate('/create-character'); return }
+              navigate(`/travel/${hero.id}`)
+            }}
+            className="cursor-pointer group rounded-2xl overflow-hidden relative col-span-2 row-span-1"
+            style={{ border: '1px solid rgba(124,58,237,0.2)' }}
+          >
+            <div className="relative h-[260px] overflow-hidden">
+              <img src={hero.heroImage} alt={hero.city} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(13,11,18,0.95) 0%, rgba(13,11,18,0.4) 40%, rgba(13,11,18,0) 70%)' }} />
+              <div className="absolute bottom-0 left-0 right-0 p-5 flex items-end justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xl">{hero.countryEmoji}</span>
+                    <h3 className="text-white text-2xl font-bold" style={{ fontFamily: SG }}>{hero.city}</h3>
+                  </div>
+                  <p className="text-[12px]" style={{ color: '#A78BFA', fontFamily: SG }}>{hero.vibeTags.join(' · ')}</p>
+                  <p className="text-[12px] mt-1" style={{ color: 'rgba(255,255,255,0.5)', fontFamily: SG }}>{hero.description}</p>
                 </div>
-                <p className="text-[12px]" style={{ color: '#A78BFA', fontFamily: SG }}>{hero.vibeTags.join(' · ')}</p>
-                <p className="text-[12px] mt-1" style={{ color: 'rgba(255,255,255,0.5)', fontFamily: SG }}>{hero.description}</p>
+                <div
+                  className="shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-semibold"
+                  style={{ background: 'linear-gradient(90deg, #7C3AED, #A78BFA)', fontFamily: SG }}
+                >
+                  <Plane size={15} /> Plan trip
+                </div>
               </div>
-              <div
-                className="shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-semibold"
-                style={{ background: 'linear-gradient(90deg, #7C3AED, #A78BFA)', fontFamily: SG }}
-              >
-                <Plane size={15} /> Plan trip
+            </div>
+          </button>
+        )}
+
+        {/* Seoul — tall card beside Tokyo */}
+        {otherAvailable[0] && (
+          <button
+            onClick={() => {
+              if (!hasCharacters) { navigate('/create-character'); return }
+              navigate(`/travel/${otherAvailable[0].id}`)
+            }}
+            className="cursor-pointer group rounded-2xl overflow-hidden relative row-span-1"
+            style={{ border: '1px solid rgba(124,58,237,0.15)' }}
+          >
+            <div className="relative h-[260px] overflow-hidden">
+              <img src={otherAvailable[0].heroImage} alt={otherAvailable[0].city} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+              <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(13,11,18,0.9) 0%, rgba(13,11,18,0.2) 50%, transparent 70%)' }} />
+              <div className="absolute bottom-0 left-0 right-0 p-4">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <span className="text-base">{otherAvailable[0].countryEmoji}</span>
+                  <p className="text-white text-lg font-bold" style={{ fontFamily: SG }}>{otherAvailable[0].city}</p>
+                </div>
+                <p className="text-[11px]" style={{ color: '#A78BFA', fontFamily: SG }}>{otherAvailable[0].vibeTags.join(' · ')}</p>
+                <p className="text-[11px] mt-1" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: SG }}>{otherAvailable[0].description}</p>
+              </div>
+            </div>
+          </button>
+        )}
+
+        {/* Locked destinations — same row, smaller cards */}
+        {locked.map((dest) => (
+          <div
+            key={dest.id}
+            className="rounded-2xl overflow-hidden relative"
+            style={{ border: '1px solid rgba(255,255,255,0.06)' }}
+          >
+            <div className="relative h-[160px] overflow-hidden">
+              <img src={dest.heroImage} alt={dest.city} className="w-full h-full object-cover" style={{ filter: 'brightness(0.65) saturate(0.7)' }} />
+              <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(13,11,18,0.9) 0%, rgba(13,11,18,0.2) 50%, transparent 70%)' }} />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-white/50 text-xs font-medium px-3 py-1.5 rounded-full" style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)', fontFamily: SG }}>Coming soon</span>
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 p-4">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <span className="text-base">{dest.countryEmoji}</span>
+                  <p className="text-lg font-bold" style={{ color: 'rgba(255,255,255,0.7)', fontFamily: SG }}>{dest.city}</p>
+                </div>
+                <p className="text-[11px]" style={{ color: '#6B5F7A', fontFamily: SG }}>{dest.vibeTags.join(' · ')}</p>
               </div>
             </div>
           </div>
-        </button>
-      )}
-
-      {/* Other available destinations */}
-      {otherAvailable.length > 0 && (
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-          {otherAvailable.map((dest) => (
-            <button
-              key={dest.id}
-              onClick={() => {
-                if (!hasCharacters) { navigate('/create-character'); return }
-                navigate(`/travel/${dest.id}`)
-              }}
-              className="cursor-pointer group rounded-2xl overflow-hidden text-left flex flex-col"
-              style={{ border: '1px solid rgba(124,58,237,0.15)' }}
-            >
-              <div className="relative h-[140px] overflow-hidden">
-                <img src={dest.heroImage} alt={dest.city} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(13,11,18,0.8) 0%, transparent 50%)' }} />
-                <div className="absolute bottom-0 left-0 right-0 p-3">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-base">{dest.countryEmoji}</span>
-                    <p className="text-white text-lg font-bold" style={{ fontFamily: SG }}>{dest.city}</p>
-                  </div>
-                  <p className="text-[11px]" style={{ color: '#A78BFA', fontFamily: SG }}>{dest.vibeTags.join(' · ')}</p>
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Coming soon destinations */}
-      {locked.length > 0 && (
-        <div>
-          <p className="text-[11px] font-semibold tracking-[2px] uppercase mb-3" style={{ color: 'rgba(107,98,117,0.4)', fontFamily: SG }}>COMING SOON</p>
-          <div className="flex gap-3">
-            {locked.map((dest) => (
-              <div
-                key={dest.id}
-                className="rounded-xl overflow-hidden flex items-center gap-3 px-3 py-2.5 flex-1"
-                style={{ background: '#14111e', border: '1px solid rgba(255,255,255,0.04)' }}
-              >
-                <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0">
-                  <img src={dest.heroImage} alt={dest.city} className="w-full h-full object-cover" style={{ filter: 'brightness(0.6) saturate(0.7)' }} />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-sm">{dest.countryEmoji}</span>
-                    <p className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.6)', fontFamily: SG }}>{dest.city}</p>
-                  </div>
-                  <p className="text-[10px]" style={{ color: '#6B5F7A', fontFamily: SG }}>{dest.vibeTags.join(' · ')}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+        ))}
+      </div>
     </div>
   )
 }
