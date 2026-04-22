@@ -17,8 +17,8 @@ export function AppSidebar() {
   const albumLabel = getMomentConfig(getUniverseGenre(selectedUniverse)).albumTitle
   const NAV_ITEMS = [
     { icon: BookOpen, label: 'Home', path: '/home' },
-    { icon: Plane, label: 'Travel', path: '/travel' },
-    { icon: Sparkles, label: 'Stories', path: '/stories' },
+    { icon: Plane, label: 'Travel Mode', path: '/travel' },
+    { icon: Sparkles, label: 'Story Mode', path: '/stories' },
     { icon: Users, label: 'Characters To Meet', path: '/cast' },
     { icon: Camera, label: albumLabel, path: '/album' },
   ]
