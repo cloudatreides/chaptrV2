@@ -170,23 +170,23 @@ function TravelContent({ hasCharacters }: { hasCharacters: boolean }) {
                   src={dest.heroImage}
                   alt={dest.city}
                   className="w-full h-full object-cover"
-                  style={{ filter: dest.locked ? 'brightness(0.4) saturate(0.5)' : undefined }}
+                  style={{ filter: dest.locked ? 'brightness(0.6) saturate(0.7)' : undefined }}
                 />
                 {!dest.locked && (
                   <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded text-[7px] font-bold tracking-[1px] text-white" style={{ background: '#7C3AED', fontFamily: SG }}>AVAILABLE</div>
                 )}
                 {dest.locked && (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-white/30 text-[10px] font-medium px-2 py-1 rounded-full" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)', fontFamily: SG }}>Coming soon</span>
+                    <span className="text-white/50 text-[10px] font-medium px-2 py-1 rounded-full" style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)', fontFamily: SG }}>Coming soon</span>
                   </div>
                 )}
               </div>
-              <div className="p-3" style={{ background: dest.locked ? '#13101c' : '#151020' }}>
+              <div className="p-3" style={{ background: dest.locked ? '#14111e' : '#151020' }}>
                 <div className="flex items-center gap-1.5">
                   <span className="text-sm">{dest.countryEmoji}</span>
-                  <p className="text-sm font-bold" style={{ color: dest.locked ? 'rgba(255,255,255,0.45)' : '#fff', fontFamily: SG }}>{dest.city}</p>
+                  <p className="text-sm font-bold" style={{ color: dest.locked ? 'rgba(255,255,255,0.6)' : '#fff', fontFamily: SG }}>{dest.city}</p>
                 </div>
-                <p className="text-[10px] mt-0.5" style={{ color: dest.locked ? '#4A4255' : '#A78BFA', fontFamily: SG }}>
+                <p className="text-[10px] mt-0.5" style={{ color: dest.locked ? '#6B5F7A' : '#A78BFA', fontFamily: SG }}>
                   {dest.vibeTags.join(' · ')}
                 </p>
               </div>
@@ -586,16 +586,12 @@ export function HomePage() {
               </div>
             </div>
 
-            {/* Toggle + Description row */}
-            <div className="flex items-start gap-6 mb-8">
-              <div className="w-[300px] shrink-0">
-                <ModeToggle mode={mode} setMode={setMode} />
-              </div>
-              <div className="flex-1">
-                <AnimatePresence mode="wait">
-                  <ModeDescription mode={mode} />
-                </AnimatePresence>
-              </div>
+            {/* Toggle + Description stacked */}
+            <div className="flex flex-col gap-3 mb-8 max-w-[480px]">
+              <ModeToggle mode={mode} setMode={setMode} />
+              <AnimatePresence mode="wait">
+                <ModeDescription mode={mode} />
+              </AnimatePresence>
             </div>
 
             {/* Ping cards */}
@@ -673,16 +669,17 @@ function DesktopTravelContent({ hasCharacters }: { hasCharacters: boolean }) {
             if (!hasCharacters) { navigate('/create-character'); return }
             navigate('/travel/tokyo')
           }}
-          className="cursor-pointer rounded-2xl flex flex-col items-center justify-center gap-2 transition-all hover:brightness-125"
+          className="cursor-pointer rounded-2xl flex items-center justify-center gap-2 transition-all hover:brightness-125"
           style={{
-            width: activeTrip ? 280 : '100%',
-            height: activeTrip ? undefined : 90,
+            width: activeTrip ? 280 : undefined,
+            maxWidth: activeTrip ? undefined : 320,
+            height: activeTrip ? undefined : 48,
             background: activeTrip ? 'rgba(124,58,237,0.08)' : 'linear-gradient(90deg, #7C3AED, #A78BFA)',
             border: '1px solid rgba(124,58,237,0.2)',
             fontFamily: SG,
           }}
         >
-          {activeTrip ? <Plus size={22} style={{ color: '#A78BFA' }} /> : <Plane size={20} className="text-white" />}
+          {activeTrip ? <Plus size={22} style={{ color: '#A78BFA' }} /> : <Plane size={16} className="text-white" />}
           <span className="text-sm font-semibold" style={{ color: activeTrip ? '#A78BFA' : '#fff' }}>
             {activeTrip ? 'Plan a new trip' : 'Plan your first trip'}
           </span>
@@ -706,26 +703,26 @@ function DesktopTravelContent({ hasCharacters }: { hasCharacters: boolean }) {
                   src={dest.heroImage}
                   alt={dest.city}
                   className="w-full h-full object-cover"
-                  style={{ filter: dest.locked ? 'brightness(0.4) saturate(0.5)' : undefined }}
+                  style={{ filter: dest.locked ? 'brightness(0.6) saturate(0.7)' : undefined }}
                 />
                 {!dest.locked && (
                   <div className="absolute top-3 left-3 px-2 py-1 rounded-md text-[9px] font-bold tracking-[1px] text-white" style={{ background: '#7C3AED', fontFamily: SG }}>AVAILABLE</div>
                 )}
                 {dest.locked && (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-white/30 text-xs font-medium px-3 py-1.5 rounded-full" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)', fontFamily: SG }}>Coming soon</span>
+                    <span className="text-white/50 text-xs font-medium px-3 py-1.5 rounded-full" style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)', fontFamily: SG }}>Coming soon</span>
                   </div>
                 )}
               </div>
-              <div className="p-4" style={{ background: dest.locked ? '#13101c' : '#151020' }}>
+              <div className="p-4" style={{ background: dest.locked ? '#14111e' : '#151020' }}>
                 <div className="flex items-center gap-2">
                   <span className="text-base">{dest.countryEmoji}</span>
-                  <p className="text-lg font-bold" style={{ color: dest.locked ? 'rgba(255,255,255,0.45)' : '#fff', fontFamily: SG }}>{dest.city}</p>
+                  <p className="text-lg font-bold" style={{ color: dest.locked ? 'rgba(255,255,255,0.6)' : '#fff', fontFamily: SG }}>{dest.city}</p>
                 </div>
-                <p className="text-[11px] mt-1" style={{ color: dest.locked ? '#4A4255' : '#A78BFA', fontFamily: SG }}>
+                <p className="text-[11px] mt-1" style={{ color: dest.locked ? '#6B5F7A' : '#A78BFA', fontFamily: SG }}>
                   {dest.vibeTags.join(' · ')}
                 </p>
-                <p className="text-[11px] mt-1.5 line-clamp-2" style={{ color: dest.locked ? '#3D3748' : 'rgba(255,255,255,0.4)', fontFamily: SG }}>
+                <p className="text-[11px] mt-1.5 line-clamp-2" style={{ color: dest.locked ? '#5A5068' : 'rgba(255,255,255,0.4)', fontFamily: SG }}>
                   {dest.description}
                 </p>
               </div>
