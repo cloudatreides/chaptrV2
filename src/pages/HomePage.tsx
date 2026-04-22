@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, Plus, Pencil, MessageCircle, LogOut, Lock, Users, Compass, BookOpen, ChevronRight, Plane, Camera } from 'lucide-react'
+import { ArrowRight, Pencil, MessageCircle, LogOut, Lock, Users, Compass, BookOpen, ChevronRight, Plane, Camera } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { UNIVERSES, GENRE_FILTERS } from '../data/storyData'
 import { useAuth } from '../contexts/AuthContext'
@@ -64,34 +64,6 @@ function ModeToggle({ mode, setMode }: { mode: 'travel' | 'stories'; setMode: (m
   )
 }
 
-// ─── Mode Description ───
-
-function ModeDescription({ mode }: { mode: 'travel' | 'stories' }) {
-  const isTravel = mode === 'travel'
-  return (
-    <motion.div
-      key={mode}
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
-      className="rounded-xl p-3.5"
-      style={{
-        background: isTravel ? 'rgba(124,58,237,0.04)' : 'rgba(200,75,158,0.04)',
-        border: `1px solid ${isTravel ? 'rgba(124,58,237,0.12)' : 'rgba(200,75,158,0.12)'}`,
-      }}
-    >
-      <p className="text-[13px] font-semibold mb-1" style={{ color: isTravel ? '#A78BFA' : '#c84b9e', fontFamily: SG }}>
-        {isTravel ? '✈️  Travel Mode' : '📖  Story Mode'}
-      </p>
-      <p className="text-[11px] leading-[1.5]" style={{ color: '#8B8B90', fontFamily: SG }}>
-        {isTravel
-          ? 'Pick a real city, choose a companion, and live your dream trip scene by scene. Explore streets, eat local food, and chat with your companion — all with your face in every scene.'
-          : 'Star in 20+ interactive stories across romance, horror, mystery, and more. Make choices that shape the plot, chat with characters who remember everything, and see yourself in every scene.'}
-      </p>
-    </motion.div>
-  )
-}
-
 // ─── Travel Content ───
 
 function TravelContent({ hasCharacters }: { hasCharacters: boolean }) {
@@ -102,6 +74,11 @@ function TravelContent({ hasCharacters }: { hasCharacters: boolean }) {
   const activeTrip = activeCharacterId
     ? Object.entries(travelTrips).find(([key, trip]) => key.startsWith(`${activeCharacterId}:`) && trip.phase !== 'complete')
     : null
+
+  const available = DESTINATIONS.filter((d) => !d.locked)
+  const locked = DESTINATIONS.filter((d) => d.locked)
+  const hero = available[0]
+  const otherAvailable = available.slice(1)
 
   return (
     <div className="flex flex-col gap-4">
@@ -117,10 +94,7 @@ function TravelContent({ hasCharacters }: { hasCharacters: boolean }) {
             style={{ background: '#1A1628', border: '1px solid rgba(124,58,237,0.12)' }}
           >
             <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0">
-              <img
-                src={DESTINATIONS.find((d) => d.id === activeTrip[1].destinationId)?.heroImage ?? ''}
-                alt="" className="w-full h-full object-cover"
-              />
+              <img src={DESTINATIONS.find((d) => d.id === activeTrip[1].destinationId)?.heroImage ?? ''} alt="" className="w-full h-full object-cover" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[10px] font-semibold tracking-[1px] mb-0.5" style={{ color: '#A78BFA', fontFamily: SG }}>
@@ -138,62 +112,86 @@ function TravelContent({ hasCharacters }: { hasCharacters: boolean }) {
         </div>
       )}
 
-      {/* Plan Trip CTA */}
-      <motion.button
-        onClick={() => {
-          if (!hasCharacters) { navigate('/create-character'); return }
-          navigate('/travel/tokyo')
-        }}
-        className="cursor-pointer w-full h-12 rounded-xl flex items-center justify-center gap-2 text-white font-semibold text-sm"
-        style={{ background: 'linear-gradient(90deg, #7C3AED, #A78BFA)', fontFamily: SG }}
-        whileTap={{ scale: 0.98 }}
-      >
-        <Plane size={16} /> {activeTrip ? 'Plan a new trip' : 'Plan your first trip'}
-      </motion.button>
+      {/* Hero destination */}
+      {hero && (
+        <motion.button
+          onClick={() => {
+            if (!hasCharacters) { navigate('/create-character'); return }
+            navigate(`/travel/${hero.id}`)
+          }}
+          className="cursor-pointer w-full rounded-2xl overflow-hidden relative"
+          style={{ border: '1px solid rgba(124,58,237,0.2)' }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <div className="relative h-[180px] overflow-hidden">
+            <img src={hero.heroImage} alt={hero.city} className="w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(13,11,18,0.95) 0%, rgba(13,11,18,0.3) 50%, rgba(13,11,18,0) 70%)' }} />
+            <div className="absolute bottom-0 left-0 right-0 p-4 flex items-end justify-between">
+              <div>
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <span className="text-lg">{hero.countryEmoji}</span>
+                  <h3 className="text-white text-xl font-bold" style={{ fontFamily: SG }}>{hero.city}</h3>
+                </div>
+                <p className="text-[11px]" style={{ color: '#A78BFA', fontFamily: SG }}>{hero.vibeTags.join(' · ')}</p>
+              </div>
+              <div
+                className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg text-white text-xs font-semibold"
+                style={{ background: 'linear-gradient(90deg, #7C3AED, #A78BFA)', fontFamily: SG }}
+              >
+                <Plane size={13} /> Plan trip
+              </div>
+            </div>
+          </div>
+        </motion.button>
+      )}
 
-      {/* Destinations */}
-      <div>
-        <p className="text-[10px] font-semibold tracking-[2px] uppercase mb-2.5" style={{ color: 'rgba(107,98,117,0.5)', fontFamily: SG }}>
-          DESTINATIONS
-        </p>
+      {/* Other available destinations */}
+      {otherAvailable.length > 0 && (
         <div className="grid grid-cols-2 gap-3">
-          {DESTINATIONS.map((dest) => (
+          {otherAvailable.map((dest) => (
             <button
               key={dest.id}
-              onClick={() => !dest.locked && navigate(`/travel/${dest.id}`)}
-              disabled={dest.locked}
-              className="cursor-pointer rounded-xl overflow-hidden text-left flex flex-col"
-              style={{ border: `1px solid ${dest.locked ? 'rgba(255,255,255,0.04)' : 'rgba(124,58,237,0.15)'}` }}
+              onClick={() => {
+                if (!hasCharacters) { navigate('/create-character'); return }
+                navigate(`/travel/${dest.id}`)
+              }}
+              className="cursor-pointer rounded-xl overflow-hidden text-left relative"
+              style={{ border: '1px solid rgba(124,58,237,0.15)' }}
             >
-              <div className="relative h-[90px] overflow-hidden">
-                <img
-                  src={dest.heroImage}
-                  alt={dest.city}
-                  className="w-full h-full object-cover"
-                  style={{ filter: dest.locked ? 'brightness(0.6) saturate(0.7)' : undefined }}
-                />
-                {!dest.locked && (
-                  <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded text-[7px] font-bold tracking-[1px] text-white" style={{ background: '#7C3AED', fontFamily: SG }}>AVAILABLE</div>
-                )}
-                {dest.locked && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-white/50 text-[10px] font-medium px-2 py-1 rounded-full" style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)', fontFamily: SG }}>Coming soon</span>
+              <div className="relative h-[100px] overflow-hidden">
+                <img src={dest.heroImage} alt={dest.city} className="w-full h-full object-cover" />
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(13,11,18,0.85) 0%, transparent 50%)' }} />
+                <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm">{dest.countryEmoji}</span>
+                    <p className="text-white text-sm font-bold" style={{ fontFamily: SG }}>{dest.city}</p>
                   </div>
-                )}
-              </div>
-              <div className="p-3" style={{ background: dest.locked ? '#14111e' : '#151020' }}>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-sm">{dest.countryEmoji}</span>
-                  <p className="text-sm font-bold" style={{ color: dest.locked ? 'rgba(255,255,255,0.6)' : '#fff', fontFamily: SG }}>{dest.city}</p>
+                  <p className="text-[10px]" style={{ color: '#A78BFA', fontFamily: SG }}>{dest.vibeTags.join(' · ')}</p>
                 </div>
-                <p className="text-[10px] mt-0.5" style={{ color: dest.locked ? '#6B5F7A' : '#A78BFA', fontFamily: SG }}>
-                  {dest.vibeTags.join(' · ')}
-                </p>
               </div>
             </button>
           ))}
         </div>
-      </div>
+      )}
+
+      {/* Coming soon */}
+      {locked.length > 0 && (
+        <div>
+          <p className="text-[10px] font-semibold tracking-[2px] uppercase mb-2" style={{ color: 'rgba(107,98,117,0.4)', fontFamily: SG }}>COMING SOON</p>
+          <div className="flex gap-2.5">
+            {locked.map((dest) => (
+              <div key={dest.id} className="rounded-lg overflow-hidden flex items-center gap-2.5 px-2.5 py-2 flex-1" style={{ background: '#14111e', border: '1px solid rgba(255,255,255,0.04)' }}>
+                <div className="w-8 h-8 rounded-md overflow-hidden shrink-0">
+                  <img src={dest.heroImage} alt={dest.city} className="w-full h-full object-cover" style={{ filter: 'brightness(0.6) saturate(0.7)' }} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.6)', fontFamily: SG }}>{dest.countryEmoji} {dest.city}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -524,11 +522,6 @@ export function HomePage() {
           {/* Toggle */}
           <ModeToggle mode={mode} setMode={setMode} />
 
-          {/* Mode Description */}
-          <AnimatePresence mode="wait">
-            <ModeDescription mode={mode} />
-          </AnimatePresence>
-
           {/* Ping cards */}
           {hasCharacters && <PingCards delay={0.05} />}
 
@@ -586,12 +579,9 @@ export function HomePage() {
               </div>
             </div>
 
-            {/* Toggle + Description stacked */}
-            <div className="flex flex-col gap-3 mb-8 max-w-[480px]">
+            {/* Toggle */}
+            <div className="mb-8 max-w-[300px]">
               <ModeToggle mode={mode} setMode={setMode} />
-              <AnimatePresence mode="wait">
-                <ModeDescription mode={mode} />
-              </AnimatePresence>
             </div>
 
             {/* Ping cards */}
@@ -637,99 +627,126 @@ function DesktopTravelContent({ hasCharacters }: { hasCharacters: boolean }) {
     ? Object.entries(travelTrips).find(([key, trip]) => key.startsWith(`${activeCharacterId}:`) && trip.phase !== 'complete')
     : null
 
+  const available = DESTINATIONS.filter((d) => !d.locked)
+  const locked = DESTINATIONS.filter((d) => d.locked)
+  const hero = available[0]
+  const otherAvailable = available.slice(1)
+
   return (
     <div className="flex flex-col gap-6">
-      {/* Continue trip + new trip CTA side by side */}
-      <div className="flex gap-4">
-        {activeTrip && (
-          <button
-            onClick={() => navigate('/travel/trip')}
-            className="cursor-pointer flex-1 flex items-center gap-4 rounded-2xl p-4 text-left"
-            style={{ background: '#1A1628', border: '1px solid rgba(124,58,237,0.12)' }}
-          >
-            <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0">
-              <img src={DESTINATIONS.find((d) => d.id === activeTrip[1].destinationId)?.heroImage ?? ''} alt="" className="w-full h-full object-cover" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-semibold tracking-[1px] mb-0.5" style={{ color: '#A78BFA', fontFamily: SG }}>
-                DAY {activeTrip[1].currentDay} · {DESTINATIONS.find((d) => d.id === activeTrip[1].destinationId)?.city?.toUpperCase()}
-              </p>
-              <p className="text-white text-[15px] font-semibold" style={{ fontFamily: SG }}>
-                {DESTINATIONS.find((d) => d.id === activeTrip[1].destinationId)?.city}
-              </p>
-              <p className="text-white/40 text-xs" style={{ fontFamily: SG }}>
-                {activeTrip[1].phase === 'planning' ? 'Still planning...' : 'Exploring'}
-              </p>
-            </div>
-            <ChevronRight size={18} className="text-white/20 shrink-0" />
-          </button>
-        )}
+      {/* Continue trip card */}
+      {activeTrip && (
+        <button
+          onClick={() => navigate('/travel/trip')}
+          className="cursor-pointer w-full flex items-center gap-4 rounded-2xl p-4 text-left"
+          style={{ background: '#1A1628', border: '1px solid rgba(124,58,237,0.12)' }}
+        >
+          <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0">
+            <img src={DESTINATIONS.find((d) => d.id === activeTrip[1].destinationId)?.heroImage ?? ''} alt="" className="w-full h-full object-cover" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-semibold tracking-[1px] mb-0.5" style={{ color: '#A78BFA', fontFamily: SG }}>
+              DAY {activeTrip[1].currentDay} · {DESTINATIONS.find((d) => d.id === activeTrip[1].destinationId)?.city?.toUpperCase()}
+            </p>
+            <p className="text-white text-[15px] font-semibold" style={{ fontFamily: SG }}>
+              {DESTINATIONS.find((d) => d.id === activeTrip[1].destinationId)?.city}
+            </p>
+            <p className="text-white/40 text-xs" style={{ fontFamily: SG }}>
+              {activeTrip[1].phase === 'planning' ? 'Still planning...' : 'Exploring'}
+            </p>
+          </div>
+          <ChevronRight size={18} className="text-white/20 shrink-0" />
+        </button>
+      )}
+
+      {/* Hero destination — full-width aspirational card */}
+      {hero && (
         <button
           onClick={() => {
             if (!hasCharacters) { navigate('/create-character'); return }
-            navigate('/travel/tokyo')
+            navigate(`/travel/${hero.id}`)
           }}
-          className="cursor-pointer rounded-2xl flex items-center justify-center gap-2 transition-all hover:brightness-125"
-          style={{
-            width: activeTrip ? 280 : undefined,
-            maxWidth: activeTrip ? undefined : 320,
-            height: activeTrip ? undefined : 48,
-            background: activeTrip ? 'rgba(124,58,237,0.08)' : 'linear-gradient(90deg, #7C3AED, #A78BFA)',
-            border: '1px solid rgba(124,58,237,0.2)',
-            fontFamily: SG,
-          }}
+          className="cursor-pointer group w-full rounded-2xl overflow-hidden relative"
+          style={{ border: '1px solid rgba(124,58,237,0.2)' }}
         >
-          {activeTrip ? <Plus size={22} style={{ color: '#A78BFA' }} /> : <Plane size={16} className="text-white" />}
-          <span className="text-sm font-semibold" style={{ color: activeTrip ? '#A78BFA' : '#fff' }}>
-            {activeTrip ? 'Plan a new trip' : 'Plan your first trip'}
-          </span>
+          <div className="relative h-[240px] overflow-hidden">
+            <img src={hero.heroImage} alt={hero.city} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(13,11,18,0.95) 0%, rgba(13,11,18,0.4) 40%, rgba(13,11,18,0) 70%)' }} />
+            <div className="absolute bottom-0 left-0 right-0 p-6 flex items-end justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xl">{hero.countryEmoji}</span>
+                  <h3 className="text-white text-2xl font-bold" style={{ fontFamily: SG }}>{hero.city}</h3>
+                </div>
+                <p className="text-[12px]" style={{ color: '#A78BFA', fontFamily: SG }}>{hero.vibeTags.join(' · ')}</p>
+                <p className="text-[12px] mt-1" style={{ color: 'rgba(255,255,255,0.5)', fontFamily: SG }}>{hero.description}</p>
+              </div>
+              <div
+                className="shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-semibold"
+                style={{ background: 'linear-gradient(90deg, #7C3AED, #A78BFA)', fontFamily: SG }}
+              >
+                <Plane size={15} /> Plan trip
+              </div>
+            </div>
+          </div>
         </button>
-      </div>
+      )}
 
-      {/* Destinations */}
-      <div>
-        <p className="text-[11px] font-semibold tracking-[2px] uppercase mb-3" style={{ color: 'rgba(107,98,117,0.5)', fontFamily: SG }}>DESTINATIONS</p>
+      {/* Other available destinations */}
+      {otherAvailable.length > 0 && (
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-          {DESTINATIONS.map((dest) => (
+          {otherAvailable.map((dest) => (
             <button
               key={dest.id}
-              onClick={() => !dest.locked && navigate(`/travel/${dest.id}`)}
-              disabled={dest.locked}
-              className="cursor-pointer rounded-2xl overflow-hidden text-left flex flex-col"
-              style={{ border: `1px solid ${dest.locked ? 'rgba(255,255,255,0.04)' : 'rgba(124,58,237,0.15)'}` }}
+              onClick={() => {
+                if (!hasCharacters) { navigate('/create-character'); return }
+                navigate(`/travel/${dest.id}`)
+              }}
+              className="cursor-pointer group rounded-2xl overflow-hidden text-left flex flex-col"
+              style={{ border: '1px solid rgba(124,58,237,0.15)' }}
             >
               <div className="relative h-[140px] overflow-hidden">
-                <img
-                  src={dest.heroImage}
-                  alt={dest.city}
-                  className="w-full h-full object-cover"
-                  style={{ filter: dest.locked ? 'brightness(0.6) saturate(0.7)' : undefined }}
-                />
-                {!dest.locked && (
-                  <div className="absolute top-3 left-3 px-2 py-1 rounded-md text-[9px] font-bold tracking-[1px] text-white" style={{ background: '#7C3AED', fontFamily: SG }}>AVAILABLE</div>
-                )}
-                {dest.locked && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-white/50 text-xs font-medium px-3 py-1.5 rounded-full" style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)', fontFamily: SG }}>Coming soon</span>
+                <img src={dest.heroImage} alt={dest.city} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(13,11,18,0.8) 0%, transparent 50%)' }} />
+                <div className="absolute bottom-0 left-0 right-0 p-3">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-base">{dest.countryEmoji}</span>
+                    <p className="text-white text-lg font-bold" style={{ fontFamily: SG }}>{dest.city}</p>
                   </div>
-                )}
-              </div>
-              <div className="p-4" style={{ background: dest.locked ? '#14111e' : '#151020' }}>
-                <div className="flex items-center gap-2">
-                  <span className="text-base">{dest.countryEmoji}</span>
-                  <p className="text-lg font-bold" style={{ color: dest.locked ? 'rgba(255,255,255,0.6)' : '#fff', fontFamily: SG }}>{dest.city}</p>
+                  <p className="text-[11px]" style={{ color: '#A78BFA', fontFamily: SG }}>{dest.vibeTags.join(' · ')}</p>
                 </div>
-                <p className="text-[11px] mt-1" style={{ color: dest.locked ? '#6B5F7A' : '#A78BFA', fontFamily: SG }}>
-                  {dest.vibeTags.join(' · ')}
-                </p>
-                <p className="text-[11px] mt-1.5 line-clamp-2" style={{ color: dest.locked ? '#5A5068' : 'rgba(255,255,255,0.4)', fontFamily: SG }}>
-                  {dest.description}
-                </p>
               </div>
             </button>
           ))}
         </div>
-      </div>
+      )}
+
+      {/* Coming soon destinations */}
+      {locked.length > 0 && (
+        <div>
+          <p className="text-[11px] font-semibold tracking-[2px] uppercase mb-3" style={{ color: 'rgba(107,98,117,0.4)', fontFamily: SG }}>COMING SOON</p>
+          <div className="flex gap-3">
+            {locked.map((dest) => (
+              <div
+                key={dest.id}
+                className="rounded-xl overflow-hidden flex items-center gap-3 px-3 py-2.5 flex-1"
+                style={{ background: '#14111e', border: '1px solid rgba(255,255,255,0.04)' }}
+              >
+                <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0">
+                  <img src={dest.heroImage} alt={dest.city} className="w-full h-full object-cover" style={{ filter: 'brightness(0.6) saturate(0.7)' }} />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm">{dest.countryEmoji}</span>
+                    <p className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.6)', fontFamily: SG }}>{dest.city}</p>
+                  </div>
+                  <p className="text-[10px]" style={{ color: '#6B5F7A', fontFamily: SG }}>{dest.vibeTags.join(' · ')}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
