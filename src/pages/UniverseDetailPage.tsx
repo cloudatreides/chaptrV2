@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ChevronLeft, BookOpen, Star, Users, Clock, Heart } from 'lucide-react'
+import { ChevronLeft, BookOpen, Users, Clock, Heart } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { UNIVERSES } from '../data/storyData'
 import { STORY_REGISTRY } from '../data/stories'
@@ -31,9 +31,6 @@ export function UniverseDetailPage() {
     trackEvent('universe_select', { universe: universe.id })
     navigate('/characters')
   }
-
-  const fullStars = Math.floor(universe.rating)
-  const hasHalfStar = universe.rating - fullStars >= 0.3
 
   return (
     <div className="min-h-screen min-h-dvh bg-bg flex flex-col">
@@ -98,28 +95,20 @@ export function UniverseDetailPage() {
               <span>~{Math.round(stepCount * 2.5)} min</span>
             </motion.div>
 
-            {/* Star rating + players */}
-            <motion.div
-              className="flex items-center gap-2"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.1 }}
-            >
-              <div className="flex items-center gap-0.5">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star
-                    key={i}
-                    size={14}
-                    fill={i < fullStars ? '#f59e0b' : (i === fullStars && hasHalfStar ? '#f59e0b' : 'transparent')}
-                    className={i < fullStars ? 'text-amber-400' : (i === fullStars && hasHalfStar ? 'text-amber-400 opacity-50' : 'text-amber-400/20')}
-                  />
-                ))}
-              </div>
-              <span className="text-textPrimary text-[13px] font-bold">{universe.rating}</span>
-              <span className="text-textSecondary text-[13px]">·</span>
-              <Users size={13} className="text-textSecondary" />
-              <span className="text-textSecondary text-[13px]">{universe.playersCount} played</span>
-            </motion.div>
+            {/* Chapter count */}
+            {universe.chapters && universe.chapters > 1 && (
+              <motion.div
+                className="flex items-center gap-1.5"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.1 }}
+              >
+                <BookOpen size={14} className="text-accent" />
+                <span className="text-accent text-[13px] font-semibold">
+                  {universe.chapters} chapters available
+                </span>
+              </motion.div>
+            )}
 
             {/* Trust metric hint */}
             {storyData && (
@@ -166,7 +155,7 @@ export function UniverseDetailPage() {
                 <div
                   key={member.id}
                   className="shrink-0 flex flex-col gap-2.5 p-4 rounded-2xl"
-                  style={{ background: '#1a1525', border: '1px solid #2a2040', width: '150px' }}
+                  style={{ background: '#1a1525', border: '1px solid #2a2040', width: '140px' }}
                 >
                   {/* Avatar */}
                   {(() => {
@@ -196,7 +185,7 @@ export function UniverseDetailPage() {
               {/* Mystery character */}
               <div
                 className="shrink-0 flex flex-col gap-2.5 p-4 rounded-2xl"
-                style={{ background: '#13101c', border: '1px dashed #2a2040', width: '150px' }}
+                style={{ background: '#13101c', border: '1px dashed #2a2040', width: '140px' }}
               >
                 <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: '#1a1525' }}>
                   <span className="text-2xl font-bold" style={{ color: '#9b8db844' }}>?</span>

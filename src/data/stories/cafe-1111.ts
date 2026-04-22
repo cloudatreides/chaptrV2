@@ -189,6 +189,7 @@ export const CAFE_1111_STEPS: StoryStep[] = [
         sceneHint: 'bold / intimate',
         consequenceHint: 'He\'s drawn you from a distance. This changes everything.',
         imagePrompt: SCENES.cafeCorner,
+        affinityDelta: { sunwoo: 7, jieun: 3 },
       },
       {
         id: 'keep-distance',
@@ -197,6 +198,7 @@ export const CAFE_1111_STEPS: StoryStep[] = [
         sceneHint: 'patient / gentle',
         consequenceHint: 'Some things are more beautiful when you don\'t rush them.',
         imagePrompt: SCENES.streetNight,
+        affinityDelta: { sunwoo: 3, jieun: 2 },
       },
     ],
   },
@@ -293,6 +295,7 @@ export const CAFE_1111_STEPS: StoryStep[] = [
         sceneHint: 'bold / certain',
         consequenceHint: 'He put your face on a wall. The least you can do is face him.',
         imagePrompt: SCENES.galleryHallway,
+        affinityDelta: { sunwoo: 10, jieun: 4 },
       },
       {
         id: 'cafe',
@@ -301,6 +304,7 @@ export const CAFE_1111_STEPS: StoryStep[] = [
         sceneHint: 'faithful / patient',
         consequenceHint: 'The café is where you found each other. Go back to the beginning.',
         imagePrompt: SCENES.cafeInterior,
+        affinityDelta: { sunwoo: 5, jieun: 5 },
       },
     ],
   },
@@ -319,6 +323,7 @@ export const CAFE_1111_STEPS: StoryStep[] = [
         sceneHint: 'brave / direct',
         consequenceHint: 'Let the world see what he sees. Let him know you\'re okay with it.',
         imagePrompt: SCENES.galleryHallway,
+        affinityDelta: { sunwoo: 10, jieun: 3 },
       },
       {
         id: 'cafe',
@@ -327,6 +332,7 @@ export const CAFE_1111_STEPS: StoryStep[] = [
         sceneHint: 'intimate / certain',
         consequenceHint: 'The gallery can wait. The café can\'t.',
         imagePrompt: SCENES.cafeInterior,
+        affinityDelta: { sunwoo: 8, jieun: 5 },
       },
     ],
   },

@@ -11,8 +11,7 @@ export interface Universe {
   locked: boolean
   lockedLabel?: string
   tags: string[]
-  rating: number
-  playersCount: string
+  chapters?: number
 }
 
 export const UNIVERSES: Universe[] = [
@@ -26,8 +25,7 @@ export const UNIVERSES: Universe[] = [
     image: '/seoul-night.jpg',
     locked: false,
     tags: ['K-Pop', 'Slow Burn', 'Multiple Endings'],
-    rating: 4.8,
-    playersCount: '12.4k',
+    chapters: 3,
   },
   {
     id: 'sakura-academy',
@@ -39,8 +37,6 @@ export const UNIVERSES: Universe[] = [
     image: '/sakura.jpg',
     locked: false,
     tags: ['Anime', 'Romance', 'School Life'],
-    rating: 4.6,
-    playersCount: '8.7k',
   },
   {
     id: 'hollow-manor',
@@ -52,8 +48,6 @@ export const UNIVERSES: Universe[] = [
     image: '/hollow-manor.jpeg',
     locked: false,
     tags: ['Supernatural', 'Suspense', 'Multiple Endings'],
-    rating: 4.7,
-    playersCount: '5.2k',
   },
   {
     id: 'the-last-signal',
@@ -65,8 +59,6 @@ export const UNIVERSES: Universe[] = [
     image: '/last-signal.jpeg',
     locked: false,
     tags: ['Film Noir', 'Detective', 'Timed Choices'],
-    rating: 4.5,
-    playersCount: '3.8k',
   },
   {
     id: 'edge-of-atlas',
@@ -78,8 +70,6 @@ export const UNIVERSES: Universe[] = [
     image: '/edge-of-atlas.jpeg',
     locked: false,
     tags: ['Exploration', 'Ancient Ruins', 'Trust Dynamics'],
-    rating: 4.4,
-    playersCount: '2.9k',
   },
   {
     id: 'campus-rivals',
@@ -91,8 +81,6 @@ export const UNIVERSES: Universe[] = [
     image: '/campus-rivals.jpeg',
     locked: false,
     tags: ['Enemies to Lovers', 'College', 'Slow Burn'],
-    rating: 4.8,
-    playersCount: '6.1k',
   },
   {
     id: 'crimson-depths',
@@ -104,8 +92,6 @@ export const UNIVERSES: Universe[] = [
     image: '/crimson-depths.jpeg',
     locked: false,
     tags: ['Deep Sea', 'Cosmic Horror', 'Isolation'],
-    rating: 4.6,
-    playersCount: '4.5k',
   },
   {
     id: 'the-whisper-game',
@@ -117,8 +103,6 @@ export const UNIVERSES: Universe[] = [
     image: '/the-whisper-game.jpeg',
     locked: false,
     tags: ['Psychological', 'Social Media', 'Paranoia'],
-    rating: 4.5,
-    playersCount: '3.9k',
   },
   {
     id: 'neon-district',
@@ -130,8 +114,6 @@ export const UNIVERSES: Universe[] = [
     image: '/neon-district.jpeg',
     locked: false,
     tags: ['Cyberpunk', 'AI Ethics', 'Neo-Tokyo'],
-    rating: 4.3,
-    playersCount: '3.2k',
   },
   {
     id: 'the-inheritance',
@@ -143,8 +125,6 @@ export const UNIVERSES: Universe[] = [
     image: '/the-inheritance.jpeg',
     locked: false,
     tags: ['Gothic', 'Family Secrets', 'Scottish Highlands'],
-    rating: 4.6,
-    playersCount: '2.8k',
   },
   {
     id: 'sky-pirates',
@@ -156,8 +136,6 @@ export const UNIVERSES: Universe[] = [
     image: '/sky-pirates.jpeg',
     locked: false,
     tags: ['Steampunk', 'Heist', 'Found Family'],
-    rating: 4.7,
-    playersCount: '2.5k',
   },
   {
     id: 'the-drift',
@@ -169,8 +147,6 @@ export const UNIVERSES: Universe[] = [
     image: '/the-drift.jpeg',
     locked: false,
     tags: ['Sci-Fi', 'AI Companion', 'Deep Space'],
-    rating: 4.4,
-    playersCount: '1.8k',
   },
   {
     id: 'phantom-protocol',
@@ -182,8 +158,6 @@ export const UNIVERSES: Universe[] = [
     image: '/phantom-protocol.jpeg',
     locked: false,
     tags: ['Espionage', 'Cold War', 'Double Cross'],
-    rating: 4.5,
-    playersCount: '2.1k',
   },
   {
     id: 'fae-court',
@@ -195,8 +169,6 @@ export const UNIVERSES: Universe[] = [
     image: '/fae-court.jpeg',
     locked: false,
     tags: ['Dark Fae', 'Bargains', 'Otherworldly'],
-    rating: 4.6,
-    playersCount: '1.4k',
   },
   {
     id: 'rooftop-promise',
@@ -208,8 +180,6 @@ export const UNIVERSES: Universe[] = [
     image: '/rooftop-promise.jpeg',
     locked: false,
     tags: ['Manhwa', 'Chaebol', 'Secret Piano'],
-    rating: 4.9,
-    playersCount: '9.8k',
   },
   {
     id: 'fake-dating',
@@ -221,8 +191,6 @@ export const UNIVERSES: Universe[] = [
     image: '/fake-dating.jpeg',
     locked: false,
     tags: ['Manhwa', 'Enemies to Lovers', 'Fake Dating'],
-    rating: 4.8,
-    playersCount: '11.2k',
   },
   {
     id: 'cafe-1111',
@@ -234,8 +202,6 @@ export const UNIVERSES: Universe[] = [
     image: '/cafe-1111.jpeg',
     locked: false,
     tags: ['Manhwa', 'Artist', 'Fate'],
-    rating: 4.7,
-    playersCount: '7.6k',
   },
   {
     id: 'idol-next-door',
@@ -247,8 +213,6 @@ export const UNIVERSES: Universe[] = [
     image: '/idol-next-door.jpeg',
     locked: false,
     tags: ['Manhwa', 'K-Pop', 'Secret Identity'],
-    rating: 4.9,
-    playersCount: '13.1k',
   },
   {
     id: 'midnight-paris',
@@ -260,8 +224,6 @@ export const UNIVERSES: Universe[] = [
     image: '/midnight-paris.jpeg',
     locked: false,
     tags: ['Art World', 'Passion', 'Parisian Nights'],
-    rating: 4.7,
-    playersCount: '7.3k',
   },
 ]
 
@@ -366,6 +328,7 @@ export interface ChoiceOption {
   imagePrompt?: string // per-option preview image
   premium?: boolean // gem-gated option
   gemCost?: number // cost in gems
+  affinityDelta?: Record<string, number> // characterId → affinity change on selection
 }
 
 export interface SceneCharacter {
@@ -379,6 +342,8 @@ export interface StoryStep {
   id: string
   type: StepType
   title?: string
+  chapter?: number
+  shareable?: boolean
   // Beat fields
   openingProse?: string // only for first beat or static opening
   sceneImagePrompt?: string // Together AI FLUX.1 prompt
@@ -431,10 +396,12 @@ const SCENE_PROMPTS = {
 }
 
 export const STORY_STEPS: StoryStep[] = [
-  // ── Act 1: Setup (linear) ──
+  // ── Chapter 1, Act 1: Setup (linear) ──
   {
     id: 'beat-1',
     type: 'beat',
+    chapter: 1,
+    shareable: true,
     title: 'First Day',
     staticImage: '/scene-elevator.jpg',
     sceneImagePrompts: [SCENE_PROMPTS.elevator, SCENE_PROMPTS.elevatorAlt],
@@ -493,6 +460,7 @@ export const STORY_STEPS: StoryStep[] = [
         sceneHint: 'bold / direct',
         consequenceHint: 'Your directness could disarm him — or make him shut down completely.',
         imagePrompt: SCENE_PROMPTS.studioApproach,
+        affinityDelta: { jiwon: 5 },
       },
       {
         id: 'follow',
@@ -501,6 +469,7 @@ export const STORY_STEPS: StoryStep[] = [
         sceneHint: 'cautious / curious',
         consequenceHint: 'You\'ll see a side of him he hides from everyone — but if he catches you...',
         imagePrompt: SCENE_PROMPTS.corridorFollow,
+        affinityDelta: { jiwon: -2, sora: 3 },
       },
       {
         id: 'crash',
@@ -511,6 +480,7 @@ export const STORY_STEPS: StoryStep[] = [
         imagePrompt: SCENE_PROMPTS.rehearsal,
         premium: true,
         gemCost: 15,
+        affinityDelta: { jiwon: 8, sora: -3 },
       },
     ],
   },
@@ -588,6 +558,8 @@ export const STORY_STEPS: StoryStep[] = [
   {
     id: 'scene-group-1',
     type: 'scene',
+    chapter: 1,
+    shareable: true,
     title: 'Late Night Run',
     groupChat: true,
     chatImagePrompt: SCENE_PROMPTS.convenienceStore,
@@ -615,6 +587,7 @@ export const STORY_STEPS: StoryStep[] = [
         sceneHint: 'brave / vulnerable',
         consequenceHint: 'Raw honesty could shatter everything — or finally make it real.',
         imagePrompt: SCENE_PROMPTS.rooftopConfront,
+        affinityDelta: { jiwon: 10, sora: 5 },
       },
       {
         id: 'stay',
@@ -623,6 +596,7 @@ export const STORY_STEPS: StoryStep[] = [
         sceneHint: 'gentle / patient',
         consequenceHint: 'Silence speaks too. Sometimes presence is the braver choice.',
         imagePrompt: SCENE_PROMPTS.rooftopStay,
+        affinityDelta: { jiwon: 5, sora: 3 },
       },
     ],
   },
@@ -641,6 +615,7 @@ export const STORY_STEPS: StoryStep[] = [
         sceneHint: 'brave / vulnerable',
         consequenceHint: 'Raw honesty could shatter everything — or finally make it real.',
         imagePrompt: SCENE_PROMPTS.rooftopConfront,
+        affinityDelta: { jiwon: 10, sora: 5 },
       },
       {
         id: 'stay',
@@ -649,6 +624,7 @@ export const STORY_STEPS: StoryStep[] = [
         sceneHint: 'gentle / patient',
         consequenceHint: 'Silence speaks too. Sometimes presence is the braver choice.',
         imagePrompt: SCENE_PROMPTS.rooftopStay,
+        affinityDelta: { jiwon: 5, sora: 3 },
       },
     ],
   },
@@ -667,6 +643,7 @@ export const STORY_STEPS: StoryStep[] = [
         sceneHint: 'open / hopeful',
         consequenceHint: 'A leap of faith — he might catch you, or you might fall alone.',
         imagePrompt: SCENE_PROMPTS.backstageTrust,
+        affinityDelta: { jiwon: 12 },
       },
       {
         id: 'deflect',
@@ -675,6 +652,7 @@ export const STORY_STEPS: StoryStep[] = [
         sceneHint: 'guarded / safe',
         consequenceHint: 'Safe, but you\'ll carry the weight of what you didn\'t say.',
         imagePrompt: SCENE_PROMPTS.cafeDeflect,
+        affinityDelta: { jiwon: -5 },
       },
     ],
   },
@@ -683,6 +661,8 @@ export const STORY_STEPS: StoryStep[] = [
   {
     id: 'ending-crash-confront',
     type: 'beat',
+    chapter: 1,
+    shareable: true,
     title: 'The Confrontation',
     requires: { 'cp-1': 'crash', 'cp-2': 'confront' },
     staticImage: '/scene-rooftop.jpg',
@@ -692,6 +672,8 @@ export const STORY_STEPS: StoryStep[] = [
   {
     id: 'ending-crash-stay',
     type: 'beat',
+    chapter: 1,
+    shareable: true,
     title: 'The Quiet Choice',
     requires: { 'cp-1': 'crash', 'cp-2': 'stay' },
     staticImage: '/scene-rooftop.jpg',
@@ -703,6 +685,8 @@ export const STORY_STEPS: StoryStep[] = [
   {
     id: 'ending-approach-confront',
     type: 'beat',
+    chapter: 1,
+    shareable: true,
     title: 'The Confrontation',
     requires: { 'cp-1': 'approach', 'cp-2': 'confront' },
     staticImage: '/scene-rooftop.jpg',
@@ -712,6 +696,8 @@ export const STORY_STEPS: StoryStep[] = [
   {
     id: 'ending-approach-stay',
     type: 'beat',
+    chapter: 1,
+    shareable: true,
     title: 'The Quiet Choice',
     requires: { 'cp-1': 'approach', 'cp-2': 'stay' },
     staticImage: '/scene-rooftop.jpg',
@@ -721,6 +707,8 @@ export const STORY_STEPS: StoryStep[] = [
   {
     id: 'ending-follow-trust',
     type: 'beat',
+    chapter: 1,
+    shareable: true,
     title: 'The Leap',
     requires: { 'cp-1': 'follow', 'cp-2': 'trust' },
     staticImage: '/scene-studio.jpg',
@@ -730,6 +718,8 @@ export const STORY_STEPS: StoryStep[] = [
   {
     id: 'ending-follow-deflect',
     type: 'beat',
+    chapter: 1,
+    shareable: true,
     title: 'The Distance',
     requires: { 'cp-1': 'follow', 'cp-2': 'deflect' },
     staticImage: '/scene-elevator.jpg',
@@ -839,29 +829,48 @@ export function getCharacterBible(preference: 'jiwon' | 'yuna' | null): string {
 
 import { getStoryData } from './stories'
 
-/** Get steps for a universe. Falls back to Seoul Transfer. */
 /** Get genre for a universe (e.g. 'ROMANCE', 'HORROR'). Defaults to 'ROMANCE' for Seoul Transfer. */
 export function getUniverseGenre(universeId: string | null): string {
   if (!universeId) return 'ROMANCE'
   return UNIVERSES.find(u => u.id === universeId)?.genre ?? 'ROMANCE'
 }
 
-export function getStepsForUniverse(universeId: string | null): StoryStep[] {
-  const storyData = getStoryData(universeId)
+/** Get steps for a universe + chapter. Falls back to Seoul Transfer Ch1. */
+export function getStepsForUniverse(universeId: string | null, chapter?: number): StoryStep[] {
+  const storyData = getStoryData(universeId ?? 'seoul-transfer')
+  if (storyData?.chapters && chapter) {
+    return storyData.chapters[chapter] ?? storyData.steps
+  }
   if (storyData) return storyData.steps
   return STORY_STEPS
 }
 
+export function getTotalChapters(universeId: string | null): number {
+  const storyData = getStoryData(universeId ?? 'seoul-transfer')
+  return storyData?.totalChapters ?? 1
+}
+
 /** Get character bible for a universe. Falls back to Seoul Transfer. */
 export function getBibleForUniverse(universeId: string | null, preference?: 'jiwon' | 'yuna' | null): string {
-  const storyData = getStoryData(universeId)
-  if (storyData) return storyData.bible
+  const storyData = getStoryData(universeId ?? 'seoul-transfer')
+  if (storyData) {
+    return resolveText(storyData.bible, preference ?? null)
+  }
   return getCharacterBible(preference ?? null)
+}
+
+/** Get chapter brief for a universe + chapter number */
+export function getChapterBrief(universeId: string | null, chapter: number): string | undefined {
+  const storyData = getStoryData(universeId ?? 'seoul-transfer')
+  if (storyData?.chapterBriefs) return storyData.chapterBriefs[chapter]
+  return CHAPTER_BRIEFS[chapter]
 }
 
 /** Get reveal perspective label for a universe */
 export function getRevealPerspective(universeId: string | null, loveInterest?: 'jiwon' | 'yuna' | null): string {
-  const storyData = getStoryData(universeId)
-  if (storyData) return storyData.revealPerspective
+  const storyData = getStoryData(universeId ?? 'seoul-transfer')
+  if (storyData) {
+    return resolveText(storyData.revealPerspective, loveInterest ?? null)
+  }
   return loveInterest === 'yuna' ? 'Yuna sees you as' : 'Jiwon sees you as'
 }

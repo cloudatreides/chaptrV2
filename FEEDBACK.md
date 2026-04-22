@@ -13,9 +13,9 @@
 | 1 | Characters feel rigid, robotic — same tone every time, no variety or playfulness | P0 | Fixed |
 | 2 | Characters too serious, lack flirty energy — no wit, warmth, or romantic tension | P0 | Fixed |
 | 3 | Suggestion chips are generic and disconnected from the conversation | P0 | Fixed |
-| 4 | Choices don't meaningfully affect where the story goes | P1 | Open |
-| 5 | User profile picture style doesn't match character art style (e.g. anime avatar with realistic character) | P2 | Open |
-| 6 | Some AI-generated scenes feel unrelated to the previous conversation context | P2 | Open |
+| 4 | Choices don't meaningfully affect where the story goes | P1 | Fixed |
+| 5 | User profile picture style doesn't match character art style (e.g. anime avatar with realistic character) | P2 | Fixed |
+| 6 | Some AI-generated scenes feel unrelated to the previous conversation context | P2 | Fixed |
 
 ### What we changed
 
@@ -38,8 +38,22 @@
 - Components use AI suggestions when available, fall back to static genre pool as backup
 - All streaming displays strip suggestion tags so they're never shown raw
 
-### Still open
+### What we changed (Round 2)
 
-- **Choices affecting story** — Needs architectural work to branch content based on player decisions. Short-term: make AI reference past choices more explicitly.
-- **Art style matching** — Would need style-transfer on user avatar or global style preset selection.
-- **Scene context relevance** — Pass more conversation context into image generation prompts.
+**Choices affecting story (#4)**
+- Added `affinityDelta` to `ChoiceOption` — bold choices boost affinity (+5 to +12), cautious gives moderate, evasive penalizes
+- Affinity changes applied instantly on choice selection
+- Beat prose AI prompt now receives `MOST RECENT CHOICE — CRITICAL` section forcing consequences to show
+- Chat `storyContext` includes most recent choice with tone/sceneHint
+
+**Art style matching (#5)** (`AppSidebar.tsx`)
+- The user's selfie was already being anime-styled via FLUX.1 Kontext Pro (img2img style transfer) during character creation — so the in-story avatar matches character art
+- The actual gap was the sidebar account section, which was pulling the raw OAuth avatar (`user_metadata.avatar_url`) instead of the styled version
+- Fixed sidebar to prioritize `activeChar.selfieUrl` (anime version) → OAuth avatar → generic icon fallback
+
+**Scene context relevance (#6)** (`togetherAi.ts`, `StoryReaderPage.tsx`, `ChatScene.tsx`)
+- Root cause: all scene image prompts were static strings from `SCENE_PROMPTS` — no awareness of what just happened in the story
+- Added `moodContext` parameter to `generateSceneImage()` that appends choice tone to the FLUX prompt
+- StoryReaderPage builds mood from the player's most recent choice `sceneHint` (e.g. "bold / direct") and passes it to beat and carousel image generation
+- ChatScene extracts mood from `storyContext` and passes it to chat intro image generation
+- Result: FLUX prompts now end with contextual suffixes like "bold / direct mood, emotional tension" so generated scenes reflect story state

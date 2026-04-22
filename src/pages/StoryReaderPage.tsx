@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, Camera } from 'lucide-react'
+import { Menu, Camera, Share2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { useActiveStory } from '../hooks/useActiveStory'
-import { getActiveSteps, getTotalBeats, getCurrentBeatNumber, resolveLoveInterestId, resolveText, getStepsForUniverse, UNIVERSES, getUniverseGenre, getMomentConfig } from '../data/storyData'
+import { getActiveSteps, getTotalBeats, getCurrentBeatNumber, resolveLoveInterestId, resolveText, getStepsForUniverse, getTotalChapters, UNIVERSES, getUniverseGenre, getMomentConfig, getChapterBrief } from '../data/storyData'
 import { GemCounter } from '../components/GemCounter'
 import { ChoicePoint } from '../components/ChoicePoint'
 import { ChatScene } from '../components/ChatScene'
@@ -12,6 +12,7 @@ import { SceneChat } from '../components/SceneChat'
 import { GroupChatScene } from '../components/GroupChatScene'
 import { YourStorySheet } from '../components/YourStorySheet'
 import { YourStorySidebar } from '../components/YourStorySidebar'
+import { ShareSceneSheet } from '../components/ShareSceneSheet'
 import { streamBeatProse, extractTrustData } from '../lib/claudeStream'
 import { generateSceneImage } from '../lib/togetherAi'
 import { useStreamingTypewriter, useTypewriter } from '../hooks/useTypewriter'
@@ -34,7 +35,7 @@ export function StoryReaderPage() {
   const navigate = useNavigate()
   const {
     activeCharacter, loveInterest, selfieUrl, bio, selectedUniverse,
-    currentStepIndex, branchChoices, choiceDescriptions, characterState,
+    currentStepIndex, currentChapter, branchChoices, choiceDescriptions, characterState,
     sceneImages, trustStatusLabel, characterAffinities, seenPings,
   } = useActiveStory()
 
@@ -50,13 +51,17 @@ export function StoryReaderPage() {
   const setSceneImage = useStore((s) => s.setSceneImage)
   const unlockCastCharacter = useStore((s) => s.unlockCastCharacter)
   const addStoryMoment = useStore((s) => s.addStoryMoment)
+  const updateAffinity = useStore((s) => s.updateAffinity)
   const playthroughHistory = useStore((s) => s.playthroughHistory)
   const summariesList = useStore.getState().getSummariesList()
 
   const [sheetOpen, setSheetOpen] = useState(false)
   const [groupChatAccepted, setGroupChatAccepted] = useState(false)
+  const [beatError, setBeatError] = useState(false)
+  const [showShareSheet, setShowShareSheet] = useState(false)
   const [activePing, setActivePing] = useState<PingDef | null>(null)
   const [questToast, setQuestToast] = useState<QuestDef | null>(null)
+  const [showChapterIntro, setShowChapterIntro] = useState(currentChapter > 1 && currentStepIndex === 0)
   const prevStepIndexRef = useRef(currentStepIndex)
 
   // Redirect if no active character
@@ -70,8 +75,13 @@ export function StoryReaderPage() {
   const genre = getUniverseGenre(selectedUniverse)
   const momentConfig = getMomentConfig(genre)
 
-  // Compute active steps based on branch choices
-  const universeSteps = getStepsForUniverse(selectedUniverse)
+  const advanceChapter = useStore((s) => s.advanceChapter)
+  const totalChapters = getTotalChapters(selectedUniverse)
+
+  const currentChapterBrief = getChapterBrief(selectedUniverse, currentChapter)
+
+  // Compute active steps based on branch choices + current chapter
+  const universeSteps = getStepsForUniverse(selectedUniverse, currentChapter)
   const activeSteps = getActiveSteps(branchChoices, universeSteps)
   const currentStep = activeSteps[currentStepIndex]
   const totalBeats = getTotalBeats(activeSteps)
@@ -93,7 +103,7 @@ export function StoryReaderPage() {
     return single ? [single] : []
   })()
 
-  const isFirstBeat = currentStep?.id === 'beat-1'
+  const isFirstBeat = currentStepIndex === 0 && currentStep?.type === 'beat' && currentStep?.openingProse
   const { displayed: openingDisplayed, done: openingDone } = useTypewriter(
     isFirstBeat ? resolveText(currentStep?.openingProse ?? '', loveInterest) : '',
     20,
@@ -101,7 +111,10 @@ export function StoryReaderPage() {
 
   const { displayed: streamDisplayed, isTyping, append, finish, reset: resetStream } = useStreamingTypewriter(18)
 
-  useEffect(() => { trackEvent('story_start') }, [])
+  useEffect(() => {
+    trackEvent('story_start')
+    trackEvent('chapter_started', { universe: selectedUniverse, chapter: currentChapter })
+  }, [])
 
   // ─── Ping evaluation — check for character pings after step transitions ───
   useEffect(() => {
@@ -119,7 +132,9 @@ export function StoryReaderPage() {
     const pending = pings.find(p => {
       if (seenPings.includes(p.id)) return false
       // Match afterStep against the step ID or choicePointId
-      if (p.afterStep !== prevStep.id && p.afterStep !== prevStep.choicePointId) return false
+      const matchesStep = p.afterStep === prevStep.id || p.afterStep === prevStep.choicePointId
+      const matchesSteps = p.afterSteps?.some(s => s === prevStep.id || s === prevStep.choicePointId)
+      if (!matchesStep && !matchesSteps) return false
       // Check affinity gate
       const resolvedCharId = p.characterId === 'jiwon'
         ? (loveInterest === 'yuna' ? 'yuna' : 'jiwon')
@@ -180,6 +195,12 @@ export function StoryReaderPage() {
 
     const gender = activeCharacter?.gender
 
+    // Build mood context from recent choices + affinity for contextual scene images
+    const recentChoice = choiceDescriptions.length > 0 ? choiceDescriptions[choiceDescriptions.length - 1] : null
+    const moodContext = recentChoice?.sceneHint
+      ? `${recentChoice.sceneHint} mood, emotional tension`
+      : undefined
+
     if (currentStep?.type === 'beat') {
       const incProt = currentStep.includesProtagonist !== false
       if (currentStep.sceneImagePrompts?.length) {
@@ -188,14 +209,14 @@ export function StoryReaderPage() {
         const promises = currentStep.sceneImagePrompts.map((prompt, i) => {
           const key = `${currentStep.id}:${i}`
           if (sceneImages[key]) return Promise.resolve()
-          return generateSceneImage({ prompt, referenceImageUrl: selfieUrl, protagonistGender: gender, includesProtagonist: incProt }).then((url) => {
+          return generateSceneImage({ prompt, referenceImageUrl: selfieUrl, protagonistGender: gender, includesProtagonist: incProt, moodContext }).then((url) => {
             if (url) setSceneImage(key, url)
           })
         })
         Promise.all(promises).then(() => setIsGeneratingScene(false))
       } else if (currentStep.sceneImagePrompt && !sceneImages[currentStep.id]) {
         setIsGeneratingScene(true)
-        generateSceneImage({ prompt: currentStep.sceneImagePrompt, referenceImageUrl: selfieUrl, protagonistGender: gender, includesProtagonist: incProt }).then((url) => {
+        generateSceneImage({ prompt: currentStep.sceneImagePrompt, referenceImageUrl: selfieUrl, protagonistGender: gender, includesProtagonist: incProt, moodContext }).then((url) => {
           if (url) setSceneImage(currentStep.id, url)
           setIsGeneratingScene(false)
         })
@@ -233,14 +254,26 @@ export function StoryReaderPage() {
     return () => { document.removeEventListener('click', unlock); ambientAudio.stop() }
   }, [])
 
+  const [showChapterTransition, setShowChapterTransition] = useState(false)
+
   useEffect(() => {
-    if (currentStep?.type === 'reveal') navigate('/reveal')
+    if (currentStep?.type === 'reveal') {
+      trackEvent('chapter_completed', { universe: selectedUniverse, chapter: currentChapter })
+      if (currentChapter < totalChapters) {
+        setShowChapterTransition(true)
+      } else {
+        navigate('/reveal')
+      }
+    }
   }, [currentStep])
 
   const handleGenerateBeat = async () => {
-    if (!currentStep || currentStep.type !== 'beat' || hasChosenBeat) return
+    if (!currentStep || currentStep.type !== 'beat') return
     if (isFirstBeat) return
+    if (hasChosenBeat && !beatError) return
 
+    setBeatError(false)
+    setHasChosenBeat(false)
     setIsStreaming(true)
     resetStream()
 
@@ -251,6 +284,7 @@ export function StoryReaderPage() {
       const gen = streamBeatProse({
         beatTitle: currentStep.title ?? 'Scene',
         arcBrief: currentStep.arcBrief,
+        chapterBrief: currentChapterBrief,
         choiceHistory: choiceDescriptions,
         chatSummaries: summariesList,
         characterState: characterState,
@@ -298,8 +332,8 @@ export function StoryReaderPage() {
       setBeatProse(cleanProse)
     } catch (e) {
       if (e instanceof Error && e.name !== 'AbortError') {
-        append('The story continues...')
-        finish()
+        setBeatError(true)
+        resetStream()
       }
     } finally {
       setIsStreaming(false)
@@ -337,8 +371,16 @@ export function StoryReaderPage() {
     }
 
     setBranchChoice(currentStep.choicePointId, optionId)
-    addChoiceDescription({ label: option.label, description: option.description })
+    addChoiceDescription({ label: option.label, description: option.description, sceneHint: option.sceneHint })
     trackEvent('choice_made', { choicePoint: currentStep.choicePointId, option: optionId, premium: !!option.premium })
+
+    // Apply affinity deltas from choice — resolve 'jiwon' to actual love interest id
+    if (option.affinityDelta) {
+      for (const [charId, delta] of Object.entries(option.affinityDelta)) {
+        const resolvedId = charId === 'jiwon' ? resolveLoveInterestId(loveInterest) : charId
+        updateAffinity(resolvedId, delta)
+      }
+    }
 
     // Show community stats + share toast
     setChoiceResult({ choicePointId: currentStep.choicePointId, selectedOptionId: optionId })
@@ -411,9 +453,14 @@ export function StoryReaderPage() {
   if (!currentStep) return null
 
   const universeDesc = UNIVERSES.find(u => u.id === selectedUniverse)?.description ?? 'The protagonist is a transfer student at Seoul Arts Academy.'
-  const storyContext = `Chapter 1: ${universeTitle}. ${universeDesc} ` +
+  const lastChoice = choiceDescriptions.length > 0 ? choiceDescriptions[choiceDescriptions.length - 1] : null
+  const storyContext = `Chapter ${currentChapter}: ${universeTitle}. ${universeDesc} ` +
+    (currentChapterBrief ? `Chapter goal: ${currentChapterBrief} ` : '') +
     (choiceDescriptions.length > 0
       ? `Choices so far: ${choiceDescriptions.map((c) => c.label).join(', ')}. `
+      : '') +
+    (lastChoice
+      ? `Most recent choice: "${lastChoice.label}" — ${lastChoice.description}${lastChoice.sceneHint ? ` (tone: ${lastChoice.sceneHint})` : ''}. React to this naturally. `
       : '') +
     (summariesList.length > 0
       ? `Previous conversations: ${summariesList.join(' ')}`
@@ -543,7 +590,11 @@ export function StoryReaderPage() {
             isGeneratingScene={isGeneratingScene}
             hasChosenBeat={hasChosenBeat}
             beatProse={beatProse}
+            beatError={beatError}
+            shareable={!!currentStep.shareable}
+            onRetry={handleGenerateBeat}
             onContinue={handleAdvance}
+            onShare={() => setShowShareSheet(true)}
             playerName={activeCharacter?.name ?? null}
             playerAvatar={selfieUrl}
           />
@@ -598,7 +649,7 @@ export function StoryReaderPage() {
         ) : (
           <div className="relative z-10 mt-auto px-5 pb-6 safe-bottom flex flex-col gap-4">
             <div className="flex items-center justify-between">
-              <p className="text-textMuted text-xs">Chapter 1 — {currentStep.title}</p>
+              <p className="text-textMuted text-xs">Chapter {currentChapter} — {currentStep.title}</p>
               <TrustIndicator trust={characterState.junhoTrust} label={trustStatusLabel} />
             </div>
             {renderStepContent()}
@@ -606,6 +657,75 @@ export function StoryReaderPage() {
         )}
 
         <YourStorySheet open={sheetOpen} onClose={() => setSheetOpen(false)} />
+
+        {/* Chapter intro title card */}
+        <AnimatePresence>
+          {showChapterIntro && (
+            <motion.div
+              className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-bg"
+              initial={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              <motion.div
+                className="text-center"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.6 }}
+              >
+                <p className="text-textMuted text-xs uppercase tracking-[0.3em] mb-4">Chapter {currentChapter}</p>
+                <h1 className="text-3xl font-bold text-textPrimary">{universeTitle}</h1>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 2 }}
+              >
+                <button
+                  onClick={() => setShowChapterIntro(false)}
+                  className="mt-10 text-textMuted text-sm hover:text-textSecondary transition-colors"
+                >
+                  Begin →
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Chapter transition overlay */}
+        <AnimatePresence>
+          {showChapterTransition && (
+            <motion.div
+              className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-bg/95 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div
+                className="text-center px-8"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                <p className="text-textMuted text-xs uppercase tracking-widest mb-3">End of Chapter {currentChapter}</p>
+                <h2 className="text-2xl font-bold text-textPrimary mb-2">{universeTitle}</h2>
+                <p className="text-textSecondary text-sm mb-8">Chapter {currentChapter + 1} awaits...</p>
+                <button
+                  onClick={() => {
+                    setShowChapterTransition(false)
+                    setShowChapterIntro(true)
+                    advanceChapter()
+                    trackEvent('chapter_started', { universe: selectedUniverse, chapter: currentChapter + 1 })
+                  }}
+                  className="px-8 py-3 rounded-xl text-white font-semibold text-sm"
+                  style={{ background: 'linear-gradient(135deg, #7C3AED, #c84b9e)' }}
+                >
+                  Continue to Chapter {currentChapter + 1}
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* DESKTOP */}
@@ -640,7 +760,7 @@ export function StoryReaderPage() {
                   )}
                 </AnimatePresence>
                 <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-8 pt-5">
-                  <p className="text-textMuted text-xs uppercase tracking-widest">Chapter 1 — {currentStep.title}</p>
+                  <p className="text-textMuted text-xs uppercase tracking-widest">Chapter {currentChapter} — {currentStep.title}</p>
                   <ProgressBar current={currentBeatNum} total={totalBeats} />
                   <div className="flex items-center gap-3">
                     <AudioToggle />
@@ -697,11 +817,26 @@ export function StoryReaderPage() {
         )}
       </AnimatePresence>
 
+      {/* Share scene sheet */}
+      <AnimatePresence>
+        {showShareSheet && (currentStep?.sceneImagePrompts?.length || currentStep?.sceneImagePrompt || currentStep?.chatImagePrompt) && (
+          <ShareSceneSheet
+            scenePrompt={currentStep.sceneImagePrompts?.[0] ?? currentStep.sceneImagePrompt ?? currentStep.chatImagePrompt ?? ''}
+            beatTitle={currentStep.title ?? 'Scene'}
+            universeName={universeTitle}
+            chapter={currentChapter}
+            selfieUrl={selfieUrl}
+            protagonistGender={activeCharacter?.gender ?? 'female'}
+            onDismiss={() => setShowShareSheet(false)}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Capture moment overlay */}
       <AnimatePresence>
         {(isCapturing || captureMoment) && (
           <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center p-6"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -790,12 +925,16 @@ interface BeatContentProps {
   isGeneratingScene: boolean
   hasChosenBeat: boolean
   beatProse: string
+  beatError: boolean
+  shareable: boolean
+  onRetry: () => void
   onContinue: () => void
+  onShare: () => void
   playerName: string | null
   playerAvatar: string | null
 }
 
-function BeatContent({ step: _step, isFirstBeat, openingDisplayed, openingDone, streamDisplayed, isTyping, isStreaming, isGeneratingScene, hasChosenBeat, beatProse, onContinue, playerName, playerAvatar }: BeatContentProps) {
+function BeatContent({ step: _step, isFirstBeat, openingDisplayed, openingDone, streamDisplayed, isTyping, isStreaming, isGeneratingScene, hasChosenBeat, beatProse, beatError, shareable, onRetry, onContinue, onShare, playerName, playerAvatar }: BeatContentProps) {
   const proseText = streamDisplayed || beatProse
   return (
     <div className="space-y-4">
@@ -831,17 +970,40 @@ function BeatContent({ step: _step, isFirstBeat, openingDisplayed, openingDone, 
           </p>
         ) : null}
       </div>
-      {isStreaming && !proseText && !isGeneratingScene && (
+      {isStreaming && !proseText && !isGeneratingScene && !beatError && (
         <div className="space-y-2">
           <div className="skeleton h-3 w-full" />
           <div className="skeleton h-3 w-4/5" />
           <div className="skeleton h-3 w-3/4" />
         </div>
       )}
-      {((isFirstBeat && openingDone) || (hasChosenBeat && !isTyping && !isStreaming)) && (
-        <motion.button className="choice-btn justify-center" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} onClick={onContinue}>
-          Continue →
+      {beatError && (
+        <motion.button
+          className="choice-btn justify-center text-amber-400 border-amber-400/30"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          onClick={onRetry}
+        >
+          Tap to retry
         </motion.button>
+      )}
+      {((isFirstBeat && openingDone) || (hasChosenBeat && !isTyping && !isStreaming && !beatError)) && (
+        <div className="flex flex-col gap-2">
+          {shareable && (_step.sceneImagePrompts?.length || _step.sceneImagePrompt) && (
+            <motion.button
+              className="choice-btn justify-center gap-2 text-accent border-accent/30"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              onClick={onShare}
+            >
+              <Share2 size={14} />
+              Share this moment
+            </motion.button>
+          )}
+          <motion.button className="choice-btn justify-center" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: shareable ? 0.15 : 0 }} onClick={onContinue}>
+            Continue →
+          </motion.button>
+        </div>
       )}
     </div>
   )

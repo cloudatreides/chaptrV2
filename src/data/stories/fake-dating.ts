@@ -189,6 +189,7 @@ export const FAKE_DATING_STEPS: StoryStep[] = [
         sceneHint: 'brave / direct',
         consequenceHint: 'The truth might break the contract. Or it might break the pretence.',
         imagePrompt: SCENES.balcony,
+        affinityDelta: { hajin: 7, yejin: 4 },
       },
       {
         id: 'keep-playing',
@@ -197,6 +198,7 @@ export const FAKE_DATING_STEPS: StoryStep[] = [
         sceneHint: 'careful / afraid',
         consequenceHint: 'Silence protects the friendship. It also protects the lie.',
         imagePrompt: SCENES.rooftopTerrace,
+        affinityDelta: { hajin: 2, yejin: -3 },
       },
     ],
   },
@@ -293,6 +295,7 @@ export const FAKE_DATING_STEPS: StoryStep[] = [
         sceneHint: 'brave / all in',
         consequenceHint: 'No more pretending. No safety net. Just the truth.',
         imagePrompt: SCENES.fireworks,
+        affinityDelta: { hajin: 12, yejin: 5 },
       },
       {
         id: 'let-expire',
@@ -301,6 +304,7 @@ export const FAKE_DATING_STEPS: StoryStep[] = [
         sceneHint: 'afraid / waiting',
         consequenceHint: 'Some things need to end before they can begin again.',
         imagePrompt: SCENES.balcony,
+        affinityDelta: { hajin: -3, yejin: -2 },
       },
     ],
   },
@@ -319,6 +323,7 @@ export const FAKE_DATING_STEPS: StoryStep[] = [
         sceneHint: 'honest / finally',
         consequenceHint: 'You\'ve been pretending all summer. Stop.',
         imagePrompt: SCENES.doorstep,
+        affinityDelta: { hajin: 10, yejin: 5 },
       },
       {
         id: 'let-expire',
@@ -327,6 +332,7 @@ export const FAKE_DATING_STEPS: StoryStep[] = [
         sceneHint: 'safe / aching',
         consequenceHint: 'You\'ll still see him every day. That might be worse.',
         imagePrompt: SCENES.neighbourhood,
+        affinityDelta: { hajin: -4, yejin: -2 },
       },
     ],
   },

@@ -18,6 +18,9 @@ import { ROOFTOP_PROMISE_STEPS, ROOFTOP_PROMISE_CHARACTERS, ROOFTOP_PROMISE_BIBL
 import { FAKE_DATING_STEPS, FAKE_DATING_CHARACTERS, FAKE_DATING_BIBLE } from './fake-dating'
 import { CAFE_1111_STEPS, CAFE_1111_CHARACTERS, CAFE_1111_BIBLE } from './cafe-1111'
 import { IDOL_NEXT_DOOR_STEPS, IDOL_NEXT_DOOR_CHARACTERS, IDOL_NEXT_DOOR_BIBLE } from './idol-next-door'
+import { SEOUL_TRANSFER_CHAPTERS, SEOUL_TRANSFER_CHAPTER_BRIEFS, SEOUL_TRANSFER_TOTAL_CHAPTERS } from './seoul-transfer'
+import { CHARACTERS } from '../characters'
+import { CHARACTER_BIBLE, STORY_STEPS } from '../storyData'
 
 export interface StoryData {
   steps: StoryStep[]
@@ -31,9 +34,25 @@ export interface StoryData {
   primaryCharacterId: string
   /** Genre-appropriate reveal signature prompt context */
   signatureContext: string
+  /** Multi-chapter support */
+  chapters?: Record<number, StoryStep[]>
+  chapterBriefs?: Record<number, string>
+  totalChapters?: number
 }
 
 export const STORY_REGISTRY: Record<string, StoryData> = {
+  'seoul-transfer': {
+    steps: STORY_STEPS,
+    characters: CHARACTERS,
+    bible: CHARACTER_BIBLE,
+    trustLabel: 'trust',
+    primaryCharacterId: 'jiwon',
+    revealPerspective: 'Jiwon sees you as',
+    signatureContext: 'a K-pop romance set at Seoul Arts Academy. The signature should capture the emotional quality of the protagonist\'s connection with Jiwon — through boldness or patience, what they risked, and what the rooftop came to mean.',
+    chapters: SEOUL_TRANSFER_CHAPTERS,
+    chapterBriefs: SEOUL_TRANSFER_CHAPTER_BRIEFS,
+    totalChapters: SEOUL_TRANSFER_TOTAL_CHAPTERS,
+  },
   'hollow-manor': {
     steps: HOLLOW_MANOR_STEPS,
     characters: HOLLOW_MANOR_CHARACTERS,

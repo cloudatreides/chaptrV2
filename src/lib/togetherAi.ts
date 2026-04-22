@@ -7,6 +7,7 @@ export interface GenerateSceneParams {
   referenceImageUrl?: string | null
   protagonistGender?: 'male' | 'female'
   includesProtagonist?: boolean
+  moodContext?: string // e.g. "tense after a bold choice" — appended to prompt for contextual scenes
 }
 
 // ─── Prompt-hash image cache (Supabase) ───
@@ -48,14 +49,19 @@ async function cacheImage(hash: string, imageUrl: string, prompt: string): Promi
  *  scene AND a selfie reference exists. Otherwise uses Schnell ($0.04).
  *  Schnell results are cached by prompt hash to avoid regenerating identical scenes. */
 export async function generateSceneImage(params: GenerateSceneParams): Promise<string | null> {
-  const { prompt, width = 768, height = 576, referenceImageUrl, protagonistGender, includesProtagonist = true } = params
+  const { prompt, width = 768, height = 576, referenceImageUrl, protagonistGender, includesProtagonist = true, moodContext } = params
 
   const useKontext = !!referenceImageUrl && includesProtagonist
 
   // Replace generic "a young person" with gender-specific description
-  const genderedPrompt = protagonistGender
+  let genderedPrompt = protagonistGender
     ? prompt.replace(/a young person/gi, protagonistGender === 'female' ? 'a young woman' : 'a young man')
     : prompt
+
+  // Append mood context from choices/affinity to make scenes feel connected to story state
+  if (moodContext) {
+    genderedPrompt += `, ${moodContext}`
+  }
 
   // Convert width/height to closest aspect ratio string for Schnell
   const toAspectRatio = (w: number, h: number): string => {

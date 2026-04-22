@@ -190,6 +190,7 @@ export const IDOL_NEXT_DOOR_STEPS: StoryStep[] = [
         sceneHint: 'honest / direct',
         consequenceHint: 'Hearing someone\'s unfinished song is hearing their unfinished thoughts.',
         imagePrompt: SCENES.practiceRoom,
+        affinityDelta: { taehyun: 6, nari: 3 },
       },
       {
         id: 'wait',
@@ -198,6 +199,7 @@ export const IDOL_NEXT_DOOR_STEPS: StoryStep[] = [
         sceneHint: 'patient / respectful',
         consequenceHint: 'Some songs need to be finished before they can be heard.',
         imagePrompt: SCENES.balconyNight,
+        affinityDelta: { taehyun: 4, nari: 2 },
       },
     ],
   },
@@ -294,6 +296,7 @@ export const IDOL_NEXT_DOOR_STEPS: StoryStep[] = [
         sceneHint: 'brave / committed',
         consequenceHint: 'The world outside is complicated. But he shouldn\'t face it alone.',
         imagePrompt: SCENES.stageReturn,
+        affinityDelta: { taehyun: 10, nari: 5 },
       },
       {
         id: 'wait-here',
@@ -302,6 +305,7 @@ export const IDOL_NEXT_DOOR_STEPS: StoryStep[] = [
         sceneHint: 'trusting / steady',
         consequenceHint: 'Home is the apartment with the thin walls. He knows where to find you.',
         imagePrompt: SCENES.balconyNight,
+        affinityDelta: { taehyun: 5, nari: 3 },
       },
     ],
   },
@@ -320,6 +324,7 @@ export const IDOL_NEXT_DOOR_STEPS: StoryStep[] = [
         sceneHint: 'brave / together',
         consequenceHint: 'He found his voice in this apartment. Help him carry it outside.',
         imagePrompt: SCENES.stageReturn,
+        affinityDelta: { taehyun: 10, nari: 4 },
       },
       {
         id: 'wait-here',
@@ -328,6 +333,7 @@ export const IDOL_NEXT_DOOR_STEPS: StoryStep[] = [
         sceneHint: 'patient / faithful',
         consequenceHint: 'You\'ll hear him come home through the wall. You always do.',
         imagePrompt: SCENES.apartment,
+        affinityDelta: { taehyun: 4, nari: 3 },
       },
     ],
   },

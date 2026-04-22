@@ -583,7 +583,7 @@ export function LandingPage() {
           {/* Hero text pinned to bottom */}
           <div className="relative z-10 mt-auto px-5 pb-8 flex flex-col gap-4 safe-bottom">
             <motion.div className="flex flex-col gap-3" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <TypewriterHeadline fontSize={40} style={{ lineHeight: 1 }} />
+              <TypewriterHeadline fontSize={34} style={{ lineHeight: 1 }} />
               <p className="text-white/75 text-sm leading-relaxed" style={{ maxWidth: 300, fontFamily: INTER, textShadow: '0 1px 8px rgba(0,0,0,0.9)' }}>
                 Upload a selfie. Chat with AI characters. Make choices that change the ending. Every story is uniquely yours.
               </p>
@@ -622,7 +622,7 @@ export function LandingPage() {
             <span className="text-accent/70 font-semibold text-[10px] tracking-[2px] uppercase" style={{ fontFamily: INTER }}>
               HOW IT WORKS
             </span>
-            <h2 className="text-white font-bold" style={{ fontSize: 28, letterSpacing: -0.5, fontFamily: SERIF, lineHeight: 1.2 }}>
+            <h2 className="text-white font-bold" style={{ fontSize: 24, letterSpacing: -0.5, fontFamily: SERIF, lineHeight: 1.2 }}>
               Three steps into<br />your story
             </h2>
           </div>

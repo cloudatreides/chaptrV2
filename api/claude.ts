@@ -1,8 +1,17 @@
+import { rateLimit, rateLimitResponse, getClientIp } from './_rateLimit'
+
 export const config = { runtime: 'edge' }
+
+const MAX_REQUESTS_PER_MINUTE = 30
 
 export default async function handler(req: Request) {
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 })
+  }
+
+  const ip = getClientIp(req)
+  if (!rateLimit(ip, MAX_REQUESTS_PER_MINUTE)) {
+    return rateLimitResponse()
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY

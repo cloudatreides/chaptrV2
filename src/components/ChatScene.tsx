@@ -235,7 +235,10 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
       const imagePrompt = character?.introImagePrompt ?? chatImagePrompt
       if (imagePrompt) {
         setIsLoadingImage(true)
-        generateSceneImage({ prompt: imagePrompt, width: 768, height: 512 }).then((url) => {
+        // Extract mood hint from storyContext if a recent choice tone is embedded
+        const toneMatch = storyContext.match(/\(tone:\s*([^)]+)\)/)
+        const moodContext = toneMatch ? `${toneMatch[1]} mood, emotional tension` : undefined
+        generateSceneImage({ prompt: imagePrompt, width: 768, height: 512, moodContext }).then((url) => {
           if (url) setIntroImage(url)
           setIsLoadingImage(false)
         })

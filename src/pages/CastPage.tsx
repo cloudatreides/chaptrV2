@@ -186,7 +186,7 @@ export function CastPage() {
                 </button>
               )}
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               {unlocked.map((cast, i) => {
                 const score = globalAffinities[cast.id] ?? 0
                 const tier = getAffinityTier(score)
@@ -233,7 +233,7 @@ export function CastPage() {
           {!selectMode && locked.length > 0 && (
             <div>
               <p className="text-white/30 text-[10px] font-semibold tracking-[2px] uppercase mb-3">PLAY TO UNLOCK</p>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 {locked.map((cast, i) => {
                   const uniColor = UNIVERSE_COLORS[cast.universeId] ?? '#888'
                   return (

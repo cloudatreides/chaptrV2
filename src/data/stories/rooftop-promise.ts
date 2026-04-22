@@ -189,6 +189,7 @@ export const ROOFTOP_PROMISE_STEPS: StoryStep[] = [
         sceneHint: 'honest / brave',
         consequenceHint: 'Honesty means he can\'t pretend the music doesn\'t matter.',
         imagePrompt: SCENES.corridorEncounter,
+        affinityDelta: { dohyun: 7, soyeon: 3 },
       },
       {
         id: 'leave-it',
@@ -197,6 +198,7 @@ export const ROOFTOP_PROMISE_STEPS: StoryStep[] = [
         sceneHint: 'discreet / patient',
         consequenceHint: 'Discretion is its own kind of care. He\'ll notice what you chose not to say.',
         imagePrompt: SCENES.rooftopPiano,
+        affinityDelta: { dohyun: 4, soyeon: 2 },
       },
     ],
   },
@@ -293,6 +295,7 @@ export const ROOFTOP_PROMISE_STEPS: StoryStep[] = [
         sceneHint: 'bold / believing',
         consequenceHint: 'He might finally play the music that\'s actually his.',
         imagePrompt: SCENES.concertHall,
+        affinityDelta: { dohyun: 10, soyeon: 5 },
       },
       {
         id: 'wait',
@@ -301,6 +304,7 @@ export const ROOFTOP_PROMISE_STEPS: StoryStep[] = [
         sceneHint: 'steady / trusting',
         consequenceHint: 'Sometimes the bravest thing is to simply be there.',
         imagePrompt: SCENES.auditorium,
+        affinityDelta: { dohyun: 5, soyeon: 3 },
       },
     ],
   },
@@ -319,6 +323,7 @@ export const ROOFTOP_PROMISE_STEPS: StoryStep[] = [
         sceneHint: 'reaching / certain',
         consequenceHint: 'You\'ve heard the real music. Now help him let others hear it.',
         imagePrompt: SCENES.concertHall,
+        affinityDelta: { dohyun: 10, soyeon: 4 },
       },
       {
         id: 'wait',
@@ -327,6 +332,7 @@ export const ROOFTOP_PROMISE_STEPS: StoryStep[] = [
         sceneHint: 'patient / present',
         consequenceHint: 'Trust that he knows what to play. Trust that he knows you\'re there.',
         imagePrompt: SCENES.auditorium,
+        affinityDelta: { dohyun: 4, soyeon: 3 },
       },
     ],
   },
