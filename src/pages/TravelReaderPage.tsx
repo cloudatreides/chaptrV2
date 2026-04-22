@@ -7,10 +7,13 @@ import { getDestination } from '../data/travel/destinations'
 import { getTravelCompanion } from '../data/travel/companions'
 import { generateDayItinerary, streamTravelScene, streamTravelChatReply, generateTravelOpeningMessage } from '../lib/claude/travel'
 import { parseAffinityDelta } from '../lib/claude/affinity'
+import { extractMemories } from '../lib/claude/memory'
 import { generateSceneImage as generateImage } from '../lib/togetherAi'
+import { DayTransition } from '../components/travel/DayTransition'
+import { TripComplete } from '../components/travel/TripComplete'
 import type { ChatMessage, TripScene } from '../store/useStore'
 
-type ViewMode = 'chat' | 'scene' | 'transition'
+type ViewMode = 'chat' | 'scene' | 'transition' | 'day-start' | 'day-end' | 'complete'
 
 export function TravelReaderPage() {
   const navigate = useNavigate()
@@ -20,7 +23,7 @@ export function TravelReaderPage() {
     addTravelPlanningMessage, addTravelDayChatMessage, updateTripItinerary,
     setTripScene, setTripSceneImage, advanceTravelScene, advanceTravelDay,
     setTripPhase, updateTravelAffinity, addCompanionMemory, addTravelEngagementTime,
-    setIsStreaming, isStreaming,
+    completeTrip, resetTrip, setIsStreaming, isStreaming,
   } = store
 
   const trip = activeTripId ? travelTrips[activeTripId] : null
@@ -28,7 +31,10 @@ export function TravelReaderPage() {
   const companion = trip ? getTravelCompanion(trip.companionId) : null
   const activeChar = characters.find((c) => c.id === activeCharacterId)
 
-  const [viewMode, setViewMode] = useState<ViewMode>('chat')
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    if (trip?.phase === 'complete') return 'complete'
+    return 'chat'
+  })
   const [input, setInput] = useState('')
   const [streamedText, setStreamedText] = useState('')
   const [suggestions, setSuggestions] = useState<string[]>([])
@@ -182,6 +188,16 @@ export function TravelReaderPage() {
 
       updateTravelAffinity(parsed.delta)
       if (parsed.suggestions) setSuggestions(parsed.suggestions)
+
+      // Extract memories from conversation every 4 messages
+      const allMessages = isPlanning
+        ? [...trip.planningChatHistory, userMsg, replyMsg]
+        : [...(trip.dayChatHistories[trip.currentDay] ?? []), userMsg, replyMsg]
+      if (allMessages.length % 4 === 0 && allMessages.length > 0) {
+        extractMemories({ characterId: trip.companionId, messages: allMessages.slice(-8) })
+          .then((memories) => memories.forEach((m) => addCompanionMemory(m)))
+          .catch(() => {})
+      }
     } catch (e: any) {
       if (e.name !== 'AbortError') console.error('Travel chat error:', e)
     } finally {
@@ -207,7 +223,7 @@ export function TravelReaderPage() {
       })
       updateTripItinerary(day)
       setTripPhase('day')
-      setViewMode('scene')
+      setViewMode('day-start')
     } catch (e) {
       console.error('Itinerary generation error:', e)
       setViewMode('chat')
@@ -264,13 +280,11 @@ export function TravelReaderPage() {
 
   async function handleNextScene() {
     advanceTravelScene()
-    // After advancing, the store will update. If phase changed to 'recap', stay in chat.
-    // Otherwise, play the next scene.
     setTimeout(() => {
       const updated = useStore.getState()
       const updatedTrip = updated.activeTripId ? updated.travelTrips[updated.activeTripId] : null
       if (updatedTrip?.phase === 'recap') {
-        setViewMode('chat')
+        setViewMode('day-end')
       } else {
         handlePlayScene()
       }
@@ -279,6 +293,14 @@ export function TravelReaderPage() {
 
   async function handleNextDay() {
     if (!trip || !destination) return
+
+    // Final day → complete
+    if (trip.currentDay >= destination.tripDays) {
+      completeTrip()
+      setViewMode('complete')
+      return
+    }
+
     setIsGeneratingItinerary(true)
     setViewMode('transition')
 
@@ -295,7 +317,7 @@ export function TravelReaderPage() {
       })
       updateTripItinerary(day)
       advanceTravelDay()
-      setViewMode('chat')
+      setViewMode('day-start')
     } catch (e) {
       console.error('Next day generation error:', e)
       setViewMode('chat')
@@ -396,6 +418,38 @@ export function TravelReaderPage() {
                   </p>
                 </div>
               </motion.div>
+            )}
+
+            {/* Day Start Transition */}
+            {viewMode === 'day-start' && (
+              <DayTransition
+                dayNumber={trip.currentDay}
+                theme={trip.itinerary.days.find((d) => d.dayNumber === trip.currentDay)?.theme ?? `Day ${trip.currentDay}`}
+                cityName={destination.city}
+                type="start"
+                onContinue={() => handlePlayScene()}
+              />
+            )}
+
+            {/* Day End Transition */}
+            {viewMode === 'day-end' && (
+              <DayTransition
+                dayNumber={trip.currentDay}
+                theme={trip.itinerary.days.find((d) => d.dayNumber === trip.currentDay)?.theme ?? ''}
+                cityName={destination.city}
+                type="end"
+                onContinue={() => setViewMode('chat')}
+              />
+            )}
+
+            {/* Trip Complete */}
+            {viewMode === 'complete' && (
+              <TripComplete
+                trip={trip}
+                destination={destination}
+                companion={companion}
+                onNewTrip={() => { resetTrip(); navigate('/travel') }}
+              />
             )}
 
             {/* Scene View */}
