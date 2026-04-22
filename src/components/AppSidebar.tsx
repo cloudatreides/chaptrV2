@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { BookOpen, Users, Sparkles, Camera, LogOut, Star, MessageCircle, User, Plane } from 'lucide-react'
+import { BookOpen, Users, Sparkles, Camera, LogOut, Star, MessageCircle, User } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { useStore } from '../store/useStore'
 import { CAST_ROSTER, getCastCharacter } from '../data/castRoster'
@@ -17,8 +17,8 @@ export function AppSidebar() {
   const albumLabel = getMomentConfig(getUniverseGenre(selectedUniverse)).albumTitle
   const NAV_ITEMS = [
     { icon: BookOpen, label: 'Home', path: '/home' },
-    { icon: Plane, label: 'Travel Mode', path: '/travel' },
-    { icon: Sparkles, label: 'Story Mode', path: '/stories' },
+    { icon: Sparkles, label: 'Travel Mode', path: '/travel' },
+    { icon: BookOpen, label: 'Story Mode', path: '/stories' },
     { icon: Users, label: 'Characters To Meet', path: '/cast' },
     { icon: Camera, label: albumLabel, path: '/album' },
   ]
