@@ -169,10 +169,10 @@ export function StoriesHomePage() {
               >
                 <div className="relative aspect-[3/4] overflow-hidden">
                   <img src={u.image} alt={u.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                  <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(19,16,28,0.95) 0%, transparent 50%)' }} />
+                  <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,8,16,0.95) 0%, rgba(10,8,16,0.5) 40%, transparent 70%)' }} />
                   <div className="absolute bottom-0 left-0 right-0 p-3">
-                    <span className="text-[9px] font-semibold tracking-[1px] uppercase" style={{ color: '#c84b9e', fontFamily: SG }}>{u.genreTag}</span>
-                    <p className="text-white text-sm font-semibold mt-0.5" style={{ fontFamily: SG }}>{u.title}</p>
+                    <span className="inline-block text-[9px] font-bold tracking-[1px] uppercase px-1.5 py-0.5 rounded" style={{ background: 'rgba(200,75,158,0.2)', color: '#e88bc4', fontFamily: SG }}>{u.genreTag}</span>
+                    <p className="text-white text-sm font-semibold mt-1" style={{ fontFamily: SG }}>{u.title}</p>
                     <div className="flex items-center gap-1.5 mt-1">
                       <Users size={11} className="text-white/40" />
                       <span className="text-white/40 text-[11px]" style={{ fontFamily: SG }}>{formatPlayerCount(UNIVERSE_PLAYERS[u.id] ?? 0)} played</span>

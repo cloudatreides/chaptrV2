@@ -1,31 +1,20 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ChevronLeft, Plus, Trash2, User } from 'lucide-react'
+import { ChevronLeft, Plus, Trash2, User, Pencil } from 'lucide-react'
 import { useStore } from '../store/useStore'
-import { getStoryData } from '../data/stories'
 
 const MAX_CHARACTERS = 3
-
-function getProgressLabel(storyProgress: Record<string, any>, charId: string, universeId: string | null): string {
-  if (!universeId) return 'New story'
-  const p = storyProgress[`${charId}:${universeId}`]
-  if (!p) return 'New story'
-  if (p.revealSignature) return 'Completed'
-  if (p.currentStepIndex > 0) return `In progress`
-  return 'New story'
-}
+const SG = "'Space Grotesk', sans-serif"
 
 export function CharacterSelectPage() {
   const navigate = useNavigate()
   const characters = useStore((s) => s.characters)
-  const selectedUniverse = useStore((s) => s.selectedUniverse)
-  const storyProgress = useStore((s) => s.storyProgress)
+  const activeCharacterId = useStore((s) => s.activeCharacterId)
   const setActiveCharacter = useStore((s) => s.setActiveCharacter)
   const deleteCharacter = useStore((s) => s.deleteCharacter)
 
-  const handleSelect = (charId: string) => {
+  const handleSetActive = (charId: string) => {
     setActiveCharacter(charId)
-    navigate('/story')
   }
 
   const handleDelete = (e: React.MouseEvent, charId: string) => {
@@ -49,84 +38,85 @@ export function CharacterSelectPage() {
         </div>
 
         {/* Back */}
-        <button onClick={() => navigate('/home')} className="flex items-center gap-1 text-textSecondary text-sm mt-4 mb-6 hover:text-textPrimary transition-colors w-fit">
+        <button onClick={() => navigate('/')} className="flex items-center gap-1 text-textSecondary text-sm mt-4 mb-6 hover:text-textPrimary transition-colors w-fit">
           <ChevronLeft size={16} />
           Back
         </button>
 
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="text-textPrimary font-bold text-3xl mb-1">Your Twins</h1>
-          <p className="text-textSecondary text-base mb-6">Choose which version of you steps into the story.</p>
+          <p className="text-textSecondary text-base mb-6">Manage your characters. The active twin stars in all stories and trips.</p>
         </motion.div>
 
         {/* Character cards */}
         <div className="space-y-3 mb-6">
           {characters.map((char, i) => {
-            const label = getProgressLabel(storyProgress, char.id, selectedUniverse)
-            const isCompleted = label === 'Completed'
-            const isInProgress = label === 'In progress'
+            const isActive = char.id === activeCharacterId
             return (
-              <motion.button
+              <motion.div
                 key={char.id}
-                className="w-full flex items-center gap-4 p-4 rounded-xl text-left transition-all hover:border-accent/50"
-                style={{ background: '#13101c', border: '1px solid #2a2040' }}
-                onClick={() => handleSelect(char.id)}
+                className="w-full flex items-center gap-4 p-4 rounded-xl"
+                style={{
+                  background: isActive ? 'rgba(200,75,158,0.06)' : '#13101c',
+                  border: `1px solid ${isActive ? 'rgba(200,75,158,0.2)' : '#2a2040'}`,
+                }}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.08 }}
               >
                 {/* Avatar */}
-                <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 flex items-center justify-center" style={{ background: 'rgba(200,75,158,0.12)', border: '1px solid rgba(200,75,158,0.3)' }}>
+                <button
+                  onClick={() => handleSetActive(char.id)}
+                  className="cursor-pointer w-12 h-12 rounded-full overflow-hidden shrink-0 flex items-center justify-center"
+                  style={{ background: 'rgba(200,75,158,0.12)', border: `2px solid ${isActive ? '#c84b9e' : 'rgba(200,75,158,0.2)'}` }}
+                >
                   {char.selfieUrl ? (
                     <img src={char.selfieUrl} alt={char.name} className="w-full h-full object-cover" />
                   ) : (
                     <User size={20} className="text-accent" />
                   )}
-                </div>
+                </button>
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="text-textPrimary font-semibold text-sm truncate">{char.name}</p>
                     <span className="text-textMuted text-xs">{char.gender === 'male' ? '♂' : '♀'}</span>
+                    {isActive && (
+                      <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(200,75,158,0.15)', color: '#c84b9e', fontFamily: SG }}>Active</span>
+                    )}
                   </div>
-                  {(() => {
-                    const sd = getStoryData(selectedUniverse)
-                    if (sd) return null // non-romance stories don't show partner
-                    return (
-                      <p className="text-textMuted text-xs mt-0.5">
-                        Partner: {char.gender === 'male' ? 'Yuna' : 'Jiwon'}
-                      </p>
-                    )
-                  })()}
+                  {char.bio && (
+                    <p className="text-textMuted text-xs mt-0.5 truncate">{char.bio.slice(0, 60)}...</p>
+                  )}
                 </div>
 
-                {/* Progress badge */}
-                <div className="flex items-center gap-2 shrink-0">
-                  <span
-                    className="text-xs px-2 py-0.5 rounded-full font-medium"
-                    style={{
-                      color: isCompleted ? '#a78bfa' : isInProgress ? '#e060b8' : '#6b7280',
-                      background: isCompleted ? 'rgba(139,92,246,0.12)' : isInProgress ? 'rgba(200,75,158,0.12)' : 'rgba(107,114,128,0.12)',
-                    }}
-                  >
-                    {label}
-                  </span>
+                {/* Actions */}
+                <div className="flex items-center gap-1 shrink-0">
+                  {!isActive && (
+                    <button
+                      onClick={() => handleSetActive(char.id)}
+                      className="cursor-pointer text-xs px-2.5 py-1 rounded-lg font-medium transition-colors hover:bg-white/5"
+                      style={{ color: 'rgba(255,255,255,0.5)', fontFamily: SG }}
+                    >
+                      Set active
+                    </button>
+                  )}
                   <button
                     onClick={(e) => handleDelete(e, char.id)}
-                    className="text-textMuted hover:text-red-400 transition-colors p-1"
+                    className="cursor-pointer text-textMuted hover:text-red-400 transition-colors p-1.5 rounded-lg hover:bg-white/5"
                   >
                     <Trash2 size={14} />
                   </button>
                 </div>
-              </motion.button>
+              </motion.div>
             )
           })}
 
           {/* Create new slot */}
           {characters.length < MAX_CHARACTERS ? (
             <motion.button
-              className="w-full flex items-center justify-center gap-2 p-4 rounded-xl text-sm font-medium transition-all hover:border-accent/50"
+              className="cursor-pointer w-full flex items-center justify-center gap-2 p-4 rounded-xl text-sm font-medium transition-all hover:border-accent/50"
               style={{ background: '#13101c', border: '1px dashed #2a2040', color: '#9ca3af' }}
               onClick={() => navigate('/create-character')}
               initial={{ opacity: 0, y: 10 }}

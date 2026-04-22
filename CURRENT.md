@@ -1,52 +1,68 @@
 # Chaptr V2 — Current Session State
 
 ## In Progress
-- Push all changes to git/prod, then begin browser playtest
+- Globe visual polish — just switched to hover-to-reveal labels, needs final check in browser
+- Uncommitted changes: TravelHomePage globe refinements (arcs, rings, HTML overlay labels). Run `git add` + `git commit` + `git push` to ship.
 
 ## Done This Session
-- **6 TypeScript build errors fixed** — unused imports, missing `currentChapter`, `sceneHint` type, `isFirstBeat` boolean coercion
-- **Destination card hero images** — added Unsplash city photos (Tokyo/Seoul/Paris/NYC) to `destinations.ts`, added `<img>` to TravelHomePage cards
-- **Travel no longer requires character creation** — auto-creates "Traveler" character on trip start, removed gate + error message
-- **GTM Playbook built** — `GTM-PLAYBOOK.md` at project root: 4 launch channels, timing plan, copy bank, objection handling, Day 8 decision gate
-- **Trip arc sidebar** (desktop) — right-side panel showing full trip progress: Plan → Start Exploring → Day 1-5 → Complete. Segments show done/active/ready/locked states. Scene sub-items expand for active days. "Start exploring" has animated pulse when ready
-- **Removed intrusive bottom CTAs** — replaced full-width gradient buttons with compact pill hints for day/scene/recap phase actions. Planning CTA lives only in sidebar
-- **Companion settings in sidebar** — collapsible section with chattiness/planning/vibe sliders, adjustable mid-trip. Added `updateCompanionSliders` store action
-- **Chattiness controls response length** — wired slider into system prompt: low = 2-3 sentences, mid = 1-2 paragraphs, high = 2-3 paragraphs
-- **Chat text wrapping fixed** — added `whitespace-pre-wrap` to message bubbles and streaming text
-- **Scene view redesign** — matches Pencil design: 360px hero image with gradient fade, scene progress bar, "DAY 1 — LOCATION" + "Scene X of Y" labels, typing indicator, two post-scene actions (Chat / Skip to next)
-- **Scene image loading state** — tracks `imageLoadingSceneId`, spinner only shows during active generation, disappears on failure instead of stuck forever
-- **"Show me" camera action** — camera button next to send in chat, generates AI image from last companion message context, renders inline in chat with image + caption
-- **Scene recap cards in chat** — after each scene, a centered card with scene image + location/activity is injected into the chat thread as a shared journal entry
-- **Image/text overlap fix** — reduced negative margin on scene content, added z-index
+
+### Interactive Globe (TravelHomePage)
+- **react-globe.gl integration** — dark earth texture, purple atmosphere, auto-rotating globe at `/travel`
+- **HTML overlay markers** — available cities show as emoji flag dots (28px circles), hover reveals city name label above. Locked cities show as small 8px dim dots with hover label. No overlap in dense regions (Asia cluster solved).
+- **Animated arcs** — dashed purple flight-path lines connecting all 7 available cities, slowly animating along the path
+- **Pulsing rings** — ripple effect at each available city location
+- **Click-to-zoom** — clicking any marker stops rotation, camera zooms to city, shows detail card with hero image, description, vibe tags, and CTA
+- **City vote system** — locked cities show "I want to go here" button, click changes to "Noted — we'll build it next". Votes persisted in Zustand store (`cityVotes` array).
+
+### 30 Destinations
+- **7 available** (unlocked with full locationKnowledge + companion intros): Tokyo, Seoul, Bangkok, Taipei, Marrakech, Kyoto, Medellin
+- **23 coming soon** (locked): Paris, New York, London, Istanbul, Mexico City, Lisbon, Sydney, Buenos Aires, Reykjavik, Hanoi, Cape Town, Porto, Cartagena, Dubrovnik, Luang Prabang, Chiang Mai, Tbilisi, Oaxaca, Jaipur, Valletta, Cairo, Zanzibar, Sarajevo
+- Unique/off-beaten-path picks mixed in: Tbilisi, Luang Prabang, Valletta, Zanzibar, Sarajevo, Oaxaca
+- **19 Pencil-generated cover images** for all new destinations (saved as `/public/dest-[city].png`)
+
+### Grid Layout Overhaul
+- Split into "Available Now" (purple accent, full-brightness) and "Coming Soon" (grey, smaller cards, dimmed images) sections
+- Available: 2-col / 4-col grid. Coming soon: 3-col / 5-col / 6-col tighter grid.
+
+### Companion Intros
+- Added city-specific `travelIntroByCity` entries for all 7 unlocked cities across all 3 companions (Sora, Jiwon, Yuna)
+
+### Store Changes
+- Added `cityVotes: string[]` and `voteCityRequest(cityId)` to Zustand store, persisted via partialize
 
 ## Done Previous Sessions
 - **Travel Mode fully built (Phases 1-5)** — all pushed to prod
-- Travel Mode concept + 7 original UI screens + 2 travel-first redesign screens in chaptr.pen
-- wanderlust.md, TRAVEL-SPEC.md
+- Homepage toggle (Travel/Stories), genre-grouped story previews, dedicated `/stories` page
+- Landing page: removed all "AI" terminology, scroll-to-section on mode card click, Pencil destination images
+- Seoul unlocked with full locationKnowledge, destination-aware companion intros
+- Travel Mode concept + UI screens in chaptr.pen
 - Previous: multi-chapter infra, share CTA, pings, stories, feedback modal, mobile polish
 
 ## Next
 
-### 1. Push to prod
-- Commit all changes, push to main, verify Vercel deployment succeeds
+### 1. Commit + push globe refinements
+- Stage TravelHomePage.tsx changes (arcs, rings, HTML overlays), commit, push to main
 
-### 2. Full browser playtest
-- Start fresh trip: Tokyo with Sora
-- Test: planning chat → sidebar arc → start exploring → scene with image → chat with recap card → camera action → day transitions → trip complete
-- Test companion slider changes mid-conversation
-- Check mobile responsiveness (sidebar hidden, pills visible)
+### 2. Full browser playtest of travel flow
+- Start fresh trip with each available destination (especially new ones: Bangkok, Taipei, Marrakech, Kyoto, Medellin)
+- Verify companion intros are city-specific, locationKnowledge feeds into planning chat
+- Test globe: hover labels, click-to-zoom, arc animations, ring pulses
+- Test vote button on locked cities
 
-### 3. Landing page refactor
-- Pencil designs exist in chaptr.pen: travel-first hero, Sora chat preview, destinations grid
-- Current landing page still leads with stories — needs rewrite
+### 3. Landing page — better Travel/Story mode icons
+- User asked to "explore better icons" for mode cards — unresolved from previous session
 
-### 4. Homepage restructure
-- "Where to next?" header, continue trip card, 3-tab bottom bar
-
-### 5. GTM launch
+### 4. GTM launch
 - GTM-PLAYBOOK.md is ready — execute channel strategy
+- 7 available destinations should be enough for launch
 - Need screenshots from playtest for Reddit/Twitter posts
-- Prep 15-second screen recording for Twitter thread
+
+## Key Files
+- `src/pages/TravelHomePage.tsx` — globe + destination grid + city detail cards
+- `src/data/travel/destinations.ts` — 30 destinations with coords, images, locationKnowledge
+- `src/data/travel/companions.ts` — 3 companions with city-specific intros
+- `src/store/useStore.ts` — cityVotes persistence
+- `public/dest-*.png` — 19 Pencil-generated destination cover images
 
 ## Blockers
-- Scene images may be failing silently (Together AI) — check browser console during playtest
+- None currently

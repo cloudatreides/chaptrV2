@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useCallback } from 'react'
+import { useRef, useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MapPin, ChevronRight, X, Heart } from 'lucide-react'
@@ -12,14 +12,6 @@ const SG = "'Space Grotesk', sans-serif"
 const AVAILABLE = DESTINATIONS.filter((d) => !d.locked)
 const LOCKED = DESTINATIONS.filter((d) => d.locked)
 
-const ARCS = AVAILABLE.flatMap((a, i) =>
-  AVAILABLE.slice(i + 1).map((b) => ({
-    startLat: a.lat,
-    startLng: a.lng,
-    endLat: b.lat,
-    endLng: b.lng,
-  }))
-)
 
 export function TravelHomePage() {
   const navigate = useNavigate()
@@ -32,6 +24,8 @@ export function TravelHomePage() {
   const [selectedDest, setSelectedDest] = useState<Destination | null>(null)
   const [globeSize, setGlobeSize] = useState({ width: 600, height: 500 })
   const [globeReady, setGlobeReady] = useState(false)
+  const markerEls = useRef<Map<string, { dot: HTMLDivElement; label: HTMLDivElement; locked: boolean }>>(new Map())
+  const selectedIdRef = useRef<string | null>(null)
 
   const activeTrip = activeCharacterId
     ? Object.entries(travelTrips).find(([key, trip]) => key.startsWith(`${activeCharacterId}:`) && trip.phase !== 'complete')
@@ -69,6 +63,53 @@ export function TravelHomePage() {
   const selectDestRef = useRef(selectDest)
   selectDestRef.current = selectDest
 
+  const arcsData = useMemo(() => {
+    if (selectedDest && !selectedDest.locked) {
+      return AVAILABLE.filter(d => d.id !== selectedDest.id).map(d => ({
+        startLat: selectedDest.lat,
+        startLng: selectedDest.lng,
+        endLat: d.lat,
+        endLng: d.lng,
+      }))
+    }
+    return AVAILABLE.slice(0, -1).map((a, i) => ({
+      startLat: a.lat,
+      startLng: a.lng,
+      endLat: AVAILABLE[i + 1].lat,
+      endLng: AVAILABLE[i + 1].lng,
+    }))
+  }, [selectedDest])
+
+  useEffect(() => {
+    selectedIdRef.current = selectedDest?.id ?? null
+    markerEls.current.forEach(({ dot, label, locked }, id) => {
+      const isSelected = selectedDest?.id === id
+      if (isSelected) {
+        if (locked) {
+          dot.style.background = 'rgba(255,255,255,0.5)'
+          dot.style.boxShadow = '0 0 10px rgba(255,255,255,0.3)'
+          dot.style.transform = 'scale(1.5)'
+        } else {
+          dot.style.transform = 'scale(1.3)'
+          dot.style.border = '2px solid rgba(167,139,250,0.9)'
+          dot.style.boxShadow = '0 0 20px rgba(124,58,237,0.6)'
+        }
+        label.style.opacity = '1'
+      } else {
+        dot.style.transform = 'scale(1)'
+        if (locked) {
+          dot.style.background = 'rgba(255,255,255,0.2)'
+          dot.style.boxShadow = '0 0 4px rgba(255,255,255,0.1)'
+          label.style.opacity = '0'
+        } else {
+          dot.style.border = '1.5px solid rgba(124,58,237,0.5)'
+          dot.style.boxShadow = '0 0 10px rgba(124,58,237,0.25)'
+          label.style.opacity = '0.7'
+        }
+      }
+    })
+  }, [selectedDest])
+
   const createHtmlElement = useCallback((d: object) => {
     const dest = d as Destination
     const el = document.createElement('div')
@@ -84,11 +125,12 @@ export function TravelHomePage() {
       dot.textContent = dest.countryEmoji
 
       const label = document.createElement('div')
-      label.style.cssText = 'position:absolute;left:50%;bottom:calc(100% + 6px);transform:translateX(-50%);display:flex;align-items:center;gap:4px;font-family:Space Grotesk,sans-serif;background:rgba(15,13,20,0.92);border:1px solid rgba(124,58,237,0.4);backdrop-filter:blur(8px);padding:4px 10px;border-radius:16px;color:white;font-size:11px;font-weight:600;white-space:nowrap;box-shadow:0 0 12px rgba(124,58,237,0.3);opacity:0;pointer-events:none;transition:opacity 0.15s ease;z-index:10;'
+      label.style.cssText = 'position:absolute;left:50%;bottom:calc(100% + 6px);transform:translateX(-50%);display:flex;align-items:center;gap:4px;font-family:Space Grotesk,sans-serif;background:rgba(15,13,20,0.92);border:1px solid rgba(124,58,237,0.4);backdrop-filter:blur(8px);padding:4px 10px;border-radius:16px;color:white;font-size:11px;font-weight:600;white-space:nowrap;box-shadow:0 0 12px rgba(124,58,237,0.3);opacity:0.7;pointer-events:none;transition:opacity 0.15s ease;z-index:10;'
       label.textContent = dest.city
 
       el.appendChild(dot)
       el.appendChild(label)
+      markerEls.current.set(dest.id, { dot, label, locked: false })
 
       el.onmouseenter = () => {
         label.style.opacity = '1'
@@ -97,10 +139,12 @@ export function TravelHomePage() {
         el.style.zIndex = '100'
       }
       el.onmouseleave = () => {
-        label.style.opacity = '0'
-        dot.style.transform = 'scale(1)'
-        dot.style.boxShadow = '0 0 10px rgba(124,58,237,0.25)'
-        el.style.zIndex = '1'
+        if (selectedIdRef.current !== dest.id) {
+          label.style.opacity = '0.7'
+          dot.style.transform = 'scale(1)'
+          dot.style.boxShadow = '0 0 10px rgba(124,58,237,0.25)'
+          el.style.zIndex = '1'
+        }
       }
     } else {
       const dot = document.createElement('div')
@@ -112,6 +156,7 @@ export function TravelHomePage() {
 
       el.appendChild(dot)
       el.appendChild(label)
+      markerEls.current.set(dest.id, { dot, label, locked: true })
 
       el.onmouseenter = () => {
         label.style.opacity = '1'
@@ -119,9 +164,11 @@ export function TravelHomePage() {
         el.style.zIndex = '100'
       }
       el.onmouseleave = () => {
-        label.style.opacity = '0'
-        dot.style.background = 'rgba(255,255,255,0.2)'
-        el.style.zIndex = '1'
+        if (selectedIdRef.current !== dest.id) {
+          label.style.opacity = '0'
+          dot.style.background = 'rgba(255,255,255,0.2)'
+          el.style.zIndex = '1'
+        }
       }
     }
 
@@ -189,39 +236,55 @@ export function TravelHomePage() {
           {/* Globe + Selected City Panel */}
           <div ref={containerRef} className="relative w-full flex flex-col items-center">
             <div className="relative" style={{ width: globeSize.width, height: globeSize.height }}>
-              <Globe
-                ref={globeRef}
-                width={globeSize.width}
-                height={globeSize.height}
-                backgroundColor="rgba(0,0,0,0)"
-                globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
-                atmosphereColor="#7C3AED"
-                atmosphereAltitude={0.15}
-                arcsData={ARCS}
-                arcStartLat="startLat"
-                arcStartLng="startLng"
-                arcEndLat="endLat"
-                arcEndLng="endLng"
-                arcColor={() => ['rgba(124,58,237,0.35)', 'rgba(167,139,250,0.15)']}
-                arcAltitudeAutoScale={0.3}
-                arcStroke={0.4}
-                arcDashLength={0.4}
-                arcDashGap={0.3}
-                arcDashAnimateTime={4000}
-                ringsData={AVAILABLE}
-                ringLat="lat"
-                ringLng="lng"
-                ringColor={() => (t: number) => `rgba(167,139,250,${1 - t})`}
-                ringMaxRadius={2.5}
-                ringPropagationSpeed={1.5}
-                ringRepeatPeriod={1800}
-                htmlElementsData={DESTINATIONS}
-                htmlLat="lat"
-                htmlLng="lng"
-                htmlAltitude={0.01}
-                htmlElement={createHtmlElement}
-                onGlobeReady={() => setGlobeReady(true)}
-              />
+              {/* Loading skeleton */}
+              {!globeReady && (
+                <div className="absolute inset-0 flex items-center justify-center z-[1]">
+                  <div
+                    className="rounded-full animate-pulse"
+                    style={{
+                      width: globeSize.width * 0.45,
+                      height: globeSize.width * 0.45,
+                      background: 'radial-gradient(circle, rgba(124,58,237,0.15) 0%, rgba(124,58,237,0.05) 40%, transparent 70%)',
+                    }}
+                  />
+                </div>
+              )}
+
+              <div style={{ opacity: globeReady ? 1 : 0, transition: 'opacity 0.8s ease' }}>
+                <Globe
+                  ref={globeRef}
+                  width={globeSize.width}
+                  height={globeSize.height}
+                  backgroundColor="rgba(0,0,0,0)"
+                  globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
+                  atmosphereColor="#7C3AED"
+                  atmosphereAltitude={0.2}
+                  arcsData={arcsData}
+                  arcStartLat="startLat"
+                  arcStartLng="startLng"
+                  arcEndLat="endLat"
+                  arcEndLng="endLng"
+                  arcColor={() => ['rgba(124,58,237,0.35)', 'rgba(167,139,250,0.15)']}
+                  arcAltitudeAutoScale={0.3}
+                  arcStroke={0.4}
+                  arcDashLength={0.4}
+                  arcDashGap={0.3}
+                  arcDashAnimateTime={4000}
+                  ringsData={AVAILABLE}
+                  ringLat="lat"
+                  ringLng="lng"
+                  ringColor={() => (t: number) => `rgba(167,139,250,${1 - t})`}
+                  ringMaxRadius={3.5}
+                  ringPropagationSpeed={1}
+                  ringRepeatPeriod={1800}
+                  htmlElementsData={DESTINATIONS}
+                  htmlLat="lat"
+                  htmlLng="lng"
+                  htmlAltitude={0.01}
+                  htmlElement={createHtmlElement}
+                  onGlobeReady={() => setGlobeReady(true)}
+                />
+              </div>
 
               {/* Glow ring behind globe */}
               <div
@@ -233,38 +296,37 @@ export function TravelHomePage() {
                   width: globeSize.width * 0.6,
                   height: globeSize.width * 0.6,
                   borderRadius: '50%',
-                  background: 'radial-gradient(circle, rgba(124,58,237,0.08) 0%, transparent 70%)',
+                  background: 'radial-gradient(circle, rgba(124,58,237,0.14) 0%, rgba(124,58,237,0.04) 50%, transparent 70%)',
                   zIndex: 0,
                 }}
               />
-            </div>
 
-            {/* Tap hint */}
-            {!selectedDest && (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1 }}
-                className="text-white/25 text-xs text-center mt-2"
-                style={{ fontFamily: SG }}
-              >
-                Click a marker to explore a destination
-              </motion.p>
-            )}
-
-            {/* Selected City Card */}
-            <AnimatePresence>
-              {selectedDest && (
-                <motion.div
-                  key={selectedDest.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  transition={{ duration: 0.25 }}
-                  className="w-full max-w-[480px] mt-4 rounded-2xl overflow-hidden"
-                  style={{ background: '#151020', border: '1px solid rgba(124,58,237,0.15)' }}
+              {/* Tap hint */}
+              {!selectedDest && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1 }}
+                  className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/25 text-xs text-center z-[2]"
+                  style={{ fontFamily: SG }}
                 >
-                  <div className="relative h-[140px] overflow-hidden">
+                  Click a marker to explore a destination
+                </motion.p>
+              )}
+
+              {/* Selected City Card — overlay */}
+              <AnimatePresence>
+                {selectedDest && (
+                  <motion.div
+                    key={selectedDest.id}
+                    initial={{ opacity: 0, y: 16, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 16, scale: 0.97 }}
+                    transition={{ duration: 0.25 }}
+                    className="absolute bottom-3 left-1/2 -translate-x-1/2 w-[calc(100%-32px)] max-w-[420px] z-10 rounded-2xl overflow-hidden"
+                    style={{ background: 'rgba(21,16,32,0.95)', backdropFilter: 'blur(12px)', border: '1px solid rgba(124,58,237,0.2)' }}
+                  >
+                  <div className="relative h-[100px] overflow-hidden">
                     <img
                       src={selectedDest.heroImage}
                       alt={selectedDest.city}
@@ -340,9 +402,10 @@ export function TravelHomePage() {
                       </button>
                     )}
                   </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
 
           {/* Available Now */}

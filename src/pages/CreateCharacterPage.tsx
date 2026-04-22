@@ -180,7 +180,7 @@ export function CreateCharacterPage() {
       bio: bio || null,
     })
     trackEvent('character_created', { gender, hasPhoto: !!finalPhoto, hasDefault: !!selectedDefault, hasBio: !!bio })
-    navigate('/characters')
+    navigate('/')
   }
 
   if (characters.length >= 3) {
@@ -188,7 +188,7 @@ export function CreateCharacterPage() {
       <div className="min-h-screen min-h-dvh bg-bg flex items-center justify-center px-6">
         <div className="text-center">
           <p className="text-textSecondary text-lg mb-3">Maximum 3 twins reached</p>
-          <button onClick={() => navigate('/characters')} className="text-accent text-sm hover:underline">Go back</button>
+          <button onClick={() => navigate('/')} className="text-accent text-sm hover:underline">Go back</button>
         </div>
       </div>
     )
@@ -209,7 +209,7 @@ export function CreateCharacterPage() {
           </div>
         </div>
 
-        <button onClick={() => navigate('/characters')} className="flex items-center gap-1 text-textSecondary text-sm mt-4 mb-6 hover:text-textPrimary transition-colors w-fit">
+        <button onClick={() => navigate('/')} className="flex items-center gap-1 text-textSecondary text-sm mt-4 mb-6 hover:text-textPrimary transition-colors w-fit">
           <ChevronLeft size={16} />
           Back
         </button>
