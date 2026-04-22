@@ -185,7 +185,7 @@ interface StoreState {
   addChatMessage: (msg: ChatMessage) => void
   setChatSummary: (stepId: string, summary: string) => void
   getSummariesList: () => string[]
-  addChoiceDescription: (desc: { label: string; description: string }) => void
+  addChoiceDescription: (desc: { label: string; description: string; sceneHint?: string }) => void
   updateTrust: (delta: number) => void
   setTrustStatusLabel: (label: string) => void
   setRevealSignature: (sig: string) => void
@@ -899,6 +899,7 @@ export const useStore = create<StoreState>()(
             questProgress: persisted.questProgress ?? {},
             notifiedQuests: persisted.notifiedQuests ?? [],
             characterMemories: persisted.characterMemories ?? {},
+            currentChapter: persisted.currentChapter ?? 1,
           }
 
           // Only create character if there was any meaningful state

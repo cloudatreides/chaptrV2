@@ -103,7 +103,7 @@ export function StoryReaderPage() {
     return single ? [single] : []
   })()
 
-  const isFirstBeat = currentStepIndex === 0 && currentStep?.type === 'beat' && currentStep?.openingProse
+  const isFirstBeat = currentStepIndex === 0 && currentStep?.type === 'beat' && !!currentStep?.openingProse
   const { displayed: openingDisplayed, done: openingDone } = useTypewriter(
     isFirstBeat ? resolveText(currentStep?.openingProse ?? '', loveInterest) : '',
     20,

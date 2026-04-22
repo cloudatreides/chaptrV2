@@ -1,4 +1,4 @@
-import { makeClaudeRequest, stripMarkdown } from './core'
+import { makeClaudeRequest } from './core'
 
 // ─── Types ───
 

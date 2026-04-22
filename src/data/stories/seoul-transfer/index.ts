@@ -1,4 +1,4 @@
-import { STORY_STEPS, CHARACTER_BIBLE } from '../../storyData'
+import { STORY_STEPS } from '../../storyData'
 import { CHAPTER_2_STEPS, CHAPTER_2_BRIEF } from './chapter-2'
 import { CHAPTER_3_STEPS, CHAPTER_3_BRIEF } from './chapter-3'
 import { CHAPTER_BRIEFS } from '../../storyData'

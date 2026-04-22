@@ -14,7 +14,7 @@ export async function generateDayItinerary(params: {
   previousDays: TripDay[]
   companionMemories: string[]
 }): Promise<TripDay> {
-  const { destinationId, companionId, companionSliders, planningHistory, dayNumber, previousDays, companionMemories } = params
+  const { destinationId, companionId, planningHistory, dayNumber, previousDays, companionMemories } = params
   const destination = getDestination(destinationId)
   const companion = getTravelCompanion(companionId)
   if (!destination || !companion) throw new Error(`Missing destination or companion: ${destinationId}, ${companionId}`)
