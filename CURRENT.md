@@ -1,65 +1,49 @@
 # Chaptr V2 — Current Session State
 
 ## In Progress
-- Travel Mode build — Phases 1-4 complete. Ready for browser testing + polish.
-
-## Done This Session
-
-### claudeStream.ts Refactor
-1. Split 633-line monolith into 6 modules under `src/lib/claude/`:
-   - `core.ts` — streaming infra, API wrapper, helpers
-   - `affinity.ts` — affinity delta parser
-   - `beats.ts` — story beat generation
-   - `chat.ts` — all chat functions + extracted shared `buildChatSystemPrompt`
-   - `memory.ts` — memory extraction
-   - `extras.ts` — reveal signatures, love letters
-2. `claudeStream.ts` is now a barrel re-export — all 12 consumer files unchanged
-
-### Travel Mode — Phase 1: Data + State
-3. `src/data/travel/destinations.ts` — Tokyo fully specced (neighborhoods, food, experiences, transport), Seoul/Paris/NYC locked
-4. `src/data/travel/companions.ts` — Sora, Jiwon, Yuna with travel system prompts, personality sliders, `buildTravelSystemPrompt()`
-5. `src/store/useStore.ts` — TripProgress types, 15 travel actions, migration v7→v8
-
-### Travel Mode — Phase 2: Claude Travel Module
-6. `src/lib/claude/travel.ts` — 5 functions:
-   - `generateDayItinerary()` — structured JSON day plans from conversation
-   - `streamTravelScene()` — immersive 2nd person prose
-   - `streamTravelChatReply()` — 6 chat modes (planning/reaction/freeform/recap/surprise/morning)
-   - `generateTravelOpeningMessage()` — contextual openers per chat type
-   - `generateTripSummary()` — poetic trip journal entry
-
-### Travel Mode — Phase 3: Selection Flow UI
-7. `TravelHomePage` — destination grid with Tokyo unlocked, continue trip card, locked city placeholders
-8. `TravelCityPage` — city detail, selfie banner, companion select cards, personality slider customize
-9. Router: `/travel`, `/travel/trip`, `/travel/:destinationId`
-10. Sidebar: Travel nav item added
-
-### Travel Mode — Phase 4: Core Trip Experience
-11. `TravelReaderPage` — full trip experience page:
-    - Planning chat with companion (free-form, no exchange limit)
-    - "Start exploring" button after 6+ exchanges → generates Day 1 itinerary
-    - Scene view with AI-generated images + streaming prose
-    - "Chat with companion" → mid-scene reaction/freeform chat
-    - Scene → Chat → Scene progression
-    - Evening recap → next day generation
-    - Engagement time tracking
-    - Suggestion chips, streaming indicators, abort support
-
-### Build Verification
-12. `tsc --noEmit` — zero errors
-13. `vite build` — production build passes clean
+- GTM launch prep — travel mode built, needs testing + landing page + seeding plan
 
 ## Done Previous Sessions
-- Travel Mode concept + 7 original UI screens designed + 2 travel-first redesign screens
-- Session length strategy: Scene → Chat → Scene continuous loop
-- GTM plan: Travel is the anchor hook, not Seoul Transfer
-- Mobile polish, multi-chapter infra, share CTA, pings, stories, feedback modal
+- **Travel Mode fully built (Phases 1-5)** — all pushed to prod:
+  - claudeStream.ts refactored into 6 modules under `src/lib/claude/`
+  - Phase 1: destinations (Tokyo + 3 locked), companions (Sora/Jiwon/Yuna), 15 store actions
+  - Phase 2: `claude/travel.ts` — itinerary gen, scene streaming, 6 chat modes, trip summary
+  - Phase 3: TravelHomePage, TravelCityPage, routes, sidebar nav
+  - Phase 4: TravelReaderPage — planning chat → scene → chat → scene loop, AI images, engagement tracking
+  - Phase 5: DayTransition, TripComplete screen with stats + AI summary, companion memory extraction
+  - tsc + vite build clean, pushed to main
+- Travel Mode concept + 7 original UI screens + 2 travel-first redesign screens in chaptr.pen
+- wanderlust.md — resolved design decisions (scene depth, companion remix, monetization deferred)
+- TRAVEL-SPEC.md — full engineering spec
+- Previous: multi-chapter infra, share CTA, pings, stories, feedback modal, mobile polish
 
 ## Next
-1. **Test in browser** — run dev server, create character, start Tokyo trip with Sora, test full flow
-2. **Phase 5 polish** — day transitions, edge cases (resume interrupted trip), companion memory across days
-3. **Landing page refactor** — implement travel-first hero from Pencil designs
-4. **Seed GTM** — post to Reddit + Twitter, monitor funnel
+
+### 1. Test in browser
+- Run dev server, create character, do full Tokyo trip with Sora
+- Test: planning chat flow, itinerary generation, scene images, scene→chat→scene loop, day transitions, trip complete
+- Fix bugs found during playtest
+
+### 2. Landing page refactor
+- Pencil designs exist in chaptr.pen: travel-first hero ("Travel anywhere. With anyone."), Sora chat preview, "Plan Your First Trip" CTA
+- "Also on Chaptr" section for stories (secondary)
+- Popular destinations grid
+- Current landing page still leads with stories — needs full rewrite to lead with travel
+
+### 3. Homepage restructure
+- Pencil designs: "Where to next?" header, continue trip card, "Plan a new trip" CTA
+- Secondary "Interactive Stories" row
+- 3-tab bottom bar (HOME | STORIES | TRAVEL)
+
+### 4. GTM seeding plan (needs to be built out)
+- **Goal:** 30 users in first week, kill metric: 25%+ complete the full Tokyo flow
+- **Decision gate Day 8:** >40% = expand cities, 25-40% = iterate, <25% = pivot to Seoul Transfer GTM
+- **Channels to plan:**
+  - Reddit: r/CharacterAI, r/ChatbotRefugees, r/solotravel, r/JapanTravel, possibly r/internetisbeautiful
+  - Twitter/X: AI product community, solo travel niche
+  - WARNING: Many subreddits (especially r/solotravel, r/JapanTravel) will ban for self-promotion. Need native-first posting strategy per sub — share the experience, not the product.
+  - Need: per-channel approach, post framing, timing, what angle works where
+- **Task for next session:** Build full GTM seeding playbook — channel selection, post strategy per sub, risk assessment, copy drafts, timing plan
 
 ## Blockers
 - None currently
