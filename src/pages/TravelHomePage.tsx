@@ -9,6 +9,18 @@ import Globe, { type GlobeMethods } from 'react-globe.gl'
 
 const SG = "'Space Grotesk', sans-serif"
 
+const AVAILABLE = DESTINATIONS.filter((d) => !d.locked)
+const LOCKED = DESTINATIONS.filter((d) => d.locked)
+
+const ARCS = AVAILABLE.flatMap((a, i) =>
+  AVAILABLE.slice(i + 1).map((b) => ({
+    startLat: a.lat,
+    startLng: a.lng,
+    endLat: b.lat,
+    endLng: b.lng,
+  }))
+)
+
 export function TravelHomePage() {
   const navigate = useNavigate()
   const activeCharacterId = useStore((s) => s.activeCharacterId)
@@ -45,14 +57,79 @@ export function TravelHomePage() {
     globeRef.current.pointOfView({ lat: 30, lng: 120, altitude: 2.2 }, 0)
   }, [globeReady])
 
-  const handlePointClick = useCallback((point: object) => {
-    const dest = point as Destination
+  const selectDest = useCallback((dest: Destination) => {
     setSelectedDest(dest)
     if (globeRef.current) {
       const controls = globeRef.current.controls()
       controls.autoRotate = false
       globeRef.current.pointOfView({ lat: dest.lat, lng: dest.lng, altitude: 1.8 }, 800)
     }
+  }, [])
+
+  const selectDestRef = useRef(selectDest)
+  selectDestRef.current = selectDest
+
+  const createHtmlElement = useCallback((d: object) => {
+    const dest = d as Destination
+    const el = document.createElement('div')
+    el.style.cursor = 'pointer'
+    el.style.pointerEvents = 'auto'
+    el.style.transform = 'translate(-50%, -50%)'
+    el.style.position = 'relative'
+    el.style.zIndex = '1'
+
+    if (!dest.locked) {
+      const dot = document.createElement('div')
+      dot.style.cssText = 'display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:rgba(15,13,20,0.8);border:1.5px solid rgba(124,58,237,0.5);box-shadow:0 0 10px rgba(124,58,237,0.25);transition:all 0.2s ease;font-size:14px;'
+      dot.textContent = dest.countryEmoji
+
+      const label = document.createElement('div')
+      label.style.cssText = 'position:absolute;left:50%;bottom:calc(100% + 6px);transform:translateX(-50%);display:flex;align-items:center;gap:4px;font-family:Space Grotesk,sans-serif;background:rgba(15,13,20,0.92);border:1px solid rgba(124,58,237,0.4);backdrop-filter:blur(8px);padding:4px 10px;border-radius:16px;color:white;font-size:11px;font-weight:600;white-space:nowrap;box-shadow:0 0 12px rgba(124,58,237,0.3);opacity:0;pointer-events:none;transition:opacity 0.15s ease;z-index:10;'
+      label.textContent = dest.city
+
+      el.appendChild(dot)
+      el.appendChild(label)
+
+      el.onmouseenter = () => {
+        label.style.opacity = '1'
+        dot.style.transform = 'scale(1.15)'
+        dot.style.boxShadow = '0 0 16px rgba(124,58,237,0.5)'
+        el.style.zIndex = '100'
+      }
+      el.onmouseleave = () => {
+        label.style.opacity = '0'
+        dot.style.transform = 'scale(1)'
+        dot.style.boxShadow = '0 0 10px rgba(124,58,237,0.25)'
+        el.style.zIndex = '1'
+      }
+    } else {
+      const dot = document.createElement('div')
+      dot.style.cssText = 'width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.2);box-shadow:0 0 4px rgba(255,255,255,0.1);transition:all 0.2s ease;'
+
+      const label = document.createElement('div')
+      label.style.cssText = 'position:absolute;left:50%;bottom:calc(100% + 4px);transform:translateX(-50%);font-family:Space Grotesk,sans-serif;background:rgba(15,13,20,0.9);border:1px solid rgba(255,255,255,0.1);padding:3px 8px;border-radius:12px;color:rgba(255,255,255,0.5);font-size:10px;font-weight:500;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 0.15s ease;z-index:10;'
+      label.textContent = `${dest.countryEmoji} ${dest.city}`
+
+      el.appendChild(dot)
+      el.appendChild(label)
+
+      el.onmouseenter = () => {
+        label.style.opacity = '1'
+        dot.style.background = 'rgba(255,255,255,0.4)'
+        el.style.zIndex = '100'
+      }
+      el.onmouseleave = () => {
+        label.style.opacity = '0'
+        dot.style.background = 'rgba(255,255,255,0.2)'
+        el.style.zIndex = '1'
+      }
+    }
+
+    el.onclick = (e) => {
+      e.stopPropagation()
+      selectDestRef.current(dest)
+    }
+    return el
   }, [])
 
   const handleDeselect = useCallback(() => {
@@ -120,20 +197,29 @@ export function TravelHomePage() {
                 globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
                 atmosphereColor="#7C3AED"
                 atmosphereAltitude={0.15}
-                pointsData={DESTINATIONS}
-                pointLat="lat"
-                pointLng="lng"
-                pointColor={(d: object) => {
-                  const dest = d as Destination
-                  return dest.locked ? 'rgba(255,255,255,0.25)' : '#A78BFA'
-                }}
-                pointAltitude={0.06}
-                pointRadius={0.6}
-                pointLabel={(d: object) => {
-                  const dest = d as Destination
-                  return `<div style="font-family: Space Grotesk, sans-serif; background: rgba(15,13,20,0.9); border: 1px solid rgba(124,58,237,0.3); backdrop-filter: blur(8px); padding: 6px 10px; border-radius: 8px; color: white; font-size: 12px; font-weight: 600;">${dest.countryEmoji} ${dest.city}</div>`
-                }}
-                onPointClick={handlePointClick}
+                arcsData={ARCS}
+                arcStartLat="startLat"
+                arcStartLng="startLng"
+                arcEndLat="endLat"
+                arcEndLng="endLng"
+                arcColor={() => ['rgba(124,58,237,0.35)', 'rgba(167,139,250,0.15)']}
+                arcAltitudeAutoScale={0.3}
+                arcStroke={0.4}
+                arcDashLength={0.4}
+                arcDashGap={0.3}
+                arcDashAnimateTime={4000}
+                ringsData={AVAILABLE}
+                ringLat="lat"
+                ringLng="lng"
+                ringColor={() => (t: number) => `rgba(167,139,250,${1 - t})`}
+                ringMaxRadius={2.5}
+                ringPropagationSpeed={1.5}
+                ringRepeatPeriod={1800}
+                htmlElementsData={DESTINATIONS}
+                htmlLat="lat"
+                htmlLng="lng"
+                htmlAltitude={0.01}
+                htmlElement={createHtmlElement}
                 onGlobeReady={() => setGlobeReady(true)}
               />
 
@@ -272,12 +358,7 @@ export function TravelHomePage() {
                 <button
                   key={dest.id}
                   onClick={() => {
-                    setSelectedDest(dest)
-                    if (globeRef.current) {
-                      const controls = globeRef.current.controls()
-                      controls.autoRotate = false
-                      globeRef.current.pointOfView({ lat: dest.lat, lng: dest.lng, altitude: 1.8 }, 800)
-                    }
+                    selectDest(dest)
                     containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
                   }}
                   className="cursor-pointer rounded-xl overflow-hidden text-left flex flex-col"
@@ -313,12 +394,7 @@ export function TravelHomePage() {
                 <button
                   key={dest.id}
                   onClick={() => {
-                    setSelectedDest(dest)
-                    if (globeRef.current) {
-                      const controls = globeRef.current.controls()
-                      controls.autoRotate = false
-                      globeRef.current.pointOfView({ lat: dest.lat, lng: dest.lng, altitude: 1.8 }, 800)
-                    }
+                    selectDest(dest)
                     containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
                   }}
                   className="cursor-pointer rounded-xl overflow-hidden text-left flex flex-col"
