@@ -5,7 +5,7 @@ import { ArrowLeft, ChevronRight, Sliders } from 'lucide-react'
 import { AppSidebar } from '../components/AppSidebar'
 import { useStore } from '../store/useStore'
 import { getDestination } from '../data/travel/destinations'
-import { TRAVEL_COMPANIONS, DEFAULT_SLIDERS, type CompanionSliders } from '../data/travel/companions'
+import { TRAVEL_COMPANIONS, DEFAULT_SLIDERS, getCompanionIntro, type CompanionSliders } from '../data/travel/companions'
 
 export function TravelCityPage() {
   const { destinationId } = useParams<{ destinationId: string }>()
@@ -157,7 +157,7 @@ export function TravelCityPage() {
                       </div>
                     </div>
                     <p className="text-white/50 text-xs leading-relaxed" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                      "{comp.travelIntro.slice(0, 80)}..."
+                      "{getCompanionIntro(comp, destinationId ?? '').slice(0, 80)}..."
                     </p>
 
                     {isSelected && (

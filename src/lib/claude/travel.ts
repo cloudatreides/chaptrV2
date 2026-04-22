@@ -1,5 +1,5 @@
 import { makeClaudeRequest, streamSSE, stripMarkdown } from './core'
-import { buildTravelSystemPrompt, getTravelCompanion, type CompanionSliders } from '../../data/travel/companions'
+import { buildTravelSystemPrompt, getTravelCompanion, getCompanionIntro, type CompanionSliders } from '../../data/travel/companions'
 import { getDestination, type Destination } from '../../data/travel/destinations'
 import type { ChatMessage, TripDay, TripScene } from '../../store/useStore'
 
@@ -274,7 +274,7 @@ export async function generateTravelOpeningMessage(params: {
 
   // For planning, use the companion's pre-written travel intro
   if (chatType === 'planning') {
-    return { content: companion.travelIntro }
+    return { content: getCompanionIntro(companion, destinationId) }
   }
 
   let system = buildTravelSystemPrompt(companion, companionSliders, destination.locationKnowledge)

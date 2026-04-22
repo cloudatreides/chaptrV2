@@ -17,6 +17,7 @@ export interface TravelCompanion {
   character: StoryCharacter
   travelSystemPrompt: string
   travelIntro: string
+  travelIntroByCity: Record<string, string>
   defaultSliders: CompanionSliders
 }
 
@@ -128,14 +129,22 @@ export const TRAVEL_COMPANIONS: TravelCompanion[] = [
     characterId: 'sora',
     character: CHARACTERS.sora,
     travelSystemPrompt: SORA_TRAVEL_PROMPT,
-    travelIntro: "Okay so I've been watching Tokyo vlogs for like three weeks straight and I have OPINIONS. But first — what are you most excited about?",
+    travelIntro: "Okay so I've been deep-diving travel vlogs for like three weeks straight and I have OPINIONS. But first, what are you most excited about?",
+    travelIntroByCity: {
+      tokyo: "Okay so I've been watching Tokyo vlogs for like three weeks straight and I have OPINIONS. Shibuya at night? The ramen? The arcades? What are you most excited about?",
+      seoul: "I literally grew up here but I've been making a list of all the places I never actually go to lol. Hongdae street food, Bukchon in the morning, soju in Euljiro... what's calling you?",
+    },
     defaultSliders: { chattiness: 70, planningStyle: 30, vibe: 30 },
   },
   {
     characterId: 'jiwon',
     character: CHARACTERS.jiwon,
     travelSystemPrompt: JIWON_TRAVEL_PROMPT,
-    travelIntro: "I found a jazz bar near Shinjuku that's only open past midnight. We should figure out the rest of the trip around that.",
+    travelIntro: "I found a spot that's only open past midnight. We should figure out the rest of the trip around that.",
+    travelIntroByCity: {
+      tokyo: "I found a jazz bar near Shinjuku that's only open past midnight. We should figure out the rest of the trip around that.",
+      seoul: "There's a bar in Euljiro hidden behind a printing shop. No sign, just a door. We should build the trip around finding it.",
+    },
     defaultSliders: { chattiness: 30, planningStyle: 50, vibe: 70 },
   },
   {
@@ -143,12 +152,20 @@ export const TRAVEL_COMPANIONS: TravelCompanion[] = [
     character: CHARACTERS.yuna,
     travelSystemPrompt: YUNA_TRAVEL_PROMPT,
     travelIntro: "I made a list. Don't worry, it's short. Okay it's not short. But I ranked everything, so we can cut from the bottom.",
+    travelIntroByCity: {
+      tokyo: "I made a list. Don't worry, it's short. Okay it's not short. But I ranked everything from Tsukiji to Shimokitazawa, so we can cut from the bottom.",
+      seoul: "I made a list. Don't worry, it's short. Okay it's not short. But I ranked everything from Gwangjang Market to Namsan Tower, so we can cut from the bottom.",
+    },
     defaultSliders: { chattiness: 50, planningStyle: 70, vibe: 50 },
   },
 ]
 
 export function getTravelCompanion(characterId: string): TravelCompanion | undefined {
   return TRAVEL_COMPANIONS.find((c) => c.characterId === characterId)
+}
+
+export function getCompanionIntro(companion: TravelCompanion, destinationId: string): string {
+  return companion.travelIntroByCity[destinationId] ?? companion.travelIntro
 }
 
 export function buildTravelSystemPrompt(companion: TravelCompanion, sliders: CompanionSliders, destinationKnowledge: string): string {
