@@ -309,7 +309,9 @@ export function LandingPage() {
                 Get Started
               </button>
             </nav>
+          </div>
 
+          <div className="relative z-10 page-container mx-auto">
             {/* Hero content — centered */}
             <div className="flex flex-col items-center text-center gap-5 pt-24 pb-16 px-8">
               <motion.span className="text-[#A78BFA] font-semibold text-xs tracking-[3px]" style={{ fontFamily: SG }} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
