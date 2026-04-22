@@ -1,14 +1,13 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, Pencil, MessageCircle, LogOut, Lock, Compass, BookOpen, ChevronRight, Plane, Camera, Sparkles, Plus } from 'lucide-react'
+import { ArrowRight, Pencil, MessageCircle, LogOut, Compass, BookOpen, ChevronRight, Camera, Sparkles, Plus } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { UNIVERSES, GENRE_FILTERS } from '../data/storyData'
 import { useAuth } from '../contexts/AuthContext'
 import { STORY_STEPS } from '../data/storyData'
 import { getStoryData } from '../data/stories'
 import { getEligibleAmbientPings } from '../data/ambientPings'
-import { getAffinityTier } from '../lib/affinity'
 import { getCharacter, CHARACTERS } from '../data/characters'
 import { AppSidebar } from '../components/AppSidebar'
 import { AmbientPingModal } from '../components/AmbientPingModal'
@@ -254,9 +253,7 @@ function TravelBrowse({ hasCharacters }: { hasCharacters: boolean }) {
 
 // ─── Stories Browse ───
 
-const PREVIEW_GENRES = GENRE_FILTERS.filter((g) => g !== 'ALL')
-
-function StoriesBrowse({ hasCharacters }: { hasCharacters: boolean }) {
+function StoriesBrowse() {
   const navigate = useNavigate()
   const [genreFilter, setGenreFilter] = useState('ALL')
   const unlocked = UNIVERSES.filter((u) => !u.locked)
@@ -501,7 +498,7 @@ export function HomePage() {
             <ModeToggle mode={mode} setMode={setMode} />
             <AnimatePresence mode="wait">
               <motion.div key={mode} initial={{ opacity: 0, x: mode === 'travel' ? -10 : 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                {mode === 'travel' ? <TravelBrowse hasCharacters={hasCharacters} /> : <StoriesBrowse hasCharacters={hasCharacters} />}
+                {mode === 'travel' ? <TravelBrowse hasCharacters={hasCharacters} /> : <StoriesBrowse />}
               </motion.div>
             </AnimatePresence>
           </div>
@@ -577,7 +574,7 @@ export function HomePage() {
 
             <AnimatePresence mode="wait">
               <motion.div key={mode} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                {mode === 'travel' ? <TravelBrowse hasCharacters={hasCharacters} /> : <StoriesBrowse hasCharacters={hasCharacters} />}
+                {mode === 'travel' ? <TravelBrowse hasCharacters={hasCharacters} /> : <StoriesBrowse />}
               </motion.div>
             </AnimatePresence>
           </div>

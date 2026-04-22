@@ -10,7 +10,6 @@ import Globe, { type GlobeMethods } from 'react-globe.gl'
 const SG = "'Space Grotesk', sans-serif"
 
 const AVAILABLE = DESTINATIONS.filter((d) => !d.locked)
-const LOCKED = DESTINATIONS.filter((d) => d.locked)
 
 
 export function TravelHomePage() {
@@ -27,9 +26,11 @@ export function TravelHomePage() {
   const markerEls = useRef<Map<string, { dot: HTMLDivElement; label: HTMLDivElement; locked: boolean }>>(new Map())
   const selectedIdRef = useRef<string | null>(null)
 
-  const activeTrip = activeCharacterId
-    ? Object.entries(travelTrips).find(([key, trip]) => key.startsWith(`${activeCharacterId}:`) && trip.phase !== 'complete')
-    : null
+  const setActiveTripId = useStore((s) => s.setActiveTripId)
+
+  const activeTrips = activeCharacterId
+    ? Object.entries(travelTrips).filter(([key, trip]) => key.startsWith(`${activeCharacterId}:`) && trip.phase !== 'complete')
+    : []
 
   useEffect(() => {
     function updateSize() {
@@ -210,27 +211,39 @@ export function TravelHomePage() {
             </p>
           </div>
 
-          {/* Continue Trip Card */}
-          {activeTrip && (
-            <motion.button
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              onClick={() => navigate('/travel/trip')}
-              className="w-full mb-6 rounded-2xl overflow-hidden text-left cursor-pointer"
-              style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.15), rgba(200,75,158,0.1))', border: '1px solid rgba(124,58,237,0.2)' }}
-            >
-              <div className="p-5">
-                <p className="text-white/40 text-[10px] font-semibold tracking-[1.5px] uppercase mb-1" style={{ fontFamily: SG }}>
-                  Continue your trip
-                </p>
-                <p className="text-white text-lg font-semibold" style={{ fontFamily: "'Syne', sans-serif" }}>
-                  {DESTINATIONS.find((d) => d.id === activeTrip[1].destinationId)?.city ?? 'Trip'} — Day {activeTrip[1].currentDay}
-                </p>
-                <p className="text-white/50 text-sm mt-1" style={{ fontFamily: SG }}>
-                  {activeTrip[1].phase === 'planning' ? 'Still planning with your companion...' : `${activeTrip[1].phase === 'recap' ? 'Evening recap' : 'Exploring'}`}
-                </p>
-              </div>
-            </motion.button>
+          {/* Active Trips */}
+          {activeTrips.length > 0 && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 flex flex-col gap-2">
+              <p className="text-white/40 text-[10px] font-semibold tracking-[1.5px] uppercase mb-1" style={{ fontFamily: SG }}>
+                {activeTrips.length === 1 ? 'Continue your trip' : `${activeTrips.length} trips in progress`}
+              </p>
+              {activeTrips.map(([tripId, trip]) => {
+                const dest = DESTINATIONS.find((d) => d.id === trip.destinationId)
+                const phaseLabel = trip.phase === 'planning' ? 'Planning' : trip.phase === 'recap' ? 'Recap' : 'Exploring'
+                return (
+                  <button
+                    key={tripId}
+                    onClick={() => { setActiveTripId(tripId); navigate('/travel/trip') }}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left cursor-pointer transition-colors"
+                    style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.12), rgba(200,75,158,0.06))', border: '1px solid rgba(124,58,237,0.15)' }}
+                  >
+                    <span className="text-xl flex-shrink-0">{dest?.countryEmoji ?? '🌍'}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-sm font-semibold truncate" style={{ fontFamily: "'Syne', sans-serif" }}>
+                        {dest?.city ?? 'Trip'} — Day {trip.currentDay}
+                      </p>
+                    </div>
+                    <span
+                      className="text-[10px] font-medium px-2 py-0.5 rounded-full flex-shrink-0"
+                      style={{ background: 'rgba(124,58,237,0.15)', color: '#A78BFA', fontFamily: SG }}
+                    >
+                      {phaseLabel}
+                    </span>
+                    <ChevronRight size={14} className="text-white/30 flex-shrink-0" />
+                  </button>
+                )
+              })}
+            </motion.div>
           )}
 
           {/* Globe + Selected City Panel */}

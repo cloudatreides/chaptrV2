@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ChevronLeft, Plus, Trash2, User, Pencil } from 'lucide-react'
+import { ChevronLeft, Plus, Trash2, User } from 'lucide-react'
 import { useStore } from '../store/useStore'
 
 const MAX_CHARACTERS = 3
