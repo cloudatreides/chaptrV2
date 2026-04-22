@@ -330,7 +330,7 @@ function StoriesContent({ hasCharacters, activePlaythrough, activeUniverse, firs
 
 export function HomePage() {
   const navigate = useNavigate()
-  const { session, signOut } = useAuth()
+  const { signOut } = useAuth()
   const characters = useStore((s) => s.characters)
   const storyProgress = useStore((s) => s.storyProgress)
   const setActiveCharacter = useStore((s) => s.setActiveCharacter)
@@ -342,14 +342,8 @@ export function HomePage() {
   const updateLastSessionTimestamp = useStore((s) => s.updateLastSessionTimestamp)
   const dismissAmbientPing = useStore((s) => s.dismissAmbientPing)
   const unlockedCastIds = useStore((s) => s.unlockedCastIds)
-  const _favoriteCastIds = useStore((s) => s.favoriteCastIds)
-  const _castChatThreads = useStore((s) => s.castChatThreads)
-  const _groupCastThreads = useStore((s) => s.groupCastThreads)
-
   const [mode, setMode] = useState<'travel' | 'stories'>('travel')
   const [activePingModal, setActivePingModal] = useState<AmbientPingDef | null>(null)
-
-  const _userName = session?.user?.user_metadata?.full_name?.split(' ')[0] ?? characters[0]?.name ?? 'You'
   const hasCharacters = characters.length > 0
 
   // ─── Ambient pings ───
