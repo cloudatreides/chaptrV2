@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Users, Camera, ChevronRight, ArrowRight } from 'lucide-react'
+import { Users, Camera, ChevronRight } from 'lucide-react'
 import { AppSidebar } from '../components/AppSidebar'
 import { useStore } from '../store/useStore'
 import { UNIVERSES, GENRE_FILTERS, STORY_STEPS } from '../data/storyData'

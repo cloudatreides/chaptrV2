@@ -910,7 +910,7 @@ export function TravelReaderPage() {
             return (
               <div key={seg.id}>
                 <motion.button
-                  onClick={isReady && seg.action ? seg.action : undefined}
+                  onClick={isReady && 'action' in seg && seg.action ? seg.action : undefined}
                   disabled={!isReady || isGeneratingItinerary}
                   animate={isReady ? { boxShadow: ['0 0 0px rgba(124,58,237,0)', '0 0 12px rgba(124,58,237,0.3)', '0 0 0px rgba(124,58,237,0)'] } : {}}
                   transition={isReady ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } : {}}

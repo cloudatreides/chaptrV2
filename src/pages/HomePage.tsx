@@ -342,14 +342,14 @@ export function HomePage() {
   const updateLastSessionTimestamp = useStore((s) => s.updateLastSessionTimestamp)
   const dismissAmbientPing = useStore((s) => s.dismissAmbientPing)
   const unlockedCastIds = useStore((s) => s.unlockedCastIds)
-  const favoriteCastIds = useStore((s) => s.favoriteCastIds)
-  const castChatThreads = useStore((s) => s.castChatThreads)
-  const groupCastThreads = useStore((s) => s.groupCastThreads)
+  const _favoriteCastIds = useStore((s) => s.favoriteCastIds)
+  const _castChatThreads = useStore((s) => s.castChatThreads)
+  const _groupCastThreads = useStore((s) => s.groupCastThreads)
 
   const [mode, setMode] = useState<'travel' | 'stories'>('travel')
   const [activePingModal, setActivePingModal] = useState<AmbientPingDef | null>(null)
 
-  const userName = session?.user?.user_metadata?.full_name?.split(' ')[0] ?? characters[0]?.name ?? 'You'
+  const _userName = session?.user?.user_metadata?.full_name?.split(' ')[0] ?? characters[0]?.name ?? 'You'
   const hasCharacters = characters.length > 0
 
   // ─── Ambient pings ───
@@ -432,7 +432,7 @@ export function HomePage() {
           </button>
         </div>
         <div className="flex gap-4 overflow-x-auto scrollbar-none pb-1">
-          {unlockedCast.map(({ id, score, tier, charData }) => (
+          {unlockedCast.map(({ id, tier, charData }) => (
             <button key={id} onClick={() => navigate(`/cast/${id}`)} className="cursor-pointer shrink-0 flex flex-col items-center gap-1.5">
               <div className="w-12 h-12 rounded-full overflow-hidden" style={{ border: `2px solid ${tier.color}`, background: 'rgba(200,75,158,0.1)' }}>
                 {charData?.staticPortrait
