@@ -297,23 +297,18 @@ export function LandingPage() {
 
           <div className="relative z-10 page-container mx-auto">
             {/* Nav */}
-            <nav className="flex items-center justify-between px-8 lg:px-20 h-16">
+            <nav className="flex items-center justify-between px-8 lg:px-20 h-16 rounded-b-2xl" style={{ background: 'rgba(13,11,18,0.6)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
               <div className="flex items-center gap-2.5">
                 <LogoMark size={34} />
                 <span className="font-semibold text-lg" style={{ fontFamily: "'Syne', sans-serif", letterSpacing: '-0.02em', background: 'linear-gradient(180deg, #D4C4F0 0%, #B8A5E0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>chaptr</span>
               </div>
-              <div className="flex items-center gap-8">
-                <span className="text-[#A78BFA] text-sm font-medium cursor-pointer" style={{ fontFamily: SG }}>Travel</span>
-                <span className="text-white/50 text-sm font-medium cursor-pointer hover:text-white transition-colors" style={{ fontFamily: SG }}>Stories</span>
-                <span className="text-white/50 text-sm font-medium cursor-pointer hover:text-white transition-colors" style={{ fontFamily: SG }}>Characters</span>
-                <button
-                  className="text-white text-sm font-semibold px-5 py-2 rounded-full transition-all hover:opacity-90"
-                  style={{ background: 'linear-gradient(90deg, #7C3AED, #A78BFA)' }}
-                  onClick={handleCTA}
-                >
-                  Get Started
-                </button>
-              </div>
+              <button
+                className="text-white text-sm font-semibold px-5 py-2 rounded-full transition-all hover:opacity-90"
+                style={{ background: 'linear-gradient(90deg, #7C3AED, #A78BFA)' }}
+                onClick={handleCTA}
+              >
+                Get Started
+              </button>
             </nav>
 
             {/* Hero content — centered */}
