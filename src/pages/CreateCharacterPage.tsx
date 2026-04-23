@@ -1,5 +1,5 @@
 import { useRef, useState, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, Camera, Shield, RefreshCw, Sparkles } from 'lucide-react'
 import Cropper from 'react-easy-crop'
@@ -70,19 +70,31 @@ function getRandomArchetypes(count: number, exclude?: string[]): typeof ALL_ARCH
 
 export function CreateCharacterPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const editId = searchParams.get('edit')
   const createCharacter = useStore((s) => s.createCharacter)
+  const updateCharacter = useStore((s) => s.updateCharacter)
   const characters = useStore((s) => s.characters)
+  const editingChar = editId ? characters.find((c) => c.id === editId) : null
+  const isEditMode = !!editingChar
   const fileRef = useRef<HTMLInputElement>(null)
 
   // ── Form state ──
-  const [name, setName] = useState('')
-  const [gender, setGender] = useState<'male' | 'female' | null>(null)
+  const [name, setName] = useState(editingChar?.name ?? '')
+  const [gender, setGender] = useState<'male' | 'female' | null>(editingChar?.gender ?? null)
 
   // Personality
-  const [selectedArch, setSelectedArch] = useState<string | null>(null)
-  const [custom, setCustom] = useState('')
-  const [isCustom, setIsCustom] = useState(false)
-  const [displayedArchetypes, setDisplayedArchetypes] = useState(() => getRandomArchetypes(3))
+  const matchingArch = editingChar?.bio ? ALL_ARCHETYPES.find((a) => a.bio === editingChar.bio) : null
+  const [selectedArch, setSelectedArch] = useState<string | null>(matchingArch?.id ?? null)
+  const [custom, setCustom] = useState(matchingArch ? '' : editingChar?.bio ?? '')
+  const [isCustom, setIsCustom] = useState(!matchingArch && !!editingChar?.bio)
+  const [displayedArchetypes, setDisplayedArchetypes] = useState(() => {
+    if (matchingArch) {
+      const others = getRandomArchetypes(2, [matchingArch.id])
+      return [matchingArch, ...others]
+    }
+    return getRandomArchetypes(3)
+  })
 
   const shufflePersonalities = () => {
     setDisplayedArchetypes(getRandomArchetypes(3, displayedArchetypes.map((a) => a.id)))
@@ -94,15 +106,17 @@ export function CreateCharacterPage() {
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
-  const [originalPhoto, setOriginalPhoto] = useState<string | null>(null)
+  const existingSelfie = editingChar?.selfieUrl ?? null
+  const isDefaultAvatar = existingSelfie?.startsWith('/default-')
+  const [originalPhoto, setOriginalPhoto] = useState<string | null>(existingSelfie && !isDefaultAvatar ? existingSelfie : null)
   const [styledPhoto, setStyledPhoto] = useState<string | null>(null)
   const [isStylizing, setIsStylizing] = useState(false)
   const [stylizeFailed, setStylizeFailed] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
-  const [uploadedSelfieUrl, setUploadedSelfieUrl] = useState<string | null>(null)
+  const [uploadedSelfieUrl, setUploadedSelfieUrl] = useState<string | null>(existingSelfie && !isDefaultAvatar ? existingSelfie : null)
   const uploadIdRef = useRef(crypto.randomUUID())
   const [dragging, setDragging] = useState(false)
-  const [selectedDefault, setSelectedDefault] = useState<string | null>(null)
+  const [selectedDefault, setSelectedDefault] = useState<string | null>(isDefaultAvatar ? existingSelfie : null)
 
   const onCropComplete = useCallback((_: Area, croppedPixels: Area) => {
     setCroppedAreaPixels(croppedPixels)
@@ -171,19 +185,30 @@ export function CreateCharacterPage() {
     }
   }
 
-  const handleCreate = () => {
+  const handleSave = () => {
     if (!canCreate) return
-    createCharacter({
-      name: name.trim(),
-      gender: gender!,
-      selfieUrl: uploadedSelfieUrl ?? finalPhoto ?? selectedDefault ?? null,
-      bio: bio || null,
-    })
-    trackEvent('character_created', { gender, hasPhoto: !!finalPhoto, hasDefault: !!selectedDefault, hasBio: !!bio })
-    navigate('/')
+    const selfieUrl = uploadedSelfieUrl ?? finalPhoto ?? selectedDefault ?? null
+    if (isEditMode) {
+      updateCharacter(editId!, {
+        name: name.trim(),
+        gender: gender!,
+        selfieUrl,
+        bio: bio || null,
+      })
+      trackEvent('character_updated', { gender, hasPhoto: !!finalPhoto, hasDefault: !!selectedDefault, hasBio: !!bio })
+    } else {
+      createCharacter({
+        name: name.trim(),
+        gender: gender!,
+        selfieUrl,
+        bio: bio || null,
+      })
+      trackEvent('character_created', { gender, hasPhoto: !!finalPhoto, hasDefault: !!selectedDefault, hasBio: !!bio })
+    }
+    navigate(isEditMode ? '/characters' : '/')
   }
 
-  if (characters.length >= 3) {
+  if (!isEditMode && characters.length >= 3) {
     return (
       <div className="min-h-screen min-h-dvh bg-bg flex items-center justify-center px-6">
         <div className="text-center">
@@ -209,14 +234,14 @@ export function CreateCharacterPage() {
           </div>
         </div>
 
-        <button onClick={() => navigate('/')} className="flex items-center gap-1 text-textSecondary text-sm mt-4 mb-6 hover:text-textPrimary transition-colors w-fit">
+        <button onClick={() => navigate(isEditMode ? '/characters' : '/')} className="flex items-center gap-1 text-textSecondary text-sm mt-4 mb-6 hover:text-textPrimary transition-colors w-fit">
           <ChevronLeft size={16} />
           Back
         </button>
 
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="text-textPrimary font-bold text-3xl mb-1">Create Twin</h1>
-          <p className="text-textSecondary text-base mb-6">Build who you'll be in the story.</p>
+          <h1 className="text-textPrimary font-bold text-3xl mb-1">{isEditMode ? 'Edit Twin' : 'Create Twin'}</h1>
+          <p className="text-textSecondary text-base mb-6">{isEditMode ? 'Update your character details.' : "Build who you'll be in the story."}</p>
         </motion.div>
 
         {/* ── Section 1: Name + Gender ── */}
@@ -420,11 +445,11 @@ export function CreateCharacterPage() {
         <div className="mt-auto space-y-3 safe-bottom">
           <button
             className="btn-accent"
-            onClick={handleCreate}
+            onClick={handleSave}
             disabled={!canCreate}
             style={{ opacity: canCreate ? 1 : 0.5, cursor: canCreate ? 'pointer' : 'not-allowed' }}
           >
-            {isStylizing ? 'Stylizing photo...' : isUploading ? 'Uploading photo...' : 'Create Twin'}
+            {isStylizing ? 'Stylizing photo...' : isUploading ? 'Uploading photo...' : isEditMode ? 'Save Changes' : 'Create Twin'}
           </button>
         </div>
       </div>

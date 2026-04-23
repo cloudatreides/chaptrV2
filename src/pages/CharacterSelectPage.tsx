@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ChevronLeft, Plus, Trash2, User } from 'lucide-react'
+import { ChevronLeft, Pencil, Plus, Trash2, User } from 'lucide-react'
 import { useStore } from '../store/useStore'
 
 const MAX_CHARACTERS = 3
@@ -77,8 +77,11 @@ export function CharacterSelectPage() {
                   )}
                 </button>
 
-                {/* Info */}
-                <div className="flex-1 min-w-0">
+                {/* Info — click to edit */}
+                <div
+                  className="flex-1 min-w-0 cursor-pointer"
+                  onClick={() => navigate(`/create-character?edit=${char.id}`)}
+                >
                   <div className="flex items-center gap-2">
                     <p className="text-textPrimary font-semibold text-sm truncate">{char.name}</p>
                     <span className="text-textMuted text-xs">{char.gender === 'male' ? '♂' : '♀'}</span>
@@ -93,6 +96,12 @@ export function CharacterSelectPage() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    onClick={() => navigate(`/create-character?edit=${char.id}`)}
+                    className="cursor-pointer text-textMuted hover:text-accent transition-colors p-1.5 rounded-lg hover:bg-white/5"
+                  >
+                    <Pencil size={14} />
+                  </button>
                   {!isActive && (
                     <button
                       onClick={() => handleSetActive(char.id)}
