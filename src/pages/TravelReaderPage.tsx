@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Send, Loader2, MapPin, ChevronRight, Lock, Check, Play, ChevronDown, ImagePlus } from 'lucide-react'
+import { ArrowLeft, Send, Loader2, MapPin, ChevronRight, Lock, Check, Play, ChevronDown, ImagePlus, Plus, X } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { getDestination } from '../data/travel/destinations'
 import { getTravelCompanion } from '../data/travel/companions'
@@ -49,6 +49,7 @@ export function TravelReaderPage() {
   const [isGeneratingChatImage, setIsGeneratingChatImage] = useState(false)
   const [localSliders, setLocalSliders] = useState<{ chattiness: number; planningStyle: number; vibe: number } | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const [showActions, setShowActions] = useState(false)
   const chatEndRef = useRef<HTMLDivElement>(null)
   const abortRef = useRef<AbortController | null>(null)
   const engagementRef = useRef<number>(Date.now())
@@ -1013,53 +1014,9 @@ export function TravelReaderPage() {
               </button>
             )}
 
-            {/* Actions + Suggestions */}
-            {!isStreaming && (suggestions.length > 0 || messages.some((m) => m.role === 'character')) && (
+            {/* Suggestions */}
+            {!isStreaming && suggestions.length > 0 && (
               <div className="flex gap-2 mb-3 overflow-x-auto pb-1">
-                {messages.some((m) => m.role === 'character') && (
-                  <>
-                    <button
-                      onClick={handleShowMe}
-                      disabled={isGeneratingChatImage}
-                      className="shrink-0 text-xs px-3 py-1.5 rounded-full cursor-pointer transition-colors hover:bg-purple-500/20 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
-                      style={{
-                        fontFamily: "'Space Grotesk', sans-serif",
-                        background: 'rgba(124,58,237,0.15)',
-                        color: 'rgba(200,180,255,0.9)',
-                        border: '1px solid rgba(124,58,237,0.25)',
-                      }}
-                    >
-                      {isGeneratingChatImage ? <Loader2 size={11} className="animate-spin" /> : <ImagePlus size={11} />}
-                      Show me
-                    </button>
-                    <button
-                      onClick={handleBuyGift}
-                      disabled={isGeneratingChatImage}
-                      className="shrink-0 text-xs px-3 py-1.5 rounded-full cursor-pointer transition-colors hover:bg-pink-500/20 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
-                      style={{
-                        fontFamily: "'Space Grotesk', sans-serif",
-                        background: 'rgba(236,72,153,0.12)',
-                        color: 'rgba(255,180,210,0.9)',
-                        border: '1px solid rgba(236,72,153,0.25)',
-                      }}
-                    >
-                      🎁 Buy a gift
-                    </button>
-                    <button
-                      onClick={handleHoldHands}
-                      disabled={isGeneratingChatImage}
-                      className="shrink-0 text-xs px-3 py-1.5 rounded-full cursor-pointer transition-colors hover:bg-pink-500/20 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
-                      style={{
-                        fontFamily: "'Space Grotesk', sans-serif",
-                        background: 'rgba(236,72,153,0.12)',
-                        color: 'rgba(255,180,210,0.9)',
-                        border: '1px solid rgba(236,72,153,0.25)',
-                      }}
-                    >
-                      💕 Hold hands
-                    </button>
-                  </>
-                )}
                 {suggestions.map((s, i) => (
                   <button
                     key={i}
@@ -1078,11 +1035,65 @@ export function TravelReaderPage() {
               </div>
             )}
 
+            {/* Actions Panel */}
+            <AnimatePresence>
+              {showActions && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="overflow-hidden mb-3"
+                >
+                  <div
+                    className="grid grid-cols-3 gap-2 p-3 rounded-xl"
+                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+                  >
+                    {[
+                      { id: 'show-me', emoji: '📸', label: 'Show me', desc: 'See what they\'re talking about', handler: handleShowMe },
+                      { id: 'buy-gift', emoji: '🎁', label: 'Buy a gift', desc: 'Surprise them with something nice', handler: handleBuyGift },
+                      { id: 'hold-hands', emoji: '💕', label: 'Hold hands', desc: 'A romantic moment together', handler: handleHoldHands },
+                    ].map((action) => (
+                      <button
+                        key={action.id}
+                        onClick={() => { setShowActions(false); action.handler() }}
+                        disabled={isGeneratingChatImage}
+                        className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-lg cursor-pointer transition-colors hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed"
+                        style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                      >
+                        <span className="text-2xl">{action.emoji}</span>
+                        <span className="text-white text-xs font-medium">{action.label}</span>
+                        <span className="text-white/30 text-[10px] leading-tight text-center">{action.desc}</span>
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             {/* Input */}
             <form
               onSubmit={(e) => { e.preventDefault(); handleSend() }}
               className="flex items-center gap-2"
             >
+              {messages.some((m) => m.role === 'character') && (
+                <button
+                  type="button"
+                  onClick={() => setShowActions(!showActions)}
+                  className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer transition-all"
+                  style={{
+                    background: showActions ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.06)',
+                    border: showActions ? '1px solid rgba(124,58,237,0.3)' : '1px solid rgba(255,255,255,0.08)',
+                  }}
+                >
+                  {isGeneratingChatImage ? (
+                    <Loader2 size={16} className="text-white/50 animate-spin" />
+                  ) : showActions ? (
+                    <X size={16} className="text-purple-400" />
+                  ) : (
+                    <Plus size={16} className="text-white/50" />
+                  )}
+                </button>
+              )}
               <input
                 type="text"
                 value={input}
