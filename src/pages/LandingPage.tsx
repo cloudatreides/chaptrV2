@@ -11,6 +11,18 @@ import { DESTINATIONS as ALL_DESTINATIONS } from '../data/travel/destinations'
 const SG = 'Space Grotesk, sans-serif'
 const INTER = 'Inter, sans-serif'
 
+const AVATAR_COUNT = 38
+const AVATARS = Array.from({ length: AVATAR_COUNT }, (_, i) => `/avatars/avatar-${String(i + 1).padStart(2, '0')}.webp`)
+
+function getVisitors(destId: string) {
+  let hash = 0
+  for (let i = 0; i < destId.length; i++) hash = (hash * 31 + destId.charCodeAt(i)) | 0
+  const count = 3 + (Math.abs(hash) % 45)
+  const start = Math.abs(hash) % AVATARS.length
+  const avatars = Array.from({ length: Math.min(4, count) }, (_, i) => AVATARS[(start + i) % AVATARS.length])
+  return { count, avatars }
+}
+
 // Pick a diverse set of stories for the showcase
 const SHOWCASE_STORIES = UNIVERSES.filter(u => !u.locked).slice(0, 8)
 
@@ -225,11 +237,34 @@ export function LandingPage() {
                 </button>
               </div>
               <div className="px-5 pb-5 -mt-4 relative">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xl">{previewDest.countryEmoji}</span>
-                  <h3 className="text-white text-2xl font-bold" style={{ fontFamily: "'Syne', sans-serif" }}>
-                    {previewDest.city}
-                  </h3>
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">{previewDest.countryEmoji}</span>
+                    <h3 className="text-white text-2xl font-bold" style={{ fontFamily: "'Syne', sans-serif" }}>
+                      {previewDest.city}
+                    </h3>
+                  </div>
+                  {(() => {
+                    const { count, avatars } = getVisitors(previewDest.id)
+                    return (
+                      <div className="flex items-center gap-2">
+                        <div className="flex -space-x-1.5">
+                          {avatars.map((src, i) => (
+                            <img
+                              key={i}
+                              src={src}
+                              alt=""
+                              className="w-6 h-6 rounded-full object-cover"
+                              style={{ border: '2px solid #13101c', zIndex: avatars.length - i }}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-white/40 text-[11px] font-medium" style={{ fontFamily: SG }}>
+                          {count} exploring
+                        </span>
+                      </div>
+                    )
+                  })()}
                 </div>
                 <p className="text-white/50 text-sm mb-3" style={{ fontFamily: SG }}>
                   {previewDest.description}
