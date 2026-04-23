@@ -88,7 +88,7 @@ function DestinationCarousel() {
 
   return (
     <div
-      className="overflow-hidden -mx-5 md:-mx-8 lg:-mx-20"
+      className="overflow-hidden"
       style={{
         maskImage: 'linear-gradient(to right, transparent, black 32px, black calc(100% - 32px), transparent)',
         WebkitMaskImage: 'linear-gradient(to right, transparent, black 32px, black calc(100% - 32px), transparent)',
@@ -292,8 +292,8 @@ export function LandingPage() {
               title="Explore the world, scene by scene"
               description="Pick a city, choose a companion, and live your dream trip scene by scene."
             />
+            <DestinationCarousel />
           </div>
-          <DestinationCarousel />
         </section>
 
         {/* Interactive Stories */}
@@ -431,8 +431,8 @@ export function LandingPage() {
               description="Pick a city, choose a companion, and live your dream trip scene by scene."
               className="mb-8"
             />
+            <DestinationCarousel />
           </div>
-          <DestinationCarousel />
         </section>
 
         {/* Interactive Stories */}
