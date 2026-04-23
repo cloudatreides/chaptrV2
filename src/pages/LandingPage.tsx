@@ -150,13 +150,12 @@ function DestinationCarousel({ onCardClick }: { onCardClick?: (dest: typeof ALL_
 
 // ─── Story Card ───
 
-function StoryCard({ story, size = 'md' }: { story: typeof UNIVERSES[number]; size?: 'sm' | 'md' }) {
-  const navigate = useNavigate()
+function StoryCard({ story, size = 'md', onClick }: { story: typeof UNIVERSES[number]; size?: 'sm' | 'md'; onClick?: (story: typeof UNIVERSES[number]) => void }) {
   return (
     <div
       className="rounded-xl md:rounded-2xl overflow-hidden flex flex-col cursor-pointer group"
       style={{ background: '#111016', border: '1px solid rgba(255,255,255,0.03)', width: size === 'sm' ? 160 : undefined, flexShrink: size === 'sm' ? 0 : undefined }}
-      onClick={() => navigate(`/universe/${story.id}`)}
+      onClick={() => onClick?.(story)}
     >
       <div className="relative w-full h-24 md:h-44 overflow-hidden">
         <img src={story.image} alt={story.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -193,6 +192,7 @@ export function LandingPage() {
   const { session } = useAuth()
   const [showAuth, setShowAuth] = useState(false)
   const [previewDest, setPreviewDest] = useState<typeof ALL_DESTINATIONS[number] | null>(null)
+  const [previewStory, setPreviewStory] = useState<typeof UNIVERSES[number] | null>(null)
 
   function handleCTA() {
     if (session) {
@@ -322,6 +322,85 @@ export function LandingPage() {
         )}
       </AnimatePresence>
 
+      {/* Story Preview Modal */}
+      <AnimatePresence>
+        {previewStory && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
+            onClick={() => setPreviewStory(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-sm rounded-2xl overflow-hidden"
+              style={{ background: '#13101c', border: '1px solid rgba(255,255,255,0.08)' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="relative h-44 overflow-hidden">
+                <img src={previewStory.image} alt={previewStory.title} className="w-full h-full object-cover" />
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 30%, #13101c 100%)' }} />
+                <button
+                  onClick={() => setPreviewStory(null)}
+                  className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer"
+                  style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
+                >
+                  <X size={16} className="text-white/70" />
+                </button>
+              </div>
+              <div className="px-5 pb-5 -mt-4 relative">
+                <span
+                  className="inline-block text-[9px] font-bold tracking-[1px] uppercase px-2 py-1 rounded mb-2"
+                  style={{ background: 'rgba(200,75,158,0.2)', color: '#e88bc4', fontFamily: SG }}
+                >
+                  {previewStory.genreTag}
+                </span>
+                <h3 className="text-white text-xl font-bold mb-1" style={{ fontFamily: "'Syne', sans-serif" }}>
+                  {previewStory.title}
+                </h3>
+
+                <div className="flex items-center gap-3 mb-3">
+                  {previewStory.chapters && (
+                    <div className="flex items-center gap-1.5">
+                      <BookOpen size={12} className="text-white/30" />
+                      <span className="text-white/40 text-[11px]" style={{ fontFamily: SG }}>{previewStory.chapters} chapters</span>
+                    </div>
+                  )}
+                </div>
+
+                <p className="text-white/50 text-[12px] leading-relaxed mb-4" style={{ fontFamily: SG }}>
+                  {previewStory.longDescription || previewStory.description}
+                </p>
+
+                <div className="flex flex-wrap gap-1.5 mb-5">
+                  {previewStory.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="text-[10px] font-medium px-2 py-0.5 rounded-full"
+                      style={{ background: 'rgba(200,75,158,0.1)', color: '#e88bc4', border: '1px solid rgba(200,75,158,0.15)', fontFamily: SG }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => { setPreviewStory(null); handleCTA() }}
+                  className="w-full py-3 rounded-xl font-semibold text-white text-sm cursor-pointer"
+                  style={{ background: 'linear-gradient(90deg, #c84b9e, #e88bc4)', fontFamily: SG }}
+                >
+                  Sign up to play {previewStory.title} →
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ═══ MOBILE ═══ */}
       <div className="md:hidden">
 
@@ -435,7 +514,7 @@ export function LandingPage() {
             description="Romance, horror, mystery — upload a selfie and become the main character. Your choices change the ending."
           />
           <div className="flex gap-2.5 overflow-x-auto pb-2 -mx-5 px-5 scrollbar-hide">
-            {SHOWCASE_STORIES.map(s => <StoryCard key={s.id} story={s} size="sm" />)}
+            {SHOWCASE_STORIES.map(s => <StoryCard key={s.id} story={s} size="sm" onClick={setPreviewStory} />)}
           </div>
         </section>
 
@@ -576,7 +655,7 @@ export function LandingPage() {
               className="mb-8"
             />
             <div className="grid grid-cols-4 gap-5">
-              {SHOWCASE_STORIES.map(s => <StoryCard key={s.id} story={s} />)}
+              {SHOWCASE_STORIES.map(s => <StoryCard key={s.id} story={s} onClick={setPreviewStory} />)}
             </div>
           </div>
         </section>
