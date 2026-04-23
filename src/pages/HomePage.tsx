@@ -41,7 +41,7 @@ function TwinHero({ character, allCharacters, onEdit, onSwitch, onCreateNew }: {
     <div className="flex flex-col gap-3">
       <div className="relative rounded-2xl overflow-hidden flex flex-col md:flex-row" style={{ border: '1px solid rgba(200,75,158,0.12)', background: '#13101c' }}>
         {/* Selfie */}
-        <div className="relative w-full md:w-[280px] h-[240px] md:h-[300px] shrink-0 overflow-hidden">
+        <div className="relative w-full md:w-[280px] h-[240px] md:h-[300px] overflow-hidden" style={{ flexShrink: 0 }}>
           {character.selfieUrl ? (
             <img src={character.selfieUrl} alt={character.name} className="w-full h-full object-cover object-center" />
           ) : (
@@ -53,7 +53,7 @@ function TwinHero({ character, allCharacters, onEdit, onSwitch, onCreateNew }: {
           <div className="hidden md:block absolute inset-0" style={{ background: 'linear-gradient(to left, #13101c 0%, transparent 40%)' }} />
         </div>
         {/* Info */}
-        <div className="flex-1 flex flex-col justify-center px-5 pb-5 -mt-8 md:mt-0 md:px-8 md:py-8 relative z-10">
+        <div className="flex-1 min-w-0 flex flex-col justify-center px-5 pb-5 -mt-8 md:mt-0 md:px-8 md:py-8 relative z-10">
           <p className="text-[10px] md:text-[11px] font-semibold tracking-[2px] uppercase mb-2" style={{ color: '#c84b9e', fontFamily: SG }}>YOUR TWIN</p>
           <h2 className="text-white text-2xl md:text-3xl font-bold mb-2" style={{ fontFamily: SG }}>{character.name}</h2>
           {character.bio && (
@@ -545,9 +545,9 @@ export function HomePage() {
       </div>
 
       {/* ═══ DESKTOP ═══ */}
-      <div className="hidden md:flex h-screen overflow-hidden">
+      <div className="hidden md:flex h-dvh overflow-hidden">
         <AppSidebar />
-        <div className="flex-1 overflow-y-auto px-8 lg:px-12 py-10">
+        <div className="flex-1 min-h-0 overflow-y-auto px-8 lg:px-12 py-10">
           <div className="page-container">
             {/* Header */}
             <div className="flex items-start justify-between mb-6">
