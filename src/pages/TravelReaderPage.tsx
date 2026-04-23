@@ -1096,8 +1096,8 @@ export function TravelReaderPage() {
             {!isStreaming && trip.phase === 'day' && currentScene?.prose && (
               <button
                 onClick={handleNextScene}
-                className="flex items-center gap-2 mb-3 py-1.5 px-3 rounded-lg text-xs cursor-pointer transition-colors hover:bg-purple-500/15"
-                style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'rgba(200,180,255,0.9)', background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.15)' }}
+                className="flex items-center gap-2 mb-3 py-1.5 px-3 rounded-lg text-xs font-medium cursor-pointer transition-colors hover:bg-white/10"
+                style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#e0e0e0', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)' }}
               >
                 Next scene <ChevronRight size={10} />
               </button>
@@ -1106,8 +1106,8 @@ export function TravelReaderPage() {
             {!isStreaming && trip.phase === 'recap' && (
               <button
                 onClick={handleNextDay}
-                className="flex items-center gap-2 mb-3 py-1.5 px-3 rounded-lg text-xs cursor-pointer transition-colors hover:bg-purple-500/15"
-                style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'rgba(200,180,255,0.9)', background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.15)' }}
+                className="flex items-center gap-2 mb-3 py-1.5 px-3 rounded-lg text-xs font-medium cursor-pointer transition-colors hover:bg-white/10"
+                style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#e0e0e0', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)' }}
               >
                 <Play size={10} /> {trip.currentDay >= destination.tripDays ? 'Complete your trip' : `Start Day ${trip.currentDay + 1}`}
               </button>
