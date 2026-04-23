@@ -574,6 +574,7 @@ export function TravelReaderPage() {
     setSceneProse('')
     setIsStreaming(true)
     abortRef.current = new AbortController()
+    const sceneTimeout = setTimeout(() => abortRef.current?.abort(), 45000)
 
     const needsImage = !currentTrip.sceneImages[scene.id]
     if (needsImage) setImageLoadingSceneId(scene.id)
@@ -620,7 +621,9 @@ export function TravelReaderPage() {
     } catch (e: any) {
       if (e.name !== 'AbortError') console.error('Scene streaming error:', e)
     } finally {
+      clearTimeout(sceneTimeout)
       setIsStreaming(false)
+      setImageLoadingSceneId(null)
     }
   }
 
@@ -713,7 +716,8 @@ export function TravelReaderPage() {
 
   async function generateTravelImage(prompt: string, selfieUrl?: string | null): Promise<string | null> {
     try {
-      return await generateImage({
+      const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 30000))
+      const image = generateImage({
         prompt,
         width: 768,
         height: 432,
@@ -721,6 +725,7 @@ export function TravelReaderPage() {
         includesProtagonist: !!selfieUrl,
         protagonistGender: activeChar?.gender,
       })
+      return await Promise.race([image, timeout])
     } catch {
       return null
     }
