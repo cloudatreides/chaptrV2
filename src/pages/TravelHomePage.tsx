@@ -339,18 +339,20 @@ export function TravelHomePage() {
                 </motion.p>
               )}
 
-              {/* Selected City Card — overlay */}
-              <AnimatePresence>
-                {selectedDest && (
-                  <motion.div
-                    key={selectedDest.id}
-                    initial={{ opacity: 0, y: 16, scale: 0.97 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 16, scale: 0.97 }}
-                    transition={{ duration: 0.25 }}
-                    className="absolute bottom-3 left-1/2 -translate-x-1/2 w-[calc(100%-32px)] max-w-[420px] z-10 rounded-2xl overflow-hidden"
-                    style={{ background: 'rgba(21,16,32,0.95)', backdropFilter: 'blur(12px)', border: '1px solid rgba(124,58,237,0.2)' }}
-                  >
+            </div>
+
+            {/* Selected City Card — outside globe container to stack above dots */}
+            <AnimatePresence>
+              {selectedDest && (
+                <motion.div
+                  key={selectedDest.id}
+                  initial={{ opacity: 0, y: 16, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 16, scale: 0.97 }}
+                  transition={{ duration: 0.25 }}
+                  className="w-full max-w-[420px] -mt-16 relative z-[200] rounded-2xl overflow-hidden mx-auto"
+                  style={{ background: 'rgba(21,16,32,0.95)', backdropFilter: 'blur(12px)', border: '1px solid rgba(124,58,237,0.2)' }}
+                >
                   <div className="relative h-[100px] overflow-hidden">
                     <img
                       src={selectedDest.heroImage}
@@ -479,10 +481,9 @@ export function TravelHomePage() {
                       </button>
                     )}
                   </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Destination Tabs */}
