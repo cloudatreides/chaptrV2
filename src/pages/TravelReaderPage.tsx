@@ -311,12 +311,13 @@ export function TravelReaderPage() {
       let full = ''
       for await (const chunk of replyStream) {
         full += chunk
-        setStreamedText(full.replace(/\n?\[AFFINITY:[^\]]*\].*$/s, '').replace(/\n?\[SUGGESTIONS:[^\]]*\].*$/s, ''))
+        setStreamedText(full.replace(/\[PLACE:([^\]]*)\]/g, '$1').replace(/\n?\[AFFINITY:[^\]]*\].*$/s, '').replace(/\n?\[SUGGESTIONS:[^\]]*\].*$/s, ''))
       }
       setIsStreaming(false)
       setStreamedText('')
 
-      const parsed = parseAffinityDelta(full)
+      const { cleanText: giftClean, places: giftPlaces } = parsePlaceTags(full)
+      const parsed = parseAffinityDelta(giftClean)
       if (imageUrl) {
         addMsg({ role: 'character', content: parsed.content, characterId: trip.companionId, timestamp: Date.now(), imageUrl })
       } else {
@@ -324,6 +325,11 @@ export function TravelReaderPage() {
       }
       updateTravelAffinity(Math.max(parsed.delta, 3))
       if (parsed.suggestions) setSuggestions(parsed.suggestions)
+      if (giftPlaces.length > 0 && destination) {
+        fetchPlaceImage(giftPlaces[0], destination.city).then((placeUrl) => {
+          if (placeUrl) addMsg({ role: 'character', content: `📍 ${giftPlaces[0]}`, characterId: trip.companionId, timestamp: Date.now(), imageUrl: placeUrl })
+        }).catch(() => {})
+      }
     } catch (e) {
       console.error('Buy gift error:', e)
       setIsStreaming(false)
@@ -369,12 +375,13 @@ export function TravelReaderPage() {
       let full = ''
       for await (const chunk of replyStream) {
         full += chunk
-        setStreamedText(full.replace(/\n?\[AFFINITY:[^\]]*\].*$/s, '').replace(/\n?\[SUGGESTIONS:[^\]]*\].*$/s, ''))
+        setStreamedText(full.replace(/\[PLACE:([^\]]*)\]/g, '$1').replace(/\n?\[AFFINITY:[^\]]*\].*$/s, '').replace(/\n?\[SUGGESTIONS:[^\]]*\].*$/s, ''))
       }
       setIsStreaming(false)
       setStreamedText('')
 
-      const parsed = parseAffinityDelta(full)
+      const { cleanText: handsClean, places: handsPlaces } = parsePlaceTags(full)
+      const parsed = parseAffinityDelta(handsClean)
       if (imageUrl) {
         addMsg({ role: 'character', content: parsed.content, characterId: trip.companionId, timestamp: Date.now(), imageUrl })
       } else {
@@ -382,6 +389,11 @@ export function TravelReaderPage() {
       }
       updateTravelAffinity(Math.max(parsed.delta, 3))
       if (parsed.suggestions) setSuggestions(parsed.suggestions)
+      if (handsPlaces.length > 0 && destination) {
+        fetchPlaceImage(handsPlaces[0], destination.city).then((placeUrl) => {
+          if (placeUrl) addMsg({ role: 'character', content: `📍 ${handsPlaces[0]}`, characterId: trip.companionId, timestamp: Date.now(), imageUrl: placeUrl })
+        }).catch(() => {})
+      }
     } catch (e) {
       console.error('Hold hands error:', e)
       setIsStreaming(false)
