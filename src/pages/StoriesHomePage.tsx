@@ -44,7 +44,8 @@ export function StoriesHomePage() {
   const [genreFilter, setGenreFilter] = useState('ALL')
 
   const hasCharacters = characters.length > 0
-  const universeCards = UNIVERSES.filter((u) => genreFilter === 'ALL' || u.genre === genreFilter)
+  const activeStories = UNIVERSES.filter((u) => !u.locked && (genreFilter === 'ALL' || u.genre === genreFilter))
+  const comingSoonStories = UNIVERSES.filter((u) => u.locked)
 
   const activePlaythrough = characters
     .map((char) => {
@@ -155,45 +156,69 @@ export function StoriesHomePage() {
             ))}
           </div>
 
-          {/* Story grid */}
+          {/* Active story grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {universeCards.map((u, i) => (
+            {activeStories.map((u, i) => (
               <motion.button
                 key={u.id}
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.04 }}
-                onClick={() => !u.locked && navigate(`/universes/${u.id}`)}
-                className={`rounded-xl overflow-hidden group text-left ${u.locked ? 'cursor-default' : 'cursor-pointer'}`}
+                onClick={() => navigate(`/universes/${u.id}`)}
+                className="cursor-pointer rounded-xl overflow-hidden group text-left"
                 style={{ background: '#13101c', border: '1px solid rgba(255,255,255,0.06)' }}
               >
                 <div className="relative aspect-[3/4] overflow-hidden">
-                  <img src={u.image} alt={u.title} className={`w-full h-full object-cover transition-transform duration-300 ${u.locked ? 'grayscale brightness-50' : 'group-hover:scale-105'}`} />
+                  <img src={u.image} alt={u.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                   <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,8,16,0.95) 0%, rgba(10,8,16,0.5) 40%, transparent 70%)' }} />
-                  {u.locked && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-[11px] font-bold tracking-[1.5px] uppercase px-3 py-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)', fontFamily: SG, backdropFilter: 'blur(4px)' }}>Coming Soon</span>
-                    </div>
-                  )}
                   <div className="absolute bottom-0 left-0 right-0 p-3">
-                    <span className="inline-block text-[9px] font-bold tracking-[1px] uppercase px-1.5 py-0.5 rounded" style={{ background: u.locked ? 'rgba(255,255,255,0.06)' : 'rgba(200,75,158,0.2)', color: u.locked ? 'rgba(255,255,255,0.3)' : '#e88bc4', fontFamily: SG }}>{u.genreTag}</span>
-                    <p className={`text-sm font-semibold mt-1 ${u.locked ? 'text-white/40' : 'text-white'}`} style={{ fontFamily: SG }}>{u.title}</p>
-                    {!u.locked && (
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <Users size={11} className="text-white/40" />
-                        <span className="text-white/40 text-[11px]" style={{ fontFamily: SG }}>{formatPlayerCount(UNIVERSE_PLAYERS[u.id] ?? 0)} played</span>
-                      </div>
-                    )}
+                    <span className="inline-block text-[9px] font-bold tracking-[1px] uppercase px-1.5 py-0.5 rounded" style={{ background: 'rgba(200,75,158,0.2)', color: '#e88bc4', fontFamily: SG }}>{u.genreTag}</span>
+                    <p className="text-white text-sm font-semibold mt-1" style={{ fontFamily: SG }}>{u.title}</p>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <Users size={11} className="text-white/40" />
+                      <span className="text-white/40 text-[11px]" style={{ fontFamily: SG }}>{formatPlayerCount(UNIVERSE_PLAYERS[u.id] ?? 0)} played</span>
+                    </div>
                   </div>
                 </div>
               </motion.button>
             ))}
           </div>
 
+          {/* Coming Soon section */}
+          {comingSoonStories.length > 0 && (
+            <div className="mt-10">
+              <h2 className="text-white/40 text-xs font-semibold tracking-[2px] uppercase mb-4" style={{ fontFamily: SG }}>Coming Soon</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {comingSoonStories.map((u, i) => (
+                  <motion.div
+                    key={u.id}
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.04 }}
+                    className="rounded-xl overflow-hidden cursor-default"
+                    style={{ background: '#13101c', border: '1px solid rgba(255,255,255,0.06)' }}
+                  >
+                    <div className="relative aspect-[3/4] overflow-hidden">
+                      <img src={u.image} alt={u.title} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,8,16,0.95) 0%, rgba(10,8,16,0.5) 40%, transparent 70%)' }} />
+                      <div className="absolute inset-0 flex items-center justify-center" style={{ backdropFilter: 'blur(6px)', background: 'rgba(10,8,16,0.4)' }}>
+                        <span className="text-[11px] font-bold tracking-[1.5px] uppercase px-3 py-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', fontFamily: SG }}>Coming Soon</span>
+                      </div>
+                      <div className="absolute bottom-0 left-0 right-0 p-3">
+                        <span className="inline-block text-[9px] font-bold tracking-[1px] uppercase px-1.5 py-0.5 rounded" style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.35)', fontFamily: SG }}>{u.genreTag}</span>
+                        <p className="text-white/50 text-sm font-semibold mt-1" style={{ fontFamily: SG }}>{u.title}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Story count */}
           <div className="mt-6 flex items-center gap-2 text-white/30">
             <span className="text-xs" style={{ fontFamily: SG }}>
-              {universeCards.filter((u) => !u.locked).length} stor{universeCards.filter((u) => !u.locked).length !== 1 ? 'ies' : 'y'} available{genreFilter !== 'ALL' ? ` in ${genreFilter[0] + genreFilter.slice(1).toLowerCase()}` : ''} · {universeCards.filter((u) => u.locked).length} coming soon
+              {activeStories.length} stor{activeStories.length !== 1 ? 'ies' : 'y'} available{genreFilter !== 'ALL' ? ` in ${genreFilter[0] + genreFilter.slice(1).toLowerCase()}` : ''} · {comingSoonStories.length} coming soon
             </span>
           </div>
         </div>
