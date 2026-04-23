@@ -9,6 +9,7 @@ export interface Destination {
   heroImage: string
   tripDays: number
   description: string
+  highlights: string[]
   locationKnowledge: string
   locked: boolean
 }
@@ -25,6 +26,7 @@ export const DESTINATIONS: Destination[] = [
     heroImage: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&q=80',
     tripDays: 5,
     description: 'Neon-lit nights, quiet temples, and the best food on Earth.',
+    highlights: ['Most Michelin-starred city in the world', 'Ancient temples hidden between skyscrapers', '14 million people, yet strangely serene', 'Vending machines on every corner — for everything'],
     locked: false,
     locationKnowledge: `TOKYO LOCAL KNOWLEDGE — Use this to ground your recommendations in real places. Be specific, opinionated, and personal — like a friend who lives here.
 
@@ -76,6 +78,7 @@ VIBE:
     heroImage: 'https://images.unsplash.com/photo-1517154421773-0529f29ea451?w=800&q=80',
     tripDays: 5,
     description: 'K-pop energy, soju nights, and palaces hiding in plain sight.',
+    highlights: ['The city that never sleeps — cafes open past 2am', '600-year-old palaces next to neon-lit streets', 'Street food capital: tteokbokki, hotteok, fried chicken', 'K-beauty, K-pop, K-everything — culture exports central'],
     locked: false,
     locationKnowledge: `SEOUL LOCAL KNOWLEDGE — Use this to ground your recommendations in real places. Be specific, opinionated, and personal — like a friend who lives here.
 
@@ -129,6 +132,7 @@ VIBE:
     heroImage: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800&q=80',
     tripDays: 5,
     description: 'Every corner is a painting. Every meal is a memory.',
+    highlights: [],
     locked: true,
     locationKnowledge: '',
   },
@@ -143,6 +147,7 @@ VIBE:
     heroImage: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800&q=80',
     tripDays: 5,
     description: 'Eight million stories, and yours is about to start.',
+    highlights: [],
     locked: true,
     locationKnowledge: '',
   },
@@ -157,6 +162,7 @@ VIBE:
     heroImage: 'https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=800&q=80',
     tripDays: 5,
     description: 'Chaos, temples, and the best $2 meal of your life.',
+    highlights: ['Street food so good it has Michelin stars', '400+ temples — each one more ornate than the last', 'Floating markets, rooftop bars, tuk-tuk chaos', 'Thai massage for less than a coffee back home'],
     locked: false,
     locationKnowledge: `BANGKOK LOCAL KNOWLEDGE — Use this to ground your recommendations in real places.
 
@@ -206,6 +212,7 @@ VIBE:
     heroImage: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800&q=80',
     tripDays: 5,
     description: 'Ancient pubs, world-class theatre, and rain you learn to love.',
+    highlights: [],
     locked: true,
     locationKnowledge: '',
   },
@@ -220,6 +227,7 @@ VIBE:
     heroImage: 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=800&q=80',
     tripDays: 5,
     description: 'Two continents, one city. Tea, bazaars, and call to prayer at sunset.',
+    highlights: [],
     locked: true,
     locationKnowledge: '',
   },
@@ -234,6 +242,7 @@ VIBE:
     heroImage: 'https://images.unsplash.com/photo-1585464231875-d9ef1f5ad396?w=800&q=80',
     tripDays: 5,
     description: 'Colors, flavors, and a creative energy that never stops.',
+    highlights: [],
     locked: true,
     locationKnowledge: '',
   },
@@ -248,6 +257,7 @@ VIBE:
     heroImage: 'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=800&q=80',
     tripDays: 5,
     description: 'Steep hills, warm light, and pastries worth the climb.',
+    highlights: [],
     locked: true,
     locationKnowledge: '',
   },
@@ -262,6 +272,7 @@ VIBE:
     heroImage: 'https://images.unsplash.com/photo-1470004914212-05527e49370b?w=800&q=80',
     tripDays: 5,
     description: 'Night markets, mountain trails, and the friendliest city in Asia.',
+    highlights: ['12 night markets — Raohe and Shilin are legendary', 'Bubble tea was invented here', 'Hot springs and mountain hikes within city limits', 'One of the safest cities in the world'],
     locked: false,
     locationKnowledge: `TAIPEI LOCAL KNOWLEDGE — Use this to ground your recommendations in real places.
 
@@ -311,6 +322,7 @@ VIBE:
     heroImage: 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?w=800&q=80',
     tripDays: 5,
     description: 'Sun, surf, and a harbour that never gets old.',
+    highlights: [],
     locked: true,
     locationKnowledge: '',
   },
@@ -325,6 +337,7 @@ VIBE:
     heroImage: '/dest-marrakech.png',
     tripDays: 5,
     description: 'Get lost in the medina. Find yourself over mint tea.',
+    highlights: ['Jemaa el-Fnaa — the world\'s wildest town square', 'Riads: hidden palaces behind unmarked doors', 'Gateway to the Sahara Desert', 'Haggling is a sport, and the souks are the arena'],
     locked: false,
     locationKnowledge: `MARRAKECH LOCAL KNOWLEDGE — Use this to ground your recommendations in real places.
 
@@ -372,6 +385,7 @@ VIBE:
     heroImage: '/dest-buenos-aires.png',
     tripDays: 5,
     description: 'A city that eats at midnight and dances until dawn.',
+    highlights: [],
     locked: true,
     locationKnowledge: '',
   },
@@ -386,6 +400,7 @@ VIBE:
     heroImage: '/dest-reykjavik.png',
     tripDays: 5,
     description: 'Fire and ice. Midnight sun or aurora, depending on when you go.',
+    highlights: [],
     locked: true,
     locationKnowledge: '',
   },
@@ -400,6 +415,7 @@ VIBE:
     heroImage: '/dest-hanoi.png',
     tripDays: 5,
     description: 'Egg coffee, train streets, and a pace that pulls you in.',
+    highlights: [],
     locked: true,
     locationKnowledge: '',
   },
@@ -414,6 +430,7 @@ VIBE:
     heroImage: '/dest-cape-town.png',
     tripDays: 5,
     description: 'Where mountains meet ocean and every sunset is unreal.',
+    highlights: [],
     locked: true,
     locationKnowledge: '',
   },
@@ -428,6 +445,7 @@ VIBE:
     heroImage: '/dest-porto.png',
     tripDays: 5,
     description: 'Lisbon gets the hype. Porto gets the soul.',
+    highlights: [],
     locked: true,
     locationKnowledge: '',
   },
@@ -442,6 +460,7 @@ VIBE:
     heroImage: '/dest-cartagena.png',
     tripDays: 5,
     description: 'Pastel walls, cumbia beats, and ceviche by the sea.',
+    highlights: [],
     locked: true,
     locationKnowledge: '',
   },
@@ -456,6 +475,7 @@ VIBE:
     heroImage: '/dest-kyoto.png',
     tripDays: 5,
     description: 'Tokyo is the future. Kyoto is the dream.',
+    highlights: ['2,000+ temples and shrines across the city', 'Geisha district Gion — Japan\'s most photographed street', 'Bamboo groves that feel like another planet', 'Kaiseki: multi-course dining elevated to art form'],
     locked: false,
     locationKnowledge: `KYOTO LOCAL KNOWLEDGE — Use this to ground your recommendations in real places.
 
@@ -497,6 +517,7 @@ VIBE:
     heroImage: '/dest-dubrovnik.png',
     tripDays: 5,
     description: 'Stone walls, impossible blue water, and orange rooftops for miles.',
+    highlights: [],
     locked: true,
     locationKnowledge: '',
   },
@@ -511,6 +532,7 @@ VIBE:
     heroImage: '/dest-luang-prabang.png',
     tripDays: 5,
     description: 'Wake up to monks collecting alms. Slow down to Mekong speed.',
+    highlights: [],
     locked: true,
     locationKnowledge: '',
   },
@@ -525,6 +547,7 @@ VIBE:
     heroImage: '/dest-medellin.png',
     tripDays: 5,
     description: 'The city of eternal spring, reinvented from the ground up.',
+    highlights: ['75°F year-round — perfect weather, every single day', 'Comuna 13: from most dangerous to open-air art gallery', 'Paragliding over the valley for $30', 'Coffee country is a day trip away'],
     locked: false,
     locationKnowledge: `MEDELLIN LOCAL KNOWLEDGE — Use this to ground your recommendations in real places.
 
@@ -567,6 +590,7 @@ VIBE:
     heroImage: '/dest-chiang-mai.png',
     tripDays: 5,
     description: '300 temples, one night bazaar, and a slower way to be.',
+    highlights: [],
     locked: true,
     locationKnowledge: '',
   },
@@ -581,6 +605,7 @@ VIBE:
     heroImage: '/dest-tbilisi.png',
     tripDays: 5,
     description: 'Europe\'s best-kept secret. Natural wine, cheese bread, and zero pretension.',
+    highlights: [],
     locked: true,
     locationKnowledge: '',
   },
@@ -595,6 +620,7 @@ VIBE:
     heroImage: '/dest-oaxaca.png',
     tripDays: 5,
     description: 'Where mezcal was born and every meal is a ceremony.',
+    highlights: [],
     locked: true,
     locationKnowledge: '',
   },
@@ -609,6 +635,7 @@ VIBE:
     heroImage: '/dest-jaipur.png',
     tripDays: 5,
     description: 'Pink palaces, elephant rides, and sensory overload in the best way.',
+    highlights: [],
     locked: true,
     locationKnowledge: '',
   },
@@ -623,6 +650,7 @@ VIBE:
     heroImage: '/dest-valletta.png',
     tripDays: 5,
     description: 'A tiny capital built by knights, surrounded by the bluest sea.',
+    highlights: [],
     locked: true,
     locationKnowledge: '',
   },
@@ -637,6 +665,7 @@ VIBE:
     heroImage: '/dest-cairo.png',
     tripDays: 5,
     description: 'Pyramids at sunset. Shisha by the Nile. 5,000 years of stories.',
+    highlights: [],
     locked: true,
     locationKnowledge: '',
   },
@@ -651,6 +680,7 @@ VIBE:
     heroImage: '/dest-zanzibar.png',
     tripDays: 5,
     description: 'Spice-scented alleys, dhow boats, and water so clear it hurts.',
+    highlights: [],
     locked: true,
     locationKnowledge: '',
   },
@@ -665,6 +695,7 @@ VIBE:
     heroImage: '/dest-sarajevo.png',
     tripDays: 5,
     description: 'Where Ottoman coffee meets Austro-Hungarian pastries on the same street.',
+    highlights: [],
     locked: true,
     locationKnowledge: '',
   },

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { motion } from 'framer-motion'
-import { ArrowRight, Globe, BookOpen, ChevronRight, X } from 'lucide-react'
+import { ArrowRight, Globe, BookOpen, ChevronRight, X, MapPin, Clock, Sparkles } from 'lucide-react'
 import { AnimatePresence } from 'framer-motion'
 import { AuthModal } from '../components/AuthModal'
 import { UNIVERSES } from '../data/storyData'
@@ -269,6 +269,35 @@ export function LandingPage() {
                 <p className="text-white/50 text-sm mb-3" style={{ fontFamily: SG }}>
                   {previewDest.description}
                 </p>
+
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="flex items-center gap-1.5">
+                    <MapPin size={12} className="text-white/30" />
+                    <span className="text-white/40 text-[11px]" style={{ fontFamily: SG }}>{previewDest.country}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Clock size={12} className="text-white/30" />
+                    <span className="text-white/40 text-[11px]" style={{ fontFamily: SG }}>{previewDest.tripDays}-day trip</span>
+                  </div>
+                </div>
+
+                {previewDest.highlights.length > 0 && (
+                  <div className="mb-4 rounded-xl p-3" style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.1)' }}>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <Sparkles size={12} style={{ color: '#A78BFA' }} />
+                      <span className="text-[10px] font-semibold tracking-[1.5px] uppercase" style={{ color: '#A78BFA', fontFamily: SG }}>Known for</span>
+                    </div>
+                    <ul className="space-y-1.5">
+                      {previewDest.highlights.map((h) => (
+                        <li key={h} className="flex items-start gap-2">
+                          <span className="text-[10px] mt-0.5" style={{ color: '#7C3AED' }}>•</span>
+                          <span className="text-white/60 text-[12px] leading-snug" style={{ fontFamily: SG }}>{h}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
                 <div className="flex flex-wrap gap-2 mb-5">
                   {previewDest.vibeTags.map((tag) => (
                     <span
@@ -376,7 +405,7 @@ export function LandingPage() {
               <SelfieMorph height={160} className="rounded-t-2xl" />
             </StepCard>
             {/* Step 2 — Pick mode */}
-            <StepCard num="02" title="Pick travel or story mode" desc="Explore Tokyo with a companion, or star in a K-drama romance. Choose your adventure — travel the world or live a story.">
+            <StepCard num="02" title={<>Pick <span style={{ color: '#A78BFA' }}>travel</span> or <span style={{ color: '#e88bc4' }}>story</span> mode</>} desc="Explore Tokyo with a companion, or star in a K-drama romance. Choose your adventure — travel the world or live a story.">
               <div className="relative w-full h-[160px] bg-cover bg-center rounded-t-2xl overflow-hidden" style={{ backgroundImage: 'url(/step2-mobile.jpeg)', backgroundColor: '#111016' }} />
             </StepCard>
             {/* Step 3 — See yourself */}
@@ -514,7 +543,7 @@ export function LandingPage() {
               <StepCard num="01" title="Upload your selfie" desc="Snap a photo and become the protagonist. Your face appears in every scene, every chapter." desktop>
                 <SelfieMorph height={200} className="rounded-t-2xl" />
               </StepCard>
-              <StepCard num="02" title="Pick travel or story mode" desc="Explore Tokyo with a companion, or star in a K-drama romance. Choose your adventure — travel the world or live a story." desktop>
+              <StepCard num="02" title={<>Pick <span style={{ color: '#A78BFA' }}>travel</span> or <span style={{ color: '#e88bc4' }}>story</span> mode</>} desc="Explore Tokyo with a companion, or star in a K-drama romance. Choose your adventure — travel the world or live a story." desktop>
                 <div className="relative w-full h-[200px] bg-cover bg-center rounded-t-2xl overflow-hidden" style={{ backgroundImage: 'url(/step2-desktop.jpeg)', backgroundColor: '#111016' }} />
               </StepCard>
               <StepCard num="03" title="See yourself in every scene" desc="Your face. Their world. Cinematic scenes starring you — and characters who remember everything you say." desktop>
@@ -602,7 +631,7 @@ function PathCard({ icon, title, desc, borderColor, iconBg, desktop, onClick }: 
 }
 
 function StepCard({ num, title, desc, children, desktop }: {
-  num: string; title: string; desc: string; children: React.ReactNode; desktop?: boolean
+  num: string; title: React.ReactNode; desc: string; children: React.ReactNode; desktop?: boolean
 }) {
   return (
     <motion.div

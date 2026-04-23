@@ -857,6 +857,7 @@ export function TravelReaderPage() {
                 dayNumber={trip.currentDay}
                 theme={trip.itinerary.days.find((d) => d.dayNumber === trip.currentDay)?.theme ?? `Day ${trip.currentDay}`}
                 cityName={destination.city}
+                heroImage={destination.heroImage}
                 type="start"
                 onContinue={() => handlePlayScene()}
               />
@@ -868,6 +869,7 @@ export function TravelReaderPage() {
                 dayNumber={trip.currentDay}
                 theme={trip.itinerary.days.find((d) => d.dayNumber === trip.currentDay)?.theme ?? ''}
                 cityName={destination.city}
+                heroImage={destination.heroImage}
                 type="end"
                 onContinue={() => setViewMode('chat')}
               />

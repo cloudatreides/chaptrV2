@@ -476,7 +476,7 @@ export function TravelHomePage() {
               ))}
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {(destTab === 'available' ? DESTINATIONS.filter(d => !d.locked) : DESTINATIONS.filter(d => d.locked)).map((dest) => (
                 <button
                   key={dest.id}
@@ -484,17 +484,22 @@ export function TravelHomePage() {
                     selectDest(dest)
                     containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
                   }}
-                  className="cursor-pointer rounded-xl overflow-hidden text-left flex flex-col group"
+                  className="cursor-pointer rounded-xl overflow-hidden text-left group"
                   style={{ border: destTab === 'available' ? '1px solid rgba(124,58,237,0.2)' : '1px solid rgba(255,255,255,0.04)', background: destTab === 'available' ? '#151020' : '#0E0B15' }}
                 >
-                  <div className="relative h-[120px] md:h-[160px] overflow-hidden">
+                  <div className="relative aspect-[4/3] overflow-hidden">
                     <img
                       src={dest.heroImage}
                       alt={dest.city}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       style={dest.locked ? { filter: 'brightness(0.35) saturate(0.3)' } : undefined}
                     />
-                    <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,8,16,0.9) 0%, transparent 60%)' }} />
+                    <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,8,16,0.95) 0%, rgba(10,8,16,0.5) 40%, transparent 70%)' }} />
+                    {dest.locked && (
+                      <div className="absolute inset-0 flex items-center justify-center" style={{ backdropFilter: 'blur(2px)', background: 'rgba(10,8,16,0.3)' }}>
+                        <span className="text-[11px] font-bold tracking-[1.5px] uppercase px-3 py-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', fontFamily: SG }}>Coming Soon</span>
+                      </div>
+                    )}
                     <div className="absolute bottom-0 left-0 right-0 p-3">
                       <div className="flex items-center gap-1.5">
                         <span className="text-sm">{dest.countryEmoji}</span>
