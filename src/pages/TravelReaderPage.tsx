@@ -1058,8 +1058,8 @@ export function TravelReaderPage() {
                   className="mb-2"
                 >
                   <div
-                    className="inline-flex gap-1 p-1.5 rounded-xl"
-                    style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+                    className="grid grid-cols-3 gap-1 p-1.5 rounded-xl"
+                    style={{ width: 320, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
                   >
                     {[
                       { id: 'show-me', emoji: '📸', label: 'Show me', desc: 'Visualize the conversation', handler: handleShowMe },
