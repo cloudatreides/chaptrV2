@@ -224,53 +224,38 @@ function ModeToggle({ mode, setMode }: { mode: 'travel' | 'stories'; setMode: (m
 
 function TravelBrowse({ hasCharacters }: { hasCharacters: boolean }) {
   const navigate = useNavigate()
-  const allDests = DESTINATIONS
-  const cardWidth = 220
-  const gap = 12
-  const totalWidth = allDests.length * (cardWidth + gap)
-  const duration = allDests.length * 4
+  const available = DESTINATIONS.filter((d) => !d.locked)
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="overflow-hidden -mx-5 md:-mx-[60px] px-5 md:px-[60px]" style={{ maskImage: 'linear-gradient(to right, transparent, black 40px, black calc(100% - 40px), transparent)', WebkitMaskImage: 'linear-gradient(to right, transparent, black 40px, black calc(100% - 40px), transparent)' }}>
-        <div
-          className="flex hover:[animation-play-state:paused]"
-          style={{ gap, width: totalWidth * 2, animation: `carouselScroll ${duration}s linear infinite` }}
-        >
-          {[...allDests, ...allDests].map((dest, i) => (
-            <button
-              key={`${dest.id}-${i}`}
-              onClick={() => {
-                if (dest.locked) { navigate('/travel'); return }
-                if (!hasCharacters) { navigate('/create-character'); return }
-                navigate(`/travel/${dest.id}`)
-              }}
-              className="cursor-pointer group rounded-xl overflow-hidden text-left relative shrink-0"
-              style={{ width: cardWidth, border: '1px solid rgba(124,58,237,0.15)' }}
-            >
-              <div className="relative h-[140px] overflow-hidden">
-                <img src={dest.heroImage} alt={dest.city} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,8,16,0.95) 0%, rgba(10,8,16,0.5) 50%, rgba(10,8,16,0.1) 80%)' }} />
-                {dest.locked && (
-                  <span className="absolute top-2 right-2 text-[9px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'rgba(0,0,0,0.6)', color: 'rgba(255,255,255,0.5)', fontFamily: SG, backdropFilter: 'blur(4px)' }}>
-                    Soon
-                  </span>
-                )}
-                <div className="absolute bottom-0 left-0 right-0 p-3">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-sm">{dest.countryEmoji}</span>
-                    <p className="text-white text-sm font-bold" style={{ fontFamily: SG }}>{dest.city}</p>
-                  </div>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {dest.vibeTags.slice(0, 2).map((tag) => (
-                      <span key={tag} className="text-[9px] font-medium px-1.5 py-0.5 rounded" style={{ background: 'rgba(124,58,237,0.2)', color: '#c4b5fd', fontFamily: SG }}>{tag}</span>
-                    ))}
-                  </div>
+    <div className="flex flex-col gap-3">
+      <div className="grid grid-cols-2 gap-3">
+        {available.map((dest) => (
+          <button
+            key={dest.id}
+            onClick={() => {
+              if (!hasCharacters) { navigate('/create-character'); return }
+              navigate(`/travel/${dest.id}`)
+            }}
+            className="cursor-pointer group rounded-xl overflow-hidden text-left relative"
+            style={{ border: '1px solid rgba(124,58,237,0.15)' }}
+          >
+            <div className="relative h-[120px] md:h-[180px] overflow-hidden">
+              <img src={dest.heroImage} alt={dest.city} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+              <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,8,16,0.95) 0%, rgba(10,8,16,0.6) 40%, rgba(10,8,16,0.1) 70%)' }} />
+              <div className="absolute bottom-0 left-0 right-0 p-3 md:p-4">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-base md:text-lg">{dest.countryEmoji}</span>
+                  <p className="text-white text-sm md:text-lg font-bold" style={{ fontFamily: SG }}>{dest.city}</p>
+                </div>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {dest.vibeTags.map((tag) => (
+                    <span key={tag} className="text-[9px] md:text-[10px] font-medium px-1.5 py-0.5 rounded" style={{ background: 'rgba(124,58,237,0.2)', color: '#c4b5fd', fontFamily: SG }}>{tag}</span>
+                  ))}
                 </div>
               </div>
-            </button>
-          ))}
-        </div>
+            </div>
+          </button>
+        ))}
       </div>
 
       <button
