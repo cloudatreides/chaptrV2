@@ -589,9 +589,9 @@ export function TravelReaderPage() {
     }
   }
 
-  function handleContinueToChat() {
+  async function handleContinueToChat() {
     const scene = getCurrentScene()
-    if (scene && trip) {
+    if (scene && trip && companion && destination) {
       const sceneImg = trip.sceneImages[scene.id]
       const recapMsg: ChatMessage = {
         role: 'character',
@@ -601,8 +601,30 @@ export function TravelReaderPage() {
         imageUrl: sceneImg || undefined,
       }
       addTravelDayChatMessage(trip.currentDay, recapMsg)
+
+      setViewMode('chat')
+
+      const result = await generateTravelOpeningMessage({
+        companionId: trip.companionId,
+        companionSliders: trip.companionSliders,
+        companionRemix: trip.companionRemix,
+        destinationId: trip.destinationId,
+        chatType: getChatType(),
+        sceneContext: `${scene.location} — ${scene.activity}`,
+        tripContext: buildTripContext(),
+        bio: activeChar?.bio ?? null,
+      })
+      const msg: ChatMessage = {
+        role: 'character',
+        content: result.content,
+        characterId: trip.companionId,
+        timestamp: Date.now(),
+      }
+      addTravelDayChatMessage(trip.currentDay, msg)
+      if (result.suggestions) setSuggestions(result.suggestions)
+    } else {
+      setViewMode('chat')
     }
-    setViewMode('chat')
   }
 
   async function handleNextScene() {
