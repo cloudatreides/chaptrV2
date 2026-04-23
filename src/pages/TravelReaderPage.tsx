@@ -358,9 +358,12 @@ export function TravelReaderPage() {
 
     const currentScene = getCurrentScene()
     const locationContext = currentScene ? `${currentScene.location}, ${destination.city}` : destination.city
-    const companionDesc = companion.character.portraitPrompt.split(',').slice(0, 4).join(',')
+    const companionDesc = companion.character.portraitPrompt
+      .split(',').slice(0, 4).join(',')
+      .replace(/^(anime style|dark|cyberpunk[^,]*|fantasy[^,]*|thriller[^,]*|sci-fi[^,]*)\s*(portrait|illustration|concept art)\s*(portrait\s*)?of\s*/i, '')
+      .trim()
     const playerGender = activeChar?.gender === 'male' ? 'a young man' : 'a young woman'
-    const scenePrompt = `anime style, romantic cinematic scene, ${playerGender} and ${companionDesc} walking side by side holding hands on a beautiful street in ${locationContext}. Warm golden hour lighting, soft bokeh background, intimate moment, K-drama aesthetic, half-body shot from behind showing their held hands, high quality anime art`
+    const scenePrompt = `anime style, two people walking together holding hands from behind on a beautiful street in ${locationContext}. ${playerGender} and ${companionDesc}. Close-up on their intertwined hands, warm golden hour lighting, soft bokeh, romantic K-drama moment, high quality anime art`
 
     try {
       const [imageUrl, replyStream] = await Promise.all([
@@ -405,6 +408,76 @@ export function TravelReaderPage() {
       }
     } catch (e) {
       console.error('Hold hands error:', e)
+      setIsStreaming(false)
+      setStreamedText('')
+    } finally {
+      setIsGeneratingChatImage(false)
+    }
+  }
+
+  async function handleSelfie() {
+    if (!trip || !companion || !destination || isGeneratingChatImage || isStreaming) return
+
+    setIsGeneratingChatImage(true)
+    const isPlanning = trip.phase === 'planning'
+    const addMsg = isPlanning ? addTravelPlanningMessage : (msg: ChatMessage) => addTravelDayChatMessage(trip.currentDay, msg)
+
+    addMsg({ role: 'user', content: `🤳 Taking a selfie with ${companionName}`, characterId: 'player', timestamp: Date.now() })
+
+    const currentScene = getCurrentScene()
+    const locationContext = currentScene ? `${currentScene.location}, ${destination.city}` : destination.city
+    const companionDesc = companion.character.portraitPrompt.split(',').slice(0, 4).join(',')
+    const playerGender = activeChar?.gender === 'male' ? 'a young man' : 'a young woman'
+
+    const recentMessages = (isPlanning ? trip.planningChatHistory : (trip.dayChatHistories[trip.currentDay] ?? [])).slice(-4)
+    const conversationHint = recentMessages.map((m) => m.content).join(' ').slice(0, 200)
+    const activityHint = currentScene?.activity ?? conversationHint
+
+    const scenePrompt = `anime style, selfie photo taken by ${playerGender}, close-up selfie with ${companionDesc}, both smiling at camera, peace signs, in ${locationContext}, ${activityHint}. Phone camera perspective, slight wide-angle distortion, warm natural lighting, candid happy energy, high quality anime art, social media selfie aesthetic`
+
+    try {
+      const [imageUrl, replyStream] = await Promise.all([
+        generateTravelImage(scenePrompt, activeChar?.selfieUrl),
+        streamTravelChatReply({
+          companionId: trip.companionId,
+          companionSliders: trip.companionSliders,
+          companionRemix: trip.companionRemix,
+          destinationId: trip.destinationId,
+          messages: [...(isPlanning ? trip.planningChatHistory : (trip.dayChatHistories[trip.currentDay] ?? [])),
+            { role: 'user' as const, content: `I just pulled you in for a selfie together here at ${locationContext}! React naturally — comment on the photo, whether you look good, suggest posting it, or joke about it.`, characterId: 'player', timestamp: Date.now() }],
+          chatType: 'freeform',
+          tripContext: buildTripContext(),
+          companionMemories: trip.companionMemories,
+          travelAffinityScore: trip.travelAffinityScore,
+          bio: activeChar?.bio ?? null,
+        }),
+      ])
+
+      setIsStreaming(true)
+      let full = ''
+      for await (const chunk of replyStream) {
+        full += chunk
+        setStreamedText(stripMetaTags(full))
+      }
+      setIsStreaming(false)
+      setStreamedText('')
+
+      const { cleanText: selfieClean, places: selfiePlaces } = parsePlaceTags(full)
+      const parsed = parseAffinityDelta(selfieClean)
+      if (imageUrl) {
+        addMsg({ role: 'character', content: parsed.content, characterId: trip.companionId, timestamp: Date.now(), imageUrl })
+      } else {
+        addMsg({ role: 'character', content: parsed.content, characterId: trip.companionId, timestamp: Date.now() })
+      }
+      updateTravelAffinity(Math.max(parsed.delta, 2))
+      if (parsed.suggestions) setSuggestions(parsed.suggestions)
+      if (selfiePlaces.length > 0 && destination) {
+        fetchPlaceImage(selfiePlaces[0], destination.city).then((placeUrl) => {
+          if (placeUrl) addMsg({ role: 'character', content: `📍 ${selfiePlaces[0]}`, characterId: trip.companionId, timestamp: Date.now(), imageUrl: placeUrl })
+        }).catch(() => {})
+      }
+    } catch (e) {
+      console.error('Selfie error:', e)
       setIsStreaming(false)
       setStreamedText('')
     } finally {
@@ -1067,11 +1140,12 @@ export function TravelReaderPage() {
                   className="mb-2"
                 >
                   <div
-                    className="grid grid-cols-3 gap-1 p-1.5 rounded-xl"
-                    style={{ width: 320, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+                    className="grid grid-cols-4 gap-1 p-1.5 rounded-xl"
+                    style={{ width: 400, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
                   >
                     {[
-                      { id: 'show-me', emoji: '📸', label: 'Show me', desc: 'Visualize the conversation', handler: handleShowMe },
+                      { id: 'show-me', emoji: '📸', label: 'Show me', desc: 'Visualize the scene', handler: handleShowMe },
+                      { id: 'selfie', emoji: '🤳', label: 'Selfie', desc: 'Snap a pic together', handler: handleSelfie },
                       { id: 'buy-gift', emoji: '🎁', label: 'Buy a gift', desc: 'They\'ll love it', handler: handleBuyGift },
                       { id: 'hold-hands', emoji: '💕', label: 'Hold hands', desc: 'A little closer', handler: handleHoldHands },
                     ].map((action) => (
