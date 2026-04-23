@@ -399,10 +399,16 @@ export function TravelCityPage() {
                           {cc.remix.name}
                         </p>
                         <p className="text-white/40 text-xs" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                          Remixed from {base.character.name}
+                          {cc.sliders.chattiness > 50 ? 'Chatty' : 'Quiet'} · {cc.sliders.planningStyle > 50 ? 'Planner' : 'Spontaneous'} · {cc.sliders.vibe > 50 ? 'Thoughtful' : 'Playful'}
                         </p>
                       </div>
                     </div>
+                    <p className="text-white/50 text-xs leading-relaxed mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                      {cc.remix.personalityTraits.length > 0
+                        ? cc.remix.personalityTraits.slice(0, 2).join('. ').slice(0, 80) + '...'
+                        : `Remixed from ${base.character.name}`
+                      }
+                    </p>
                     <div className="flex items-center gap-3">
                       <button
                         onClick={(e) => { e.stopPropagation(); openRemixModal(base, cc.id) }}
