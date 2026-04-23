@@ -592,7 +592,7 @@ export function TravelReaderPage() {
                 className="relative"
               >
                 {/* Hero image with gradient fade */}
-                <div className="relative w-full" style={{ height: sceneImg ? 440 : imageLoadingSceneId === currentScene.id ? 200 : 0 }}>
+                <div className="relative w-full" style={{ height: sceneImg ? 440 : 200 }}>
                   {sceneImg && (
                     <>
                       <img
@@ -614,6 +614,19 @@ export function TravelReaderPage() {
                         <Loader2 size={14} className="animate-spin" />
                         <span className="text-xs" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Generating scene...</span>
                       </div>
+                    </div>
+                  )}
+
+                  {/* Fallback when image failed to generate */}
+                  {!sceneImg && imageLoadingSceneId !== currentScene.id && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ background: 'linear-gradient(180deg, rgba(124,58,237,0.06) 0%, rgba(10,8,16,1) 100%)' }}>
+                      <MapPin size={20} className="text-purple-400/30 mb-2" />
+                      <p className="text-white/25 text-sm font-medium" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                        {currentScene.location}
+                      </p>
+                      <p className="text-white/15 text-xs mt-0.5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                        {currentScene.timeOfDay}
+                      </p>
                     </div>
                   )}
                 </div>
