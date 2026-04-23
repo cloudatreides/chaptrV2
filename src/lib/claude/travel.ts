@@ -231,7 +231,14 @@ New day. You're energized. Reference last night's conversation about what to do 
 
   system += chatTypeInstructions[chatType]
 
-  system += `\n\nAFFINITY — MANDATORY:
+  system += `\n\nPLACE TAGS — OPTIONAL:
+When you mention a specific, well-known landmark, market, temple, neighborhood, or attraction by name, tag it ONCE inline:
+[PLACE:Chatuchak Weekend Market] or [PLACE:Wat Arun] or [PLACE:Shibuya Crossing]
+- Only tag real, specific, notable places (not "a cafe" or "the street")
+- Only tag the FIRST mention per message, max 1 tag per message
+- Place the tag right after the place name in your text
+
+AFFINITY — MANDATORY:
 After your dialogue, on a NEW line, add exactly one tag: [AFFINITY:+N] or [AFFINITY:-N] where N is 1-5.
 +1 to +2: Normal good conversation. +3 to +5: Real connection moment. -1 to -5: Dismissive or rude response.
 

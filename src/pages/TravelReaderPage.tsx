@@ -7,6 +7,7 @@ import { getDestination } from '../data/travel/destinations'
 import { getTravelCompanion } from '../data/travel/companions'
 import { generateDayItinerary, streamTravelScene, streamTravelChatReply, generateTravelOpeningMessage } from '../lib/claude/travel'
 import { parseAffinityDelta } from '../lib/claude/affinity'
+import { parsePlaceTags, fetchPlaceImage } from '../lib/imageSearch'
 import { extractMemories } from '../lib/claude/memory'
 import { generateSceneImage as generateImage } from '../lib/togetherAi'
 import { DayTransition } from '../components/travel/DayTransition'
@@ -176,10 +177,11 @@ export function TravelReaderPage() {
       let full = ''
       for await (const chunk of stream) {
         full += chunk
-        setStreamedText(full.replace(/\n?\[AFFINITY:[^\]]*\].*$/s, '').replace(/\n?\[SUGGESTIONS:[^\]]*\].*$/s, ''))
+        setStreamedText(full.replace(/\[PLACE:[^\]]*\]/g, '').replace(/\n?\[AFFINITY:[^\]]*\].*$/s, '').replace(/\n?\[SUGGESTIONS:[^\]]*\].*$/s, ''))
       }
 
-      const parsed = parseAffinityDelta(full)
+      const { cleanText, places } = parsePlaceTags(full)
+      const parsed = parseAffinityDelta(cleanText)
       const replyMsg: ChatMessage = {
         role: 'character',
         content: parsed.content,
@@ -195,6 +197,25 @@ export function TravelReaderPage() {
 
       updateTravelAffinity(parsed.delta)
       if (parsed.suggestions) setSuggestions(parsed.suggestions)
+
+      // Fetch real photo for tagged landmarks
+      if (places.length > 0 && destination) {
+        fetchPlaceImage(places[0], destination.city).then((imageUrl) => {
+          if (!imageUrl) return
+          const imageMsg: ChatMessage = {
+            role: 'character',
+            content: `📍 ${places[0]}`,
+            characterId: trip.companionId,
+            timestamp: Date.now(),
+            imageUrl,
+          }
+          if (isPlanning) {
+            addTravelPlanningMessage(imageMsg)
+          } else {
+            addTravelDayChatMessage(trip.currentDay, imageMsg)
+          }
+        }).catch(() => {})
+      }
 
       // Extract memories from conversation every 4 messages
       const allMessages = isPlanning
