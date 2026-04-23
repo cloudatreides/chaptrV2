@@ -513,15 +513,20 @@ export function TravelReaderPage() {
   }
 
   async function handlePlayScene() {
-    const scene = getCurrentScene()
-    if (!scene || !trip || !destination || !companion) return
+    // Read from store directly to avoid stale closures when called from setTimeout
+    const state = useStore.getState()
+    const currentTrip = state.activeTripId ? state.travelTrips[state.activeTripId] : null
+    if (!currentTrip || !destination || !companion) return
+    const day = currentTrip.itinerary.days.find((d) => d.dayNumber === currentTrip.currentDay)
+    const scene = day?.scenes[currentTrip.currentSceneIndex] ?? null
+    if (!scene) return
 
     setViewMode('scene')
     setSceneProse('')
     setIsStreaming(true)
     abortRef.current = new AbortController()
 
-    if (!trip.sceneImages[scene.id]) {
+    if (!currentTrip.sceneImages[scene.id]) {
       setImageLoadingSceneId(scene.id)
       generateTravelImage(scene.imagePrompt, scene.protagonistVisible ? activeChar?.selfieUrl : undefined)
         .then((url) => {
@@ -534,11 +539,11 @@ export function TravelReaderPage() {
       const stream = streamTravelScene({
         scene,
         destination,
-        companionId: trip.companionId,
-        companionSliders: trip.companionSliders,
-        companionRemix: trip.companionRemix,
+        companionId: currentTrip.companionId,
+        companionSliders: currentTrip.companionSliders,
+        companionRemix: currentTrip.companionRemix,
         tripContext: buildTripContext(),
-        recentChat: trip.dayChatHistories[trip.currentDay] ?? [],
+        recentChat: currentTrip.dayChatHistories[currentTrip.currentDay] ?? [],
         playerName: activeChar?.name ?? null,
         bio: activeChar?.bio ?? null,
         signal: abortRef.current.signal,
