@@ -47,6 +47,8 @@ export function TravelReaderPage() {
   const [showCompanionSettings, setShowCompanionSettings] = useState(false)
   const [imageLoadingSceneId, setImageLoadingSceneId] = useState<string | null>(null)
   const [isGeneratingChatImage, setIsGeneratingChatImage] = useState(false)
+  const [localSliders, setLocalSliders] = useState<{ chattiness: number; planningStyle: number; vibe: number } | null>(null)
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
   const abortRef = useRef<AbortController | null>(null)
   const engagementRef = useRef<number>(Date.now())
@@ -932,7 +934,7 @@ export function TravelReaderPage() {
                             src={msg.imageUrl}
                             alt=""
                             className="rounded-lg mb-2 w-full"
-                            style={{ maxWidth: 320, aspectRatio: '16/9', objectFit: 'cover' }}
+                            style={{ maxWidth: 320, objectFit: 'cover' }}
                           />
                         )}
                         <p
@@ -1254,7 +1256,14 @@ export function TravelReaderPage() {
           </button>
 
           <AnimatePresence>
-            {showCompanionSettings && trip && (
+            {showCompanionSettings && trip && (() => {
+              const sliders = localSliders ?? trip.companionSliders
+              const hasChanges = localSliders !== null && (
+                localSliders.chattiness !== trip.companionSliders.chattiness ||
+                localSliders.planningStyle !== trip.companionSliders.planningStyle ||
+                localSliders.vibe !== trip.companionSliders.vibe
+              )
+              return (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
@@ -1276,22 +1285,57 @@ export function TravelReaderPage() {
                         type="range"
                         min={0}
                         max={100}
-                        value={trip.companionSliders[s.key]}
+                        value={sliders[s.key]}
                         onChange={(e) => {
                           const val = parseInt(e.target.value)
-                          updateCompanionSliders({ ...trip.companionSliders, [s.key]: val })
+                          setLocalSliders({ ...sliders, [s.key]: val })
                         }}
                         className="w-full accent-purple-500"
                         style={{ height: 3 }}
                       />
                     </div>
                   ))}
+                  <AnimatePresence>
+                    {hasChanges && (
+                      <motion.button
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        onClick={() => {
+                          updateCompanionSliders(localSliders)
+                          setLocalSliders(null)
+                          setToastMessage('Companion vibe updated')
+                          setTimeout(() => setToastMessage(null), 2000)
+                        }}
+                        className="w-full py-2 rounded-lg text-xs font-medium text-white cursor-pointer"
+                        style={{ fontFamily: "'Space Grotesk', sans-serif", background: 'linear-gradient(135deg, #7C3AED, #c84b9e)' }}
+                      >
+                        Save
+                      </motion.button>
+                    )}
+                  </AnimatePresence>
                 </div>
               </motion.div>
-            )}
+              )
+            })()}
           </AnimatePresence>
         </div>
       </div>
+
+      {/* Toast */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl text-xs text-white font-medium"
+            style={{ fontFamily: "'Space Grotesk', sans-serif", background: '#1E1A2E', border: '1px solid rgba(124,58,237,0.3)', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
+          >
+            {toastMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
