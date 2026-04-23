@@ -1125,6 +1125,9 @@ export function TravelReaderPage() {
                     const segments = parseNarrationSegments(msg.content)
                     return (
                     <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-1.5">
+                      {msg.imageUrl && (
+                        <img src={msg.imageUrl} alt="" className="rounded-xl w-full" style={{ maxWidth: 360, objectFit: 'cover' }} />
+                      )}
                       {segments.map((seg, j) =>
                         seg.type === 'narration' ? (
                           <p key={j} className="text-[13px] italic leading-relaxed pl-1" style={{ fontFamily: "'Source Serif 4', Georgia, serif", color: 'rgba(255,255,255,0.35)' }}>
@@ -1133,9 +1136,6 @@ export function TravelReaderPage() {
                         ) : (
                           <div key={j} className="flex justify-start">
                             <div className="max-w-[80%] rounded-2xl px-4 py-2.5" style={{ background: 'rgba(255,255,255,0.06)', borderBottomLeftRadius: 4 }}>
-                              {j === 0 && msg.imageUrl && (
-                                <img src={msg.imageUrl} alt="" className="rounded-lg mb-2 w-full" style={{ maxWidth: 320, objectFit: 'cover' }} />
-                              )}
                               <p className="text-[14px] leading-relaxed whitespace-pre-wrap" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'rgba(255,255,255,0.8)' }}>
                                 {seg.text}
                               </p>
