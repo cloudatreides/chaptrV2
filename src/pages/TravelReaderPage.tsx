@@ -1051,30 +1051,30 @@ export function TravelReaderPage() {
             <AnimatePresence>
               {showActions && (
                 <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="overflow-hidden mb-3"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 8 }}
+                  transition={{ duration: 0.15 }}
+                  className="mb-2"
                 >
                   <div
-                    className="grid grid-cols-3 gap-2 p-3 rounded-xl"
-                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+                    className="inline-flex gap-1 p-1 rounded-xl"
+                    style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
                   >
                     {[
-                      { id: 'show-me', emoji: '📸', label: 'Show me', desc: 'See what they\'re talking about', handler: handleShowMe },
-                      { id: 'buy-gift', emoji: '🎁', label: 'Buy a gift', desc: 'Surprise them with something nice', handler: handleBuyGift },
-                      { id: 'hold-hands', emoji: '💕', label: 'Hold hands', desc: 'A romantic moment together', handler: handleHoldHands },
+                      { id: 'show-me', emoji: '📸', label: 'Show me', handler: handleShowMe },
+                      { id: 'buy-gift', emoji: '🎁', label: 'Buy a gift', handler: handleBuyGift },
+                      { id: 'hold-hands', emoji: '💕', label: 'Hold hands', handler: handleHoldHands },
                     ].map((action) => (
                       <button
                         key={action.id}
                         onClick={() => { setShowActions(false); action.handler() }}
                         disabled={isGeneratingChatImage}
-                        className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-lg cursor-pointer transition-colors hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="flex items-center gap-1.5 py-2 px-3 rounded-lg cursor-pointer transition-colors hover:bg-white/8 disabled:opacity-40 disabled:cursor-not-allowed"
                         style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                       >
-                        <span className="text-2xl">{action.emoji}</span>
-                        <span className="text-white text-xs font-medium">{action.label}</span>
-                        <span className="text-white/30 text-[10px] leading-tight text-center">{action.desc}</span>
+                        <span className="text-sm">{action.emoji}</span>
+                        <span className="text-white/70 text-xs">{action.label}</span>
                       </button>
                     ))}
                   </div>
