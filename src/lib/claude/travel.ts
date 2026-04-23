@@ -261,7 +261,7 @@ Format: [SUGGESTIONS: "reply 1" | "reply 2" | "reply 3"]
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-haiku-4-5',
-      max_tokens: 300,
+      max_tokens: 450,
       stream: true,
       temperature: companion.character.chatTemperature,
       system,
