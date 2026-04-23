@@ -35,6 +35,7 @@ export function TravelHomePage() {
   const [globeSize, setGlobeSize] = useState({ width: 600, height: 500 })
   const [globeReady, setGlobeReady] = useState(false)
   const [destTab, setDestTab] = useState<'available' | 'coming-soon'>('available')
+  const [isLg, setIsLg] = useState(() => window.matchMedia('(min-width: 1024px)').matches)
   const markerEls = useRef<Map<string, { dot: HTMLDivElement; label: HTMLDivElement; locked: boolean }>>(new Map())
   const selectedIdRef = useRef<string | null>(null)
 
@@ -49,6 +50,7 @@ export function TravelHomePage() {
       if (!containerRef.current) return
       const rect = containerRef.current.getBoundingClientRect()
       setGlobeSize({ width: rect.width, height: Math.min(rect.width * 0.75, 550) })
+      setIsLg(window.matchMedia('(min-width: 1024px)').matches)
     }
     updateSize()
     window.addEventListener('resize', updateSize)
@@ -259,7 +261,8 @@ export function TravelHomePage() {
           )}
 
           {/* Globe + Selected City Panel */}
-          <div ref={containerRef} className="relative w-full flex flex-col items-center">
+          <div className="relative w-full flex flex-col lg:flex-row lg:items-start lg:gap-6">
+            <div ref={containerRef} className="relative flex-1 min-w-0 flex flex-col items-center">
             <div className="relative" style={{ width: globeSize.width, height: globeSize.height }}>
               {/* Loading skeleton */}
               {!globeReady && (
@@ -341,9 +344,9 @@ export function TravelHomePage() {
 
             </div>
 
-            {/* Selected City Card — outside globe container to stack above dots */}
+            {/* Selected City Card — mobile/tablet only (not rendered on lg+) */}
             <AnimatePresence>
-              {selectedDest && (
+              {selectedDest && !isLg && (
                 <motion.div
                   key={selectedDest.id}
                   initial={{ opacity: 0, y: 16, scale: 0.97 }}
@@ -484,6 +487,124 @@ export function TravelHomePage() {
                 </motion.div>
               )}
             </AnimatePresence>
+            </div>
+
+            {/* Desktop City Panel — side by side with globe */}
+            {isLg && (
+            <div className="w-[400px] shrink-0 sticky top-8">
+              <AnimatePresence mode="wait">
+                {selectedDest && (
+                  <motion.div
+                    key={selectedDest.id}
+                    initial={false}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                    className="w-full rounded-2xl overflow-hidden"
+                    style={{ background: 'rgba(21,16,32,0.95)', backdropFilter: 'blur(12px)', border: '1px solid rgba(124,58,237,0.2)' }}
+                  >
+                    <div className="relative h-[140px] overflow-hidden">
+                      <img
+                        src={selectedDest.heroImage}
+                        alt={selectedDest.city}
+                        className="w-full h-full object-cover"
+                        style={{ filter: selectedDest.locked ? 'brightness(0.35) saturate(0.4)' : undefined }}
+                      />
+                      {selectedDest.locked && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-white/30 text-sm font-medium px-4 py-2 rounded-full" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)', fontFamily: SG }}>
+                            Coming soon
+                          </span>
+                        </div>
+                      )}
+                      <button
+                        onClick={handleDeselect}
+                        className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer"
+                        style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
+                      >
+                        <X size={14} className="text-white/60" />
+                      </button>
+                    </div>
+                    <div className="p-5">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl">{selectedDest.countryEmoji}</span>
+                          <h3 className="text-2xl font-bold text-white" style={{ fontFamily: "'Syne', sans-serif", letterSpacing: '-0.01em' }}>
+                            {selectedDest.city}
+                          </h3>
+                        </div>
+                        {!selectedDest.locked && (() => {
+                          const { count, avatars } = getVisitors(selectedDest.id)
+                          return (
+                            <div className="flex items-center gap-2">
+                              <div className="flex -space-x-1.5">
+                                {avatars.map((src, i) => (
+                                  <img key={i} src={src} alt="" className="w-6 h-6 rounded-full object-cover" style={{ border: '2px solid rgba(21,16,32,0.95)', zIndex: avatars.length - i }} />
+                                ))}
+                              </div>
+                              <span className="text-white/40 text-[11px] font-medium" style={{ fontFamily: SG }}>{count} exploring</span>
+                            </div>
+                          )
+                        })()}
+                      </div>
+                      <p className="text-white/50 text-sm mb-3" style={{ fontFamily: SG }}>{selectedDest.description}</p>
+                      <div className="flex items-center gap-4 mb-3">
+                        <div className="flex items-center gap-1.5">
+                          <MapPin size={12} className="text-white/30" />
+                          <span className="text-white/40 text-[11px]" style={{ fontFamily: SG }}>{selectedDest.country}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Clock size={12} className="text-white/30" />
+                          <span className="text-white/40 text-[11px]" style={{ fontFamily: SG }}>{selectedDest.tripDays}-day trip</span>
+                        </div>
+                      </div>
+                      {selectedDest.highlights.length > 0 && (
+                        <div className="mb-4 rounded-xl p-3" style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.1)' }}>
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <Sparkles size={12} style={{ color: '#A78BFA' }} />
+                            <span className="text-[10px] font-semibold tracking-[1.5px] uppercase" style={{ color: '#A78BFA', fontFamily: SG }}>Known for</span>
+                          </div>
+                          <ul className="space-y-1.5">
+                            {selectedDest.highlights.map((h) => (
+                              <li key={h} className="flex items-start gap-2">
+                                <span className="text-[10px] mt-0.5" style={{ color: '#7C3AED' }}>•</span>
+                                <span className="text-white/60 text-[12px] leading-snug" style={{ fontFamily: SG }}>{h}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      <div className="flex gap-2 flex-wrap mb-4">
+                        {selectedDest.vibeTags.map((tag) => (
+                          <span key={tag} className="text-[11px] px-2.5 py-1 rounded-full" style={{ fontFamily: SG, background: selectedDest.locked ? 'rgba(255,255,255,0.04)' : 'rgba(124,58,237,0.12)', color: selectedDest.locked ? 'rgba(255,255,255,0.25)' : 'rgba(200,180,255,0.8)', fontWeight: 500 }}>
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                      {!selectedDest.locked ? (
+                        <button onClick={() => handleNavigate(selectedDest)} className="cursor-pointer w-full h-11 rounded-xl flex items-center justify-center gap-2 text-white font-semibold text-sm" style={{ background: 'linear-gradient(90deg, #7C3AED, #A78BFA)', fontFamily: SG }}>
+                          Explore {selectedDest.city} <ChevronRight size={16} />
+                        </button>
+                      ) : cityVotes.includes(selectedDest.id) ? (
+                        <div className="w-full h-11 rounded-xl flex items-center justify-center gap-2 text-sm" style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.15)', color: '#A78BFA', fontFamily: SG, fontWeight: 500 }}>
+                          <Heart size={14} fill="#A78BFA" /> Noted — we'll build it next
+                        </div>
+                      ) : (
+                        <button onClick={() => voteCityRequest(selectedDest.id)} className="cursor-pointer w-full h-11 rounded-xl flex items-center justify-center gap-2 text-sm font-medium" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', fontFamily: SG }}>
+                          <Heart size={14} /> I want to go here
+                        </button>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              {!selectedDest && (
+                <div className="flex items-center justify-center h-[300px] text-white/15 text-sm" style={{ fontFamily: SG }}>
+                  Click a city on the globe to explore
+                </div>
+              )}
+            </div>
+            )}
           </div>
 
           {/* Destination Tabs */}
