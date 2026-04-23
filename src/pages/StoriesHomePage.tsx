@@ -201,7 +201,7 @@ export function StoriesHomePage() {
                     <div className="relative aspect-[3/4] overflow-hidden">
                       <img src={u.image} alt={u.title} className="w-full h-full object-cover" />
                       <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,8,16,0.95) 0%, rgba(10,8,16,0.5) 40%, transparent 70%)' }} />
-                      <div className="absolute inset-0 flex items-center justify-center" style={{ backdropFilter: 'blur(6px)', background: 'rgba(10,8,16,0.4)' }}>
+                      <div className="absolute inset-0 flex items-center justify-center" style={{ backdropFilter: 'blur(2px)', background: 'rgba(10,8,16,0.3)' }}>
                         <span className="text-[11px] font-bold tracking-[1.5px] uppercase px-3 py-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', fontFamily: SG }}>Coming Soon</span>
                       </div>
                       <div className="absolute bottom-0 left-0 right-0 p-3">
