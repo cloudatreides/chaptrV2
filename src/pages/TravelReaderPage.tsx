@@ -894,18 +894,18 @@ export function TravelReaderPage() {
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="flex flex-col gap-3 max-w-[400px] pb-8"
+                      className="flex items-center gap-3 pb-8"
                     >
                       <button
                         onClick={handleContinueToChat}
-                        className="py-3 px-5 rounded-xl text-white font-medium text-sm cursor-pointer"
+                        className="py-2.5 px-5 rounded-xl text-white font-medium text-sm cursor-pointer"
                         style={{ fontFamily: "'Space Grotesk', sans-serif", background: 'linear-gradient(135deg, #7C3AED, #c84b9e)' }}
                       >
                         Chat with {companionName}
                       </button>
                       <button
                         onClick={handleNextScene}
-                        className="py-3 px-5 rounded-xl text-white/60 font-medium text-sm cursor-pointer transition-colors hover:text-white/80"
+                        className="py-2.5 px-5 rounded-xl text-white/50 font-medium text-sm cursor-pointer transition-colors hover:text-white/80"
                         style={{ fontFamily: "'Space Grotesk', sans-serif", background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
                       >
                         Skip to next scene
