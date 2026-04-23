@@ -571,7 +571,7 @@ export function TravelReaderPage() {
                 className="relative"
               >
                 {/* Hero image with gradient fade */}
-                <div className="relative w-full" style={{ height: sceneImg ? 360 : imageLoadingSceneId === currentScene.id ? 200 : 0 }}>
+                <div className="relative w-full" style={{ height: sceneImg ? 440 : imageLoadingSceneId === currentScene.id ? 200 : 0 }}>
                   {sceneImg && (
                     <>
                       <img
@@ -581,7 +581,7 @@ export function TravelReaderPage() {
                       />
                       <div
                         className="absolute inset-0"
-                        style={{ background: 'linear-gradient(180deg, rgba(10,8,16,0) 40%, rgba(10,8,16,1) 100%)' }}
+                        style={{ background: 'linear-gradient(180deg, rgba(10,8,16,0) 60%, rgba(10,8,16,1) 100%)' }}
                       />
                     </>
                   )}
@@ -597,7 +597,7 @@ export function TravelReaderPage() {
                   )}
                 </div>
 
-                <div className="relative z-10 px-5 md:px-[60px]" style={{ marginTop: sceneImg ? -20 : 16 }}>
+                <div className="relative z-10 px-5 md:px-[60px] mx-auto max-w-[800px]" style={{ marginTop: sceneImg ? -20 : 16 }}>
                   {/* Scene progress bar */}
                   <div className="flex gap-1 mb-4">
                     {Array.from({ length: totalScenes }, (_, i) => (
@@ -629,7 +629,7 @@ export function TravelReaderPage() {
 
                   {/* Prose */}
                   <div
-                    className="text-white/85 text-[15px] leading-[1.8] mb-8 whitespace-pre-wrap max-w-[640px]"
+                    className="text-white/85 text-[15px] leading-[1.8] mb-8 whitespace-pre-wrap"
                     style={{ fontFamily: "'Source Serif 4', Georgia, serif" }}
                   >
                     {sceneProse || currentScene.prose || ''}
@@ -916,44 +916,73 @@ export function TravelReaderPage() {
             const isDone = seg.status === 'done'
             const isLocked = seg.status === 'locked'
 
+            // Tooltip text for locked segments
+            const lockHint = isLocked
+              ? seg.id === 'start-exploring'
+                ? 'Chat with your companion to plan your trip first'
+                : seg.id === 'complete'
+                  ? 'Complete all days to finish your trip'
+                  : seg.id.startsWith('day-')
+                    ? 'Start exploring to unlock days'
+                    : undefined
+              : undefined
+
             return (
               <div key={seg.id}>
-                <motion.button
-                  onClick={isReady && 'action' in seg && seg.action ? seg.action : undefined}
-                  disabled={!isReady || isGeneratingItinerary}
-                  animate={isReady ? { boxShadow: ['0 0 0px rgba(124,58,237,0)', '0 0 12px rgba(124,58,237,0.3)', '0 0 0px rgba(124,58,237,0)'] } : {}}
-                  transition={isReady ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } : {}}
-                  className={`w-full flex items-center gap-2.5 py-2 px-2.5 rounded-lg text-left transition-all ${
-                    isReady ? 'cursor-pointer hover:bg-purple-500/10' : 'cursor-default'
-                  }`}
-                  style={{
-                    background: isActive ? 'rgba(124,58,237,0.1)' : isReady ? 'rgba(124,58,237,0.05)' : 'transparent',
-                    border: isActive ? '1px solid rgba(124,58,237,0.2)' : isReady ? '1px solid rgba(124,58,237,0.2)' : '1px solid transparent',
-                  }}
-                >
-                  <div
-                    className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center"
+                <div className="relative group">
+                  <motion.button
+                    onClick={isReady && 'action' in seg && seg.action ? seg.action : undefined}
+                    disabled={!isReady || isGeneratingItinerary}
+                    animate={isReady ? { boxShadow: ['0 0 0px rgba(124,58,237,0)', '0 0 12px rgba(124,58,237,0.3)', '0 0 0px rgba(124,58,237,0)'] } : {}}
+                    transition={isReady ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } : {}}
+                    className={`w-full flex items-center gap-2.5 py-2 px-2.5 rounded-lg text-left transition-all ${
+                      isReady ? 'cursor-pointer hover:bg-purple-500/10' : 'cursor-default'
+                    }`}
                     style={{
-                      background: isDone ? '#7C3AED' : isActive ? 'rgba(124,58,237,0.3)' : isReady ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.06)',
-                      border: isActive ? '2px solid #7C3AED' : undefined,
+                      background: isActive ? 'rgba(124,58,237,0.1)' : isReady ? 'rgba(124,58,237,0.05)' : 'transparent',
+                      border: isActive ? '1px solid rgba(124,58,237,0.2)' : isReady ? '1px solid rgba(124,58,237,0.2)' : '1px solid transparent',
                     }}
                   >
-                    {isDone && <Check size={10} className="text-white" />}
-                    {isActive && <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />}
-                    {isReady && <Play size={8} className="text-purple-400 ml-0.5" />}
-                    {isLocked && <Lock size={8} className="text-white/20" />}
-                  </div>
-                  <span
-                    className="text-xs leading-tight"
-                    style={{
-                      fontFamily: "'Space Grotesk', sans-serif",
-                      color: isDone ? 'rgba(255,255,255,0.5)' : isActive ? '#fff' : isReady ? 'rgba(200,180,255,0.9)' : 'rgba(255,255,255,0.2)',
-                      fontWeight: isActive || isReady ? 600 : 400,
-                    }}
-                  >
-                    {seg.label}
-                  </span>
-                </motion.button>
+                    <div
+                      className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center"
+                      style={{
+                        background: isDone ? '#7C3AED' : isActive ? 'rgba(124,58,237,0.3)' : isReady ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.06)',
+                        border: isActive ? '2px solid #7C3AED' : undefined,
+                      }}
+                    >
+                      {isDone && <Check size={10} className="text-white" />}
+                      {isActive && <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />}
+                      {isReady && <Play size={8} className="text-purple-400 ml-0.5" />}
+                      {isLocked && <Lock size={8} className="text-white/20" />}
+                    </div>
+                    <span
+                      className="text-xs leading-tight"
+                      style={{
+                        fontFamily: "'Space Grotesk', sans-serif",
+                        color: isDone ? 'rgba(255,255,255,0.5)' : isActive ? '#fff' : isReady ? 'rgba(200,180,255,0.9)' : 'rgba(255,255,255,0.2)',
+                        fontWeight: isActive || isReady ? 600 : 400,
+                      }}
+                    >
+                      {seg.label}
+                    </span>
+                  </motion.button>
+                  {lockHint && (
+                    <div
+                      className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1.5 px-2.5 py-1.5 rounded-lg text-[10px] leading-tight whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10"
+                      style={{ fontFamily: "'Space Grotesk', sans-serif", background: '#1E1A2E', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(124,58,237,0.2)' }}
+                    >
+                      {lockHint}
+                    </div>
+                  )}
+                  {isReady && seg.id === 'start-exploring' && (
+                    <p
+                      className="text-[10px] ml-10 -mt-0.5 mb-1"
+                      style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'rgba(167,139,250,0.5)' }}
+                    >
+                      Ready when you are
+                    </p>
+                  )}
+                </div>
 
                 {/* Scene sub-items for active/done days */}
                 {'scenes' in seg && seg.scenes && (isActive || isDone) && (
