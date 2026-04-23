@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MapPin, ChevronRight, X, Heart } from 'lucide-react'
+import { MapPin, ChevronRight, X, Heart, Clock, Sparkles } from 'lucide-react'
 import { AppSidebar } from '../components/AppSidebar'
 import { useStore } from '../store/useStore'
 import { DESTINATIONS, type Destination } from '../data/travel/destinations'
@@ -409,6 +409,35 @@ export function TravelHomePage() {
                     <p className="text-white/50 text-sm mb-3" style={{ fontFamily: SG }}>
                       {selectedDest.description}
                     </p>
+
+                    <div className="flex items-center gap-4 mb-3">
+                      <div className="flex items-center gap-1.5">
+                        <MapPin size={12} className="text-white/30" />
+                        <span className="text-white/40 text-[11px]" style={{ fontFamily: SG }}>{selectedDest.country}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Clock size={12} className="text-white/30" />
+                        <span className="text-white/40 text-[11px]" style={{ fontFamily: SG }}>{selectedDest.tripDays}-day trip</span>
+                      </div>
+                    </div>
+
+                    {selectedDest.highlights.length > 0 && (
+                      <div className="mb-4 rounded-xl p-3" style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.1)' }}>
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <Sparkles size={12} style={{ color: '#A78BFA' }} />
+                          <span className="text-[10px] font-semibold tracking-[1.5px] uppercase" style={{ color: '#A78BFA', fontFamily: SG }}>Known for</span>
+                        </div>
+                        <ul className="space-y-1.5">
+                          {selectedDest.highlights.map((h) => (
+                            <li key={h} className="flex items-start gap-2">
+                              <span className="text-[10px] mt-0.5" style={{ color: '#7C3AED' }}>•</span>
+                              <span className="text-white/60 text-[12px] leading-snug" style={{ fontFamily: SG }}>{h}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
                     <div className="flex gap-2 flex-wrap mb-4">
                       {selectedDest.vibeTags.map((tag) => (
                         <span
