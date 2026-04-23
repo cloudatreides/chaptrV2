@@ -14,6 +14,7 @@ export const CAST_ROSTER: CastMember[] = [
   // Base — always chattable
   { id: 'sora', name: 'Sora', universeId: 'seoul-transfer', universeLabel: 'Seoul Transfer', base: true, bio: 'A shy art student from Seoul with blue hair and a love for film photography. Quietly observant, fiercely loyal.', unlockHint: 'Always available' },
   { id: 'jiwon', name: 'Jiwon', universeId: 'seoul-transfer', universeLabel: 'Seoul Transfer', base: true, bio: 'Rising K-pop idol who hides vulnerability behind charm. Ambitious, witty, and surprisingly deep.', unlockHint: 'Always available' },
+  { id: 'kai', name: 'Kai', universeId: 'seoul-transfer', universeLabel: 'Seoul Transfer', base: true, bio: 'Variety show MC trainee who makes friends everywhere. High-energy, adventurous, and always knows where to eat.', unlockHint: 'Always available' },
   { id: 'yuna', name: 'Yuna', universeId: 'seoul-transfer', universeLabel: 'Seoul Transfer', base: true, bio: 'K-pop idol with auburn highlights and a sharp tongue. Confident on stage, guarded off it.', unlockHint: 'Always available' },
   // Story-locked
   { id: 'ren', name: 'Ren', universeId: 'sakura-academy', universeLabel: 'Sakura Academy', base: false, bio: 'Student council president with quiet intensity. Precise, private, and unexpectedly gentle with those he trusts.', unlockHint: 'Chat with Ren during a Sakura Academy story' },

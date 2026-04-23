@@ -1,5 +1,5 @@
 import { makeClaudeRequest, streamSSE, stripMarkdown } from './core'
-import { buildTravelSystemPrompt, getTravelCompanion, getCompanionIntro, type CompanionSliders } from '../../data/travel/companions'
+import { buildTravelSystemPrompt, getTravelCompanion, getCompanionIntro, type CompanionSliders, type CompanionRemix } from '../../data/travel/companions'
 import { getDestination, type Destination } from '../../data/travel/destinations'
 import type { ChatMessage, TripDay, TripScene } from '../../store/useStore'
 
@@ -9,22 +9,24 @@ export async function generateDayItinerary(params: {
   destinationId: string
   companionId: string
   companionSliders: CompanionSliders
+  companionRemix?: CompanionRemix
   planningHistory: ChatMessage[]
   dayNumber: number
   previousDays: TripDay[]
   companionMemories: string[]
 }): Promise<TripDay> {
-  const { destinationId, companionId, planningHistory, dayNumber, previousDays, companionMemories } = params
+  const { destinationId, companionId, companionRemix, planningHistory, dayNumber, previousDays, companionMemories } = params
   const destination = getDestination(destinationId)
   const companion = getTravelCompanion(companionId)
   if (!destination || !companion) throw new Error(`Missing destination or companion: ${destinationId}, ${companionId}`)
+  const companionName = companionRemix?.name ?? companion.character.name
 
   const previousSummary = previousDays.length > 0
     ? `\n\nPREVIOUS DAYS:\n${previousDays.map((d) => `Day ${d.dayNumber} (${d.theme}): ${d.scenes.map((s) => `${s.location} — ${s.activity}`).join(', ')}`).join('\n')}\nDo NOT repeat locations or activities from previous days.`
     : ''
 
   const chatContext = planningHistory.length > 0
-    ? `\n\nCONVERSATION WITH TRAVELER:\n${planningHistory.slice(-20).map((m) => `${m.role === 'user' ? 'Traveler' : companion.character.name}: ${m.content}`).join('\n')}`
+    ? `\n\nCONVERSATION WITH TRAVELER:\n${planningHistory.slice(-20).map((m) => `${m.role === 'user' ? 'Traveler' : companionName}: ${m.content}`).join('\n')}`
     : ''
 
   const memoryContext = companionMemories.length > 0
@@ -118,23 +120,29 @@ export async function* streamTravelScene(params: {
   destination: Destination
   companionId: string
   companionSliders: CompanionSliders
+  companionRemix?: CompanionRemix
   tripContext: string
   recentChat: ChatMessage[]
   playerName: string | null
   bio: string | null
   signal?: AbortSignal
 }): AsyncGenerator<string> {
-  const { scene, destination, companionId, companionSliders, tripContext, recentChat, playerName, bio, signal } = params
+  const { scene, destination, companionId, companionSliders, companionRemix, tripContext, recentChat, playerName, bio, signal } = params
   const companion = getTravelCompanion(companionId)
   if (!companion) throw new Error(`Unknown companion: ${companionId}`)
+  const companionName = companionRemix?.name ?? companion.character.name
 
   const recentChatText = recentChat.length > 0
-    ? `\n\nRECENT CONVERSATION:\n${recentChat.slice(-6).map((m) => `${m.role === 'user' ? 'Traveler' : companion.character.name}: ${m.content}`).join('\n')}`
+    ? `\n\nRECENT CONVERSATION:\n${recentChat.slice(-6).map((m) => `${m.role === 'user' ? 'Traveler' : companionName}: ${m.content}`).join('\n')}`
+    : ''
+
+  const remixContext = companionRemix
+    ? `\nCHARACTER IDENTITY: ${companionName}.${companionRemix.personalityTraits.length > 0 ? ` Personality: ${companionRemix.personalityTraits.join('. ')}.` : ''}${companionRemix.travelStyle.length > 0 ? ` Travel style: ${companionRemix.travelStyle.join('. ')}.` : ''}`
     : ''
 
   const system = `You are writing immersive travel scene prose for a virtual trip to ${destination.city}, ${destination.country}.
 
-COMPANION: ${companion.character.name} is traveling with the protagonist. Their energy: ${companionSliders.vibe < 40 ? 'playful and light' : companionSliders.vibe > 60 ? 'thoughtful and present' : 'balanced'}.
+COMPANION: ${companionName} is traveling with the protagonist. Their energy: ${companionSliders.vibe < 40 ? 'playful and light' : companionSliders.vibe > 60 ? 'thoughtful and present' : 'balanced'}.${remixContext}
 
 TRIP CONTEXT: ${tripContext}${recentChatText}
 ${bio ? `\nTRAVELER PERSONALITY: "${bio}"` : ''}${playerName ? `\nTRAVELER NAME: ${playerName}. Use occasionally in narration.` : ''}
@@ -146,9 +154,9 @@ PROSE CONSTRAINTS:
 - Write 2-4 short paragraphs (max 150 words total).
 - Present tense, second person ("you").
 - Immersive sensory details: sounds, smells, textures, light, temperature.
-- Include ${companion.character.name}'s presence naturally — a reaction, a comment, a gesture.
+- Include ${companionName}'s presence naturally — a reaction, a comment, a gesture.
 - Ground in real details about ${destination.city} — make it feel like being there.
-- End on a moment that invites conversation with ${companion.character.name}.
+- End on a moment that invites conversation with ${companionName}.
 - Do NOT include dialogue or chat. Just narrative prose.
 - Do NOT use em dashes (—). Use commas or periods.
 - Do NOT use markdown formatting.`
@@ -171,6 +179,7 @@ PROSE CONSTRAINTS:
 export async function* streamTravelChatReply(params: {
   companionId: string
   companionSliders: CompanionSliders
+  companionRemix?: CompanionRemix
   destinationId: string
   messages: ChatMessage[]
   chatType: 'planning' | 'reaction' | 'freeform' | 'recap' | 'surprise' | 'morning'
@@ -181,12 +190,12 @@ export async function* streamTravelChatReply(params: {
   bio: string | null
   signal?: AbortSignal
 }): AsyncGenerator<string> {
-  const { companionId, companionSliders, destinationId, messages, chatType, sceneContext, tripContext, companionMemories, travelAffinityScore, bio, signal } = params
+  const { companionId, companionSliders, companionRemix, destinationId, messages, chatType, sceneContext, tripContext, companionMemories, travelAffinityScore, bio, signal } = params
   const companion = getTravelCompanion(companionId)
   const destination = getDestination(destinationId)
   if (!companion || !destination) throw new Error(`Missing companion or destination`)
 
-  let system = buildTravelSystemPrompt(companion, companionSliders, destination.locationKnowledge)
+  let system = buildTravelSystemPrompt(companion, companionSliders, destination.locationKnowledge, companionRemix)
 
   if (bio) system += `\nTraveler personality: "${bio}"`
 
@@ -261,23 +270,23 @@ Format: [SUGGESTIONS: "reply 1" | "reply 2" | "reply 3"]
 export async function generateTravelOpeningMessage(params: {
   companionId: string
   companionSliders: CompanionSliders
+  companionRemix?: CompanionRemix
   destinationId: string
   chatType: 'planning' | 'reaction' | 'freeform' | 'recap' | 'surprise' | 'morning'
   sceneContext?: string
   tripContext?: string
   bio: string | null
 }): Promise<{ content: string; suggestions?: string[] }> {
-  const { companionId, companionSliders, destinationId, chatType, sceneContext, tripContext, bio } = params
+  const { companionId, companionSliders, companionRemix, destinationId, chatType, sceneContext, tripContext, bio } = params
   const companion = getTravelCompanion(companionId)
   const destination = getDestination(destinationId)
   if (!companion || !destination) return { content: '...' }
 
-  // For planning, use the companion's pre-written travel intro
   if (chatType === 'planning') {
     return { content: getCompanionIntro(companion, destinationId) }
   }
 
-  let system = buildTravelSystemPrompt(companion, companionSliders, destination.locationKnowledge)
+  let system = buildTravelSystemPrompt(companion, companionSliders, destination.locationKnowledge, companionRemix)
   if (bio) system += `\nTraveler personality: "${bio}"`
   if (tripContext) system += `\n\nTRIP SO FAR: ${tripContext}`
 
@@ -322,20 +331,22 @@ Format: [SUGGESTIONS: "reply 1" | "reply 2" | "reply 3"]
 export async function generateTripSummary(params: {
   destinationId: string
   companionId: string
+  companionRemix?: CompanionRemix
   itineraryDays: TripDay[]
   companionMemories: string[]
   travelAffinityScore: number
 }): Promise<string> {
-  const { destinationId, companionId, itineraryDays, companionMemories, travelAffinityScore } = params
+  const { destinationId, companionId, companionRemix, itineraryDays, companionMemories, travelAffinityScore } = params
   const destination = getDestination(destinationId)
   const companion = getTravelCompanion(companionId)
   if (!destination || !companion) return 'A trip to remember.'
+  const companionName = companionRemix?.name ?? companion.character.name
 
   const journeyLog = itineraryDays.map((d) =>
     `Day ${d.dayNumber} (${d.theme}): ${d.scenes.map((s) => `${s.location}`).join(', ')}`
   ).join('\n')
 
-  const system = `Write a short, poetic trip summary (3-5 sentences) for a virtual trip to ${destination.city} with ${companion.character.name}.
+  const system = `Write a short, poetic trip summary (3-5 sentences) for a virtual trip to ${destination.city} with ${companionName}.
 
 JOURNEY:
 ${journeyLog}

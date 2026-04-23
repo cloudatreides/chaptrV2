@@ -5,28 +5,28 @@
 
 ## Done This Session
 
-### Homepage Redesign — Twin-First Layout
-- **Twin Hero** — user's selfie is now the dominant visual element on the homepage. Large image (240px mobile, 300px desktop) with name + archetype bio in a side-by-side layout (stacked on mobile). Gradient fades only at the image/text boundary, face fully visible.
-- **Twin Switcher** — if multiple twins exist, small avatar dots appear below the hero. Active twin has pink border + larger size. Click to switch. "+" button to create new twin (max 3).
-- **Upload CTA Hero** — when no character exists, the upload selfie prompt IS the hero (large, impossible to miss) instead of a small banner.
-- **Mode Toggle** — redesigned from pill switcher to two side-by-side cards showing "Travel Mode" / "Story Mode" with one-liner descriptions. Active card gets tinted background.
-- **Travel Browse** — only shows unlocked destinations in a 2-col grid + "View all destinations" button linking to `/travel`. Removed all "coming soon" locked cities from homepage.
-- **Stories Browse** — matching 2-col grid (same card heights as travel). Genre tags now pill-styled with tinted backgrounds for readability. Max 4 stories shown + "See all stories" button.
-- **Stronger gradients** — both travel and story cards have heavier bottom gradients so text is always readable against any image.
-- **Vibe tag pills** — travel destination tags (e.g., "neon streets", "ramen culture") now individual pills with purple tinted background instead of raw text on image.
-- **Genre tag pills** — story genre labels (ROMANCE, MYSTERY etc) now have semi-transparent pink background pills.
-- **Removed from homepage** — Cast section, description text walls, companion/Sora cards, ping cards still exist but deprioritized below browse.
+### Globe UX Overhaul (7 improvements)
+- **Stronger atmosphere** — `atmosphereAltitude` 0.15→0.2, radial glow behind globe bumped to 0.14 opacity
+- **Always-visible city labels** — non-locked markers show labels at 0.7 opacity by default, not hover-only
+- **Selected marker highlight** — clicked marker scales up with brighter border + glow, persists until deselected
+- **Contextual arcs** — replaced N² arc clutter with arcs from selected city only (sequential chain when idle)
+- **Overlay city card** — card now floats over the bottom of the globe instead of pushing content below the fold
+- **Loading skeleton** — pulsing gradient placeholder while globe loads, then 0.8s fade-in
+- **Slower ring pulses** — `ringMaxRadius` 2.5→3.5, `ringPropagationSpeed` 1.5→1.0
 
-### Character Flow Fixes
-- **CreateCharacterPage** — now redirects to `/` (homepage) after creation instead of `/characters`
-- **CharacterSelectPage** — no longer launches into a story when clicking a twin. Now pure management: set active, delete, create new. Active twin gets "Active" badge.
+### Multi-Trip Support
+- "Continue your trip" section now shows all active trips as compact rows (emoji + city + day + phase badge)
+- Added `setActiveTripId` store action so clicking any trip card sets the right context before navigating
 
-### Sidebar Consistency
-- Renamed sidebar nav items to "Travel Mode" and "Story Mode" to match homepage toggle.
+### Visitor Social Proof
+- Selected city card shows overlapping anime avatar stack + "X exploring" count
+- 38 anime-style profile portraits generated via Pencil AI, exported as webp to `public/avatars/`
+- Deterministic mock data seeded from destination ID (stable counts per city, different avatar sets)
 
-### Build Fixes
-- Removed unused imports (Pencil, useMemo, Lock, Plane, getAffinityTier, PREVIEW_GENRES, LOCKED) across HomePage, CharacterSelectPage, TravelHomePage
-- Committed missing store changes (setActiveTripId) that were modified locally but not pushed
+### Previous Session — Icon Consistency + Homepage Redesign
+- Sidebar icons swapped: Sparkles for Travel, BookOpen for Story
+- Twin-first homepage layout with hero selfie, mode toggle cards, browse grids
+- Character flow fixes (redirect after creation, management-only select page)
 
 ## Done Previous Sessions
 - Interactive globe on TravelHomePage (react-globe.gl, arcs, rings, HTML overlay labels, click-to-zoom)
@@ -41,27 +41,25 @@
 
 ### 1. Full browser playtest
 - Test homepage flow: no character → upload → hero appears → browse travel/stories
-- Test twin switching with multiple characters
+- Test globe UX: markers, overlay card, visitor avatars, multi-trip cards
 - Verify travel destinations link correctly from homepage cards
 - Verify story cards link correctly to universe pages
 
-### 2. Landing page — better Travel/Story mode icons
-- User asked to "explore better icons" for mode cards — unresolved from previous session
-
-### 3. GTM launch
+### 2. GTM launch
 - GTM-PLAYBOOK.md is ready — execute channel strategy
 - 7 available destinations should be enough for launch
 - Need screenshots from playtest for Reddit/Twitter posts
 
 ## Key Files
 - `src/pages/HomePage.tsx` — twin-first homepage with hero, mode toggle, browse grids
+- `src/pages/TravelHomePage.tsx` — globe + overlay card + visitor avatars + multi-trip
 - `src/pages/CharacterSelectPage.tsx` — twin management (set active, delete, create)
 - `src/pages/CreateCharacterPage.tsx` — selfie upload + archetype selection
 - `src/pages/StoriesHomePage.tsx` — full stories grid with genre filters
-- `src/pages/TravelHomePage.tsx` — globe + destination grid
 - `src/components/AppSidebar.tsx` — sidebar nav with "Travel Mode" / "Story Mode"
 - `src/data/travel/destinations.ts` — 30 destinations with coords, images, locationKnowledge
-- `src/store/useStore.ts` — characters, trips, story progress, cityVotes
+- `src/store/useStore.ts` — characters, trips, story progress, cityVotes, setActiveTripId
+- `public/avatars/` — 38 anime-style profile pics for visitor social proof
 
 ## Blockers
 - None currently

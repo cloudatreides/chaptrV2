@@ -31,6 +31,7 @@ export function TripComplete({ trip, destination, companion, onNewTrip }: TripCo
     generateTripSummary({
       destinationId: trip.destinationId,
       companionId: trip.companionId,
+      companionRemix: trip.companionRemix,
       itineraryDays: trip.itinerary.days,
       companionMemories: trip.companionMemories,
       travelAffinityScore: trip.travelAffinityScore,
@@ -79,7 +80,7 @@ export function TripComplete({ trip, destination, companion, onNewTrip }: TripCo
           className="text-white/50 text-sm mb-6"
           style={{ fontFamily: "'Space Grotesk', sans-serif" }}
         >
-          with {companion.character.name}
+          with {trip.companionRemix?.name ?? companion.character.name}
         </motion.p>
 
         {/* Stats */}

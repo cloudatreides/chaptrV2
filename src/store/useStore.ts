@@ -90,6 +90,7 @@ export interface TripProgress {
   destinationId: string
   companionId: string
   companionSliders: { chattiness: number; planningStyle: number; vibe: number }
+  companionRemix?: { name: string; imageUrl?: string; personalityTraits: string[]; travelStyle: string[] }
   currentDay: number
   currentSceneIndex: number
   phase: 'planning' | 'day' | 'recap' | 'complete'
@@ -251,7 +252,7 @@ interface StoreState {
   travelTrips: Record<string, TripProgress>
   activeTripId: string | null
   setActiveTripId: (id: string) => void
-  startTrip: (destinationId: string, companionId: string, sliders: { chattiness: number; planningStyle: number; vibe: number }) => void
+  startTrip: (destinationId: string, companionId: string, sliders: { chattiness: number; planningStyle: number; vibe: number }, remix?: { name: string; imageUrl?: string; personalityTraits: string[]; travelStyle: string[] }) => void
   addTravelPlanningMessage: (msg: ChatMessage) => void
   addTravelDayChatMessage: (day: number, msg: ChatMessage) => void
   updateTripItinerary: (day: TripDay) => void
@@ -627,7 +628,7 @@ export const useStore = create<StoreState>()(
 
       setActiveTripId: (id) => set({ activeTripId: id }),
 
-      startTrip: (destinationId, companionId, sliders) => {
+      startTrip: (destinationId, companionId, sliders, remix) => {
         const charId = get().activeCharacterId
         if (!charId) return
         const tripId = `${charId}:${destinationId}`
@@ -638,6 +639,7 @@ export const useStore = create<StoreState>()(
               destinationId,
               companionId,
               companionSliders: sliders,
+              ...(remix ? { companionRemix: remix } : {}),
               currentDay: 1,
               currentSceneIndex: 0,
               phase: 'planning',

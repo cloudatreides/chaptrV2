@@ -29,6 +29,8 @@ export function TravelReaderPage() {
   const trip = activeTripId ? travelTrips[activeTripId] : null
   const destination = trip ? getDestination(trip.destinationId) : null
   const companion = trip ? getTravelCompanion(trip.companionId) : null
+  const companionName = trip?.companionRemix?.name ?? companion?.character.name ?? ''
+  const companionPortrait = trip?.companionRemix?.imageUrl ?? companion?.character.staticPortrait
   const activeChar = characters.find((c) => c.id === activeCharacterId)
 
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
@@ -81,6 +83,7 @@ export function TravelReaderPage() {
       const result = await generateTravelOpeningMessage({
         companionId: trip.companionId,
         companionSliders: trip.companionSliders,
+        companionRemix: trip.companionRemix,
         destinationId: trip.destinationId,
         chatType,
         sceneContext: currentScene ? `${currentScene.location} — ${currentScene.activity}` : undefined,
@@ -158,6 +161,7 @@ export function TravelReaderPage() {
       const stream = streamTravelChatReply({
         companionId: trip.companionId,
         companionSliders: trip.companionSliders,
+        companionRemix: trip.companionRemix,
         destinationId: trip.destinationId,
         messages,
         chatType: isPlanning ? 'planning' : getChatType(),
@@ -256,6 +260,7 @@ export function TravelReaderPage() {
         destinationId: trip.destinationId,
         companionId: trip.companionId,
         companionSliders: trip.companionSliders,
+        companionRemix: trip.companionRemix,
         planningHistory: trip.planningChatHistory,
         dayNumber: 1,
         previousDays: [],
@@ -296,6 +301,7 @@ export function TravelReaderPage() {
         destination,
         companionId: trip.companionId,
         companionSliders: trip.companionSliders,
+        companionRemix: trip.companionRemix,
         tripContext: buildTripContext(),
         recentChat: trip.dayChatHistories[trip.currentDay] ?? [],
         playerName: activeChar?.name ?? null,
@@ -365,6 +371,7 @@ export function TravelReaderPage() {
         destinationId: trip.destinationId,
         companionId: trip.companionId,
         companionSliders: trip.companionSliders,
+        companionRemix: trip.companionRemix,
         planningHistory: trip.dayChatHistories[trip.currentDay] ?? [],
         dayNumber: nextDayNum,
         previousDays: trip.itinerary.days,
@@ -470,8 +477,8 @@ export function TravelReaderPage() {
           <button onClick={() => navigate('/travel')} className="text-white/40 hover:text-white/60 cursor-pointer">
             <ArrowLeft size={18} />
           </button>
-          {companion.character.staticPortrait ? (
-            <img src={companion.character.staticPortrait} alt="" className="w-8 h-8 rounded-full object-cover" />
+          {companionPortrait ? (
+            <img src={companionPortrait} alt="" className="w-8 h-8 rounded-full object-cover" />
           ) : (
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm" style={{ background: '#2D2538' }}>
               {companion.character.avatar}
@@ -479,7 +486,7 @@ export function TravelReaderPage() {
           )}
           <div className="flex-1 min-w-0">
             <p className="text-white text-sm font-semibold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              {companion.character.name}
+              {companionName}
             </p>
             <p className="text-white/40 text-xs" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               {destination.countryEmoji} {destination.city} — {trip.phase === 'planning' ? 'Planning' : `Day ${trip.currentDay}`}
@@ -641,7 +648,7 @@ export function TravelReaderPage() {
                         className="py-3 px-5 rounded-xl text-white font-medium text-sm cursor-pointer"
                         style={{ fontFamily: "'Space Grotesk', sans-serif", background: 'linear-gradient(135deg, #7C3AED, #c84b9e)' }}
                       >
-                        Chat with {companion.character.name}
+                        Chat with {companionName}
                       </button>
                       <button
                         onClick={handleNextScene}
@@ -658,15 +665,15 @@ export function TravelReaderPage() {
                 {isStreaming && (
                   <div className="px-5 md:px-[60px] pb-6">
                     <div className="flex items-center gap-2">
-                      {companion.character.staticPortrait ? (
-                        <img src={companion.character.staticPortrait} alt="" className="w-5 h-5 rounded-full object-cover" />
+                      {companionPortrait ? (
+                        <img src={companionPortrait} alt="" className="w-5 h-5 rounded-full object-cover" />
                       ) : (
                         <div className="w-5 h-5 rounded-full flex items-center justify-center text-[8px]" style={{ background: '#2D2538' }}>
                           {companion.character.avatar}
                         </div>
                       )}
                       <span className="text-white/30 text-xs italic" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                        {companion.character.name} is writing...
+                        {companionName} is writing...
                       </span>
                     </div>
                   </div>
@@ -849,7 +856,7 @@ export function TravelReaderPage() {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder={`Message ${companion.character.name}...`}
+                placeholder={`Message ${companionName}...`}
                 disabled={isStreaming}
                 className="flex-1 bg-transparent text-white text-sm px-4 py-3 rounded-xl outline-none placeholder:text-white/25 disabled:opacity-50"
                 style={{
@@ -989,15 +996,15 @@ export function TravelReaderPage() {
             onClick={() => setShowCompanionSettings(!showCompanionSettings)}
             className="w-full flex items-center gap-2 py-1.5 cursor-pointer"
           >
-            {companion.character.staticPortrait ? (
-              <img src={companion.character.staticPortrait} alt="" className="w-6 h-6 rounded-full object-cover" />
+            {companionPortrait ? (
+              <img src={companionPortrait} alt="" className="w-6 h-6 rounded-full object-cover" />
             ) : (
               <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs" style={{ background: '#2D2538' }}>
                 {companion.character.avatar}
               </div>
             )}
             <span className="text-white/50 text-xs flex-1 text-left" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              {companion.character.name}
+              {companionName}
             </span>
             <ChevronDown size={12} className={`text-white/30 transition-transform ${showCompanionSettings ? 'rotate-180' : ''}`} />
           </button>
