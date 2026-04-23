@@ -236,7 +236,7 @@ export function TravelHomePage() {
                   <button
                     key={tripId}
                     onClick={() => { setActiveTripId(tripId); navigate('/travel/trip') }}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left cursor-pointer transition-colors"
+                    className="w-full max-w-lg flex items-center gap-3 px-4 py-3 rounded-xl text-left cursor-pointer transition-colors"
                     style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.12), rgba(200,75,158,0.06))', border: '1px solid rgba(124,58,237,0.15)' }}
                   >
                     <span className="text-xl flex-shrink-0">{dest?.countryEmoji ?? '🌍'}</span>
