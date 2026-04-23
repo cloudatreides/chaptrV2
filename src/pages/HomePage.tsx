@@ -389,6 +389,7 @@ export function HomePage() {
   const dismissAmbientPing = useStore((s) => s.dismissAmbientPing)
   const activeCharacterId = useStore((s) => s.activeCharacterId)
   const travelTrips = useStore((s) => s.travelTrips)
+  const setActiveTripId = useStore((s) => s.setActiveTripId)
 
   const [mode, setMode] = useState<'travel' | 'stories'>('travel')
   const [activePingModal, setActivePingModal] = useState<AmbientPingDef | null>(null)
@@ -429,9 +430,11 @@ export function HomePage() {
   const activeUniverse = activePlaythrough ? UNIVERSES.find((u) => u.id === activePlaythrough.universeId) : null
   const firstSceneImage = activePlaythrough?.progress?.sceneImages ? Object.values(activePlaythrough.progress.sceneImages)[0] as string | null : null
 
-  // ─── Active trip (travel) ───
+  // ─── Active trip (travel) — most recently started ───
   const activeTrip = activeCharacterId
-    ? Object.entries(travelTrips).find(([key, trip]) => key.startsWith(`${activeCharacterId}:`) && trip.phase !== 'complete')
+    ? Object.entries(travelTrips)
+        .filter(([key, trip]) => key.startsWith(`${activeCharacterId}:`) && trip.phase !== 'complete')
+        .sort(([, a], [, b]) => b.startedAt - a.startedAt)[0] ?? null
     : null
 
   const handleResume = () => {
@@ -464,7 +467,7 @@ export function HomePage() {
         subtitle={activeTrip[1].phase === 'planning' ? 'Still planning...' : 'Exploring'}
         meta={`TRAVEL · DAY ${activeTrip[1].currentDay}`}
         image={dest?.heroImage}
-        onClick={() => navigate('/travel/trip')}
+        onClick={() => { setActiveTripId(activeTrip[0]); navigate('/travel/trip') }}
       />
     )
   }
