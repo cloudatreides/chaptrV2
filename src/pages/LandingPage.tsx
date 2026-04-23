@@ -81,7 +81,7 @@ function SectionHeader({ tag, title, description, className }: { tag: string; ti
 // ─── Destination Card ───
 
 function DestinationCarousel() {
-  const allDests = ALL_DESTINATIONS
+  const allDests = [...ALL_DESTINATIONS].sort((a, b) => Number(a.locked ?? false) - Number(b.locked ?? false))
   const cardWidth = 280
   const gap = 16
   const duration = allDests.length * 3.5

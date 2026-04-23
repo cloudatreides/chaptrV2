@@ -311,7 +311,7 @@ export function TravelCityPage() {
             >
               Choose your travel companion
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {/* Base companions */}
               {TRAVEL_COMPANIONS.map((comp) => {
                 const isSelected = selectedId === comp.characterId
@@ -319,40 +319,33 @@ export function TravelCityPage() {
                   <motion.div
                     key={comp.characterId}
                     whileTap={{ scale: 0.98 }}
-                    className="relative rounded-xl p-4 text-left cursor-pointer transition-colors"
+                    className="relative rounded-xl overflow-hidden cursor-pointer group"
                     style={{
-                      background: isSelected ? 'rgba(124,58,237,0.12)' : 'rgba(255,255,255,0.03)',
-                      border: isSelected ? '1px solid rgba(124,58,237,0.3)' : '1px solid rgba(255,255,255,0.06)',
+                      border: isSelected ? '2px solid rgba(124,58,237,0.5)' : '1px solid rgba(255,255,255,0.06)',
                     }}
                     onClick={() => handleSelectBase(comp.characterId)}
                   >
-                    <div className="flex items-center gap-3 mb-2">
+                    <div className="relative aspect-[3/4] overflow-hidden">
                       {comp.character.staticPortrait ? (
-                        <img src={comp.character.staticPortrait} alt={comp.character.name} className="w-12 h-12 rounded-full object-cover" />
+                        <img src={comp.character.staticPortrait} alt={comp.character.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       ) : (
-                        <div className="w-12 h-12 rounded-full flex items-center justify-center text-xl" style={{ background: '#2D2538' }}>
+                        <div className="w-full h-full flex items-center justify-center text-4xl" style={{ background: '#2D2538' }}>
                           {comp.character.avatar}
                         </div>
                       )}
-                      <div>
+                      <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,8,16,0.95) 0%, rgba(10,8,16,0.4) 40%, transparent 70%)' }} />
+                      <div className="absolute bottom-0 left-0 right-0 p-3">
                         <p className="text-white font-semibold text-sm" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                           {comp.character.name}
                         </p>
-                        <p className="text-white/40 text-xs" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                        <p className="text-white/40 text-[11px] mt-0.5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                           {comp.defaultSliders.chattiness > 50 ? 'Chatty' : 'Quiet'} · {comp.defaultSliders.planningStyle > 50 ? 'Planner' : 'Spontaneous'} · {comp.defaultSliders.vibe > 50 ? 'Thoughtful' : 'Playful'}
+                        </p>
+                        <p className="text-white/30 text-[11px] mt-1 leading-relaxed line-clamp-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                          "{getCompanionIntro(comp, destinationId ?? '').slice(0, 80)}..."
                         </p>
                       </div>
                     </div>
-                    <p className="text-white/50 text-xs leading-relaxed mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                      "{getCompanionIntro(comp, destinationId ?? '').slice(0, 80)}..."
-                    </p>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleOpenProfile(comp) }}
-                      className="text-purple-400/70 text-xs hover:text-purple-400 transition-colors cursor-pointer"
-                      style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                    >
-                      View more
-                    </button>
                     {isSelected && (
                       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute top-3 right-3 w-5 h-5 rounded-full flex items-center justify-center" style={{ background: '#7C3AED' }}>
                         <div className="w-2 h-2 rounded-full bg-white" />
@@ -367,56 +360,57 @@ export function TravelCityPage() {
                 const base = TRAVEL_COMPANIONS.find((c) => c.characterId === cc.baseId)
                 if (!base) return null
                 const isSelected = selectedId === cc.id
+                const portraitSrc = cc.remix.imageUrl ?? base.character.staticPortrait
                 return (
                   <motion.div
                     key={cc.id}
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     whileTap={{ scale: 0.98 }}
-                    className="relative rounded-xl p-4 text-left cursor-pointer transition-colors"
+                    className="relative rounded-xl overflow-hidden cursor-pointer group"
                     style={{
-                      background: isSelected ? 'rgba(124,58,237,0.12)' : 'rgba(255,255,255,0.03)',
-                      border: isSelected ? '1px solid rgba(124,58,237,0.3)' : '1px solid rgba(255,255,255,0.06)',
+                      border: isSelected ? '2px solid rgba(124,58,237,0.5)' : '1px solid rgba(255,255,255,0.06)',
                     }}
                     onClick={() => handleSelectCustom(cc.id)}
                   >
-                    <div className="flex items-center gap-3 mb-2">
-                      {(cc.remix.imageUrl || base.character.staticPortrait) ? (
-                        <img src={cc.remix.imageUrl ?? base.character.staticPortrait!} alt="" className="w-12 h-12 rounded-full object-cover" />
+                    <div className="relative aspect-[3/4] overflow-hidden">
+                      {portraitSrc ? (
+                        <img src={portraitSrc} alt={cc.remix.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       ) : (
-                        <div className="w-12 h-12 rounded-full flex items-center justify-center text-xl" style={{ background: '#2D2538' }}>
+                        <div className="w-full h-full flex items-center justify-center text-4xl" style={{ background: '#2D2538' }}>
                           {base.character.avatar}
                         </div>
                       )}
-                      <div className="min-w-0">
+                      <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,8,16,0.95) 0%, rgba(10,8,16,0.4) 40%, transparent 70%)' }} />
+                      <div className="absolute bottom-0 left-0 right-0 p-3">
                         <p className="text-white font-semibold text-sm" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                           {cc.remix.name}
                         </p>
-                        <p className="text-white/40 text-xs" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                        <p className="text-white/40 text-[11px] mt-0.5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                           {cc.sliders.chattiness > 50 ? 'Chatty' : 'Quiet'} · {cc.sliders.planningStyle > 50 ? 'Planner' : 'Spontaneous'} · {cc.sliders.vibe > 50 ? 'Thoughtful' : 'Playful'}
                         </p>
+                        <p className="text-white/30 text-[11px] mt-1 leading-relaxed line-clamp-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                          {cc.remix.personalityTraits.length > 0
+                            ? cc.remix.personalityTraits.slice(0, 2).join('. ').slice(0, 80) + '...'
+                            : `Remixed from ${base.character.name}`
+                          }
+                        </p>
+                        <div className="flex items-center gap-3 mt-1.5">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); openRemixModal(base, cc.id) }}
+                            className="text-purple-400/70 text-xs hover:text-purple-400 transition-colors cursor-pointer"
+                            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleDeleteCustom(cc.id) }}
+                            className="text-white/20 hover:text-red-400/70 transition-colors cursor-pointer"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                    <p className="text-white/50 text-xs leading-relaxed mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                      {cc.remix.personalityTraits.length > 0
-                        ? cc.remix.personalityTraits.slice(0, 2).join('. ').slice(0, 80) + '...'
-                        : `Remixed from ${base.character.name}`
-                      }
-                    </p>
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); openRemixModal(base, cc.id) }}
-                        className="text-purple-400/70 text-xs hover:text-purple-400 transition-colors cursor-pointer"
-                        style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleDeleteCustom(cc.id) }}
-                        className="text-white/20 hover:text-red-400/70 transition-colors cursor-pointer"
-                      >
-                        <Trash2 size={12} />
-                      </button>
                     </div>
                     {isSelected && (
                       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute top-3 right-3 w-5 h-5 rounded-full flex items-center justify-center" style={{ background: '#7C3AED' }}>
