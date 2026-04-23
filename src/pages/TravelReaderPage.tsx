@@ -575,14 +575,9 @@ export function TravelReaderPage() {
     setIsStreaming(true)
     abortRef.current = new AbortController()
 
-    if (!currentTrip.sceneImages[scene.id]) {
-      setImageLoadingSceneId(scene.id)
-      generateTravelImage(scene.imagePrompt, scene.protagonistVisible ? activeChar?.selfieUrl : undefined)
-        .then((url) => {
-          if (url) setTripSceneImage(scene.id, url)
-        })
-        .finally(() => setImageLoadingSceneId(null))
-    }
+    const needsImage = !currentTrip.sceneImages[scene.id]
+    if (needsImage) setImageLoadingSceneId(scene.id)
+    let imageTriggered = false
 
     try {
       const stream = streamTravelScene({
@@ -602,6 +597,23 @@ export function TravelReaderPage() {
       for await (const chunk of stream) {
         full += chunk
         setSceneProse(full)
+
+        if (needsImage && !imageTriggered && full.length > 200) {
+          imageTriggered = true
+          const proseSnippet = full.slice(0, 300).replace(/[.!?][^.!?]*$/, '.').trim()
+          const imagePrompt = `anime style, cinematic wide shot, ${scene.timeOfDay} atmosphere in ${scene.location}, ${destination.city}. ${proseSnippet} Detailed background, atmospheric lighting, high quality anime art`
+          generateTravelImage(imagePrompt, scene.protagonistVisible ? activeChar?.selfieUrl : undefined)
+            .then((url) => { if (url) setTripSceneImage(scene.id, url) })
+            .finally(() => setImageLoadingSceneId(null))
+        }
+      }
+
+      if (needsImage && !imageTriggered) {
+        imageTriggered = true
+        const imagePrompt = `anime style, cinematic wide shot, ${scene.timeOfDay} atmosphere in ${scene.location}, ${destination.city}. ${full.slice(0, 300)} Detailed background, atmospheric lighting, high quality anime art`
+        generateTravelImage(imagePrompt, scene.protagonistVisible ? activeChar?.selfieUrl : undefined)
+          .then((url) => { if (url) setTripSceneImage(scene.id, url) })
+          .finally(() => setImageLoadingSceneId(null))
       }
 
       setTripScene(scene.id, { prose: full })

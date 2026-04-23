@@ -98,7 +98,7 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
         model: 'black-forest-labs/FLUX.1-schnell',
         prompt: genderedPrompt,
         aspect_ratio: toAspectRatio(width, height),
-        steps: 4,
+        steps: 8,
         n: 1,
         response_format: 'url',
       }
@@ -124,7 +124,7 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
           model: 'black-forest-labs/FLUX.1-schnell',
           prompt: genderedPrompt,
           aspect_ratio: toAspectRatio(width, height),
-          steps: 4,
+          steps: 8,
           n: 1,
           response_format: 'url',
         }
