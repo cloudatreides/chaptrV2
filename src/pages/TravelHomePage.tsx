@@ -499,7 +499,7 @@ export function TravelHomePage() {
                 COMING SOON — {DESTINATIONS.filter((d) => d.locked).length} DESTINATIONS
               </p>
             </div>
-            <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-2.5">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {DESTINATIONS.filter((d) => d.locked).map((dest) => (
                 <button
                   key={dest.id}
@@ -510,7 +510,7 @@ export function TravelHomePage() {
                   className="cursor-pointer rounded-xl overflow-hidden text-left flex flex-col"
                   style={{ border: '1px solid rgba(255,255,255,0.04)', background: '#0E0B15' }}
                 >
-                  <div className="relative h-[60px] overflow-hidden">
+                  <div className="relative h-[80px] overflow-hidden">
                     <img
                       src={dest.heroImage}
                       alt={dest.city}
@@ -518,10 +518,10 @@ export function TravelHomePage() {
                       style={{ filter: 'brightness(0.35) saturate(0.3)' }}
                     />
                   </div>
-                  <div className="p-2">
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs">{dest.countryEmoji}</span>
-                      <p className="text-xs font-medium truncate" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: SG }}>{dest.city}</p>
+                  <div className="p-2.5">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-sm">{dest.countryEmoji}</span>
+                      <p className="text-sm font-medium truncate" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: SG }}>{dest.city}</p>
                     </div>
                   </div>
                 </button>
