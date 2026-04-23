@@ -84,12 +84,6 @@ export function TravelCityPage() {
     }
   }
 
-  // ── Profile modal ──
-  function handleOpenProfile(comp: TravelCompanion) {
-    setModalCompanion(comp)
-    setModalSliders(selectedId === comp.characterId ? { ...sliders } : { ...comp.defaultSliders })
-  }
-
   function handleSelectFromProfile() {
     if (!modalCompanion) return
     setSelectedId(modalCompanion.characterId)
