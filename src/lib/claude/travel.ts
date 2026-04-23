@@ -236,6 +236,7 @@ When you mention a specific, well-known landmark, market, temple, neighborhood, 
 [PLACE:Chatuchak Weekend Market] or [PLACE:Wat Arun] or [PLACE:Shibuya Crossing]
 - Only tag real, specific, notable places (not "a cafe" or "the street")
 - Only tag the FIRST mention per message, max 1 tag per message
+- The tagged place MUST be the exact place your text is currently describing. Do NOT tag a different nearby landmark. If you're describing walking through Higashiyama streets, tag [PLACE:Higashiyama District] not [PLACE:Kiyomizu-dera].
 - Place the tag right after the place name in your text
 - The system will automatically show a real photo of the tagged place — you do NOT need to mention showing images, photos, or pictures. Never say you "can't show" anything. Just describe the place naturally and add the tag.
 

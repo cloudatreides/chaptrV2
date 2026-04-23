@@ -5,45 +5,66 @@
 
 ## Done This Session
 
-### Globe UX Overhaul (7 improvements)
-- **Stronger atmosphere** — `atmosphereAltitude` 0.15→0.2, radial glow behind globe bumped to 0.14 opacity
-- **Always-visible city labels** — non-locked markers show labels at 0.7 opacity by default, not hover-only
-- **Selected marker highlight** — clicked marker scales up with brighter border + glow, persists until deselected
-- **Contextual arcs** — replaced N² arc clutter with arcs from selected city only (sequential chain when idle)
-- **Overlay city card** — card now floats over the bottom of the globe instead of pushing content below the fold
-- **Loading skeleton** — pulsing gradient placeholder while globe loads, then 0.8s fade-in
-- **Slower ring pulses** — `ringMaxRadius` 2.5→3.5, `ringPropagationSpeed` 1.5→1.0
+### Companion Remix Persistence (Supabase)
+- Moved `customCompanions` from ephemeral React `useState` to Zustand store
+- Added `addCustomCompanion`, `updateCustomCompanion`, `deleteCustomCompanion` store actions
+- Added to `partialize` (localStorage), `useGameStateSync` (auto-sync), and `AuthContext` signOut save
+- Bumped persist version to 9 with migration
+- `CustomCompanion` type exported from store, removed duplicate interface from TravelCityPage
 
-### Multi-Trip Support
-- "Continue your trip" section now shows all active trips as compact rows (emoji + city + day + phase badge)
-- Added `setActiveTripId` store action so clicking any trip card sets the right context before navigating
+### "Show me" UX Redesign
+- Removed ambiguous camera icon from chat input bar
+- Added "Show me" pill button in suggestions row (generates AI image of what companion is describing)
+- Uses `ImagePlus` icon, shows spinner during generation, disabled when no companion messages
 
-### Visitor Social Proof
-- Selected city card shows overlapping anime avatar stack + "X exploring" count
-- 38 anime-style profile portraits generated via Pencil AI, exported as webp to `public/avatars/`
-- Deterministic mock data seeded from destination ID (stable counts per city, different avatar sets)
+### Trip Progress Sidebar Tooltips
+- Locked items show hover tooltips explaining how to unlock (e.g., "Chat with your companion to plan your trip first")
+- "Start exploring" shows subtle "Ready when you are" hint when unlocked
 
-### Previous Session — Icon Consistency + Homepage Redesign
-- Sidebar icons swapped: Sparkles for Travel, BookOpen for Story
-- Twin-first homepage layout with hero selfie, mode toggle cards, browse grids
-- Character flow fixes (redirect after creation, management-only select page)
+### Landmark Photo Feature (Real Images)
+- Created `/api/image-search.ts` Vercel Edge Function — searches Wikipedia API (free, no key) with Google Custom Search as optional upgrade
+- Created `src/lib/imageSearch.ts` — client-side util with in-memory cache, `fetchPlaceImage()` and `parsePlaceTags()`
+- Added `[PLACE:Name]` tag instruction to Claude travel chat system prompt (max 1 per message, notable landmarks only)
+- Prompt tells Claude the system auto-shows photos — never say "I can't show images"
+- Tags stripped during streaming display and after completion, place names preserved in text
+- Real photos appear as standalone left-aligned cards with MapPin icon + place name caption
+- All code paths covered: main chat, buy-gift handler, hold-hands handler
+
+### Scene Image Fallback
+- Scenes without images now show 200px placeholder with location name + time of day instead of collapsing to 0 height
+
+### Companion Vibe Sliders — Save + Toast
+- Sliders now buffer changes in local state instead of saving on every drag
+- "Save" button appears when changes are made
+- Toast notification "Companion vibe updated" on save (2s fade)
+
+### Hold Hands Fix
+- Image prompt now uses `activeChar.gender` ("a young man" / "a young woman") instead of generic "two people"
+- User message changed from "🤝 Held hands" to "💕 Reaching out to hold [name]'s hand..."
+
+### Homepage Continue Card — Most Recent Trip
+- Active trips sorted by `startedAt` descending so most recent trip shows first
+- Sets `activeTripId` on click so the correct trip loads
 
 ## Done Previous Sessions
-- Interactive globe on TravelHomePage (react-globe.gl, arcs, rings, HTML overlay labels, click-to-zoom)
+- Globe UX overhaul (atmosphere, labels, arcs, overlay card, loading skeleton, ring pulses)
+- Multi-trip support with compact trip rows
+- Visitor social proof avatars on selected city card
+- Sidebar icon consistency + twin-first homepage redesign
+- Interactive globe on TravelHomePage (react-globe.gl)
 - 30 destinations (7 unlocked, 23 coming soon) with Pencil-generated cover images
-- Travel Mode fully built (Phases 1-5), all pushed to prod
-- StoriesHomePage dedicated page with genre filters
-- Landing page refinements, scroll-to-section, removed "AI" terminology
-- Seoul unlocked with full locationKnowledge
+- Travel Mode fully built (Phases 1-5)
+- Companion remix system — profile modals, custom companions, image upload + stylization
+- StoriesHomePage with genre filters
 - Multi-chapter infra, share CTA, pings, stories, feedback modal, mobile polish
 
 ## Next
 
 ### 1. Full browser playtest
-- Test homepage flow: no character → upload → hero appears → browse travel/stories
-- Test globe UX: markers, overlay card, visitor avatars, multi-trip cards
-- Verify travel destinations link correctly from homepage cards
-- Verify story cards link correctly to universe pages
+- Test landmark photo feature end-to-end (mention a landmark, verify real photo appears)
+- Test companion remix persistence (create remix, refresh, verify it persists)
+- Test hold-hands image with male twin (verify correct gender in generated image)
+- Test homepage continue card shows Kyoto (most recent) not Bangkok
 
 ### 2. GTM launch
 - GTM-PLAYBOOK.md is ready — execute channel strategy
@@ -51,15 +72,15 @@
 - Need screenshots from playtest for Reddit/Twitter posts
 
 ## Key Files
-- `src/pages/HomePage.tsx` — twin-first homepage with hero, mode toggle, browse grids
-- `src/pages/TravelHomePage.tsx` — globe + overlay card + visitor avatars + multi-trip
-- `src/pages/CharacterSelectPage.tsx` — twin management (set active, delete, create)
-- `src/pages/CreateCharacterPage.tsx` — selfie upload + archetype selection
-- `src/pages/StoriesHomePage.tsx` — full stories grid with genre filters
-- `src/components/AppSidebar.tsx` — sidebar nav with "Travel Mode" / "Story Mode"
-- `src/data/travel/destinations.ts` — 30 destinations with coords, images, locationKnowledge
-- `src/store/useStore.ts` — characters, trips, story progress, cityVotes, setActiveTripId
-- `public/avatars/` — 38 anime-style profile pics for visitor social proof
+- `src/pages/HomePage.tsx` — twin-first homepage, continue cards sorted by recency
+- `src/pages/TravelCityPage.tsx` — companion select + remix modal (uses store for customCompanions)
+- `src/pages/TravelReaderPage.tsx` — travel chat, scene view, place photos, actions, vibe sliders
+- `src/store/useStore.ts` — characters, trips, customCompanions, story progress, persist v9
+- `src/lib/imageSearch.ts` — place image fetching + [PLACE:] tag parsing
+- `src/lib/claude/travel.ts` — travel system prompts with [PLACE:] tag instructions
+- `api/image-search.ts` — Vercel Edge Function for Wikipedia/Google image search
+- `src/hooks/useGameStateSync.ts` — auto-sync to Supabase (includes customCompanions)
+- `src/contexts/AuthContext.tsx` — sign-out save (includes customCompanions)
 
 ## Blockers
 - None currently
