@@ -506,7 +506,7 @@ export function TravelHomePage() {
                             <span
                               key={tag}
                               className="text-[9px] font-medium px-1.5 py-0.5 rounded-full"
-                              style={{ background: 'rgba(124,58,237,0.25)', color: '#C4B5FD', backdropFilter: 'blur(8px)', fontFamily: SG }}
+                              style={{ background: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(8px)', fontFamily: SG }}
                             >
                               {tag}
                             </span>
