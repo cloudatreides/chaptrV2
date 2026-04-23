@@ -34,6 +34,7 @@ export function TravelHomePage() {
   const [selectedDest, setSelectedDest] = useState<Destination | null>(null)
   const [globeSize, setGlobeSize] = useState({ width: 600, height: 500 })
   const [globeReady, setGlobeReady] = useState(false)
+  const [destTab, setDestTab] = useState<'available' | 'coming-soon'>('available')
   const markerEls = useRef<Map<string, { dot: HTMLDivElement; label: HTMLDivElement; locked: boolean }>>(new Map())
   const selectedIdRef = useRef<string | null>(null)
 
@@ -455,73 +456,55 @@ export function TravelHomePage() {
             </div>
           </div>
 
-          {/* Available Now */}
+          {/* Destination Tabs */}
           <div className="mt-10">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-2 h-2 rounded-full" style={{ background: '#7C3AED' }} />
-              <p className="text-[10px] font-semibold tracking-[2px] uppercase" style={{ color: '#A78BFA', fontFamily: SG }}>
-                AVAILABLE NOW
-              </p>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {DESTINATIONS.filter((d) => !d.locked).map((dest) => (
+            <div className="flex gap-1 mb-5">
+              {(['available', 'coming-soon'] as const).map((tab) => (
                 <button
-                  key={dest.id}
-                  onClick={() => {
-                    selectDest(dest)
-                    containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  key={tab}
+                  onClick={() => setDestTab(tab)}
+                  className="cursor-pointer px-4 py-1.5 rounded-full text-[11px] font-semibold transition-colors"
+                  style={{
+                    fontFamily: SG,
+                    background: destTab === tab ? 'rgba(124,58,237,0.15)' : 'transparent',
+                    color: destTab === tab ? '#A78BFA' : 'rgba(255,255,255,0.3)',
+                    border: destTab === tab ? '1px solid rgba(124,58,237,0.3)' : '1px solid transparent',
                   }}
-                  className="cursor-pointer rounded-xl overflow-hidden text-left flex flex-col"
-                  style={{ border: '1px solid rgba(124,58,237,0.2)', background: '#151020' }}
                 >
-                  <div className="relative h-[80px] overflow-hidden">
-                    <img src={dest.heroImage} alt={dest.city} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="p-2.5">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-sm">{dest.countryEmoji}</span>
-                      <p className="text-sm font-semibold text-white" style={{ fontFamily: SG }}>{dest.city}</p>
-                    </div>
-                    <p className="text-[10px] mt-0.5" style={{ color: '#A78BFA', fontFamily: SG }}>
-                      {dest.vibeTags.join(' · ')}
-                    </p>
-                  </div>
+                  {tab === 'available' ? `Available Now (${DESTINATIONS.filter(d => !d.locked).length})` : `Coming Soon (${DESTINATIONS.filter(d => d.locked).length})`}
                 </button>
               ))}
             </div>
-          </div>
 
-          {/* Coming Soon */}
-          <div className="mt-10">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-2 h-2 rounded-full" style={{ background: 'rgba(255,255,255,0.2)' }} />
-              <p className="text-[10px] font-semibold tracking-[2px] uppercase" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: SG }}>
-                COMING SOON — {DESTINATIONS.filter((d) => d.locked).length} DESTINATIONS
-              </p>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {DESTINATIONS.filter((d) => d.locked).map((dest) => (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {(destTab === 'available' ? DESTINATIONS.filter(d => !d.locked) : DESTINATIONS.filter(d => d.locked)).map((dest) => (
                 <button
                   key={dest.id}
                   onClick={() => {
                     selectDest(dest)
                     containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
                   }}
-                  className="cursor-pointer rounded-xl overflow-hidden text-left flex flex-col"
-                  style={{ border: '1px solid rgba(255,255,255,0.04)', background: '#0E0B15' }}
+                  className="cursor-pointer rounded-xl overflow-hidden text-left flex flex-col group"
+                  style={{ border: destTab === 'available' ? '1px solid rgba(124,58,237,0.2)' : '1px solid rgba(255,255,255,0.04)', background: destTab === 'available' ? '#151020' : '#0E0B15' }}
                 >
-                  <div className="relative h-[80px] overflow-hidden">
+                  <div className="relative h-[120px] md:h-[160px] overflow-hidden">
                     <img
                       src={dest.heroImage}
                       alt={dest.city}
-                      className="w-full h-full object-cover"
-                      style={{ filter: 'brightness(0.35) saturate(0.3)' }}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      style={dest.locked ? { filter: 'brightness(0.35) saturate(0.3)' } : undefined}
                     />
-                  </div>
-                  <div className="p-2.5">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-sm">{dest.countryEmoji}</span>
-                      <p className="text-sm font-medium truncate" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: SG }}>{dest.city}</p>
+                    <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,8,16,0.9) 0%, transparent 60%)' }} />
+                    <div className="absolute bottom-0 left-0 right-0 p-3">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sm">{dest.countryEmoji}</span>
+                        <p className="text-sm font-semibold" style={{ fontFamily: SG, color: dest.locked ? 'rgba(255,255,255,0.4)' : '#fff' }}>{dest.city}</p>
+                      </div>
+                      {!dest.locked && (
+                        <p className="text-[10px] mt-0.5" style={{ color: '#A78BFA', fontFamily: SG }}>
+                          {dest.vibeTags.join(' · ')}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </button>
