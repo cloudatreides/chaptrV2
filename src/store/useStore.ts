@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import type { CompanionRemix, CompanionSliders } from '../data/travel/companions'
 
 // ─── Types ───
 
@@ -102,6 +103,13 @@ export interface TripProgress {
   companionMemories: string[]
   startedAt: number
   totalEngagementMs: number
+}
+
+export interface CustomCompanion {
+  id: string
+  baseId: string
+  remix: CompanionRemix
+  sliders: CompanionSliders
 }
 
 export const DEFAULT_TRIP_PROGRESS: Omit<TripProgress, 'destinationId' | 'companionId' | 'companionSliders'> = {
@@ -267,6 +275,12 @@ interface StoreState {
   addTravelEngagementTime: (ms: number) => void
   completeTrip: () => void
   resetTrip: () => void
+
+  // ── Custom (remixed) companions ──
+  customCompanions: CustomCompanion[]
+  addCustomCompanion: (companion: CustomCompanion) => void
+  updateCustomCompanion: (id: string, remix: CompanionRemix) => void
+  deleteCustomCompanion: (id: string) => void
 
   // ── City votes (demand signal for locked destinations) ──
   cityVotes: string[]
@@ -615,6 +629,18 @@ export const useStore = create<StoreState>()(
         return true
       },
 
+      // ── Custom companions ──
+      customCompanions: [],
+      addCustomCompanion: (companion) => set((s) => ({
+        customCompanions: [...s.customCompanions, companion],
+      })),
+      updateCustomCompanion: (id, remix) => set((s) => ({
+        customCompanions: s.customCompanions.map((c) => c.id === id ? { ...c, remix } : c),
+      })),
+      deleteCustomCompanion: (id) => set((s) => ({
+        customCompanions: s.customCompanions.filter((c) => c.id !== id),
+      })),
+
       // ── City votes ──
       cityVotes: [],
       voteCityRequest: (cityId) => {
@@ -895,7 +921,7 @@ export const useStore = create<StoreState>()(
     }),
     {
       name: 'chaptr-v2-story',
-      version: 8,
+      version: 9,
       migrate: (persisted: any, version: number) => {
         if (version < 2 && persisted) {
           // Migrate from flat store to multi-character
@@ -966,6 +992,9 @@ export const useStore = create<StoreState>()(
           persisted.travelTrips = persisted.travelTrips ?? {}
           persisted.activeTripId = persisted.activeTripId ?? null
         }
+        if (version < 9 && persisted) {
+          persisted.customCompanions = persisted.customCompanions ?? []
+        }
         return persisted
       },
       partialize: (s) => ({
@@ -985,6 +1014,7 @@ export const useStore = create<StoreState>()(
         storyMoments: s.storyMoments,
         travelTrips: s.travelTrips,
         activeTripId: s.activeTripId,
+        customCompanions: s.customCompanions,
         cityVotes: s.cityVotes,
       }),
     }

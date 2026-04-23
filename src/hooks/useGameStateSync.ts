@@ -26,6 +26,7 @@ export function useGameStateSync() {
         groupCastThreads: state.groupCastThreads,
         favoriteCastIds: state.favoriteCastIds,
         storyMoments: state.storyMoments,
+        customCompanions: state.customCompanions,
       }
       queueSave(user.id, partialState)
     })

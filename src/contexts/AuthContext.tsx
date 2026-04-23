@@ -110,6 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         groupCastThreads: state.groupCastThreads,
         favoriteCastIds: state.favoriteCastIds,
         storyMoments: state.storyMoments,
+        customCompanions: state.customCompanions,
       }
       await saveGameState(userId, partialState)
     }

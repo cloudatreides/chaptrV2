@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Send, Loader2, MapPin, ChevronRight, Lock, Check, Play, ChevronDown, Camera } from 'lucide-react'
+import { ArrowLeft, Send, Loader2, MapPin, ChevronRight, Lock, Check, Play, ChevronDown, ImagePlus } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { getDestination } from '../data/travel/destinations'
 import { getTravelCompanion } from '../data/travel/companions'
@@ -176,7 +176,7 @@ export function TravelReaderPage() {
       let full = ''
       for await (const chunk of stream) {
         full += chunk
-        setStreamedText(full)
+        setStreamedText(full.replace(/\n?\[AFFINITY:[^\]]*\].*$/s, '').replace(/\n?\[SUGGESTIONS:[^\]]*\].*$/s, ''))
       }
 
       const parsed = parseAffinityDelta(full)
@@ -826,9 +826,25 @@ export function TravelReaderPage() {
               </button>
             )}
 
-            {/* Suggestions */}
-            {suggestions.length > 0 && !isStreaming && (
+            {/* Suggestions + Show me */}
+            {!isStreaming && (suggestions.length > 0 || messages.some((m) => m.role === 'character')) && (
               <div className="flex gap-2 mb-3 overflow-x-auto pb-1">
+                {messages.some((m) => m.role === 'character') && (
+                  <button
+                    onClick={handleShowMe}
+                    disabled={isGeneratingChatImage}
+                    className="shrink-0 text-xs px-3 py-1.5 rounded-full cursor-pointer transition-colors hover:bg-purple-500/20 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
+                    style={{
+                      fontFamily: "'Space Grotesk', sans-serif",
+                      background: 'rgba(124,58,237,0.15)',
+                      color: 'rgba(200,180,255,0.9)',
+                      border: '1px solid rgba(124,58,237,0.25)',
+                    }}
+                  >
+                    {isGeneratingChatImage ? <Loader2 size={11} className="animate-spin" /> : <ImagePlus size={11} />}
+                    Show me
+                  </button>
+                )}
                 {suggestions.map((s, i) => (
                   <button
                     key={i}
@@ -865,20 +881,6 @@ export function TravelReaderPage() {
                   border: '1px solid rgba(255,255,255,0.08)',
                 }}
               />
-              <button
-                type="button"
-                onClick={handleShowMe}
-                disabled={isStreaming || isGeneratingChatImage || messages.filter((m) => m.role === 'character').length === 0}
-                className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed transition-colors hover:bg-purple-500/10"
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
-                title="Generate a photo of what we're talking about"
-              >
-                {isGeneratingChatImage ? (
-                  <Loader2 size={16} className="text-purple-400 animate-spin" />
-                ) : (
-                  <Camera size={16} className="text-purple-400/70" />
-                )}
-              </button>
               <button
                 type="submit"
                 disabled={!input.trim() || isStreaming}

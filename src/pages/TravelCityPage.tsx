@@ -5,19 +5,12 @@ import { ArrowLeft, X, Shuffle, Camera, Plus, Trash2 } from 'lucide-react'
 import Cropper from 'react-easy-crop'
 import type { Area } from 'react-easy-crop'
 import { AppSidebar } from '../components/AppSidebar'
-import { useStore } from '../store/useStore'
+import { useStore, type CustomCompanion } from '../store/useStore'
 import { getDestination } from '../data/travel/destinations'
 import { TRAVEL_COMPANIONS, DEFAULT_SLIDERS, getCompanionIntro, type CompanionSliders, type CompanionRemix, type TravelCompanion } from '../data/travel/companions'
 import { stylizeSelfie } from '../lib/togetherAi'
 import { getCroppedImg } from '../lib/cropImage'
 import { uploadSelfieToStorage } from '../lib/supabase'
-
-interface CustomCompanion {
-  id: string
-  baseId: string
-  remix: CompanionRemix
-  sliders: CompanionSliders
-}
 
 export function TravelCityPage() {
   const { destinationId } = useParams<{ destinationId: string }>()
@@ -28,11 +21,14 @@ export function TravelCityPage() {
   const activeChar = characters.find((c) => c.id === activeCharacterId)
   const startTrip = useStore((s) => s.startTrip)
   const createCharacter = useStore((s) => s.createCharacter)
+  const customCompanions = useStore((s) => s.customCompanions)
+  const addCustomCompanion = useStore((s) => s.addCustomCompanion)
+  const updateCustomCompanion = useStore((s) => s.updateCustomCompanion)
+  const deleteCustomCompanion = useStore((s) => s.deleteCustomCompanion)
 
   // Selection: either a base companion id (e.g. "kai") or a custom companion id (e.g. "custom-abc123")
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [sliders, setSliders] = useState<CompanionSliders>({ ...DEFAULT_SLIDERS })
-  const [customCompanions, setCustomCompanions] = useState<CustomCompanion[]>([])
 
   // Profile modal
   const [modalCompanion, setModalCompanion] = useState<TravelCompanion | null>(null)
@@ -151,9 +147,7 @@ export function TravelCityPage() {
     }
 
     if (editingCustomId) {
-      setCustomCompanions((prev) =>
-        prev.map((c) => c.id === editingCustomId ? { ...c, remix: remixData } : c)
-      )
+      updateCustomCompanion(editingCustomId, remixData)
       setSelectedId(editingCustomId)
     } else {
       const newId = `custom-${crypto.randomUUID().slice(0, 8)}`
@@ -163,7 +157,7 @@ export function TravelCityPage() {
         remix: remixData,
         sliders: { ...sliders },
       }
-      setCustomCompanions((prev) => [...prev, newCustom])
+      addCustomCompanion(newCustom)
       setSelectedId(newId)
       setSliders(newCustom.sliders)
     }
@@ -171,7 +165,7 @@ export function TravelCityPage() {
   }
 
   function handleDeleteCustom(id: string) {
-    setCustomCompanions((prev) => prev.filter((c) => c.id !== id))
+    deleteCustomCompanion(id)
     if (selectedId === id) setSelectedId(null)
   }
 
