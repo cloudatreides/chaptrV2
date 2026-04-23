@@ -82,8 +82,8 @@ function SectionHeader({ tag, title, description, className }: { tag: string; ti
 
 function DestinationCarousel() {
   const allDests = ALL_DESTINATIONS
-  const cardWidth = 200
-  const gap = 12
+  const cardWidth = 280
+  const gap = 16
   const duration = allDests.length * 3.5
 
   return (
@@ -101,30 +101,30 @@ function DestinationCarousel() {
         {[...allDests, ...allDests].map((dest, i) => (
           <div
             key={`${dest.id}-${i}`}
-            className="rounded-xl overflow-hidden shrink-0"
-            style={{ width: cardWidth, border: '1px solid rgba(255,255,255,0.06)' }}
+            className="rounded-2xl overflow-hidden shrink-0 flex flex-col"
+            style={{ width: cardWidth, background: '#111016', border: '1px solid rgba(255,255,255,0.03)' }}
           >
-            <div className="relative w-full h-[120px] overflow-hidden">
+            <div className="relative w-full h-44 overflow-hidden">
               <img src={dest.heroImage} alt={dest.city} className="w-full h-full object-cover" />
-              <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,8,16,0.95) 0%, rgba(10,8,16,0.4) 60%, transparent)' }} />
+              <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 50%, #111016 100%)' }} />
               {dest.locked && (
                 <span
-                  className="absolute top-2 right-2 text-[9px] font-semibold px-2 py-0.5 rounded-full"
+                  className="absolute top-2.5 right-2.5 text-[9px] font-semibold px-2 py-0.5 rounded-full"
                   style={{ background: 'rgba(0,0,0,0.6)', color: 'rgba(255,255,255,0.5)', fontFamily: SG, backdropFilter: 'blur(4px)' }}
                 >
                   Soon
                 </span>
               )}
-              <div className="absolute bottom-0 left-0 right-0 p-2.5">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs">{dest.countryEmoji}</span>
-                  <p className="text-white text-xs font-bold" style={{ fontFamily: SG }}>{dest.city}</p>
-                </div>
-                <div className="flex gap-1 mt-1">
-                  {dest.vibeTags.slice(0, 2).map((tag) => (
-                    <span key={tag} className="text-[8px] font-medium px-1.5 py-0.5 rounded" style={{ background: 'rgba(124,58,237,0.2)', color: '#c4b5fd', fontFamily: SG }}>{tag}</span>
-                  ))}
-                </div>
+            </div>
+            <div className="flex flex-col gap-1 p-4">
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm">{dest.countryEmoji}</span>
+                <p className="text-white font-semibold text-sm" style={{ fontFamily: SG }}>{dest.city}</p>
+              </div>
+              <div className="flex gap-1.5">
+                {dest.vibeTags.slice(0, 2).map((tag) => (
+                  <span key={tag} className="text-[10px] font-medium" style={{ color: '#A78BFA', fontFamily: SG }}>{tag}</span>
+                ))}
               </div>
             </div>
           </div>
