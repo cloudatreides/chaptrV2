@@ -501,9 +501,17 @@ export function TravelHomePage() {
                         <p className="text-sm font-semibold" style={{ fontFamily: SG, color: dest.locked ? 'rgba(255,255,255,0.4)' : '#fff' }}>{dest.city}</p>
                       </div>
                       {!dest.locked && (
-                        <p className="text-[10px] mt-0.5" style={{ color: '#A78BFA', fontFamily: SG }}>
-                          {dest.vibeTags.join(' · ')}
-                        </p>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {dest.vibeTags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="text-[9px] font-medium px-1.5 py-0.5 rounded-full"
+                              style={{ background: 'rgba(124,58,237,0.25)', color: '#C4B5FD', backdropFilter: 'blur(8px)', fontFamily: SG }}
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
                       )}
                     </div>
                   </div>

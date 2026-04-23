@@ -278,22 +278,22 @@ export function TravelCityPage() {
           {/* Twin Banner */}
           {activeChar?.selfieUrl && (
             <div
-              className="flex items-center gap-3 rounded-xl p-4 mb-8"
+              className="inline-flex items-center gap-3 rounded-xl px-4 py-3 mb-8"
               style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.15)' }}
             >
-              <img src={activeChar.selfieUrl} alt="" className="w-10 h-10 rounded-full object-cover" />
-              <div className="flex-1 min-w-0">
+              <img src={activeChar.selfieUrl} alt="" className="w-9 h-9 rounded-full object-cover" />
+              <div>
                 <p className="text-white text-sm font-medium" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                   Your twin — You'll appear in every scene
                 </p>
-                <button
-                  onClick={() => navigate(`/edit-character/${activeCharacterId}`)}
-                  className="text-purple-400/70 text-xs hover:text-purple-400 transition-colors cursor-pointer"
-                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                >
-                  Change
-                </button>
               </div>
+              <button
+                onClick={() => navigate(`/edit-character/${activeCharacterId}`)}
+                className="text-purple-400/70 text-xs hover:text-purple-400 transition-colors cursor-pointer ml-2"
+                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+              >
+                Change
+              </button>
             </div>
           )}
 

@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { motion } from 'framer-motion'
-import { ArrowRight, Globe, BookOpen, ChevronRight } from 'lucide-react'
+import { ArrowRight, Globe, BookOpen, ChevronRight, X } from 'lucide-react'
+import { AnimatePresence } from 'framer-motion'
 import { AuthModal } from '../components/AuthModal'
 import { UNIVERSES } from '../data/storyData'
 import { DESTINATIONS as ALL_DESTINATIONS } from '../data/travel/destinations'
@@ -80,7 +81,7 @@ function SectionHeader({ tag, title, description, className }: { tag: string; ti
 
 // ─── Destination Card ───
 
-function DestinationCarousel() {
+function DestinationCarousel({ onCardClick }: { onCardClick?: (dest: typeof ALL_DESTINATIONS[number]) => void }) {
   const allDests = [...ALL_DESTINATIONS].sort((a, b) => Number(a.locked ?? false) - Number(b.locked ?? false))
   const cardWidth = 280
   const gap = 16
@@ -101,8 +102,9 @@ function DestinationCarousel() {
         {[...allDests, ...allDests].map((dest, i) => (
           <div
             key={`${dest.id}-${i}`}
-            className="rounded-2xl overflow-hidden shrink-0 flex flex-col"
+            className="rounded-2xl overflow-hidden shrink-0 flex flex-col cursor-pointer"
             style={{ width: cardWidth, background: '#111016', border: '1px solid rgba(255,255,255,0.03)' }}
+            onClick={() => onCardClick?.(dest)}
           >
             <div className="relative w-full h-44 overflow-hidden">
               <img src={dest.heroImage} alt={dest.city} className="w-full h-full object-cover" />
@@ -178,6 +180,7 @@ export function LandingPage() {
   const navigate = useNavigate()
   const { session } = useAuth()
   const [showAuth, setShowAuth] = useState(false)
+  const [previewDest, setPreviewDest] = useState<typeof ALL_DESTINATIONS[number] | null>(null)
 
   function handleCTA() {
     if (session) {
@@ -190,6 +193,70 @@ export function LandingPage() {
   return (
     <div className="bg-[#0D0B12]">
       <AuthModal open={showAuth} onClose={() => setShowAuth(false)} />
+
+      {/* Destination Preview Modal */}
+      <AnimatePresence>
+        {previewDest && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
+            onClick={() => setPreviewDest(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md rounded-2xl overflow-hidden"
+              style={{ background: '#13101c', border: '1px solid rgba(255,255,255,0.08)' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="relative h-52 overflow-hidden">
+                <img src={previewDest.heroImage} alt={previewDest.city} className="w-full h-full object-cover" />
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 40%, #13101c 100%)' }} />
+                <button
+                  onClick={() => setPreviewDest(null)}
+                  className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer"
+                  style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
+                >
+                  <X size={16} className="text-white/70" />
+                </button>
+              </div>
+              <div className="px-5 pb-5 -mt-4 relative">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xl">{previewDest.countryEmoji}</span>
+                  <h3 className="text-white text-2xl font-bold" style={{ fontFamily: "'Syne', sans-serif" }}>
+                    {previewDest.city}
+                  </h3>
+                </div>
+                <p className="text-white/50 text-sm mb-3" style={{ fontFamily: SG }}>
+                  {previewDest.description}
+                </p>
+                <div className="flex flex-wrap gap-2 mb-5">
+                  {previewDest.vibeTags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="text-[11px] font-medium px-2.5 py-1 rounded-full"
+                      style={{ background: 'rgba(124,58,237,0.1)', color: '#A78BFA', border: '1px solid rgba(124,58,237,0.15)', fontFamily: SG }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+                <button
+                  onClick={() => { setPreviewDest(null); handleCTA() }}
+                  className="w-full py-3 rounded-xl font-semibold text-white text-sm cursor-pointer"
+                  style={{ background: 'linear-gradient(90deg, #7C3AED, #A78BFA)', fontFamily: SG }}
+                >
+                  Sign up to explore {previewDest.city} →
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ═══ MOBILE ═══ */}
       <div className="md:hidden">
@@ -292,7 +359,7 @@ export function LandingPage() {
               title="Explore the world, scene by scene"
               description="Pick a city, choose a companion, and live your dream trip scene by scene."
             />
-            <DestinationCarousel />
+            <DestinationCarousel onCardClick={setPreviewDest} />
           </div>
         </section>
 
@@ -431,7 +498,7 @@ export function LandingPage() {
               description="Pick a city, choose a companion, and live your dream trip scene by scene."
               className="mb-8"
             />
-            <DestinationCarousel />
+            <DestinationCarousel onCardClick={setPreviewDest} />
           </div>
         </section>
 
