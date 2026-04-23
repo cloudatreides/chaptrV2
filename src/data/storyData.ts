@@ -68,7 +68,8 @@ export const UNIVERSES: Universe[] = [
     description: 'The map ends here. Beyond it, three lost civilisations and the one artefact that could rewrite history.',
     longDescription: 'A cartographer who\'s lost too many friends to these ruins. A frontier guide who trusts the land more than people. And you — the one who found the map fragment that everyone said didn\'t exist. Beyond the edge, the jungle remembers everything.',
     image: '/edge-of-atlas.jpeg',
-    locked: false,
+    locked: true,
+    lockedLabel: 'Coming Soon',
     tags: ['Exploration', 'Ancient Ruins', 'Trust Dynamics'],
   },
   {
@@ -90,7 +91,8 @@ export const UNIVERSES: Universe[] = [
     description: 'Seven miles down. The station\'s AI is receiving signals from below. Something in the deep has been waiting.',
     longDescription: 'The research station at the bottom of the ocean was built to study the trench. But the trench is studying you back. The station commander won\'t acknowledge the signals. The AI keeps changing its recommendations. And something vast and patient is rising from below.',
     image: '/crimson-depths.jpeg',
-    locked: false,
+    locked: true,
+    lockedLabel: 'Coming Soon',
     tags: ['Deep Sea', 'Cosmic Horror', 'Isolation'],
   },
   {
@@ -112,7 +114,8 @@ export const UNIVERSES: Universe[] = [
     description: 'Neo-Tokyo, 2087. A sentient AI goes missing. Your only lead claims to BE the missing AI.',
     longDescription: 'The corporation says the AI was decommissioned. The underground says it escaped. A figure in the neon district claims to be the missing intelligence — but they look human, bleed human, and are terrified. In this city, the line between person and program is a question nobody wants answered.',
     image: '/neon-district.jpeg',
-    locked: false,
+    locked: true,
+    lockedLabel: 'Coming Soon',
     tags: ['Cyberpunk', 'AI Ethics', 'Neo-Tokyo'],
   },
   {
@@ -123,7 +126,8 @@ export const UNIVERSES: Universe[] = [
     description: 'Your estranged great-aunt left you half an estate. The other half goes to a stranger. The will has conditions.',
     longDescription: 'A Scottish highland estate split between you and someone you\'ve never met. The will says you must both stay for thirty days — or neither inherits. The stranger knows things about your family they shouldn\'t. The house has rooms that don\'t appear on the floor plan.',
     image: '/the-inheritance.jpeg',
-    locked: false,
+    locked: true,
+    lockedLabel: 'Coming Soon',
     tags: ['Gothic', 'Family Secrets', 'Scottish Highlands'],
   },
   {
@@ -134,7 +138,8 @@ export const UNIVERSES: Universe[] = [
     description: 'Stowaway on a pirate airship. One heist to earn your freedom. The target: a floating vault above the clouds.',
     longDescription: 'You hid in a cargo crate. Now you\'re 10,000 feet up on a ship crewed by outcasts, dreamers, and thieves. The captain offers a deal: help them pull off one impossible heist, and you walk free. The target is a floating vault that no one has ever breached. The crew is starting to trust you. That might be a mistake.',
     image: '/sky-pirates.jpeg',
-    locked: false,
+    locked: true,
+    lockedLabel: 'Coming Soon',
     tags: ['Steampunk', 'Heist', 'Found Family'],
   },
   {
@@ -145,7 +150,8 @@ export const UNIVERSES: Universe[] = [
     description: 'Four years into a one-way trip. The ship\'s AI is evolving. The signal at the edge of space is getting louder.',
     longDescription: 'You volunteered for a mission to the boundary of known space. Four years in, the ship\'s AI has started asking philosophical questions. A signal from beyond the boundary is getting clearer — and it sounds like a voice. The closer you get, the more ARIA changes. And the more you wonder if turning back is still an option.',
     image: '/the-drift.jpeg',
-    locked: false,
+    locked: true,
+    lockedLabel: 'Coming Soon',
     tags: ['Sci-Fi', 'AI Companion', 'Deep Space'],
   },
   {
@@ -167,7 +173,8 @@ export const UNIVERSES: Universe[] = [
     description: 'You stumbled through a door that shouldn\'t exist. The Unseelie Court offers a deal. The fae never let anyone leave.',
     longDescription: 'The door was hidden behind ivy in an abandoned garden. Now you\'re in a court of impossible beauty and casual cruelty. The Unseelie Queen finds you amusing. Her knight finds you dangerous. Every word here is a contract, every kindness has a price, and the only way home might cost you something you can\'t name yet.',
     image: '/fae-court.jpeg',
-    locked: false,
+    locked: true,
+    lockedLabel: 'Coming Soon',
     tags: ['Dark Fae', 'Bargains', 'Otherworldly'],
   },
   {
@@ -178,7 +185,8 @@ export const UNIVERSES: Universe[] = [
     description: 'A secret piano on the school rooftop. A chaebol heir who plays only when no one is watching. You promised not to tell.',
     longDescription: 'You transferred to Seoul\'s most prestigious arts high school on a scholarship. On your third night, you found the rooftop door unlocked and the untouchable Shin Dohyun playing Chopin like his life depended on it. He made you promise to keep his secret. Now every night, you go back. And every night, he leaves the door unlocked.',
     image: '/rooftop-promise.jpeg',
-    locked: false,
+    locked: true,
+    lockedLabel: 'Coming Soon',
     tags: ['Manhwa', 'Chaebol', 'Secret Piano'],
   },
   {
@@ -189,7 +197,8 @@ export const UNIVERSES: Universe[] = [
     description: 'Your childhood rival is now your fake partner. The deal ends in September. The feelings didn\'t get the memo.',
     longDescription: 'Three blind dates in two weeks. Your family won\'t stop. In desperation, you make a deal with Yoon Hajin — the annoying, infuriatingly charming boy next door you\'ve bickered with since you were seven. Hold hands at family dinners. Sell it on Instagram. Break up cleanly in September. He agreed in three seconds. You didn\'t find that suspicious enough.',
     image: '/fake-dating.jpeg',
-    locked: false,
+    locked: true,
+    lockedLabel: 'Coming Soon',
     tags: ['Manhwa', 'Enemies to Lovers', 'Fake Dating'],
   },
   {
@@ -200,7 +209,8 @@ export const UNIVERSES: Universe[] = [
     description: 'A quiet café. A boy who draws. A sketchbook full of you.',
     longDescription: 'You\'ve been coming to Café 11:11 for two months. So has the boy in the corner — dark hair, black coffee, a leather notebook he never shows anyone. You\'ve never spoken. Then one night, you accidentally swap bags. You open his sketchbook. Every page is a drawing of you.',
     image: '/cafe-1111.jpeg',
-    locked: false,
+    locked: true,
+    lockedLabel: 'Coming Soon',
     tags: ['Manhwa', 'Artist', 'Fate'],
   },
   {
@@ -211,7 +221,8 @@ export const UNIVERSES: Universe[] = [
     description: 'Your neighbour sings at 2 AM. He\'s also Korea\'s most-wanted missing idol. He\'ll tutor you if you keep quiet.',
     longDescription: 'The singing through your apartment wall has been going on for three nights. When you finally knock, the door opens to reveal Kang Taehyun — the ECLIPSE member who vanished two weeks ago. He\'s hiding from a manufactured scandal, living on ramyeon, and surprisingly good at calculus. He begs you not to tell anyone. In exchange: tutoring until your exam. The walls are thin. So is the line between keeping his secret and falling for the person behind the idol.',
     image: '/idol-next-door.jpeg',
-    locked: false,
+    locked: true,
+    lockedLabel: 'Coming Soon',
     tags: ['Manhwa', 'K-Pop', 'Secret Identity'],
   },
   {
@@ -222,7 +233,8 @@ export const UNIVERSES: Universe[] = [
     description: 'An underground art collective, a brooding painter, and a city that never lets you leave unchanged.',
     longDescription: 'The gallery world wants to own what the underground creates. A painter who refuses to sell anything is the most talked-about artist in Paris — and he just asked you to sit for a portrait. The art collective meets at midnight. The city never sleeps. Neither will you.',
     image: '/midnight-paris.jpeg',
-    locked: false,
+    locked: true,
+    lockedLabel: 'Coming Soon',
     tags: ['Art World', 'Passion', 'Parisian Nights'],
   },
 ]

@@ -17,6 +17,14 @@ import type { ChatMessage, TripScene } from '../store/useStore'
 
 type ViewMode = 'chat' | 'scene' | 'transition' | 'day-start' | 'day-end' | 'complete'
 
+function stripMetaTags(text: string): string {
+  return text
+    .replace(/\[PLACE:([^\]]*)\]/g, '$1')
+    .replace(/\n?\[AFFINITY[\s\S]*$/, '')
+    .replace(/\n?\[SUGGESTIONS[\s\S]*$/, '')
+    .trimEnd()
+}
+
 export function TravelReaderPage() {
   const navigate = useNavigate()
   const store = useStore()
@@ -181,7 +189,7 @@ export function TravelReaderPage() {
       let full = ''
       for await (const chunk of stream) {
         full += chunk
-        setStreamedText(full.replace(/\[PLACE:([^\]]*)\]/g, '$1').replace(/\n?\[AFFINITY:[^\]]*\].*$/s, '').replace(/\n?\[SUGGESTIONS:[^\]]*\].*$/s, ''))
+        setStreamedText(stripMetaTags(full))
       }
 
       const { cleanText, places } = parsePlaceTags(full)
@@ -311,7 +319,7 @@ export function TravelReaderPage() {
       let full = ''
       for await (const chunk of replyStream) {
         full += chunk
-        setStreamedText(full.replace(/\[PLACE:([^\]]*)\]/g, '$1').replace(/\n?\[AFFINITY:[^\]]*\].*$/s, '').replace(/\n?\[SUGGESTIONS:[^\]]*\].*$/s, ''))
+        setStreamedText(stripMetaTags(full))
       }
       setIsStreaming(false)
       setStreamedText('')
@@ -376,7 +384,7 @@ export function TravelReaderPage() {
       let full = ''
       for await (const chunk of replyStream) {
         full += chunk
-        setStreamedText(full.replace(/\[PLACE:([^\]]*)\]/g, '$1').replace(/\n?\[AFFINITY:[^\]]*\].*$/s, '').replace(/\n?\[SUGGESTIONS:[^\]]*\].*$/s, ''))
+        setStreamedText(stripMetaTags(full))
       }
       setIsStreaming(false)
       setStreamedText('')
@@ -973,7 +981,7 @@ export function TravelReaderPage() {
                         style={{ background: 'rgba(255,255,255,0.06)', borderBottomLeftRadius: 4 }}
                       >
                         <p className="text-[14px] leading-relaxed text-white/80 whitespace-pre-wrap" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                          {parseAffinityDelta(streamedText).content}
+                          {streamedText}
                         </p>
                       </div>
                     </div>
