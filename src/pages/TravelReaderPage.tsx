@@ -7,7 +7,7 @@ import { getDestination } from '../data/travel/destinations'
 import { getTravelCompanion } from '../data/travel/companions'
 import { generateDayItinerary, streamTravelScene, streamTravelChatReply, generateTravelOpeningMessage } from '../lib/claude/travel'
 import { parseAffinityDelta } from '../lib/claude/affinity'
-import { parsePlaceTags, fetchPlaceImage } from '../lib/imageSearch'
+import { parsePlaceTags, parseFoodTags, fetchPlaceImage, fetchFoodImage } from '../lib/imageSearch'
 import { extractMemories } from '../lib/claude/memory'
 import { generateSceneImage as generateImage, generateCharacterPortrait } from '../lib/togetherAi'
 import { buildReactionImagePrompt } from '../data/chatActions'
@@ -20,6 +20,7 @@ type ViewMode = 'chat' | 'scene' | 'transition' | 'day-start' | 'day-end' | 'com
 function stripMetaTags(text: string): string {
   return text
     .replace(/\[PLACE:([^\]]*)\]/g, '$1')
+    .replace(/\[FOOD:([^\]]*)\]/g, '$1')
     .replace(/\n?\[AFFINITY[\s\S]*$/, '')
     .replace(/\n?\[SUGGESTIONS[\s\S]*$/, '')
     .trimEnd()
@@ -219,7 +220,8 @@ export function TravelReaderPage() {
       }
 
       const { cleanText, places } = parsePlaceTags(full)
-      const parsed = parseAffinityDelta(cleanText)
+      const { cleanText: cleanText2, foods } = parseFoodTags(cleanText)
+      const parsed = parseAffinityDelta(cleanText2)
       const replyMsg: ChatMessage = {
         role: 'character',
         content: parsed.content,
@@ -253,6 +255,27 @@ export function TravelReaderPage() {
             addTravelDayChatMessage(trip.currentDay, imageMsg)
           }
         }).catch(() => {})
+      }
+
+      // Fetch real photos for tagged food
+      if (foods.length > 0 && destination) {
+        for (const food of foods) {
+          fetchFoodImage(food, destination.city).then((imageUrl) => {
+            if (!imageUrl) return
+            const imageMsg: ChatMessage = {
+              role: 'character',
+              content: `🍽️ ${food}`,
+              characterId: trip.companionId,
+              timestamp: Date.now(),
+              imageUrl,
+            }
+            if (isPlanning) {
+              addTravelPlanningMessage(imageMsg)
+            } else {
+              addTravelDayChatMessage(trip.currentDay, imageMsg)
+            }
+          }).catch(() => {})
+        }
       }
 
       // Extract memories from conversation every 4 messages
@@ -1048,6 +1071,38 @@ export function TravelReaderPage() {
                                 style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                               >
                                 {msg.content.replace('📍 ', '')}
+                              </p>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )
+                    }
+
+                    if (msg.content.startsWith('🍽️') && msg.imageUrl) {
+                      return (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="flex justify-start my-1"
+                        >
+                          <div
+                            className="rounded-xl overflow-hidden"
+                            style={{ maxWidth: 320, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}
+                          >
+                            <img
+                              src={msg.imageUrl}
+                              alt=""
+                              className="w-full"
+                              style={{ aspectRatio: '4/3', objectFit: 'cover' }}
+                              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                            />
+                            <div className="px-3 py-2">
+                              <p
+                                className="text-white/50 text-xs"
+                                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                              >
+                                {msg.content.replace('🍽️ ', '')}
                               </p>
                             </div>
                           </div>

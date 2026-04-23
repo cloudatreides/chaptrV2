@@ -26,3 +26,30 @@ export function parsePlaceTags(text: string): { cleanText: string; places: strin
   })
   return { cleanText: cleanText.trim(), places }
 }
+
+export async function fetchFoodImage(dishName: string, city: string): Promise<string | null> {
+  const query = `${dishName} ${city} food dish`
+  if (cache.has(query)) return cache.get(query)!
+
+  try {
+    const resp = await fetch(`/api/image-search?q=${encodeURIComponent(query)}`)
+    if (!resp.ok) return null
+
+    const data = await resp.json()
+    const url = data?.url ?? null
+    cache.set(query, url)
+    return url
+  } catch {
+    cache.set(query, null)
+    return null
+  }
+}
+
+export function parseFoodTags(text: string): { cleanText: string; foods: string[] } {
+  const foods: string[] = []
+  const cleanText = text.replace(/\[FOOD:([^\]]+)\]/g, (_, name) => {
+    foods.push(name.trim())
+    return name.trim()
+  })
+  return { cleanText: cleanText.trim(), foods }
+}
