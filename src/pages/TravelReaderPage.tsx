@@ -748,6 +748,40 @@ export function TravelReaderPage() {
                       )
                     }
 
+                    {/* Place photo card */}
+                    if (msg.content.startsWith('📍') && msg.imageUrl) {
+                      return (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="flex justify-start my-1"
+                        >
+                          <div
+                            className="rounded-xl overflow-hidden"
+                            style={{ maxWidth: 320, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}
+                          >
+                            <img
+                              src={msg.imageUrl}
+                              alt=""
+                              className="w-full"
+                              style={{ aspectRatio: '4/3', objectFit: 'cover' }}
+                              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                            />
+                            <div className="px-3 py-2 flex items-center gap-1.5">
+                              <MapPin size={10} className="text-purple-400/60 shrink-0" />
+                              <p
+                                className="text-white/50 text-xs"
+                                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                              >
+                                {msg.content.replace('📍 ', '')}
+                              </p>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )
+                    }
+
                     return (
                     <motion.div
                       key={i}
