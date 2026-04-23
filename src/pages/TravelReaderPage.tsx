@@ -346,12 +346,13 @@ export function TravelReaderPage() {
     const isPlanning = trip.phase === 'planning'
     const addMsg = isPlanning ? addTravelPlanningMessage : (msg: ChatMessage) => addTravelDayChatMessage(trip.currentDay, msg)
 
-    addMsg({ role: 'user', content: '🤝 Held hands', characterId: 'player', timestamp: Date.now() })
+    addMsg({ role: 'user', content: `💕 Reaching out to hold ${companionName}'s hand...`, characterId: 'player', timestamp: Date.now() })
 
     const currentScene = getCurrentScene()
     const locationContext = currentScene ? `${currentScene.location}, ${destination.city}` : destination.city
     const companionDesc = companion.character.portraitPrompt.split(',').slice(0, 4).join(',')
-    const scenePrompt = `anime style, romantic cinematic scene, two people walking side by side holding hands on a beautiful street in ${locationContext}. One is ${companionDesc}. Warm golden hour lighting, soft bokeh background, intimate moment, K-drama aesthetic, half-body shot from behind showing their held hands, high quality anime art`
+    const playerGender = activeChar?.gender === 'male' ? 'a young man' : 'a young woman'
+    const scenePrompt = `anime style, romantic cinematic scene, ${playerGender} and ${companionDesc} walking side by side holding hands on a beautiful street in ${locationContext}. Warm golden hour lighting, soft bokeh background, intimate moment, K-drama aesthetic, half-body shot from behind showing their held hands, high quality anime art`
 
     try {
       const [imageUrl, replyStream] = await Promise.all([
