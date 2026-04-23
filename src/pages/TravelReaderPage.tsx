@@ -9,7 +9,8 @@ import { generateDayItinerary, streamTravelScene, streamTravelChatReply, generat
 import { parseAffinityDelta } from '../lib/claude/affinity'
 import { parsePlaceTags, fetchPlaceImage } from '../lib/imageSearch'
 import { extractMemories } from '../lib/claude/memory'
-import { generateSceneImage as generateImage } from '../lib/togetherAi'
+import { generateSceneImage as generateImage, generateCharacterPortrait } from '../lib/togetherAi'
+import { buildReactionImagePrompt } from '../data/chatActions'
 import { DayTransition } from '../components/travel/DayTransition'
 import { TripComplete } from '../components/travel/TripComplete'
 import type { ChatMessage, TripScene } from '../store/useStore'
@@ -177,7 +178,7 @@ export function TravelReaderPage() {
       let full = ''
       for await (const chunk of stream) {
         full += chunk
-        setStreamedText(full.replace(/\[PLACE:[^\]]*\]/g, '').replace(/\n?\[AFFINITY:[^\]]*\].*$/s, '').replace(/\n?\[SUGGESTIONS:[^\]]*\].*$/s, ''))
+        setStreamedText(full.replace(/\[PLACE:([^\]]*)\]/g, '$1').replace(/\n?\[AFFINITY:[^\]]*\].*$/s, '').replace(/\n?\[SUGGESTIONS:[^\]]*\].*$/s, ''))
       }
 
       const { cleanText, places } = parsePlaceTags(full)
@@ -266,6 +267,122 @@ export function TravelReaderPage() {
       }
     } catch (e) {
       console.error('Show me image error:', e)
+    } finally {
+      setIsGeneratingChatImage(false)
+    }
+  }
+
+  async function handleBuyGift() {
+    if (!trip || !companion || !destination || isGeneratingChatImage || isStreaming) return
+
+    setIsGeneratingChatImage(true)
+    const isPlanning = trip.phase === 'planning'
+    const addMsg = isPlanning ? addTravelPlanningMessage : (msg: ChatMessage) => addTravelDayChatMessage(trip.currentDay, msg)
+
+    addMsg({ role: 'user', content: '🎁 Bought a gift', characterId: 'player', timestamp: Date.now() })
+
+    try {
+      const portraitPrompt = buildReactionImagePrompt(
+        companion.character.portraitPrompt,
+        'mystery-box',
+        'gift',
+      )
+      const [imageUrl, replyStream] = await Promise.all([
+        generateCharacterPortrait(portraitPrompt),
+        streamTravelChatReply({
+          companionId: trip.companionId,
+          companionSliders: trip.companionSliders,
+          companionRemix: trip.companionRemix,
+          destinationId: trip.destinationId,
+          messages: [...(isPlanning ? trip.planningChatHistory : (trip.dayChatHistories[trip.currentDay] ?? [])),
+            { role: 'user' as const, content: 'I just bought you a gift while we were walking around. React with surprise and genuine happiness. Be flattered and a little flustered.', characterId: 'player', timestamp: Date.now() }],
+          chatType: 'freeform',
+          tripContext: buildTripContext(),
+          companionMemories: trip.companionMemories,
+          travelAffinityScore: trip.travelAffinityScore,
+          bio: activeChar?.bio ?? null,
+        }),
+      ])
+
+      setIsStreaming(true)
+      let full = ''
+      for await (const chunk of replyStream) {
+        full += chunk
+        setStreamedText(full.replace(/\n?\[AFFINITY:[^\]]*\].*$/s, '').replace(/\n?\[SUGGESTIONS:[^\]]*\].*$/s, ''))
+      }
+      setIsStreaming(false)
+      setStreamedText('')
+
+      const parsed = parseAffinityDelta(full)
+      if (imageUrl) {
+        addMsg({ role: 'character', content: parsed.content, characterId: trip.companionId, timestamp: Date.now(), imageUrl })
+      } else {
+        addMsg({ role: 'character', content: parsed.content, characterId: trip.companionId, timestamp: Date.now() })
+      }
+      updateTravelAffinity(Math.max(parsed.delta, 3))
+      if (parsed.suggestions) setSuggestions(parsed.suggestions)
+    } catch (e) {
+      console.error('Buy gift error:', e)
+      setIsStreaming(false)
+      setStreamedText('')
+    } finally {
+      setIsGeneratingChatImage(false)
+    }
+  }
+
+  async function handleHoldHands() {
+    if (!trip || !companion || !destination || isGeneratingChatImage || isStreaming) return
+
+    setIsGeneratingChatImage(true)
+    const isPlanning = trip.phase === 'planning'
+    const addMsg = isPlanning ? addTravelPlanningMessage : (msg: ChatMessage) => addTravelDayChatMessage(trip.currentDay, msg)
+
+    addMsg({ role: 'user', content: '🤝 Held hands', characterId: 'player', timestamp: Date.now() })
+
+    const currentScene = getCurrentScene()
+    const locationContext = currentScene ? `${currentScene.location}, ${destination.city}` : destination.city
+    const companionDesc = companion.character.portraitPrompt.split(',').slice(0, 4).join(',')
+    const scenePrompt = `anime style, romantic cinematic scene, two people walking side by side holding hands on a beautiful street in ${locationContext}. One is ${companionDesc}. Warm golden hour lighting, soft bokeh background, intimate moment, K-drama aesthetic, half-body shot from behind showing their held hands, high quality anime art`
+
+    try {
+      const [imageUrl, replyStream] = await Promise.all([
+        generateTravelImage(scenePrompt, activeChar?.selfieUrl),
+        streamTravelChatReply({
+          companionId: trip.companionId,
+          companionSliders: trip.companionSliders,
+          companionRemix: trip.companionRemix,
+          destinationId: trip.destinationId,
+          messages: [...(isPlanning ? trip.planningChatHistory : (trip.dayChatHistories[trip.currentDay] ?? [])),
+            { role: 'user' as const, content: 'I just reached over and held your hand while we were walking. React with surprise, then warmth. Be flirtatious about it.', characterId: 'player', timestamp: Date.now() }],
+          chatType: 'freeform',
+          tripContext: buildTripContext(),
+          companionMemories: trip.companionMemories,
+          travelAffinityScore: trip.travelAffinityScore,
+          bio: activeChar?.bio ?? null,
+        }),
+      ])
+
+      setIsStreaming(true)
+      let full = ''
+      for await (const chunk of replyStream) {
+        full += chunk
+        setStreamedText(full.replace(/\n?\[AFFINITY:[^\]]*\].*$/s, '').replace(/\n?\[SUGGESTIONS:[^\]]*\].*$/s, ''))
+      }
+      setIsStreaming(false)
+      setStreamedText('')
+
+      const parsed = parseAffinityDelta(full)
+      if (imageUrl) {
+        addMsg({ role: 'character', content: parsed.content, characterId: trip.companionId, timestamp: Date.now(), imageUrl })
+      } else {
+        addMsg({ role: 'character', content: parsed.content, characterId: trip.companionId, timestamp: Date.now() })
+      }
+      updateTravelAffinity(Math.max(parsed.delta, 3))
+      if (parsed.suggestions) setSuggestions(parsed.suggestions)
+    } catch (e) {
+      console.error('Hold hands error:', e)
+      setIsStreaming(false)
+      setStreamedText('')
     } finally {
       setIsGeneratingChatImage(false)
     }
@@ -894,24 +1011,52 @@ export function TravelReaderPage() {
               </button>
             )}
 
-            {/* Suggestions + Show me */}
+            {/* Actions + Suggestions */}
             {!isStreaming && (suggestions.length > 0 || messages.some((m) => m.role === 'character')) && (
               <div className="flex gap-2 mb-3 overflow-x-auto pb-1">
                 {messages.some((m) => m.role === 'character') && (
-                  <button
-                    onClick={handleShowMe}
-                    disabled={isGeneratingChatImage}
-                    className="shrink-0 text-xs px-3 py-1.5 rounded-full cursor-pointer transition-colors hover:bg-purple-500/20 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
-                    style={{
-                      fontFamily: "'Space Grotesk', sans-serif",
-                      background: 'rgba(124,58,237,0.15)',
-                      color: 'rgba(200,180,255,0.9)',
-                      border: '1px solid rgba(124,58,237,0.25)',
-                    }}
-                  >
-                    {isGeneratingChatImage ? <Loader2 size={11} className="animate-spin" /> : <ImagePlus size={11} />}
-                    Show me
-                  </button>
+                  <>
+                    <button
+                      onClick={handleShowMe}
+                      disabled={isGeneratingChatImage}
+                      className="shrink-0 text-xs px-3 py-1.5 rounded-full cursor-pointer transition-colors hover:bg-purple-500/20 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{
+                        fontFamily: "'Space Grotesk', sans-serif",
+                        background: 'rgba(124,58,237,0.15)',
+                        color: 'rgba(200,180,255,0.9)',
+                        border: '1px solid rgba(124,58,237,0.25)',
+                      }}
+                    >
+                      {isGeneratingChatImage ? <Loader2 size={11} className="animate-spin" /> : <ImagePlus size={11} />}
+                      Show me
+                    </button>
+                    <button
+                      onClick={handleBuyGift}
+                      disabled={isGeneratingChatImage}
+                      className="shrink-0 text-xs px-3 py-1.5 rounded-full cursor-pointer transition-colors hover:bg-pink-500/20 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{
+                        fontFamily: "'Space Grotesk', sans-serif",
+                        background: 'rgba(236,72,153,0.12)',
+                        color: 'rgba(255,180,210,0.9)',
+                        border: '1px solid rgba(236,72,153,0.25)',
+                      }}
+                    >
+                      🎁 Buy a gift
+                    </button>
+                    <button
+                      onClick={handleHoldHands}
+                      disabled={isGeneratingChatImage}
+                      className="shrink-0 text-xs px-3 py-1.5 rounded-full cursor-pointer transition-colors hover:bg-pink-500/20 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{
+                        fontFamily: "'Space Grotesk', sans-serif",
+                        background: 'rgba(236,72,153,0.12)',
+                        color: 'rgba(255,180,210,0.9)',
+                        border: '1px solid rgba(236,72,153,0.25)',
+                      }}
+                    >
+                      💕 Hold hands
+                    </button>
+                  </>
                 )}
                 {suggestions.map((s, i) => (
                   <button

@@ -22,7 +22,7 @@ export function parsePlaceTags(text: string): { cleanText: string; places: strin
   const places: string[] = []
   const cleanText = text.replace(/\[PLACE:([^\]]+)\]/g, (_, name) => {
     places.push(name.trim())
-    return ''
+    return name.trim()
   })
   return { cleanText: cleanText.trim(), places }
 }
