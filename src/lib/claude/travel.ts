@@ -304,7 +304,7 @@ export async function generateTravelOpeningMessage(params: {
     freeform: `You have free time. Suggest something or ask what the traveler wants to do. 1-2 sentences. ${sceneContext ? `Current context: ${sceneContext}` : ''}`,
     recap: 'The day is ending. Start a reflective conversation about the day. 1-2 sentences.',
     surprise: 'You just noticed or remembered something exciting. Initiate a spontaneous suggestion. 1-2 sentences. Be impulsive.',
-    morning: 'Good morning! New day of the trip. Set the tone. 1-2 sentences.',
+    morning: `Good morning! New day of the trip. ${tripContext ? 'Reference something from yesterday, ask how they slept or what they thought about the day before.' : 'Set the tone.'} 1-2 sentences.`,
   }
 
   system += `\n\nYou are opening a conversation. ${openerInstructions[chatType] ?? 'Say something to start the conversation.'}`
@@ -322,12 +322,10 @@ Format: [SUGGESTIONS: "reply 1" | "reply 2" | "reply 3"]
     if (!response.ok) return { content: '...' }
     const data = await response.json()
     const raw = data.content?.[0]?.text?.trim() ?? '...'
-    const suggestionsMatch = raw.match(/\[SUGGESTIONS:\s*"([^"]+)"\s*\|\s*"([^"]+)"\s*\|\s*"([^"]+)"\s*\]/)
-    const contentOnly = suggestionsMatch
-      ? raw.replace(/\n?\[SUGGESTIONS:\s*"[^"]+"\s*\|\s*"[^"]+"\s*\|\s*"[^"]+"\s*\]/, '').trim()
-      : raw
+    const suggestionsMatch = raw.match(/\[SUGGESTIONS:\s*"([^"]+)"\s*\|\s*"([^"]+)"\s*(?:\|\s*"([^"]*)"?)?\s*\]?/)
+    const contentOnly = raw.replace(/\n?\[SUGGESTIONS[\s\S]*$/, '').trim()
     const suggestions = suggestionsMatch
-      ? [suggestionsMatch[1], suggestionsMatch[2], suggestionsMatch[3]]
+      ? [suggestionsMatch[1], suggestionsMatch[2], ...(suggestionsMatch[3] ? [suggestionsMatch[3]] : [])]
       : undefined
     return { content: stripMarkdown(contentOnly), suggestions }
   } catch {

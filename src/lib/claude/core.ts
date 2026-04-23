@@ -46,7 +46,7 @@ export async function* streamSSE(response: Response): AsyncGenerator<string> {
         if (parsed.type === 'message_stop') return
         if (parsed.type === 'content_block_delta' && parsed.delta?.type === 'text_delta') {
           const clean = parsed.delta.text
-            .replace(/\*{1,2}([^*]*)\*{1,2}/g, '$1')
+            .replace(/\*\*([^*]*)\*\*/g, '$1')
             .replace(/\s*—\s*/g, ', ')
           yield clean
         }
