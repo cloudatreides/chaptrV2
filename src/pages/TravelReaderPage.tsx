@@ -1130,7 +1130,7 @@ export function TravelReaderPage() {
                       )}
                       {segments.map((seg, j) =>
                         seg.type === 'narration' ? (
-                          <p key={j} className="text-[13px] italic leading-relaxed pl-1" style={{ fontFamily: "'Source Serif 4', Georgia, serif", color: 'rgba(255,255,255,0.35)' }}>
+                          <p key={j} className="text-[12px] italic leading-relaxed pl-4" style={{ fontFamily: "'Source Serif 4', Georgia, serif", color: 'rgba(255,255,255,0.3)' }}>
                             {seg.text}
                           </p>
                         ) : (
@@ -1154,7 +1154,7 @@ export function TravelReaderPage() {
                       <div className="flex flex-col gap-1.5">
                         {streamSegments.map((seg, j) =>
                           seg.type === 'narration' ? (
-                            <p key={j} className="text-[13px] italic leading-relaxed pl-1" style={{ fontFamily: "'Source Serif 4', Georgia, serif", color: 'rgba(255,255,255,0.35)' }}>
+                            <p key={j} className="text-[12px] italic leading-relaxed pl-4" style={{ fontFamily: "'Source Serif 4', Georgia, serif", color: 'rgba(255,255,255,0.3)' }}>
                               {seg.text}
                             </p>
                           ) : (
