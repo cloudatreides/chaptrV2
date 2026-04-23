@@ -25,6 +25,32 @@ function stripMetaTags(text: string): string {
     .trimEnd()
 }
 
+type MessageSegment = { type: 'narration' | 'dialogue'; text: string }
+
+function parseNarrationSegments(content: string): MessageSegment[] {
+  const lines = content.split('\n')
+  const segments: MessageSegment[] = []
+  let dialogueLines: string[] = []
+
+  const flushDialogue = () => {
+    const text = dialogueLines.join('\n').trim()
+    if (text) segments.push({ type: 'dialogue', text })
+    dialogueLines = []
+  }
+
+  for (const line of lines) {
+    const trimmed = line.trim()
+    if (trimmed.startsWith('*') && trimmed.endsWith('*') && trimmed.length > 2) {
+      flushDialogue()
+      segments.push({ type: 'narration', text: trimmed.slice(1, -1) })
+    } else {
+      dialogueLines.push(line)
+    }
+  }
+  flushDialogue()
+  return segments
+}
+
 export function TravelReaderPage() {
   const navigate = useNavigate()
   const store = useStore()
@@ -894,7 +920,7 @@ export function TravelReaderPage() {
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="flex items-center gap-3 pb-8"
+                      className="flex flex-col gap-3 pb-8 max-w-[320px]"
                     >
                       <button
                         onClick={handleContinueToChat}
@@ -902,13 +928,6 @@ export function TravelReaderPage() {
                         style={{ fontFamily: "'Space Grotesk', sans-serif", background: 'linear-gradient(135deg, #7C3AED, #c84b9e)' }}
                       >
                         Chat with {companionName}
-                      </button>
-                      <button
-                        onClick={handleNextScene}
-                        className="py-2.5 px-5 rounded-xl text-white/50 font-medium text-sm cursor-pointer transition-colors hover:text-white/80"
-                        style={{ fontFamily: "'Space Grotesk', sans-serif", background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
-                      >
-                        Skip to next scene
                       </button>
                     </motion.div>
                   )}
@@ -1014,56 +1033,67 @@ export function TravelReaderPage() {
                       )
                     }
 
+                    if (msg.role === 'user') {
+                      return (
+                        <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex justify-end">
+                          <div className="max-w-[80%] rounded-2xl px-4 py-2.5" style={{ background: '#7C3AED', borderBottomRightRadius: 4 }}>
+                            <p className="text-[14px] leading-relaxed whitespace-pre-wrap text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                              {msg.content}
+                            </p>
+                          </div>
+                        </motion.div>
+                      )
+                    }
+
+                    const segments = parseNarrationSegments(msg.content)
                     return (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div
-                        className="max-w-[80%] rounded-2xl px-4 py-2.5"
-                        style={{
-                          background: msg.role === 'user' ? '#7C3AED' : 'rgba(255,255,255,0.06)',
-                          borderBottomRightRadius: msg.role === 'user' ? 4 : undefined,
-                          borderBottomLeftRadius: msg.role !== 'user' ? 4 : undefined,
-                        }}
-                      >
-                        {msg.imageUrl && (
-                          <img
-                            src={msg.imageUrl}
-                            alt=""
-                            className="rounded-lg mb-2 w-full"
-                            style={{ maxWidth: 320, objectFit: 'cover' }}
-                          />
-                        )}
-                        <p
-                          className="text-[14px] leading-relaxed whitespace-pre-wrap"
-                          style={{
-                            fontFamily: "'Space Grotesk', sans-serif",
-                            color: msg.role === 'user' ? '#fff' : 'rgba(255,255,255,0.8)',
-                          }}
-                        >
-                          {msg.content}
-                        </p>
-                      </div>
+                    <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-1.5">
+                      {segments.map((seg, j) =>
+                        seg.type === 'narration' ? (
+                          <p key={j} className="text-[13px] italic leading-relaxed pl-1" style={{ fontFamily: "'Source Serif 4', Georgia, serif", color: 'rgba(255,255,255,0.35)' }}>
+                            {seg.text}
+                          </p>
+                        ) : (
+                          <div key={j} className="flex justify-start">
+                            <div className="max-w-[80%] rounded-2xl px-4 py-2.5" style={{ background: 'rgba(255,255,255,0.06)', borderBottomLeftRadius: 4 }}>
+                              {j === 0 && msg.imageUrl && (
+                                <img src={msg.imageUrl} alt="" className="rounded-lg mb-2 w-full" style={{ maxWidth: 320, objectFit: 'cover' }} />
+                              )}
+                              <p className="text-[14px] leading-relaxed whitespace-pre-wrap" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'rgba(255,255,255,0.8)' }}>
+                                {seg.text}
+                              </p>
+                            </div>
+                          </div>
+                        )
+                      )}
                     </motion.div>
                     )
                   })}
 
                   {/* Streaming indicator */}
-                  {isStreaming && streamedText && (
-                    <div className="flex justify-start">
-                      <div
-                        className="max-w-[80%] rounded-2xl px-4 py-2.5"
-                        style={{ background: 'rgba(255,255,255,0.06)', borderBottomLeftRadius: 4 }}
-                      >
-                        <p className="text-[14px] leading-relaxed text-white/80 whitespace-pre-wrap" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                          {streamedText}
-                        </p>
+                  {isStreaming && streamedText && (() => {
+                    const streamSegments = parseNarrationSegments(streamedText)
+                    return (
+                      <div className="flex flex-col gap-1.5">
+                        {streamSegments.map((seg, j) =>
+                          seg.type === 'narration' ? (
+                            <p key={j} className="text-[13px] italic leading-relaxed pl-1" style={{ fontFamily: "'Source Serif 4', Georgia, serif", color: 'rgba(255,255,255,0.35)' }}>
+                              {seg.text}
+                            </p>
+                          ) : (
+                            <div key={j} className="flex justify-start">
+                              <div className="max-w-[80%] rounded-2xl px-4 py-2.5" style={{ background: 'rgba(255,255,255,0.06)', borderBottomLeftRadius: 4 }}>
+                                <p className="text-[14px] leading-relaxed text-white/80 whitespace-pre-wrap" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                                  {seg.text}
+                                </p>
+                              </div>
+                            </div>
+                          )
+                        )}
+                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-purple-400/60 animate-pulse ml-1" />
                       </div>
-                    </div>
-                  )}
+                    )
+                  })()}
 
                   {isStreaming && !streamedText && (
                     <div className="flex justify-start">
@@ -1093,15 +1123,19 @@ export function TravelReaderPage() {
               </button>
             )}
 
-            {!isStreaming && trip.phase === 'day' && currentScene?.prose && (
-              <button
-                onClick={handleNextScene}
-                className="flex items-center gap-2 mb-3 py-1.5 px-3 rounded-lg text-xs font-medium cursor-pointer transition-colors hover:bg-white/10"
-                style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#e0e0e0', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)' }}
-              >
-                Next scene <ChevronRight size={10} />
-              </button>
-            )}
+            {!isStreaming && trip.phase === 'day' && currentScene?.prose && (() => {
+              const dayChatMessages = trip.dayChatHistories[trip.currentDay] ?? []
+              const userMsgCount = dayChatMessages.filter((m) => m.role === 'user').length
+              return userMsgCount >= 2 ? (
+                <button
+                  onClick={handleNextScene}
+                  className="flex items-center gap-2 mb-3 py-1.5 px-3 rounded-lg text-xs font-medium cursor-pointer transition-colors hover:bg-white/10"
+                  style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#e0e0e0', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)' }}
+                >
+                  Next scene <ChevronRight size={10} />
+                </button>
+              ) : null
+            })()}
 
             {!isStreaming && trip.phase === 'recap' && (
               <button
