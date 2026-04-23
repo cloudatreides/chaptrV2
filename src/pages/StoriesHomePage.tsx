@@ -157,7 +157,7 @@ export function StoriesHomePage() {
           </div>
 
           {/* Active story grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
             {activeStories.map((u, i) => (
               <motion.button
                 key={u.id}
@@ -188,7 +188,7 @@ export function StoriesHomePage() {
           {comingSoonStories.length > 0 && (
             <div className="mt-10">
               <h2 className="text-white/40 text-xs font-semibold tracking-[2px] uppercase mb-4" style={{ fontFamily: SG }}>Coming Soon</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
                 {comingSoonStories.map((u, i) => (
                   <motion.div
                     key={u.id}
