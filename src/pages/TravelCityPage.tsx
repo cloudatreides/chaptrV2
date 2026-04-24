@@ -84,6 +84,11 @@ export function TravelCityPage() {
     }
   }
 
+  function handleOpenProfile(comp: TravelCompanion) {
+    setModalCompanion(comp)
+    setModalSliders(selectedId === comp.characterId ? { ...sliders } : { ...comp.defaultSliders })
+  }
+
   function handleSelectFromProfile() {
     if (!modalCompanion) return
     setSelectedId(modalCompanion.characterId)
@@ -338,6 +343,13 @@ export function TravelCityPage() {
                         <p className="text-white/30 text-[11px] mt-1 leading-relaxed line-clamp-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                           "{getCompanionIntro(comp, destinationId ?? '').slice(0, 80)}..."
                         </p>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleOpenProfile(comp) }}
+                          className="text-purple-400/70 text-xs hover:text-purple-400 transition-colors cursor-pointer mt-1.5"
+                          style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                        >
+                          Remix
+                        </button>
                       </div>
                     </div>
                     {isSelected && (
