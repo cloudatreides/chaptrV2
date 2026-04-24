@@ -972,7 +972,7 @@ export function TravelReaderPage() {
 
                   {/* Prose */}
                   <div
-                    className="text-white/85 text-[15px] leading-[1.8] mb-8 whitespace-pre-wrap"
+                    className="text-white text-[15px] leading-[1.8] mb-8 whitespace-pre-wrap"
                     style={{ fontFamily: "'Source Serif 4', Georgia, serif" }}
                   >
                     {sceneProse || currentScene.prose || ''}
@@ -1145,7 +1145,13 @@ export function TravelReaderPage() {
                     return (
                     <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-1.5">
                       {msg.imageUrl && (
-                        <img src={msg.imageUrl} alt="" className="rounded-xl w-full" style={{ maxWidth: 360, objectFit: 'cover' }} />
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.4, ease: 'easeOut' }}
+                        >
+                          <img src={msg.imageUrl} alt="" className="rounded-xl w-full" style={{ maxWidth: 360, objectFit: 'cover' }} />
+                        </motion.div>
                       )}
                       {segments.map((seg, j) =>
                         seg.type === 'narration' ? (
