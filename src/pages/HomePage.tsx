@@ -380,28 +380,38 @@ function PingCards({ pings, onOpen }: { pings: any[]; onOpen: (ping: any) => voi
 // ─── Journey Stats ───
 
 function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStarted: number; momentsCollected: number; connectionsFormed: number } }) {
+  const navigate = useNavigate()
   const items = [
-    { icon: Map, label: 'Trips', value: stats.tripsCompleted, color: '#A78BFA' },
-    { icon: BookOpen, label: 'Stories', value: stats.storiesStarted, color: '#c84b9e' },
-    { icon: Image, label: 'Moments', value: stats.momentsCollected, color: '#60a5fa' },
-    { icon: Heart, label: 'Connections', value: stats.connectionsFormed, color: '#f472b6' },
+    { icon: Map, label: 'Trips', value: stats.tripsCompleted, color: '#A78BFA', bg: 'rgba(167,139,250,0.08)', border: 'rgba(167,139,250,0.15)', to: '/travel' },
+    { icon: BookOpen, label: 'Stories', value: stats.storiesStarted, color: '#c84b9e', bg: 'rgba(200,75,158,0.08)', border: 'rgba(200,75,158,0.15)', to: '/stories' },
+    { icon: Image, label: 'Moments', value: stats.momentsCollected, color: '#60a5fa', bg: 'rgba(96,165,250,0.08)', border: 'rgba(96,165,250,0.15)', to: '/album' },
+    { icon: Heart, label: 'Bonds', value: stats.connectionsFormed, color: '#f472b6', bg: 'rgba(244,114,182,0.08)', border: 'rgba(244,114,182,0.15)', to: '/characters' },
   ]
 
   const hasAny = items.some((i) => i.value > 0)
   if (!hasAny) return null
 
   return (
-    <div className="grid grid-cols-4 gap-2">
+    <div className="grid grid-cols-4 gap-2.5">
       {items.map((item) => (
-        <div
+        <button
           key={item.label}
-          className="flex flex-col items-center gap-1 py-3 rounded-xl"
-          style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
+          onClick={() => navigate(item.to)}
+          className="flex flex-col items-center gap-1.5 py-3.5 rounded-xl cursor-pointer transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
+          style={{
+            background: item.value > 0 ? item.bg : 'rgba(255,255,255,0.02)',
+            border: `1px solid ${item.value > 0 ? item.border : 'rgba(255,255,255,0.05)'}`,
+          }}
         >
-          <item.icon size={14} style={{ color: item.value > 0 ? item.color : 'rgba(255,255,255,0.12)' }} />
-          <span className="text-white text-lg font-bold" style={{ fontFamily: SG }}>{item.value}</span>
-          <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: SG }}>{item.label}</span>
-        </div>
+          <div
+            className="w-7 h-7 rounded-full flex items-center justify-center"
+            style={{ background: item.value > 0 ? `${item.color}15` : 'transparent' }}
+          >
+            <item.icon size={14} style={{ color: item.value > 0 ? item.color : 'rgba(255,255,255,0.12)' }} />
+          </div>
+          <span className="text-white text-xl font-bold" style={{ fontFamily: "'Syne', sans-serif" }}>{item.value}</span>
+          <span className="text-[10px] uppercase tracking-[0.5px]" style={{ color: item.value > 0 ? `${item.color}99` : 'rgba(255,255,255,0.25)', fontFamily: SG }}>{item.label}</span>
+        </button>
       ))}
     </div>
   )
