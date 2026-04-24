@@ -26,15 +26,41 @@ function stripMetaTags(text: string): string {
     .trimEnd()
 }
 
-function stripActionBeats(content: string): string {
-  return content
-    .split('\n')
-    .filter((line) => {
-      const t = line.trim()
-      return !(t.startsWith('*') && t.endsWith('*') && t.length > 2)
-    })
-    .join('\n')
-    .trim()
+type TextSegment = { type: 'text' | 'action'; text: string }
+
+function parseSegments(content: string): TextSegment[] {
+  const lines = content.split('\n')
+  const segments: TextSegment[] = []
+  let textLines: string[] = []
+
+  const flushText = () => {
+    const text = textLines.join('\n').trim()
+    if (text) segments.push({ type: 'text', text })
+    textLines = []
+  }
+
+  for (const line of lines) {
+    const t = line.trim()
+    if (t.startsWith('*') && t.endsWith('*') && t.length > 2) {
+      flushText()
+      segments.push({ type: 'action', text: t.slice(1, -1) })
+    } else {
+      textLines.push(line)
+    }
+  }
+  flushText()
+  return segments
+}
+
+function ActionBeat({ text }: { text: string }) {
+  return (
+    <p
+      className="text-[12px] italic leading-relaxed"
+      style={{ fontFamily: "'Source Serif 4', Georgia, serif", color: 'rgba(255,255,255,0.3)' }}
+    >
+      {text}
+    </p>
+  )
 }
 
 export function TravelReaderPage() {
@@ -956,11 +982,20 @@ export function TravelReaderPage() {
                   </div>
 
                   {/* Prose */}
-                  <div
-                    className="text-white text-[15px] leading-[1.8] mb-8 whitespace-pre-wrap"
-                    style={{ fontFamily: "'Source Serif 4', Georgia, serif" }}
-                  >
-                    {stripActionBeats(sceneProse || currentScene.prose || '')}
+                  <div className="mb-8 space-y-2">
+                    {parseSegments(sceneProse || currentScene.prose || '').map((seg, j) =>
+                      seg.type === 'action' ? (
+                        <ActionBeat key={j} text={seg.text} />
+                      ) : (
+                        <p
+                          key={j}
+                          className="text-white text-[15px] leading-[1.8] whitespace-pre-wrap"
+                          style={{ fontFamily: "'Source Serif 4', Georgia, serif" }}
+                        >
+                          {seg.text}
+                        </p>
+                      )
+                    )}
                     {isStreaming && <span className="inline-block w-0.5 h-4 bg-purple-400/60 ml-0.5 animate-pulse align-text-bottom" />}
                   </div>
 
@@ -1140,7 +1175,7 @@ export function TravelReaderPage() {
                       )
                     }
 
-                    const dialogue = stripActionBeats(msg.content)
+                    const segments = parseSegments(msg.content)
                     return (
                     <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-1.5">
                       {msg.imageUrl && (
@@ -1152,13 +1187,19 @@ export function TravelReaderPage() {
                           <img src={msg.imageUrl} alt="" className="rounded-xl w-full" style={{ maxWidth: 360, objectFit: 'cover' }} />
                         </motion.div>
                       )}
-                      <div className="flex justify-start">
-                        <div className="max-w-[80%] rounded-2xl px-4 py-2.5" style={{ background: 'rgba(255,255,255,0.06)', borderBottomLeftRadius: 4 }}>
-                          <p className="text-[14px] leading-relaxed whitespace-pre-wrap" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'rgba(255,255,255,0.8)' }}>
-                            {dialogue}
-                          </p>
-                        </div>
-                      </div>
+                      {segments.map((seg, j) =>
+                        seg.type === 'action' ? (
+                          <ActionBeat key={j} text={seg.text} />
+                        ) : (
+                          <div key={j} className="flex justify-start">
+                            <div className="max-w-[80%] rounded-2xl px-4 py-2.5" style={{ background: 'rgba(255,255,255,0.06)', borderBottomLeftRadius: 4 }}>
+                              <p className="text-[14px] leading-relaxed whitespace-pre-wrap" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'rgba(255,255,255,0.8)' }}>
+                                {seg.text}
+                              </p>
+                            </div>
+                          </div>
+                        )
+                      )}
                     </motion.div>
                     )
                   })}
@@ -1166,13 +1207,19 @@ export function TravelReaderPage() {
                   {/* Streaming indicator */}
                   {isStreaming && streamedText && (
                     <div className="flex flex-col gap-1.5">
-                      <div className="flex justify-start">
-                        <div className="max-w-[80%] rounded-2xl px-4 py-2.5" style={{ background: 'rgba(255,255,255,0.06)', borderBottomLeftRadius: 4 }}>
-                          <p className="text-[14px] leading-relaxed text-white/80 whitespace-pre-wrap" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                            {stripActionBeats(streamedText)}
-                          </p>
-                        </div>
-                      </div>
+                      {parseSegments(streamedText).map((seg, j) =>
+                        seg.type === 'action' ? (
+                          <ActionBeat key={j} text={seg.text} />
+                        ) : (
+                          <div key={j} className="flex justify-start">
+                            <div className="max-w-[80%] rounded-2xl px-4 py-2.5" style={{ background: 'rgba(255,255,255,0.06)', borderBottomLeftRadius: 4 }}>
+                              <p className="text-[14px] leading-relaxed text-white/80 whitespace-pre-wrap" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                                {seg.text}
+                              </p>
+                            </div>
+                          </div>
+                        )
+                      )}
                       <span className="inline-block w-1.5 h-1.5 rounded-full bg-purple-400/60 animate-pulse ml-1" />
                     </div>
                   )}
