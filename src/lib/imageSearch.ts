@@ -27,8 +27,8 @@ export function parsePlaceTags(text: string): { cleanText: string; places: strin
   return { cleanText: cleanText.trim(), places }
 }
 
-export async function fetchFoodImage(dishName: string, city: string): Promise<string | null> {
-  const query = `${dishName} ${city} food dish`
+export async function fetchFoodImage(dishName: string, _city: string): Promise<string | null> {
+  const query = `${dishName} dish close up photo`
   if (cache.has(query)) return cache.get(query)!
 
   try {
