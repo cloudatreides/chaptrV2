@@ -31,12 +31,12 @@ type TextSegment = { type: 'text' | 'action'; text: string }
 
 function parseSegments(content: string): TextSegment[] {
   const lines = content.split('\n')
-  const segments: TextSegment[] = []
+  const all: TextSegment[] = []
   let textLines: string[] = []
 
   const flushText = () => {
     const text = textLines.join('\n').trim()
-    if (text) segments.push({ type: 'text', text })
+    if (text) all.push({ type: 'text', text })
     textLines = []
   }
 
@@ -44,20 +44,42 @@ function parseSegments(content: string): TextSegment[] {
     const t = line.trim()
     if (t.startsWith('*') && t.endsWith('*') && t.length > 2) {
       flushText()
-      segments.push({ type: 'action', text: t.slice(1, -1) })
+      all.push({ type: 'action', text: t.slice(1, -1) })
     } else {
       textLines.push(line)
     }
   }
   flushText()
-  return segments
+
+  const textSegments = all.filter((s) => s.type === 'text')
+  if (textSegments.length <= 2) return all
+
+  const capped: TextSegment[] = []
+  let textCount = 0
+  for (const seg of all) {
+    if (seg.type === 'action') {
+      if (textCount < 2) capped.push(seg)
+    } else {
+      textCount++
+      if (textCount <= 1) {
+        capped.push(seg)
+      } else {
+        if (textCount === 2) capped.push({ type: 'text', text: seg.text })
+        else {
+          const last = capped[capped.length - 1]
+          last.text += '\n\n' + seg.text
+        }
+      }
+    }
+  }
+  return capped
 }
 
 function ActionBeat({ text }: { text: string }) {
   return (
     <p
       className="text-[12px] italic leading-relaxed"
-      style={{ fontFamily: "'Source Serif 4', Georgia, serif", color: 'rgba(255,255,255,0.3)' }}
+      style={{ fontFamily: "'Source Serif 4', Georgia, serif", color: 'rgba(255,255,255,0.45)' }}
     >
       {text}
     </p>
