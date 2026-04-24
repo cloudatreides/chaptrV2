@@ -78,8 +78,8 @@ function parseSegments(content: string): TextSegment[] {
 function ActionBeat({ text }: { text: string }) {
   return (
     <p
-      className="text-[12px] italic leading-relaxed"
-      style={{ fontFamily: "'Source Serif 4', Georgia, serif", color: 'rgba(255,255,255,0.45)' }}
+      className="text-[12px] italic leading-relaxed rounded-lg px-3 py-1.5"
+      style={{ fontFamily: "'Source Serif 4', Georgia, serif", color: 'rgba(255,255,255,0.45)', background: 'rgba(255,255,255,0.04)' }}
     >
       {text}
     </p>
@@ -286,44 +286,22 @@ export function TravelReaderPage() {
       updateTravelAffinity(parsed.delta)
       if (parsed.suggestions) setSuggestions(parsed.suggestions)
 
-      // Fetch real photo for tagged landmarks
-      if (places.length > 0 && destination) {
-        fetchPlaceImage(places[0], destination.city).then((imageUrl) => {
-          if (!imageUrl) return
-          const imageMsg: ChatMessage = {
-            role: 'character',
-            content: `📍 ${places[0]}`,
-            characterId: trip.companionId,
-            timestamp: Date.now(),
-            imageUrl,
-          }
-          if (isPlanning) {
-            addTravelPlanningMessage(imageMsg)
-          } else {
-            addTravelDayChatMessage(trip.currentDay, imageMsg)
-          }
-        }).catch(() => {})
-      }
+      // Fetch place + food images in parallel, then add in consistent order (place first, then foods)
+      if ((places.length > 0 || foods.length > 0) && destination) {
+        const addImageMsg = isPlanning ? addTravelPlanningMessage : (msg: ChatMessage) => addTravelDayChatMessage(trip.currentDay, msg)
+        ;(async () => {
+          const [placeResult, ...foodResults] = await Promise.all([
+            places.length > 0 ? fetchPlaceImage(places[0], destination.city).catch(() => null) : Promise.resolve(null),
+            ...foods.map((food) => fetchFoodImage(food, destination.city).catch(() => null)),
+          ])
 
-      // Fetch real photos for tagged food
-      if (foods.length > 0 && destination) {
-        for (const food of foods) {
-          fetchFoodImage(food, destination.city).then((imageUrl) => {
-            if (!imageUrl) return
-            const imageMsg: ChatMessage = {
-              role: 'character',
-              content: `🍽️ ${food}`,
-              characterId: trip.companionId,
-              timestamp: Date.now(),
-              imageUrl,
-            }
-            if (isPlanning) {
-              addTravelPlanningMessage(imageMsg)
-            } else {
-              addTravelDayChatMessage(trip.currentDay, imageMsg)
-            }
-          }).catch(() => {})
-        }
+          if (placeResult) {
+            addImageMsg({ role: 'character', content: `📍 ${places[0]}`, characterId: trip.companionId, timestamp: Date.now(), imageUrl: placeResult })
+          }
+          foodResults.forEach((url, i) => {
+            if (url) addImageMsg({ role: 'character', content: `🍽️ ${foods[i]}`, characterId: trip.companionId, timestamp: Date.now(), imageUrl: url })
+          })
+        })()
       }
 
       // Extract memories from conversation every 4 messages
@@ -1232,11 +1210,13 @@ export function TravelReaderPage() {
                     <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-1.5">
                       {msg.imageUrl && (
                         <motion.div
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.4, ease: 'easeOut' }}
+                          initial={{ opacity: 0, y: 10, scale: 0.97 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          transition={{ duration: 0.5, ease: 'easeOut' }}
+                          className="rounded-xl overflow-hidden"
+                          style={{ maxWidth: 360, border: '1px solid rgba(255,255,255,0.08)' }}
                         >
-                          <img src={msg.imageUrl} alt="" className="rounded-xl w-full" style={{ maxWidth: 360, objectFit: 'cover' }} />
+                          <img src={msg.imageUrl} alt="" className="w-full" style={{ aspectRatio: '16/9', objectFit: 'cover' }} />
                         </motion.div>
                       )}
                       {segments.map((seg, j) =>
