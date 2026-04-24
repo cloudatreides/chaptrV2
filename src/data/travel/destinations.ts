@@ -544,7 +544,7 @@ VIBE:
     lat: 6.2476,
     lng: -75.5658,
     vibeTags: ['Eternal Spring', 'Street Art', 'Reinvention'],
-    heroImage: '/dest-medellin.png',
+    heroImage: 'https://images.unsplash.com/photo-1709152213008-71edae302aad?w=800&q=80',
     tripDays: 5,
     description: 'The city of eternal spring, reinvented from the ground up.',
     highlights: ['75°F year-round — perfect weather, every single day', 'Comuna 13: from most dangerous to open-air art gallery', 'Paragliding over the valley for $30', 'Coffee country is a day trip away'],
