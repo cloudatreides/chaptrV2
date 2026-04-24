@@ -50,7 +50,7 @@ async function cacheImage(hash: string, imageUrl: string, prompt: string): Promi
  *  Uses Kontext Pro (img2img, $0.20) only when the protagonist is visible in the
  *  scene AND a selfie reference exists. Otherwise uses Schnell ($0.04).
  *  Schnell results are cached by prompt hash to avoid regenerating identical scenes. */
-async function refineCompanionFace(sceneUrl: string, companionRefUrl: string, companionDesc: string, width: number, height: number): Promise<string | null> {
+async function refineCompanionFace(sceneUrl: string, _companionRefUrl: string, companionDesc: string, width: number, height: number): Promise<string | null> {
   const startTime = performance.now()
   try {
     const response = await fetch('/api/together', {

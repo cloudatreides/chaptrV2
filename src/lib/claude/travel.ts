@@ -385,3 +385,41 @@ Write it like a travel journal entry. Personal, specific, warm. Reference real m
     return 'A trip to remember.'
   }
 }
+
+// ─── Companion Farewell ───
+
+export async function generateCompanionFarewell(params: {
+  destinationId: string
+  companionId: string
+  companionRemix?: CompanionRemix
+  companionMemories: string[]
+  travelAffinityScore: number
+}): Promise<string> {
+  const { destinationId, companionId, companionRemix, companionMemories, travelAffinityScore } = params
+  const destination = getDestination(destinationId)
+  const companion = getTravelCompanion(companionId)
+  if (!destination || !companion) return ''
+  const companionName = companionRemix?.name ?? companion.character.name
+
+  const system = `You are ${companionName}, a travel companion. Write a short farewell message (1-2 sentences) to your travel partner at the end of a trip to ${destination.city}.
+
+Your personality: ${companion.personalityTraits.join(', ')}
+
+${companionMemories.length > 0 ? `Things you shared together:\n${companionMemories.slice(-3).join('\n')}` : ''}
+
+Rapport level: ${travelAffinityScore}/100.
+
+Be personal, reference a specific moment if possible. Match your personality — warm but not over the top. No quotes around your message. No emojis. No markdown.`
+
+  try {
+    const response = await makeClaudeRequest(system, 'Write the farewell.', {
+      temperature: 0.8,
+      maxTokens: 80,
+    })
+    if (!response.ok) return ''
+    const data = await response.json()
+    return stripMarkdown(data.content?.[0]?.text?.trim() ?? '')
+  } catch {
+    return ''
+  }
+}
