@@ -322,7 +322,7 @@ export function TravelCityPage() {
                     style={{
                       border: isSelected ? '2px solid rgba(124,58,237,0.5)' : '1px solid rgba(255,255,255,0.06)',
                     }}
-                    onClick={() => handleSelectBase(comp.characterId)}
+                    onClick={() => handleOpenProfile(comp)}
                   >
                     <div className="relative aspect-[3/4] overflow-hidden">
                       {comp.character.staticPortrait ? (
@@ -343,13 +343,6 @@ export function TravelCityPage() {
                         <p className="text-white/30 text-[11px] mt-1 leading-relaxed line-clamp-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                           "{getCompanionIntro(comp, destinationId ?? '').slice(0, 80)}..."
                         </p>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleOpenProfile(comp) }}
-                          className="text-purple-400/70 text-xs hover:text-purple-400 transition-colors cursor-pointer mt-1.5"
-                          style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                        >
-                          Remix
-                        </button>
                       </div>
                     </div>
                     {isSelected && (
