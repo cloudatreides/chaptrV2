@@ -26,30 +26,15 @@ function stripMetaTags(text: string): string {
     .trimEnd()
 }
 
-type MessageSegment = { type: 'narration' | 'dialogue'; text: string }
-
-function parseNarrationSegments(content: string): MessageSegment[] {
-  const lines = content.split('\n')
-  const segments: MessageSegment[] = []
-  let dialogueLines: string[] = []
-
-  const flushDialogue = () => {
-    const text = dialogueLines.join('\n').trim()
-    if (text) segments.push({ type: 'dialogue', text })
-    dialogueLines = []
-  }
-
-  for (const line of lines) {
-    const trimmed = line.trim()
-    if (trimmed.startsWith('*') && trimmed.endsWith('*') && trimmed.length > 2) {
-      flushDialogue()
-      segments.push({ type: 'narration', text: trimmed.slice(1, -1) })
-    } else {
-      dialogueLines.push(line)
-    }
-  }
-  flushDialogue()
-  return segments
+function stripActionBeats(content: string): string {
+  return content
+    .split('\n')
+    .filter((line) => {
+      const t = line.trim()
+      return !(t.startsWith('*') && t.endsWith('*') && t.length > 2)
+    })
+    .join('\n')
+    .trim()
 }
 
 export function TravelReaderPage() {
@@ -1027,6 +1012,20 @@ export function TravelReaderPage() {
                 exit={{ opacity: 0 }}
                 className="px-5 md:px-[60px] py-4"
               >
+                {/* Scene context divider */}
+                {currentScene?.prose && (
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="h-px flex-1" style={{ background: 'rgba(124,58,237,0.15)' }} />
+                    <span
+                      className="text-[11px] italic shrink-0"
+                      style={{ fontFamily: "'Source Serif 4', Georgia, serif", color: 'rgba(200,180,255,0.4)' }}
+                    >
+                      {currentScene.location}, {currentScene.timeOfDay}
+                    </span>
+                    <div className="h-px flex-1" style={{ background: 'rgba(124,58,237,0.15)' }} />
+                  </div>
+                )}
+
                 {/* Messages */}
                 <div className="space-y-4">
                   {messages.map((msg, i) => {
@@ -1141,7 +1140,7 @@ export function TravelReaderPage() {
                       )
                     }
 
-                    const segments = parseNarrationSegments(msg.content)
+                    const dialogue = stripActionBeats(msg.content)
                     return (
                     <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-1.5">
                       {msg.imageUrl && (
@@ -1153,49 +1152,30 @@ export function TravelReaderPage() {
                           <img src={msg.imageUrl} alt="" className="rounded-xl w-full" style={{ maxWidth: 360, objectFit: 'cover' }} />
                         </motion.div>
                       )}
-                      {segments.map((seg, j) =>
-                        seg.type === 'narration' ? (
-                          <p key={j} className="text-[12px] italic leading-relaxed pl-4" style={{ fontFamily: "'Source Serif 4', Georgia, serif", color: 'rgba(255,255,255,0.3)' }}>
-                            {seg.text}
+                      <div className="flex justify-start">
+                        <div className="max-w-[80%] rounded-2xl px-4 py-2.5" style={{ background: 'rgba(255,255,255,0.06)', borderBottomLeftRadius: 4 }}>
+                          <p className="text-[14px] leading-relaxed whitespace-pre-wrap" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'rgba(255,255,255,0.8)' }}>
+                            {dialogue}
                           </p>
-                        ) : (
-                          <div key={j} className="flex justify-start">
-                            <div className="max-w-[80%] rounded-2xl px-4 py-2.5" style={{ background: 'rgba(255,255,255,0.06)', borderBottomLeftRadius: 4 }}>
-                              <p className="text-[14px] leading-relaxed whitespace-pre-wrap" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'rgba(255,255,255,0.8)' }}>
-                                {seg.text}
-                              </p>
-                            </div>
-                          </div>
-                        )
-                      )}
+                        </div>
+                      </div>
                     </motion.div>
                     )
                   })}
 
                   {/* Streaming indicator */}
-                  {isStreaming && streamedText && (() => {
-                    const streamSegments = parseNarrationSegments(streamedText)
-                    return (
-                      <div className="flex flex-col gap-1.5">
-                        {streamSegments.map((seg, j) =>
-                          seg.type === 'narration' ? (
-                            <p key={j} className="text-[12px] italic leading-relaxed pl-4" style={{ fontFamily: "'Source Serif 4', Georgia, serif", color: 'rgba(255,255,255,0.3)' }}>
-                              {seg.text}
-                            </p>
-                          ) : (
-                            <div key={j} className="flex justify-start">
-                              <div className="max-w-[80%] rounded-2xl px-4 py-2.5" style={{ background: 'rgba(255,255,255,0.06)', borderBottomLeftRadius: 4 }}>
-                                <p className="text-[14px] leading-relaxed text-white/80 whitespace-pre-wrap" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                                  {seg.text}
-                                </p>
-                              </div>
-                            </div>
-                          )
-                        )}
-                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-purple-400/60 animate-pulse ml-1" />
+                  {isStreaming && streamedText && (
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex justify-start">
+                        <div className="max-w-[80%] rounded-2xl px-4 py-2.5" style={{ background: 'rgba(255,255,255,0.06)', borderBottomLeftRadius: 4 }}>
+                          <p className="text-[14px] leading-relaxed text-white/80 whitespace-pre-wrap" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                            {stripActionBeats(streamedText)}
+                          </p>
+                        </div>
                       </div>
-                    )
-                  })()}
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-purple-400/60 animate-pulse ml-1" />
+                    </div>
+                  )}
 
                   {isStreaming && !streamedText && (
                     <div className="flex justify-start">
