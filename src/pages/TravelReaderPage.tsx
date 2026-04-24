@@ -124,17 +124,17 @@ export function TravelReaderPage() {
   const abortRef = useRef<AbortController | null>(null)
   const engagementRef = useRef<number>(Date.now())
 
-  // Start lofi on first click, stop on unmount
+  const [showLofiLabel, setShowLofiLabel] = useState(true)
+
+  // Stop lofi on unmount
   useEffect(() => {
-    const startLofi = () => {
-      lofiPlayer.play()
-      document.removeEventListener('click', startLofi)
-    }
-    document.addEventListener('click', startLofi, { once: true })
-    return () => {
-      document.removeEventListener('click', startLofi)
-      lofiPlayer.stop()
-    }
+    return () => { lofiPlayer.stop() }
+  }, [])
+
+  // Hide lofi label after 5 seconds
+  useEffect(() => {
+    const t = setTimeout(() => setShowLofiLabel(false), 5000)
+    return () => clearTimeout(t)
   }, [])
 
   // Track engagement time
@@ -858,21 +858,23 @@ export function TravelReaderPage() {
               {destination.countryEmoji} {destination.city} — {trip.phase === 'planning' ? 'Planning' : `Day ${trip.currentDay}`}
             </p>
           </div>
-          {trip.phase !== 'planning' && currentScene && (
-            <div className="flex items-center gap-1.5 text-white/30">
-              <MapPin size={12} />
-              <span className="text-xs truncate max-w-[120px]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                {currentScene.location}
-              </span>
-            </div>
-          )}
-          <button
-            onClick={() => setLofiPlaying(lofiPlayer.toggle())}
-            className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-colors hover:bg-white/5"
+          <motion.button
+            onClick={() => {
+              const playing = lofiPlayer.toggle()
+              setLofiPlaying(playing)
+              setShowLofiLabel(false)
+            }}
+            animate={!lofiPlaying && showLofiLabel ? { scale: [1, 1.08, 1] } : {}}
+            transition={!lofiPlaying && showLofiLabel ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } : {}}
+            className="shrink-0 h-8 rounded-full flex items-center gap-1.5 px-2.5 cursor-pointer transition-colors hover:bg-white/5"
+            style={{ background: lofiPlaying ? 'rgba(139,92,246,0.12)' : 'transparent', border: lofiPlaying ? '1px solid rgba(139,92,246,0.2)' : '1px solid rgba(255,255,255,0.08)' }}
             title={lofiPlaying ? 'Pause lofi' : 'Play lofi'}
           >
-            {lofiPlaying ? <Volume2 size={14} className="text-purple-400/70" /> : <VolumeX size={14} className="text-white/25" />}
-          </button>
+            {lofiPlaying ? <Volume2 size={14} className="text-purple-400" /> : <VolumeX size={14} className="text-white/40" />}
+            {showLofiLabel && !lofiPlaying && (
+              <span className="text-[11px] text-white/40 pr-0.5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>lofi</span>
+            )}
+          </motion.button>
         </div>
 
         {/* Main Content */}

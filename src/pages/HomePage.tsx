@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, Pencil, MessageCircle, LogOut, Compass, BookOpen, ChevronRight, Camera, Sparkles, Plus } from 'lucide-react'
+import { ArrowRight, Pencil, MessageCircle, LogOut, Compass, BookOpen, ChevronRight, Camera, Sparkles, Plus, Map, Heart, Image } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { UNIVERSES, GENRE_FILTERS } from '../data/storyData'
 import { useAuth } from '../contexts/AuthContext'
@@ -377,6 +377,36 @@ function PingCards({ pings, onOpen }: { pings: any[]; onOpen: (ping: any) => voi
   )
 }
 
+// ─── Journey Stats ───
+
+function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStarted: number; momentsCollected: number; connectionsFormed: number } }) {
+  const items = [
+    { icon: Map, label: 'Trips', value: stats.tripsCompleted, color: '#A78BFA' },
+    { icon: BookOpen, label: 'Stories', value: stats.storiesStarted, color: '#c84b9e' },
+    { icon: Image, label: 'Moments', value: stats.momentsCollected, color: '#60a5fa' },
+    { icon: Heart, label: 'Connections', value: stats.connectionsFormed, color: '#f472b6' },
+  ]
+
+  const hasAny = items.some((i) => i.value > 0)
+  if (!hasAny) return null
+
+  return (
+    <div className="grid grid-cols-4 gap-2">
+      {items.map((item) => (
+        <div
+          key={item.label}
+          className="flex flex-col items-center gap-1 py-3 rounded-xl"
+          style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
+        >
+          <item.icon size={14} style={{ color: item.value > 0 ? item.color : 'rgba(255,255,255,0.12)' }} />
+          <span className="text-white text-lg font-bold" style={{ fontFamily: SG }}>{item.value}</span>
+          <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: SG }}>{item.label}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 // ─── Main HomePage ───
 
 export function HomePage() {
@@ -395,6 +425,7 @@ export function HomePage() {
   const activeCharacterId = useStore((s) => s.activeCharacterId)
   const travelTrips = useStore((s) => s.travelTrips)
   const setActiveTripId = useStore((s) => s.setActiveTripId)
+  const storyMoments = useStore((s) => s.storyMoments)
 
   const [mode, setMode] = useState<'travel' | 'stories'>('travel')
   const [activePingModal, setActivePingModal] = useState<AmbientPingDef | null>(null)
@@ -460,6 +491,13 @@ export function HomePage() {
     setActivePingModal(def)
   }
 
+  // ─── Journey stats ───
+  const tripsCompleted = Object.values(travelTrips).filter((t) => t.phase === 'complete').length
+  const storiesStarted = Object.values(storyProgress).filter((p) => p.currentStepIndex > 0).length
+  const momentsCollected = storyMoments.length
+  const connectionsFormed = Object.keys(globalAffinities).length
+  const journeyStats = { tripsCompleted, storiesStarted, momentsCollected, connectionsFormed }
+
   // ─── Continue cards ───
   const continueCards = []
   if (activeTrip) {
@@ -507,6 +545,9 @@ export function HomePage() {
           ) : (
             <UploadHero onClick={() => navigate('/create-character')} />
           )}
+
+          {/* Journey stats */}
+          {hasCharacters && <JourneyStats stats={journeyStats} />}
 
           {/* Continue cards */}
           {continueCards.length > 0 && (
@@ -573,6 +614,13 @@ export function HomePage() {
                 <UploadHero onClick={() => navigate('/create-character')} />
               )}
             </div>
+
+            {/* Journey stats */}
+            {hasCharacters && (
+              <div className="mb-6 max-w-[480px]">
+                <JourneyStats stats={journeyStats} />
+              </div>
+            )}
 
             {/* Continue cards */}
             {continueCards.length > 0 && (
