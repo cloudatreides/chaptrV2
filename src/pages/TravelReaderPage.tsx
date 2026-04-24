@@ -960,7 +960,7 @@ export function TravelReaderPage() {
                     className="text-white text-[15px] leading-[1.8] mb-8 whitespace-pre-wrap"
                     style={{ fontFamily: "'Source Serif 4', Georgia, serif" }}
                   >
-                    {sceneProse || currentScene.prose || ''}
+                    {stripActionBeats(sceneProse || currentScene.prose || '')}
                     {isStreaming && <span className="inline-block w-0.5 h-4 bg-purple-400/60 ml-0.5 animate-pulse align-text-bottom" />}
                   </div>
 

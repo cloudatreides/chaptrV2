@@ -158,6 +158,7 @@ PROSE CONSTRAINTS:
 - Ground in real details about ${destination.city} — make it feel like being there.
 - End on a moment that invites conversation with ${companionName}.
 - Do NOT include dialogue or chat. Just narrative prose.
+- Do NOT use *asterisks* or action beats. Write full prose sentences only.
 - Do NOT use em dashes (—). Use commas or periods.
 - Do NOT use markdown formatting.`
 
