@@ -70,12 +70,6 @@ export function TravelCityPage() {
     : TRAVEL_COMPANIONS.find((c) => c.characterId === selectedId)
   const displayName = selectedCustom?.remix.name ?? selectedBase?.character.name
 
-  function handleSelectBase(id: string) {
-    setSelectedId(id)
-    const comp = TRAVEL_COMPANIONS.find((c) => c.characterId === id)
-    if (comp) setSliders(comp.defaultSliders)
-  }
-
   function handleSelectCustom(id: string) {
     const cc = customCompanions.find((c) => c.id === id)
     if (cc) {
