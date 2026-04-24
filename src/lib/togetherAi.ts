@@ -5,9 +5,11 @@ export interface GenerateSceneParams {
   width?: number
   height?: number
   referenceImageUrl?: string | null
+  companionReferenceUrl?: string | null
+  companionDescription?: string
   protagonistGender?: 'male' | 'female'
   includesProtagonist?: boolean
-  moodContext?: string // e.g. "tense after a bold choice" — appended to prompt for contextual scenes
+  moodContext?: string
 }
 
 // ─── Prompt-hash image cache (Supabase) ───
@@ -48,8 +50,45 @@ async function cacheImage(hash: string, imageUrl: string, prompt: string): Promi
  *  Uses Kontext Pro (img2img, $0.20) only when the protagonist is visible in the
  *  scene AND a selfie reference exists. Otherwise uses Schnell ($0.04).
  *  Schnell results are cached by prompt hash to avoid regenerating identical scenes. */
+async function refineCompanionFace(sceneUrl: string, companionRefUrl: string, companionDesc: string, width: number, height: number): Promise<string | null> {
+  const startTime = performance.now()
+  try {
+    const response = await fetch('/api/together', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'black-forest-labs/FLUX.1-kontext-pro',
+        prompt: `The reference image shows a scene with two people. One of the people is the travel companion — change ONLY their appearance to look exactly like: ${companionDesc}. Keep the other person, the background, lighting, composition, and everything else completely unchanged. Only modify the companion's face and features.`,
+        image_url: sceneUrl,
+        width,
+        height,
+        steps: 20,
+        n: 1,
+        response_format: 'url',
+      }),
+    })
+    if (!response.ok) {
+      console.warn(`[Companion refine] error after ${((performance.now() - startTime) / 1000).toFixed(1)}s:`, response.status)
+      return null
+    }
+    const data = await response.json()
+    const elapsed = ((performance.now() - startTime) / 1000).toFixed(1)
+    const url = data.data?.[0]?.url
+    if (url) {
+      console.log(`[Companion refine] done in ${elapsed}s`)
+      return url
+    }
+    const b64 = data.data?.[0]?.b64_json
+    if (b64) return `data:image/png;base64,${b64}`
+    return null
+  } catch (e) {
+    console.warn('[Companion refine] failed:', e)
+    return null
+  }
+}
+
 export async function generateSceneImage(params: GenerateSceneParams): Promise<string | null> {
-  const { prompt, width = 768, height = 576, referenceImageUrl, protagonistGender, includesProtagonist = true, moodContext } = params
+  const { prompt, width = 768, height = 576, referenceImageUrl, companionReferenceUrl, companionDescription, protagonistGender, includesProtagonist = true, moodContext } = params
 
   const useKontext = !!referenceImageUrl && includesProtagonist
 
@@ -155,23 +194,28 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
 
     const data = await response.json()
     const elapsed = ((performance.now() - startTime) / 1000).toFixed(1)
-    const url = data.data?.[0]?.url
-    if (url) {
-      console.log(`[Scene ${model}] generated in ${elapsed}s`)
-      // Cache Schnell results for future reuse
-      if (!useKontext) {
-        const hash = await hashPrompt(cacheKey)
-        cacheImage(hash, url, genderedPrompt)
-      }
-      return url
+    let resultUrl = data.data?.[0]?.url as string | null
+    const b64 = data.data?.[0]?.b64_json as string | undefined
+    if (!resultUrl && b64) {
+      resultUrl = `data:image/png;base64,${b64}`
     }
-    const b64 = data.data?.[0]?.b64_json
-    if (b64) {
-      console.log(`[Scene ${model}] generated (b64) in ${elapsed}s`)
-      return `data:image/png;base64,${b64}`
+    if (!resultUrl) {
+      console.warn(`[Scene ${model}] no image data after ${elapsed}s`)
+      return null
     }
-    console.warn(`[Scene ${model}] no image data after ${elapsed}s`)
-    return null
+
+    console.log(`[Scene ${model}] generated in ${elapsed}s`)
+    if (!useKontext) {
+      const hash = await hashPrompt(cacheKey)
+      cacheImage(hash, resultUrl, genderedPrompt)
+    }
+
+    if (companionReferenceUrl && companionDescription && !resultUrl.startsWith('data:')) {
+      const refined = await refineCompanionFace(resultUrl, companionReferenceUrl, companionDescription, width, height)
+      if (refined) return refined
+    }
+
+    return resultUrl
   } catch (e) {
     console.error(`[Scene ${model}] failed after ${((performance.now() - startTime) / 1000).toFixed(1)}s:`, e)
     return null

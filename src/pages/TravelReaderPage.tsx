@@ -746,14 +746,20 @@ export function TravelReaderPage() {
     }
   }
 
-  async function generateTravelImage(prompt: string, selfieUrl?: string | null): Promise<string | null> {
+  async function generateTravelImage(prompt: string, selfieUrl?: string | null, includeCompanion = true): Promise<string | null> {
     try {
-      const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 30000))
+      const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 45000))
+      const companionDesc = companion?.character.portraitPrompt
+        .split(',').slice(0, 5).join(',')
+        .replace(/^(anime style|dark|cyberpunk[^,]*|fantasy[^,]*|thriller[^,]*|sci-fi[^,]*)\s*(portrait|illustration|concept art)\s*(portrait\s*)?of\s*/i, '')
+        .trim()
       const image = generateImage({
         prompt,
         width: 768,
         height: 432,
         referenceImageUrl: selfieUrl ?? undefined,
+        companionReferenceUrl: includeCompanion ? (companionPortrait ?? undefined) : undefined,
+        companionDescription: includeCompanion ? companionDesc : undefined,
         includesProtagonist: !!selfieUrl,
         protagonistGender: activeChar?.gender,
       })
