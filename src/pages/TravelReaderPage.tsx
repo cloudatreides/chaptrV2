@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Send, Loader2, MapPin, ChevronRight, Lock, Check, Play, ChevronDown, Plus, X } from 'lucide-react'
+import { ArrowLeft, Send, Loader2, MapPin, ChevronRight, Lock, Check, Play, ChevronDown, Plus, X, Volume2, VolumeX } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { getDestination } from '../data/travel/destinations'
 import { getTravelCompanion } from '../data/travel/companions'
@@ -14,6 +14,7 @@ import { buildReactionImagePrompt } from '../data/chatActions'
 import { DayTransition } from '../components/travel/DayTransition'
 import { TripComplete } from '../components/travel/TripComplete'
 import type { ChatMessage, TripScene } from '../store/useStore'
+import { lofiPlayer } from '../lib/lofiPlayer'
 
 type ViewMode = 'chat' | 'scene' | 'transition' | 'day-start' | 'day-end' | 'complete'
 
@@ -96,9 +97,23 @@ export function TravelReaderPage() {
   const [localSliders, setLocalSliders] = useState<{ chattiness: number; planningStyle: number; vibe: number } | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [showActions, setShowActions] = useState(false)
+  const [lofiPlaying, setLofiPlaying] = useState(lofiPlayer.isPlaying)
   const chatEndRef = useRef<HTMLDivElement>(null)
   const abortRef = useRef<AbortController | null>(null)
   const engagementRef = useRef<number>(Date.now())
+
+  // Start lofi on first click, stop on unmount
+  useEffect(() => {
+    const startLofi = () => {
+      lofiPlayer.play()
+      document.removeEventListener('click', startLofi)
+    }
+    document.addEventListener('click', startLofi, { once: true })
+    return () => {
+      document.removeEventListener('click', startLofi)
+      lofiPlayer.stop()
+    }
+  }, [])
 
   // Track engagement time
   useEffect(() => {
@@ -390,6 +405,8 @@ export function TravelReaderPage() {
         addMsg({ role: 'character', content: parsed.content, characterId: trip.companionId, timestamp: Date.now(), imageUrl })
       } else {
         addMsg({ role: 'character', content: parsed.content, characterId: trip.companionId, timestamp: Date.now() })
+        setToastMessage('Image couldn\'t be generated')
+        setTimeout(() => setToastMessage(null), 3000)
       }
       updateTravelAffinity(Math.max(parsed.delta, 3))
       if (parsed.suggestions) setSuggestions(parsed.suggestions)
@@ -458,6 +475,8 @@ export function TravelReaderPage() {
         addMsg({ role: 'character', content: parsed.content, characterId: trip.companionId, timestamp: Date.now(), imageUrl })
       } else {
         addMsg({ role: 'character', content: parsed.content, characterId: trip.companionId, timestamp: Date.now() })
+        setToastMessage('Image couldn\'t be generated')
+        setTimeout(() => setToastMessage(null), 3000)
       }
       updateTravelAffinity(Math.max(parsed.delta, 3))
       if (parsed.suggestions) setSuggestions(parsed.suggestions)
@@ -528,6 +547,8 @@ export function TravelReaderPage() {
         addMsg({ role: 'character', content: parsed.content, characterId: trip.companionId, timestamp: Date.now(), imageUrl })
       } else {
         addMsg({ role: 'character', content: parsed.content, characterId: trip.companionId, timestamp: Date.now() })
+        setToastMessage('Image couldn\'t be generated')
+        setTimeout(() => setToastMessage(null), 3000)
       }
       updateTravelAffinity(Math.max(parsed.delta, 2))
       if (parsed.suggestions) setSuggestions(parsed.suggestions)
@@ -839,6 +860,13 @@ export function TravelReaderPage() {
               </span>
             </div>
           )}
+          <button
+            onClick={() => setLofiPlaying(lofiPlayer.toggle())}
+            className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-colors hover:bg-white/5"
+            title={lofiPlaying ? 'Pause lofi' : 'Play lofi'}
+          >
+            {lofiPlaying ? <Volume2 size={14} className="text-purple-400/70" /> : <VolumeX size={14} className="text-white/25" />}
+          </button>
         </div>
 
         {/* Main Content */}
@@ -883,6 +911,8 @@ export function TravelReaderPage() {
                 heroImage={destination.heroImage}
                 type="end"
                 onContinue={() => setViewMode('chat')}
+                scenes={trip.itinerary.days.find((d) => d.dayNumber === trip.currentDay)?.scenes}
+                sceneImages={trip.sceneImages}
               />
             )}
 
@@ -1048,7 +1078,7 @@ export function TravelReaderPage() {
                 className="px-5 md:px-[60px] py-4"
               >
                 {/* Scene context divider */}
-                {currentScene?.prose && (
+                {currentScene && (
                   <div className="flex items-center gap-2 mb-4">
                     <div className="h-px flex-1" style={{ background: 'rgba(124,58,237,0.15)' }} />
                     <span
@@ -1193,7 +1223,7 @@ export function TravelReaderPage() {
                         ) : (
                           <div key={j} className="flex justify-start">
                             <div className="max-w-[80%] rounded-2xl px-4 py-2.5" style={{ background: 'rgba(255,255,255,0.06)', borderBottomLeftRadius: 4 }}>
-                              <p className="text-[14px] leading-relaxed whitespace-pre-wrap" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'rgba(255,255,255,0.8)' }}>
+                              <p className="text-[14px] leading-relaxed whitespace-pre-wrap text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                                 {seg.text}
                               </p>
                             </div>
@@ -1204,6 +1234,13 @@ export function TravelReaderPage() {
                     )
                   })}
 
+                  {/* Image loading shimmer */}
+                  {isGeneratingChatImage && (
+                    <div className="w-full max-w-[360px] rounded-xl overflow-hidden">
+                      <div className="w-full aspect-[16/9] scene-image-shimmer rounded-xl" />
+                    </div>
+                  )}
+
                   {/* Streaming indicator */}
                   {isStreaming && streamedText && (
                     <div className="flex flex-col gap-1.5">
@@ -1213,7 +1250,7 @@ export function TravelReaderPage() {
                         ) : (
                           <div key={j} className="flex justify-start">
                             <div className="max-w-[80%] rounded-2xl px-4 py-2.5" style={{ background: 'rgba(255,255,255,0.06)', borderBottomLeftRadius: 4 }}>
-                              <p className="text-[14px] leading-relaxed text-white/80 whitespace-pre-wrap" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                              <p className="text-[14px] leading-relaxed text-white whitespace-pre-wrap" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                                 {seg.text}
                               </p>
                             </div>
