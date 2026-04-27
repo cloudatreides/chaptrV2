@@ -416,15 +416,17 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
   const navigate = useNavigate()
   const travelTrips = useStore((s) => s.travelTrips)
   const storyProgress = useStore((s) => s.storyProgress)
+  const setActiveTripId = useStore((s) => s.setActiveTripId)
+  const extendTrip = useStore((s) => s.extendTrip)
 
   const hasAny = stats.tripsCompleted > 0 || stats.storiesStarted > 0
   if (!hasAny) return null
 
-  const completedTrips = Object.values(travelTrips)
-    .filter((t) => t.phase === 'complete')
-    .sort((a, b) => b.startedAt - a.startedAt)
+  const completedTrips = Object.entries(travelTrips)
+    .filter(([, t]) => t.phase === 'complete')
+    .sort(([, a], [, b]) => b.startedAt - a.startedAt)
 
-  const completedDestinations = completedTrips.map((t) => {
+  const completedDestinations = completedTrips.map(([, t]) => {
     const dest = getDestination(t.destinationId)
     return dest ? { emoji: dest.countryEmoji, city: dest.city } : null
   }).filter(Boolean) as { emoji: string; city: string }[]
@@ -550,7 +552,7 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
 
               {modal === 'trips' && (
                 <div className="flex flex-col gap-3">
-                  {completedTrips.map((trip, i) => {
+                  {completedTrips.map(([tripId, trip], i) => {
                     const dest = getDestination(trip.destinationId)
                     const comp = getTravelCompanion(trip.companionId)
                     const compName = trip.companionRemix?.name ?? comp?.character.name ?? 'Companion'
@@ -578,10 +580,14 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
                         <div className="px-3 py-2.5">
                           {extensions < 2 ? (
                             <div className="flex items-center gap-2">
-                              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer transition-colors hover:bg-[#7C3AED22]" style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.2)' }}>
+                              <button
+                                onClick={() => { setActiveTripId(tripId); extendTrip(); navigate('/travel/trip') }}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer transition-colors hover:bg-[#7C3AED22]"
+                                style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.2)' }}
+                              >
                                 <Plus size={12} className="text-[#A78BFA]" />
                                 <span className="text-[#A78BFA] text-xs font-semibold" style={{ fontFamily: SG }}>Stay 2 more days</span>
-                              </div>
+                              </button>
                               <span className="text-white/40 text-[11px] line-through" style={{ fontFamily: SG }}>$2.99</span>
                               <span className="text-emerald-400 text-[11px] font-bold" style={{ fontFamily: SG }}>FREE</span>
                             </div>
