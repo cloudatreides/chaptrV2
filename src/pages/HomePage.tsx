@@ -380,8 +380,8 @@ function PingCards({ pings, onOpen }: { pings: any[]; onOpen: (ping: any) => voi
 
 // ─── Journey Stats ───
 
-function BentoStatCard({ icon: Icon, label, value, subtitle, color, gradientFrom, onClick, children }: {
-  icon: typeof Map; label: string; value: number; subtitle: string; color: string; gradientFrom: string; onClick?: () => void; children?: React.ReactNode
+function BentoStatCard({ icon: Icon, label, subtitle, color, gradientFrom, onClick, children }: {
+  icon: typeof Map; label: string; value?: number; subtitle: string; color: string; gradientFrom: string; onClick?: () => void; children?: React.ReactNode
 }) {
   return (
     <button
@@ -604,7 +604,7 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
                     return (
                       <div key={s.key} className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
                         <div className="relative h-24">
-                          {s.universe?.coverImage && <img src={s.universe.coverImage} alt="" className="w-full h-full object-cover" style={{ opacity: 0.4 }} />}
+                          {s.universe?.image && <img src={s.universe.image} alt="" className="w-full h-full object-cover" style={{ opacity: 0.4 }} />}
                           <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, #1A1726 0%, transparent 100%)' }} />
                           <div className="absolute bottom-3 left-3 right-3">
                             <p className="text-white font-bold text-sm mb-1" style={{ fontFamily: SG }}>{s.universe?.title}</p>
