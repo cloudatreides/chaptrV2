@@ -511,120 +511,53 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
       <div>
         <p className="text-[10px] md:text-[11px] font-semibold tracking-[2px] uppercase mb-3" style={{ color: 'rgba(255,255,255,0.25)', fontFamily: SG }}>YOUR JOURNEY</p>
 
-        {/* Mobile: trips full-width, stories+moments side by side */}
-        <div className="flex flex-col gap-2.5 md:hidden">
+        {/* 3-column equal grid (2-col on mobile, 3-col on desktop) */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 md:gap-3">
           <BentoStatCard
             icon={Map} label="Trips" value={stats.tripsCompleted} subtitle="completed"
             color="#B794F6" gradientFrom="#2D1B69"
             onClick={() => stats.tripsCompleted > 0 ? setModal('trips') : navigate('/travel')}
           >
-            <div className="flex items-end justify-between mt-1.5">
-              <span className="text-white text-[42px] font-extrabold leading-none" style={{ fontFamily: SG }}>{stats.tripsCompleted}</span>
-            </div>
+            <span className="text-white text-[36px] md:text-[42px] font-extrabold leading-none mt-2" style={{ fontFamily: SG }}>{stats.tripsCompleted}</span>
             {completedDestinations.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {completedDestinations.map((d, i) => (
-                  <span key={i} className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] text-white/70 font-medium" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', fontFamily: SG }}>
+              <div className="flex flex-wrap gap-1 mt-auto pt-2">
+                {completedDestinations.slice(0, 3).map((d, i) => (
+                  <span key={i} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] text-white/60 font-medium" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', fontFamily: SG }}>
                     {d.emoji} {d.city}
                   </span>
                 ))}
               </div>
             )}
           </BentoStatCard>
-          <div className="grid grid-cols-2 gap-2.5">
-            <BentoStatCard
-              icon={BookOpen} label="Stories" value={stats.storiesStarted} subtitle="in progress"
-              color="#E879A8" gradientFrom="#3D1B2E"
-              onClick={() => stats.storiesStarted > 0 ? setModal('stories') : navigate('/stories')}
-            >
-              <div className="mt-auto pt-2">
-                {stats.storiesStarted > 0 && (
-                  <div className="mb-2">
-                    <p className="text-white/45 text-[10px] truncate mb-1" style={{ fontFamily: SG }}>{latestStoryTitle}</p>
-                    <div className="w-full h-1 rounded-full overflow-hidden" style={{ background: 'rgba(232,121,168,0.15)' }}>
-                      <div className="h-full rounded-full" style={{ width: `${latestStoryProgress}%`, background: '#E879A8' }} />
-                    </div>
-                  </div>
-                )}
-                <span className="text-white text-[32px] font-extrabold leading-none block text-right" style={{ fontFamily: SG }}>{stats.storiesStarted}</span>
-              </div>
-            </BentoStatCard>
-            <BentoStatCard
-              icon={Camera} label="Moments" value={stats.momentsCollected} subtitle="captured"
-              color="#5EEAD4" gradientFrom="#1B3D3A"
-              onClick={() => navigate('/album')}
-            >
-              <div className="mt-auto pt-2">
-                {recentMoments.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-2">
-                    {recentMoments.slice(0, 2).map((label, i) => (
-                      <span key={i} className="text-[9px] px-1.5 py-0.5 rounded-full text-white/50" style={{ background: 'rgba(94,234,212,0.1)', border: '1px solid rgba(94,234,212,0.15)', fontFamily: SG }}>{label}</span>
-                    ))}
-                  </div>
-                )}
-                <span className="text-white text-[32px] font-extrabold leading-none block text-right" style={{ fontFamily: SG }}>{stats.momentsCollected}</span>
-              </div>
-            </BentoStatCard>
-          </div>
-        </div>
-
-        {/* Desktop: asymmetric bento — trips hero left, stories+moments stacked right */}
-        <div className="hidden md:flex gap-3 max-w-[800px]">
           <BentoStatCard
-            icon={Map} label="Trips" value={stats.tripsCompleted} subtitle="completed"
-            color="#B794F6" gradientFrom="#2D1B69"
-            onClick={() => stats.tripsCompleted > 0 ? setModal('trips') : navigate('/travel')}
+            icon={BookOpen} label="Stories" value={stats.storiesStarted} subtitle="in progress"
+            color="#E879A8" gradientFrom="#3D1B2E"
+            onClick={() => stats.storiesStarted > 0 ? setModal('stories') : navigate('/stories')}
           >
-            <span className="text-white text-[50px] font-extrabold leading-none mt-1.5" style={{ fontFamily: SG }}>{stats.tripsCompleted}</span>
-            {completedDestinations.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {completedDestinations.map((d, i) => (
-                  <span key={i} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] text-white/70 font-medium" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', fontFamily: SG }}>
-                    {d.emoji} {d.city}
-                  </span>
+            <span className="text-white text-[36px] md:text-[42px] font-extrabold leading-none mt-2" style={{ fontFamily: SG }}>{stats.storiesStarted}</span>
+            {stats.storiesStarted > 0 && (
+              <div className="mt-auto pt-2">
+                <p className="text-white/40 text-[10px] truncate mb-1.5" style={{ fontFamily: SG }}>{latestStoryTitle}</p>
+                <div className="w-full h-1 rounded-full overflow-hidden" style={{ background: 'rgba(232,121,168,0.15)' }}>
+                  <div className="h-full rounded-full" style={{ width: `${latestStoryProgress}%`, background: '#E879A8' }} />
+                </div>
+              </div>
+            )}
+          </BentoStatCard>
+          <BentoStatCard
+            icon={Camera} label="Moments" value={stats.momentsCollected} subtitle="captured"
+            color="#5EEAD4" gradientFrom="#1B3D3A"
+            onClick={() => navigate('/album')}
+          >
+            <span className="text-white text-[36px] md:text-[42px] font-extrabold leading-none mt-2" style={{ fontFamily: SG }}>{stats.momentsCollected}</span>
+            {recentMoments.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-auto pt-2">
+                {recentMoments.slice(0, 2).map((label, i) => (
+                  <span key={i} className="text-[9px] px-1.5 py-0.5 rounded-full text-white/50" style={{ background: 'rgba(94,234,212,0.1)', border: '1px solid rgba(94,234,212,0.15)', fontFamily: SG }}>{label}</span>
                 ))}
               </div>
             )}
           </BentoStatCard>
-          <div className="flex flex-col gap-3 flex-1">
-            <BentoStatCard
-              icon={BookOpen} label="Stories" value={stats.storiesStarted} subtitle="in progress"
-              color="#E879A8" gradientFrom="#3D1B2E"
-              onClick={() => stats.storiesStarted > 0 ? setModal('stories') : navigate('/stories')}
-            >
-              <div className="flex items-end justify-between mt-auto">
-                <div className="flex-1 min-w-0 mr-3">
-                  {stats.storiesStarted > 0 && (
-                    <>
-                      <p className="text-white/50 text-[10px] truncate mb-1.5" style={{ fontFamily: SG }}>{latestStoryTitle}</p>
-                      <div className="w-full h-1 rounded-full overflow-hidden" style={{ background: 'rgba(232,121,168,0.15)' }}>
-                        <div className="h-full rounded-full" style={{ width: `${latestStoryProgress}%`, background: '#E879A8' }} />
-                      </div>
-                    </>
-                  )}
-                </div>
-                <span className="text-white text-[36px] font-extrabold leading-none shrink-0" style={{ fontFamily: SG }}>{stats.storiesStarted}</span>
-              </div>
-            </BentoStatCard>
-            <BentoStatCard
-              icon={Camera} label="Moments" value={stats.momentsCollected} subtitle="captured"
-              color="#5EEAD4" gradientFrom="#1B3D3A"
-              onClick={() => navigate('/album')}
-            >
-              <div className="flex items-end justify-between mt-auto">
-                <div className="flex-1 min-w-0 mr-3">
-                  {recentMoments.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {recentMoments.map((label, i) => (
-                        <span key={i} className="text-[9px] px-1.5 py-0.5 rounded-full text-white/50" style={{ background: 'rgba(94,234,212,0.1)', border: '1px solid rgba(94,234,212,0.15)', fontFamily: SG }}>{label}</span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <span className="text-white text-[36px] font-extrabold leading-none shrink-0" style={{ fontFamily: SG }}>{stats.momentsCollected}</span>
-              </div>
-            </BentoStatCard>
-          </div>
         </div>
       </div>
 
