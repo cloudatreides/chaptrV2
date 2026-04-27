@@ -40,6 +40,9 @@ export function TravelHomePage() {
   const selectedIdRef = useRef<string | null>(null)
   const [heroIdx, setHeroIdx] = useState(0)
   const [heroPaused, setHeroPaused] = useState(false)
+  const cityCarouselRef = useRef<HTMLDivElement>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(true)
 
   const setActiveTripId = useStore((s) => s.setActiveTripId)
 
@@ -79,6 +82,24 @@ export function TravelHomePage() {
     }, 2500)
     return () => clearInterval(timer)
   }, [selectedDest?.id, heroPaused])
+
+  const updateCarouselArrows = useCallback(() => {
+    const el = cityCarouselRef.current
+    if (!el) return
+    setCanScrollLeft(el.scrollLeft > 4)
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 4)
+  }, [])
+
+  const scrollCarousel = useCallback((dir: 'left' | 'right') => {
+    const el = cityCarouselRef.current
+    if (!el) return
+    const cardWidth = el.querySelector<HTMLElement>(':scope > *')?.offsetWidth ?? 260
+    el.scrollBy({ left: dir === 'left' ? -cardWidth - 16 : cardWidth + 16, behavior: 'smooth' })
+  }, [])
+
+  useEffect(() => {
+    updateCarouselArrows()
+  }, [destTab, updateCarouselArrows])
 
   const selectDest = useCallback((dest: Destination) => {
     setSelectedDest(dest)
@@ -721,52 +742,79 @@ export function TravelHomePage() {
               ))}
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {(destTab === 'available' ? DESTINATIONS.filter(d => !d.locked) : DESTINATIONS.filter(d => d.locked)).map((dest) => (
+            {/* Mobile: horizontal carousel / Desktop: grid */}
+            <div className="relative">
+              {/* Left arrow — mobile only */}
+              {canScrollLeft && (
                 <button
-                  key={dest.id}
-                  onClick={() => {
-                    selectDest(dest)
-                    containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                  }}
-                  className="cursor-pointer rounded-xl overflow-hidden text-left group"
-                  style={{ border: destTab === 'available' ? '1px solid rgba(124,58,237,0.2)' : '1px solid rgba(255,255,255,0.04)', background: destTab === 'available' ? '#151020' : '#0E0B15' }}
+                  onClick={() => scrollCarousel('left')}
+                  className="sm:hidden absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer"
+                  style={{ background: 'rgba(10,8,16,0.85)', border: '1px solid rgba(124,58,237,0.3)' }}
                 >
-                  <div className="relative aspect-[4/3] overflow-hidden">
-                    <img
-                      src={dest.heroImage}
-                      alt={dest.city}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      style={dest.locked ? { filter: 'brightness(0.35) saturate(0.3)' } : undefined}
-                    />
-                    <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,8,16,0.95) 0%, rgba(10,8,16,0.5) 40%, transparent 70%)' }} />
-                    {dest.locked && (
-                      <div className="absolute inset-0 flex items-center justify-center" style={{ backdropFilter: 'blur(2px)', background: 'rgba(10,8,16,0.3)' }}>
-                        <span className="text-[11px] font-bold tracking-[1.5px] uppercase px-3 py-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', fontFamily: SG }}>Coming Soon</span>
-                      </div>
-                    )}
-                    <div className="absolute bottom-0 left-0 right-0 p-3">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-sm">{dest.countryEmoji}</span>
-                        <p className="text-sm font-semibold" style={{ fontFamily: SG, color: dest.locked ? 'rgba(255,255,255,0.4)' : '#fff' }}>{dest.city}</p>
-                      </div>
-                      {!dest.locked && (
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {dest.vibeTags.map((tag) => (
-                            <span
-                              key={tag}
-                              className="text-[9px] font-medium px-1.5 py-0.5 rounded-full"
-                              style={{ background: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(8px)', fontFamily: SG }}
-                            >
-                              {tag}
-                            </span>
-                          ))}
+                  <ChevronLeft size={16} className="text-violet-400" />
+                </button>
+              )}
+              {/* Right arrow — mobile only */}
+              {canScrollRight && (
+                <button
+                  onClick={() => scrollCarousel('right')}
+                  className="sm:hidden absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer"
+                  style={{ background: 'rgba(10,8,16,0.85)', border: '1px solid rgba(124,58,237,0.3)' }}
+                >
+                  <ChevronRight size={16} className="text-violet-400" />
+                </button>
+              )}
+              <div
+                ref={cityCarouselRef}
+                onScroll={updateCarouselArrows}
+                className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 scrollbar-hide sm:grid sm:grid-cols-3 lg:grid-cols-4 sm:gap-4 sm:overflow-visible sm:pb-0"
+              >
+                {(destTab === 'available' ? DESTINATIONS.filter(d => !d.locked) : DESTINATIONS.filter(d => d.locked)).map((dest) => (
+                  <button
+                    key={dest.id}
+                    onClick={() => {
+                      selectDest(dest)
+                      containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                    }}
+                    className="cursor-pointer rounded-xl overflow-hidden text-left group snap-start shrink-0 w-[72vw] sm:w-auto"
+                    style={{ border: destTab === 'available' ? '1px solid rgba(124,58,237,0.2)' : '1px solid rgba(255,255,255,0.04)', background: destTab === 'available' ? '#151020' : '#0E0B15' }}
+                  >
+                    <div className="relative aspect-[4/3] overflow-hidden">
+                      <img
+                        src={dest.heroImage}
+                        alt={dest.city}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        style={dest.locked ? { filter: 'brightness(0.35) saturate(0.3)' } : undefined}
+                      />
+                      <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,8,16,0.95) 0%, rgba(10,8,16,0.5) 40%, transparent 70%)' }} />
+                      {dest.locked && (
+                        <div className="absolute inset-0 flex items-center justify-center" style={{ backdropFilter: 'blur(2px)', background: 'rgba(10,8,16,0.3)' }}>
+                          <span className="text-[11px] font-bold tracking-[1.5px] uppercase px-3 py-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', fontFamily: SG }}>Coming Soon</span>
                         </div>
                       )}
+                      <div className="absolute bottom-0 left-0 right-0 p-3">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-sm">{dest.countryEmoji}</span>
+                          <p className="text-sm font-semibold" style={{ fontFamily: SG, color: dest.locked ? 'rgba(255,255,255,0.4)' : '#fff' }}>{dest.city}</p>
+                        </div>
+                        {!dest.locked && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {dest.vibeTags.map((tag) => (
+                              <span
+                                key={tag}
+                                className="text-[9px] font-medium px-1.5 py-0.5 rounded-full"
+                                style={{ background: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(8px)', fontFamily: SG }}
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
