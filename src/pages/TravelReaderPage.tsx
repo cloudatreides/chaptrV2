@@ -165,7 +165,6 @@ export function TravelReaderPage() {
     const first = msgs[0]
     if (first.role === 'character' && first.content.includes('staying')) return
     backfillRan.current = true
-    const cName = trip.companionRemix?.name ?? companion.character.name
     const reactions = [
       `Wait... we're staying?! I was already trying to figure out how to say goodbye and now — okay, I'm not going to pretend I'm not really happy right now.`,
       `You're serious? More days together? I... I don't know what to say. I was dreading the end of this trip and now we get to keep going. You have no idea how much this means.`,
@@ -389,7 +388,7 @@ export function TravelReaderPage() {
 
     const currentScene = getCurrentScene()
     const locationContext = currentScene ? `${currentScene.location}, ${destination.city}` : destination.city
-    const imagePrompt = `anime style, cinematic scene: ${lastCompanionMsg.content.slice(0, 200)}. Setting: ${locationContext}. Atmospheric lighting, detailed background, travel photography mood.`
+    const imagePrompt = `anime illustration, cel-shaded, cinematic scene: ${lastCompanionMsg.content.slice(0, 200)}. Setting: ${locationContext}. Atmospheric lighting, detailed background, vibrant anime art`
 
     try {
       const url = await generateTravelImage(imagePrompt, activeChar?.selfieUrl)
@@ -496,7 +495,7 @@ export function TravelReaderPage() {
       .replace(/^(anime style|dark|cyberpunk[^,]*|fantasy[^,]*|thriller[^,]*|sci-fi[^,]*)\s*(portrait|illustration|concept art)\s*(portrait\s*)?of\s*/i, '')
       .trim()
     const playerGender = activeChar?.gender === 'male' ? 'a young man' : 'a young woman'
-    const scenePrompt = `anime style, two people walking together holding hands from behind on a beautiful street in ${locationContext}. ${playerGender} and ${companionDesc}. Close-up on their intertwined hands, warm golden hour lighting, soft bokeh, romantic K-drama moment, high quality anime art`
+    const scenePrompt = `anime illustration, cel-shaded, two people walking together holding hands from behind on a beautiful street in ${locationContext}. ${playerGender} and ${companionDesc}. Close-up on their intertwined hands, warm golden hour lighting, soft bokeh, romantic moment, vibrant anime art`
 
     try {
       const [imageUrl, replyStream] = await Promise.all([
@@ -568,7 +567,7 @@ export function TravelReaderPage() {
     const conversationHint = recentMessages.map((m) => m.content).join(' ').slice(0, 200)
     const activityHint = currentScene?.activity ?? conversationHint
 
-    const scenePrompt = `anime style, selfie photo taken by ${playerGender}, close-up selfie with ${companionDesc}, both smiling at camera, peace signs, in ${locationContext}, ${activityHint}. Phone camera perspective, slight wide-angle distortion, warm natural lighting, candid happy energy, high quality anime art, social media selfie aesthetic`
+    const scenePrompt = `anime illustration, cel-shaded, selfie taken by ${playerGender}, close-up selfie with ${companionDesc}, both smiling at camera, peace signs, in ${locationContext}, ${activityHint}. Phone camera perspective, slight wide-angle distortion, warm natural lighting, candid happy energy, vibrant anime art`
 
     try {
       const [imageUrl, replyStream] = await Promise.all([
@@ -748,7 +747,7 @@ export function TravelReaderPage() {
         if (needsImage && !imageTriggered && full.length > 200) {
           imageTriggered = true
           const proseSnippet = full.slice(0, 300).replace(/[.!?][^.!?]*$/, '.').trim()
-          const imagePrompt = `anime style, cinematic wide shot, ${scene.timeOfDay} atmosphere in ${scene.location}, ${destination.city}. ${proseSnippet} Detailed background, atmospheric lighting, high quality anime art`
+          const imagePrompt = `anime illustration, cel-shaded, cinematic wide shot, ${scene.timeOfDay} atmosphere in ${scene.location}, ${destination.city}. ${proseSnippet} Detailed background, atmospheric lighting, vibrant anime art`
           generateTravelImage(imagePrompt, scene.protagonistVisible ? activeChar?.selfieUrl : undefined)
             .then((url) => { if (url) setTripSceneImage(scene.id, url) })
             .finally(() => setImageLoadingSceneId(null))
@@ -757,7 +756,7 @@ export function TravelReaderPage() {
 
       if (needsImage && !imageTriggered) {
         imageTriggered = true
-        const imagePrompt = `anime style, cinematic wide shot, ${scene.timeOfDay} atmosphere in ${scene.location}, ${destination.city}. ${full.slice(0, 300)} Detailed background, atmospheric lighting, high quality anime art`
+        const imagePrompt = `anime illustration, cel-shaded, cinematic wide shot, ${scene.timeOfDay} atmosphere in ${scene.location}, ${destination.city}. ${full.slice(0, 300)} Detailed background, atmospheric lighting, vibrant anime art`
         generateTravelImage(imagePrompt, scene.protagonistVisible ? activeChar?.selfieUrl : undefined)
           .then((url) => { if (url) setTripSceneImage(scene.id, url) })
           .finally(() => setImageLoadingSceneId(null))
