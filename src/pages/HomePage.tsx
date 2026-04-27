@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, Pencil, MessageCircle, LogOut, Compass, BookOpen, ChevronRight, Camera, Sparkles, Plus, Map, X, Image, Heart } from 'lucide-react'
+import { ArrowRight, Pencil, MessageCircle, LogOut, Compass, BookOpen, ChevronRight, Camera, Sparkles, Plus, Map, X } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { UNIVERSES, GENRE_FILTERS } from '../data/storyData'
 import { useAuth } from '../contexts/AuthContext'
@@ -380,51 +380,38 @@ function PingCards({ pings, onOpen }: { pings: any[]; onOpen: (ping: any) => voi
 
 // ─── Journey Stats ───
 
-function JourneyStatCard({ icon: Icon, label, value, color, glowColor, subtitle, onClick }: {
-  icon: typeof Map; label: string; value: number; color: string; glowColor: string; subtitle?: string; onClick?: () => void
+function BentoStatCard({ icon: Icon, label, value, subtitle, color, gradientFrom, onClick, children }: {
+  icon: typeof Map; label: string; value: number; subtitle: string; color: string; gradientFrom: string; onClick?: () => void; children?: React.ReactNode
 }) {
   return (
     <button
       onClick={onClick}
-      className="group relative flex flex-col items-center gap-2 py-5 md:py-6 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.04] active:scale-[0.97] overflow-hidden"
+      className="group relative overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
       style={{
-        background: `linear-gradient(135deg, ${color}18 0%, ${color}08 40%, #13101C 100%)`,
-        border: `1px solid ${color}30`,
-        boxShadow: value > 0 ? `0 8px 32px ${glowColor}, inset 0 1px 0 ${color}15` : 'none',
+        background: `linear-gradient(155deg, ${gradientFrom} 0%, #1A1628 60%, #13101C 100%)`,
+        border: `1px solid ${color}44`,
+        borderRadius: 18,
       }}
     >
-      {/* Ambient glow blob */}
-      <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full opacity-40 blur-2xl transition-opacity group-hover:opacity-60" style={{ background: color }} />
-
-      {/* Icon */}
-      <div
-        className="relative z-10 w-10 h-10 rounded-xl flex items-center justify-center"
-        style={{ background: `${color}25`, boxShadow: `0 0 16px ${color}20` }}
-      >
-        <Icon size={18} style={{ color }} />
+      <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ background: `linear-gradient(90deg, ${color}, ${color}88, ${color}44)` }} />
+      <div className="absolute -top-8 -left-5 w-36 h-36 rounded-full opacity-[0.06] blur-2xl" style={{ background: color }} />
+      <div className="relative z-10 flex flex-col h-full p-4 md:p-5">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 md:w-9 md:h-9 rounded-[10px] flex items-center justify-center" style={{ background: `${color}22` }}>
+            <Icon size={15} style={{ color }} />
+          </div>
+          <div className="text-left">
+            <p className="text-white/70 text-[13px] font-medium" style={{ fontFamily: SG }}>{label}</p>
+            <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.25)', fontFamily: SG }}>{subtitle}</p>
+          </div>
+        </div>
+        {children}
       </div>
-
-      {/* Number */}
-      <span className="relative z-10 text-white text-2xl md:text-3xl font-bold tracking-tight" style={{ fontFamily: "'Syne', sans-serif" }}>
-        {value}
-      </span>
-
-      {/* Label */}
-      <span className="relative z-10 text-[10px] md:text-[11px] uppercase tracking-[1.5px] font-semibold" style={{ color: `${color}cc`, fontFamily: SG }}>
-        {label}
-      </span>
-
-      {/* Subtitle */}
-      {subtitle && (
-        <span className="relative z-10 text-[10px] mt-[-4px] hidden md:block" style={{ color: 'rgba(255,255,255,0.25)', fontFamily: SG }}>
-          {subtitle}
-        </span>
-      )}
     </button>
   )
 }
 
-function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStarted: number; momentsCollected: number; bondsFormed: number } }) {
+function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStarted: number; momentsCollected: number } }) {
   const [modal, setModal] = useState<'trips' | 'stories' | null>(null)
   const navigate = useNavigate()
   const travelTrips = useStore((s) => s.travelTrips)
@@ -436,6 +423,11 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
   const completedTrips = Object.values(travelTrips)
     .filter((t) => t.phase === 'complete')
     .sort((a, b) => b.startedAt - a.startedAt)
+
+  const completedDestinations = completedTrips.map((t) => {
+    const dest = getDestination(t.destinationId)
+    return dest ? { emoji: dest.countryEmoji, city: dest.city } : null
+  }).filter(Boolean) as { emoji: string; city: string }[]
 
   const activeStories = Object.entries(storyProgress)
     .filter(([, p]) => p.currentStepIndex > 0)
@@ -449,31 +441,82 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
 
   return (
     <>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <JourneyStatCard
-          icon={Map} label="Trips" value={stats.tripsCompleted}
-          color="#A78BFA" glowColor="rgba(167,139,250,0.12)"
-          subtitle={stats.tripsCompleted > 0 ? 'completed' : undefined}
-          onClick={() => stats.tripsCompleted > 0 ? setModal('trips') : navigate('/travel')}
-        />
-        <JourneyStatCard
-          icon={BookOpen} label="Stories" value={stats.storiesStarted}
-          color="#c84b9e" glowColor="rgba(200,75,158,0.12)"
-          subtitle={stats.storiesStarted > 0 ? 'in progress' : undefined}
-          onClick={() => stats.storiesStarted > 0 ? setModal('stories') : navigate('/stories')}
-        />
-        <JourneyStatCard
-          icon={Image} label="Moments" value={stats.momentsCollected}
-          color="#60A5FA" glowColor="rgba(96,165,250,0.12)"
-          subtitle={stats.momentsCollected > 0 ? 'captured' : undefined}
-          onClick={() => navigate('/album')}
-        />
-        <JourneyStatCard
-          icon={Heart} label="Bonds" value={stats.bondsFormed}
-          color="#F472B6" glowColor="rgba(244,114,182,0.12)"
-          subtitle={stats.bondsFormed > 0 ? 'formed' : undefined}
-          onClick={() => navigate('/characters')}
-        />
+      <div>
+        <p className="text-[10px] md:text-[11px] font-semibold tracking-[2px] uppercase mb-3" style={{ color: 'rgba(255,255,255,0.25)', fontFamily: SG }}>YOUR JOURNEY</p>
+
+        {/* Mobile: trips full-width, stories+moments side by side */}
+        <div className="flex flex-col gap-2.5 md:hidden">
+          <BentoStatCard
+            icon={Map} label="Trips" value={stats.tripsCompleted} subtitle="completed"
+            color="#A78BFA" gradientFrom="#2D1B69"
+            onClick={() => stats.tripsCompleted > 0 ? setModal('trips') : navigate('/travel')}
+          >
+            <div className="flex items-end justify-between mt-auto pt-3">
+              <span className="text-white text-[42px] font-extrabold leading-none" style={{ fontFamily: SG }}>{stats.tripsCompleted}</span>
+            </div>
+            {completedDestinations.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {completedDestinations.map((d, i) => (
+                  <span key={i} className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] text-white/70 font-medium" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', fontFamily: SG }}>
+                    {d.emoji} {d.city}
+                  </span>
+                ))}
+              </div>
+            )}
+          </BentoStatCard>
+          <div className="grid grid-cols-2 gap-2.5">
+            <BentoStatCard
+              icon={BookOpen} label="Stories" value={stats.storiesStarted} subtitle="in progress"
+              color="#c84b9e" gradientFrom="#3D1B4E"
+              onClick={() => stats.storiesStarted > 0 ? setModal('stories') : navigate('/stories')}
+            >
+              <span className="text-white text-[32px] font-extrabold leading-none mt-auto pt-2 text-right" style={{ fontFamily: SG }}>{stats.storiesStarted}</span>
+            </BentoStatCard>
+            <BentoStatCard
+              icon={Camera} label="Moments" value={stats.momentsCollected} subtitle="captured"
+              color="#60A5FA" gradientFrom="#1B2D4E"
+              onClick={() => navigate('/album')}
+            >
+              <span className="text-white text-[32px] font-extrabold leading-none mt-auto pt-2 text-right" style={{ fontFamily: SG }}>{stats.momentsCollected}</span>
+            </BentoStatCard>
+          </div>
+        </div>
+
+        {/* Desktop: asymmetric bento — trips hero left, stories+moments stacked right */}
+        <div className="hidden md:flex gap-3 max-w-[800px]">
+          <BentoStatCard
+            icon={Map} label="Trips" value={stats.tripsCompleted} subtitle="completed"
+            color="#A78BFA" gradientFrom="#2D1B69"
+            onClick={() => stats.tripsCompleted > 0 ? setModal('trips') : navigate('/travel')}
+          >
+            <span className="text-white text-[50px] font-extrabold leading-none mt-3" style={{ fontFamily: SG }}>{stats.tripsCompleted}</span>
+            {completedDestinations.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-auto pt-3">
+                {completedDestinations.map((d, i) => (
+                  <span key={i} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] text-white/70 font-medium" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', fontFamily: SG }}>
+                    {d.emoji} {d.city}
+                  </span>
+                ))}
+              </div>
+            )}
+          </BentoStatCard>
+          <div className="flex flex-col gap-3 flex-1">
+            <BentoStatCard
+              icon={BookOpen} label="Stories" value={stats.storiesStarted} subtitle="in progress"
+              color="#c84b9e" gradientFrom="#3D1B4E"
+              onClick={() => stats.storiesStarted > 0 ? setModal('stories') : navigate('/stories')}
+            >
+              <span className="text-white text-[36px] font-extrabold leading-none absolute top-3 right-5" style={{ fontFamily: SG }}>{stats.storiesStarted}</span>
+            </BentoStatCard>
+            <BentoStatCard
+              icon={Camera} label="Moments" value={stats.momentsCollected} subtitle="captured"
+              color="#60A5FA" gradientFrom="#1B2D4E"
+              onClick={() => navigate('/album')}
+            >
+              <span className="text-white text-[36px] font-extrabold leading-none absolute top-3 right-5" style={{ fontFamily: SG }}>{stats.momentsCollected}</span>
+            </BentoStatCard>
+          </div>
+        </div>
       </div>
 
       {/* Modals */}
@@ -497,7 +540,7 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-5">
-                <h3 className="text-white text-lg font-bold" style={{ fontFamily: "'Syne', sans-serif" }}>
+                <h3 className="text-white text-lg font-bold" style={{ fontFamily: SG }}>
                   {modal === 'trips' ? 'Completed Trips' : 'Your Stories'}
                 </h3>
                 <button onClick={() => setModal(null)} className="text-white/40 hover:text-white/70 cursor-pointer transition-colors">
@@ -515,31 +558,35 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
                     const totalMessages = trip.planningChatHistory.length +
                       Object.values(trip.dayChatHistories).reduce((sum, msgs) => sum + msgs.length, 0)
                     const daysExplored = trip.itinerary.days.filter((d) => d.completed).length
+                    const extensions = trip.extensions ?? 0
                     return (
-                      <div
-                        key={i}
-                        className="rounded-xl overflow-hidden"
-                        style={{ border: '1px solid rgba(255,255,255,0.06)' }}
-                      >
+                      <div key={i} className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
                         <div className="relative h-24">
                           {dest && <img src={dest.heroImage} alt="" className="w-full h-full object-cover" style={{ opacity: 0.5 }} />}
                           <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, #1A1726 0%, transparent 100%)' }} />
                           <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
                             <div>
-                              <p className="text-white font-bold text-sm" style={{ fontFamily: "'Syne', sans-serif" }}>
-                                {dest?.countryEmoji} {dest?.city ?? trip.destinationId}
-                              </p>
-                              <p className="text-white/40 text-[11px]" style={{ fontFamily: SG }}>
-                                {daysExplored} days · {totalMessages} messages
-                              </p>
+                              <p className="text-white font-bold text-sm" style={{ fontFamily: SG }}>{dest?.countryEmoji} {dest?.city ?? trip.destinationId}</p>
+                              <p className="text-white/40 text-[11px]" style={{ fontFamily: SG }}>{daysExplored} days · {totalMessages} messages</p>
                             </div>
                             <div className="flex items-center gap-2">
-                              {compPortrait && (
-                                <img src={compPortrait} alt="" className="w-7 h-7 rounded-full object-cover" style={{ border: '1.5px solid rgba(167,139,250,0.4)' }} />
-                              )}
+                              {compPortrait && <img src={compPortrait} alt="" className="w-7 h-7 rounded-full object-cover" style={{ border: '1.5px solid rgba(167,139,250,0.4)' }} />}
                               <span className="text-white/50 text-xs" style={{ fontFamily: SG }}>{compName}</span>
                             </div>
                           </div>
+                        </div>
+                        <div className="px-3 py-2.5">
+                          {extensions < 2 ? (
+                            <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer transition-colors hover:bg-[#7C3AED22]" style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.2)' }}>
+                                <Plus size={12} className="text-[#A78BFA]" />
+                                <span className="text-[#A78BFA] text-xs font-semibold" style={{ fontFamily: SG }}>Stay 2 more days</span>
+                              </div>
+                              <span className="text-white/20 text-[11px]" style={{ fontFamily: SG }}>$2.99</span>
+                            </div>
+                          ) : (
+                            <p className="text-white/25 text-[11px] italic" style={{ fontFamily: SG }}>Come back anytime, {compName} will remember you</p>
+                          )}
                         </div>
                       </div>
                     )
@@ -555,25 +602,17 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
                   {activeStories.map((s) => {
                     const pct = Math.round((s.progress.currentStepIndex / s.total) * 100)
                     return (
-                      <div
-                        key={s.key}
-                        className="rounded-xl overflow-hidden"
-                        style={{ border: '1px solid rgba(255,255,255,0.06)' }}
-                      >
+                      <div key={s.key} className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
                         <div className="relative h-24">
                           {s.universe?.coverImage && <img src={s.universe.coverImage} alt="" className="w-full h-full object-cover" style={{ opacity: 0.4 }} />}
                           <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, #1A1726 0%, transparent 100%)' }} />
                           <div className="absolute bottom-3 left-3 right-3">
-                            <p className="text-white font-bold text-sm mb-1" style={{ fontFamily: "'Syne', sans-serif" }}>
-                              {s.universe?.title}
-                            </p>
+                            <p className="text-white font-bold text-sm mb-1" style={{ fontFamily: SG }}>{s.universe?.title}</p>
                             <div className="flex items-center gap-2">
                               <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: 'rgba(200,75,158,0.15)' }}>
                                 <div className="h-full rounded-full" style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #c84b9e, #e879a8)' }} />
                               </div>
-                              <span className="text-white/40 text-[11px] shrink-0" style={{ fontFamily: SG }}>
-                                {pct === 100 ? 'Complete' : `${pct}%`}
-                              </span>
+                              <span className="text-white/40 text-[11px] shrink-0" style={{ fontFamily: SG }}>{pct === 100 ? 'Complete' : `${pct}%`}</span>
                             </div>
                           </div>
                         </div>
@@ -683,8 +722,7 @@ export function HomePage() {
   const tripsCompleted = Object.values(travelTrips).filter((t) => t.phase === 'complete').length || 3
   const storiesStarted = Object.values(storyProgress).filter((p) => p.currentStepIndex > 0).length || 2
   const momentsCollected = storyMoments.length || 12
-  const bondsFormed = Object.keys(globalAffinities).length || 5
-  const journeyStats = { tripsCompleted, storiesStarted, momentsCollected, bondsFormed }
+  const journeyStats = { tripsCompleted, storiesStarted, momentsCollected }
 
   // ─── Continue cards ───
   const continueCards = []
