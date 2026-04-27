@@ -1145,7 +1145,7 @@ export function TravelReaderPage() {
                 {previousDayMessages.length > 0 && (
                   <div className="space-y-4 mb-6 opacity-60">
                     {previousDayMessages.map((day) => (
-                      <div key={day.dayNumber}>
+                      <div key={day.dayNumber} id={`day-chat-${day.dayNumber}`}>
                         <div className="flex items-center gap-2 mb-3 mt-2">
                           <div className="h-px flex-1" style={{ background: 'rgba(124,58,237,0.12)' }} />
                           <span className="text-[10px] font-semibold tracking-[1.5px] uppercase shrink-0" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'rgba(167,139,250,0.5)' }}>
@@ -1224,7 +1224,7 @@ export function TravelReaderPage() {
                         </div>
                       </div>
                     ))}
-                    <div className="flex items-center gap-2 mb-3 mt-4">
+                    <div id={`day-chat-${trip.currentDay}`} className="flex items-center gap-2 mb-3 mt-4">
                       <div className="h-px flex-1" style={{ background: 'rgba(124,58,237,0.25)' }} />
                       <span className="text-[10px] font-semibold tracking-[1.5px] uppercase shrink-0" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'rgba(167,139,250,0.7)' }}>
                         Day {trip.currentDay}: Now
@@ -1617,12 +1617,18 @@ export function TravelReaderPage() {
               <div key={seg.id}>
                 <div className="relative group">
                   <motion.button
-                    onClick={isReady && 'action' in seg && seg.action ? seg.action : undefined}
-                    disabled={!isReady || isGeneratingItinerary}
+                    onClick={
+                      isReady && 'action' in seg && seg.action
+                        ? seg.action
+                        : (isDone || isActive) && seg.id.startsWith('day-')
+                          ? () => { document.getElementById(`day-chat-${seg.id.replace('day-', '')}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }
+                          : undefined
+                    }
+                    disabled={!isReady && !isDone && !isActive}
                     animate={isReady ? { boxShadow: ['0 0 0px rgba(124,58,237,0)', '0 0 12px rgba(124,58,237,0.3)', '0 0 0px rgba(124,58,237,0)'] } : {}}
                     transition={isReady ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } : {}}
                     className={`w-full flex items-center gap-2.5 py-2 px-2.5 rounded-lg text-left transition-all ${
-                      isReady ? 'cursor-pointer hover:bg-purple-500/10' : 'cursor-default'
+                      isReady || ((isDone || isActive) && seg.id.startsWith('day-')) ? 'cursor-pointer hover:bg-purple-500/10' : 'cursor-default'
                     }`}
                     style={{
                       background: isActive ? 'rgba(124,58,237,0.1)' : isReady ? 'rgba(124,58,237,0.05)' : 'transparent',
