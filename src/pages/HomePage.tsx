@@ -435,37 +435,6 @@ function PingCards({ pings, onOpen }: { pings: any[]; onOpen: (ping: any) => voi
 
 // ─── Journey Stats ───
 
-function BentoStatCard({ icon: Icon, label, subtitle, color, gradientFrom, onClick, children }: {
-  icon: typeof Map; label: string; value?: number; subtitle: string; color: string; gradientFrom: string; onClick?: () => void; children?: React.ReactNode
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="group relative overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
-      style={{
-        background: `linear-gradient(155deg, ${gradientFrom} 0%, ${gradientFrom}cc 25%, #1A1628 65%, #13101C 100%)`,
-        border: `1px solid ${color}44`,
-        borderRadius: 18,
-      }}
-    >
-      <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ background: `linear-gradient(90deg, ${color}, ${color}cc, ${color}88)` }} />
-      <div className="absolute -top-8 -left-5 w-36 h-36 rounded-full opacity-[0.14] blur-2xl" style={{ background: color }} />
-      <div className="relative z-10 flex flex-col h-full p-4 md:p-5">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 md:w-9 md:h-9 rounded-[10px] flex items-center justify-center" style={{ background: `${color}22` }}>
-            <Icon size={15} style={{ color }} />
-          </div>
-          <div className="text-left">
-            <p className="text-white/70 text-[13px] font-medium" style={{ fontFamily: SG }}>{label}</p>
-            <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: SG }}>{subtitle}</p>
-          </div>
-        </div>
-        {children}
-      </div>
-    </button>
-  )
-}
-
 function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStarted: number; momentsCollected: number } }) {
   const [modal, setModal] = useState<'trips' | 'stories' | null>(null)
   const navigate = useNavigate()
@@ -511,53 +480,63 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
       <div>
         <p className="text-[10px] md:text-[11px] font-semibold tracking-[2px] uppercase mb-3" style={{ color: 'rgba(255,255,255,0.25)', fontFamily: SG }}>YOUR JOURNEY</p>
 
-        {/* 3-column equal grid (2-col on mobile, 3-col on desktop) */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 md:gap-3">
-          <BentoStatCard
-            icon={Map} label="Trips" value={stats.tripsCompleted} subtitle="completed"
-            color="#B794F6" gradientFrom="#2D1B69"
-            onClick={() => stats.tripsCompleted > 0 ? setModal('trips') : navigate('/travel')}
-          >
-            <span className="text-white text-[36px] md:text-[42px] font-extrabold leading-none mt-2" style={{ fontFamily: SG }}>{stats.tripsCompleted}</span>
-            {completedDestinations.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-auto pt-2">
-                {completedDestinations.slice(0, 3).map((d, i) => (
-                  <span key={i} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] text-white/60 font-medium" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', fontFamily: SG }}>
-                    {d.emoji} {d.city}
-                  </span>
-                ))}
+        {/* Single banner with all 3 stats */}
+        <div
+          className="relative overflow-hidden rounded-2xl"
+          style={{
+            background: 'linear-gradient(135deg, #2D1B69 0%, #1A1628 40%, #1B3D3A 100%)',
+            border: '1px solid rgba(255,255,255,0.08)',
+          }}
+        >
+          <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full opacity-[0.12] blur-3xl" style={{ background: '#B794F6' }} />
+          <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full opacity-[0.12] blur-3xl" style={{ background: '#5EEAD4' }} />
+
+          <div className="relative z-10 flex items-stretch">
+            {/* Trips */}
+            <button
+              onClick={() => stats.tripsCompleted > 0 ? setModal('trips') : navigate('/travel')}
+              className="flex-1 flex flex-col items-center gap-1.5 py-5 px-3 cursor-pointer hover:bg-white/[0.03] transition-colors"
+            >
+              <div className="flex items-center gap-1.5 mb-1">
+                <Map size={13} style={{ color: '#B794F6' }} />
+                <span className="text-white/50 text-[11px] font-medium" style={{ fontFamily: SG }}>Trips</span>
               </div>
-            )}
-          </BentoStatCard>
-          <BentoStatCard
-            icon={BookOpen} label="Stories" value={stats.storiesStarted} subtitle="in progress"
-            color="#E879A8" gradientFrom="#3D1B2E"
-            onClick={() => stats.storiesStarted > 0 ? setModal('stories') : navigate('/stories')}
-          >
-            <span className="text-white text-[36px] md:text-[42px] font-extrabold leading-none mt-2" style={{ fontFamily: SG }}>{stats.storiesStarted}</span>
-            {stats.storiesStarted > 0 && (
-              <div className="mt-auto pt-2">
-                <p className="text-white/40 text-[10px] truncate mb-1.5" style={{ fontFamily: SG }}>{latestStoryTitle}</p>
-                <div className="w-full h-1 rounded-full overflow-hidden" style={{ background: 'rgba(232,121,168,0.15)' }}>
-                  <div className="h-full rounded-full" style={{ width: `${latestStoryProgress}%`, background: '#E879A8' }} />
-                </div>
+              <span className="text-white text-[28px] md:text-[32px] font-extrabold leading-none" style={{ fontFamily: SG }}>{stats.tripsCompleted}</span>
+              <span className="text-white/30 text-[10px]" style={{ fontFamily: SG }}>completed</span>
+            </button>
+
+            {/* Divider */}
+            <div className="w-px self-stretch my-4" style={{ background: 'rgba(255,255,255,0.08)' }} />
+
+            {/* Stories */}
+            <button
+              onClick={() => stats.storiesStarted > 0 ? setModal('stories') : navigate('/stories')}
+              className="flex-1 flex flex-col items-center gap-1.5 py-5 px-3 cursor-pointer hover:bg-white/[0.03] transition-colors"
+            >
+              <div className="flex items-center gap-1.5 mb-1">
+                <BookOpen size={13} style={{ color: '#E879A8' }} />
+                <span className="text-white/50 text-[11px] font-medium" style={{ fontFamily: SG }}>Stories</span>
               </div>
-            )}
-          </BentoStatCard>
-          <BentoStatCard
-            icon={Camera} label="Moments" value={stats.momentsCollected} subtitle="captured"
-            color="#5EEAD4" gradientFrom="#1B3D3A"
-            onClick={() => navigate('/album')}
-          >
-            <span className="text-white text-[36px] md:text-[42px] font-extrabold leading-none mt-2" style={{ fontFamily: SG }}>{stats.momentsCollected}</span>
-            {recentMoments.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-auto pt-2">
-                {recentMoments.slice(0, 2).map((label, i) => (
-                  <span key={i} className="text-[9px] px-1.5 py-0.5 rounded-full text-white/50" style={{ background: 'rgba(94,234,212,0.1)', border: '1px solid rgba(94,234,212,0.15)', fontFamily: SG }}>{label}</span>
-                ))}
+              <span className="text-white text-[28px] md:text-[32px] font-extrabold leading-none" style={{ fontFamily: SG }}>{stats.storiesStarted}</span>
+              <span className="text-white/30 text-[10px]" style={{ fontFamily: SG }}>in progress</span>
+            </button>
+
+            {/* Divider */}
+            <div className="w-px self-stretch my-4" style={{ background: 'rgba(255,255,255,0.08)' }} />
+
+            {/* Moments */}
+            <button
+              onClick={() => navigate('/album')}
+              className="flex-1 flex flex-col items-center gap-1.5 py-5 px-3 cursor-pointer hover:bg-white/[0.03] transition-colors"
+            >
+              <div className="flex items-center gap-1.5 mb-1">
+                <Camera size={13} style={{ color: '#5EEAD4' }} />
+                <span className="text-white/50 text-[11px] font-medium" style={{ fontFamily: SG }}>Moments</span>
               </div>
-            )}
-          </BentoStatCard>
+              <span className="text-white text-[28px] md:text-[32px] font-extrabold leading-none" style={{ fontFamily: SG }}>{stats.momentsCollected}</span>
+              <span className="text-white/30 text-[10px]" style={{ fontFamily: SG }}>captured</span>
+            </button>
+          </div>
         </div>
       </div>
 
