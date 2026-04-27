@@ -702,7 +702,7 @@ function PathCard({ icon, title, desc, borderColor, iconBg, desktop, onClick }: 
       </div>
       <div className="flex flex-col gap-0.5 flex-1 min-w-0">
         <p className={`text-white font-bold ${desktop ? 'text-lg' : 'text-[15px]'}`} style={{ fontFamily: SG }}>{title}</p>
-        <p className={`text-[#B0A8BF] leading-snug ${desktop ? 'text-sm' : 'text-[11px]'}`} style={{ fontFamily: SG }}>{desc}</p>
+        <p className={`text-[#B0A8BF] leading-snug ${desktop ? 'text-sm' : 'text-xs'}`} style={{ fontFamily: SG }}>{desc}</p>
       </div>
       <ChevronRight size={desktop ? 20 : 16} className="text-white/20 shrink-0" />
     </div>
