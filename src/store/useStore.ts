@@ -103,6 +103,7 @@ export interface TripProgress {
   companionMemories: string[]
   startedAt: number
   totalEngagementMs: number
+  extensions?: number
 }
 
 export interface CustomCompanion {
@@ -274,6 +275,7 @@ interface StoreState {
   addCompanionMemory: (memory: string) => void
   addTravelEngagementTime: (ms: number) => void
   completeTrip: () => void
+  extendTrip: () => void
   resetTrip: () => void
 
   // ── Custom (remixed) companions ──
@@ -881,6 +883,27 @@ export const useStore = create<StoreState>()(
           travelTrips: {
             ...s.travelTrips,
             [id]: { ...s.travelTrips[id], phase: 'complete' },
+          },
+        }
+      }),
+
+      extendTrip: () => set((s) => {
+        const id = s.activeTripId
+        if (!id || !s.travelTrips[id]) return {}
+        const trip = s.travelTrips[id]
+        const ext = trip.extensions ?? 0
+        if (ext >= 2) return {}
+        const nextDay = trip.itinerary.days.length + 1
+        return {
+          travelTrips: {
+            ...s.travelTrips,
+            [id]: {
+              ...trip,
+              phase: 'day' as const,
+              currentDay: nextDay,
+              currentSceneIndex: 0,
+              extensions: ext + 1,
+            },
           },
         }
       }),

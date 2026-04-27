@@ -13,6 +13,7 @@ interface TripCompleteProps {
   destination: Destination
   companion: TravelCompanion
   onNewTrip: () => void
+  onExtendTrip: () => void
 }
 
 function getBondLabel(score: number): string {
@@ -23,7 +24,7 @@ function getBondLabel(score: number): string {
   return 'Just met'
 }
 
-export function TripComplete({ trip, destination, companion, onNewTrip }: TripCompleteProps) {
+export function TripComplete({ trip, destination, companion, onNewTrip, onExtendTrip }: TripCompleteProps) {
   const navigate = useNavigate()
   const [summary, setSummary] = useState<string | null>(null)
   const [farewell, setFarewell] = useState<string | null>(null)
@@ -303,6 +304,69 @@ export function TripComplete({ trip, destination, companion, onNewTrip }: TripCo
                 ))}
               </div>
             </motion.div>
+          )}
+
+          {/* Stay Longer CTA */}
+          {(trip.extensions ?? 0) < 2 ? (
+            <motion.div
+              initial={{ y: 10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 1.0 }}
+              className="mb-3"
+            >
+              <button
+                onClick={onExtendTrip}
+                className="w-full py-4 rounded-xl cursor-pointer text-left px-5 transition-all hover:scale-[1.01]"
+                style={{
+                  background: 'rgba(124,58,237,0.06)',
+                  border: '1px solid rgba(124,58,237,0.25)',
+                }}
+              >
+                <p
+                  className="text-white/50 text-xs mb-1.5"
+                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                >
+                  Not ready to leave?
+                </p>
+                <div className="flex items-center justify-between">
+                  <p
+                    className="text-white text-sm font-medium"
+                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                  >
+                    Stay 2 more days with {companionName}
+                  </p>
+                  <div className="flex items-center gap-2 shrink-0 ml-3">
+                    <span
+                      className="text-white/30 text-xs line-through"
+                      style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                    >
+                      $2.99
+                    </span>
+                    <span
+                      className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                      style={{
+                        fontFamily: "'Space Grotesk', sans-serif",
+                        background: 'rgba(34,197,94,0.15)',
+                        color: '#4ade80',
+                        border: '1px solid rgba(34,197,94,0.25)',
+                      }}
+                    >
+                      Free
+                    </span>
+                  </div>
+                </div>
+              </button>
+            </motion.div>
+          ) : (
+            <motion.p
+              initial={{ y: 10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 1.0 }}
+              className="text-center text-white/30 text-xs mb-4"
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+            >
+              Come back anytime, {companionName} will remember you
+            </motion.p>
           )}
 
           {/* Actions */}

@@ -94,7 +94,7 @@ export function TravelReaderPage() {
     addTravelPlanningMessage, addTravelDayChatMessage, updateTripItinerary,
     setTripScene, setTripSceneImage, advanceTravelScene, advanceTravelDay,
     setTripPhase, updateTravelAffinity, addCompanionMemory, addTravelEngagementTime,
-    completeTrip, resetTrip, setIsStreaming, isStreaming, updateCompanionSliders,
+    completeTrip, extendTrip, resetTrip, setIsStreaming, isStreaming, updateCompanionSliders,
   } = store
 
   const trip = activeTripId ? travelTrips[activeTripId] : null
@@ -593,6 +593,35 @@ export function TravelReaderPage() {
     }
   }
 
+  async function handleExtendTrip() {
+    if (!trip || !destination || isGeneratingItinerary) return
+    setIsGeneratingItinerary(true)
+
+    const nextDayNum = trip.itinerary.days.length + 1
+    extendTrip()
+    setViewMode('transition')
+
+    try {
+      const day = await generateDayItinerary({
+        destinationId: trip.destinationId,
+        companionId: trip.companionId,
+        companionSliders: trip.companionSliders,
+        companionRemix: trip.companionRemix,
+        planningHistory: trip.dayChatHistories[trip.currentDay] ?? [],
+        dayNumber: nextDayNum,
+        previousDays: trip.itinerary.days,
+        companionMemories: trip.companionMemories,
+      })
+      updateTripItinerary(day)
+      setViewMode('day-start')
+    } catch (e) {
+      console.error('Extension day generation error:', e)
+      setViewMode('chat')
+    } finally {
+      setIsGeneratingItinerary(false)
+    }
+  }
+
   async function handlePlayScene() {
     // Read from store directly to avoid stale closures when called from setTimeout
     const state = useStore.getState()
@@ -713,8 +742,8 @@ export function TravelReaderPage() {
   async function handleNextDay() {
     if (!trip || !destination) return
 
-    // Final day → complete
-    if (trip.currentDay >= destination.tripDays) {
+    const totalDays = destination.tripDays + (trip.extensions ?? 0) * 2
+    if (trip.currentDay >= totalDays) {
       completeTrip()
       setViewMode('complete')
       return
@@ -931,6 +960,7 @@ export function TravelReaderPage() {
                 destination={destination}
                 companion={companion}
                 onNewTrip={() => { resetTrip(); navigate('/travel') }}
+                onExtendTrip={handleExtendTrip}
               />
             )}
 

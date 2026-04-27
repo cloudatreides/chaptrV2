@@ -165,6 +165,20 @@ Phase 2 answers: "Do users come back?"
 
 ---
 
+## What's Live (GTM Testing)
+
+**Phase 1: "Stay Longer" — implemented, free for now**
+
+- "Stay 2 more days" CTA appears on the trip complete screen, between highlights and exit buttons
+- $2.99 shown in strikethrough with a "Free" badge — GTM testers see the intended price point without being blocked
+- Copy: "Not ready to leave? Stay 2 more days with {companion}"
+- Max 2 extensions per trip (4 extra days, 9 days total)
+- After 2 extensions, CTA is replaced with "Come back anytime, {companion} will remember you"
+- Extension days use the same itinerary generation — fresh themes, new locations, all memories and affinity carry forward
+- No payment infra yet. Stripe integration when conversion data justifies it
+
+---
+
 ## Future Monetisation Angles (Post-Validation)
 
 - **Premium companions** — new personalities with unique backstories, $2.99 to unlock

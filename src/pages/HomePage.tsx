@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, Pencil, MessageCircle, LogOut, Compass, BookOpen, ChevronRight, Camera, Sparkles, Plus, Map, Heart, Image } from 'lucide-react'
+import { ArrowRight, Pencil, MessageCircle, LogOut, Compass, BookOpen, ChevronRight, Camera, Sparkles, Plus, Map, X, Image, Heart } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { UNIVERSES, GENRE_FILTERS } from '../data/storyData'
 import { useAuth } from '../contexts/AuthContext'
@@ -11,7 +11,8 @@ import { getEligibleAmbientPings } from '../data/ambientPings'
 import { getCharacter, CHARACTERS } from '../data/characters'
 import { AppSidebar } from '../components/AppSidebar'
 import { AmbientPingModal } from '../components/AmbientPingModal'
-import { DESTINATIONS } from '../data/travel/destinations'
+import { DESTINATIONS, getDestination } from '../data/travel/destinations'
+import { getTravelCompanion } from '../data/travel/companions'
 import type { AmbientPingDef } from '../data/ambientPings'
 
 const SG = "'Space Grotesk', sans-serif"
@@ -379,41 +380,216 @@ function PingCards({ pings, onOpen }: { pings: any[]; onOpen: (ping: any) => voi
 
 // ─── Journey Stats ───
 
-function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStarted: number; momentsCollected: number; connectionsFormed: number } }) {
-  const navigate = useNavigate()
-  const items = [
-    { icon: Map, label: 'Trips', value: stats.tripsCompleted, color: '#A78BFA', bg: 'rgba(167,139,250,0.08)', border: 'rgba(167,139,250,0.15)', to: '/travel' },
-    { icon: BookOpen, label: 'Stories', value: stats.storiesStarted, color: '#c84b9e', bg: 'rgba(200,75,158,0.08)', border: 'rgba(200,75,158,0.15)', to: '/stories' },
-    { icon: Image, label: 'Moments', value: stats.momentsCollected, color: '#60a5fa', bg: 'rgba(96,165,250,0.08)', border: 'rgba(96,165,250,0.15)', to: '/album' },
-    { icon: Heart, label: 'Bonds', value: stats.connectionsFormed, color: '#f472b6', bg: 'rgba(244,114,182,0.08)', border: 'rgba(244,114,182,0.15)', to: '/characters' },
-  ]
+function JourneyStatCard({ icon: Icon, label, value, color, glowColor, subtitle, onClick }: {
+  icon: typeof Map; label: string; value: number; color: string; glowColor: string; subtitle?: string; onClick?: () => void
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="group relative flex flex-col items-center gap-2 py-5 md:py-6 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.04] active:scale-[0.97] overflow-hidden"
+      style={{
+        background: `linear-gradient(135deg, ${color}18 0%, ${color}08 40%, #13101C 100%)`,
+        border: `1px solid ${color}30`,
+        boxShadow: value > 0 ? `0 8px 32px ${glowColor}, inset 0 1px 0 ${color}15` : 'none',
+      }}
+    >
+      {/* Ambient glow blob */}
+      <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full opacity-40 blur-2xl transition-opacity group-hover:opacity-60" style={{ background: color }} />
 
-  const hasAny = items.some((i) => i.value > 0)
+      {/* Icon */}
+      <div
+        className="relative z-10 w-10 h-10 rounded-xl flex items-center justify-center"
+        style={{ background: `${color}25`, boxShadow: `0 0 16px ${color}20` }}
+      >
+        <Icon size={18} style={{ color }} />
+      </div>
+
+      {/* Number */}
+      <span className="relative z-10 text-white text-2xl md:text-3xl font-bold tracking-tight" style={{ fontFamily: "'Syne', sans-serif" }}>
+        {value}
+      </span>
+
+      {/* Label */}
+      <span className="relative z-10 text-[10px] md:text-[11px] uppercase tracking-[1.5px] font-semibold" style={{ color: `${color}cc`, fontFamily: SG }}>
+        {label}
+      </span>
+
+      {/* Subtitle */}
+      {subtitle && (
+        <span className="relative z-10 text-[10px] mt-[-4px] hidden md:block" style={{ color: 'rgba(255,255,255,0.25)', fontFamily: SG }}>
+          {subtitle}
+        </span>
+      )}
+    </button>
+  )
+}
+
+function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStarted: number; momentsCollected: number; bondsFormed: number } }) {
+  const [modal, setModal] = useState<'trips' | 'stories' | null>(null)
+  const navigate = useNavigate()
+  const travelTrips = useStore((s) => s.travelTrips)
+  const storyProgress = useStore((s) => s.storyProgress)
+
+  const hasAny = stats.tripsCompleted > 0 || stats.storiesStarted > 0
   if (!hasAny) return null
 
+  const completedTrips = Object.values(travelTrips)
+    .filter((t) => t.phase === 'complete')
+    .sort((a, b) => b.startedAt - a.startedAt)
+
+  const activeStories = Object.entries(storyProgress)
+    .filter(([, p]) => p.currentStepIndex > 0)
+    .map(([key, p]) => {
+      const universeId = key.split(':')[1]
+      const universe = UNIVERSES.find((u) => u.id === universeId)
+      const total = getStepCount(universeId)
+      return { key, universeId, progress: p, universe, total }
+    })
+    .filter((s) => s.universe)
+
   return (
-    <div className="grid grid-cols-4 gap-2.5">
-      {items.map((item) => (
-        <button
-          key={item.label}
-          onClick={() => navigate(item.to)}
-          className="flex flex-col items-center gap-1.5 py-3.5 rounded-xl cursor-pointer transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
-          style={{
-            background: item.value > 0 ? item.bg : 'rgba(255,255,255,0.02)',
-            border: `1px solid ${item.value > 0 ? item.border : 'rgba(255,255,255,0.05)'}`,
-          }}
-        >
-          <div
-            className="w-7 h-7 rounded-full flex items-center justify-center"
-            style={{ background: item.value > 0 ? `${item.color}15` : 'transparent' }}
+    <>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <JourneyStatCard
+          icon={Map} label="Trips" value={stats.tripsCompleted}
+          color="#A78BFA" glowColor="rgba(167,139,250,0.12)"
+          subtitle={stats.tripsCompleted > 0 ? 'completed' : undefined}
+          onClick={() => stats.tripsCompleted > 0 ? setModal('trips') : navigate('/travel')}
+        />
+        <JourneyStatCard
+          icon={BookOpen} label="Stories" value={stats.storiesStarted}
+          color="#c84b9e" glowColor="rgba(200,75,158,0.12)"
+          subtitle={stats.storiesStarted > 0 ? 'in progress' : undefined}
+          onClick={() => stats.storiesStarted > 0 ? setModal('stories') : navigate('/stories')}
+        />
+        <JourneyStatCard
+          icon={Image} label="Moments" value={stats.momentsCollected}
+          color="#60A5FA" glowColor="rgba(96,165,250,0.12)"
+          subtitle={stats.momentsCollected > 0 ? 'captured' : undefined}
+          onClick={() => navigate('/album')}
+        />
+        <JourneyStatCard
+          icon={Heart} label="Bonds" value={stats.bondsFormed}
+          color="#F472B6" glowColor="rgba(244,114,182,0.12)"
+          subtitle={stats.bondsFormed > 0 ? 'formed' : undefined}
+          onClick={() => navigate('/characters')}
+        />
+      </div>
+
+      {/* Modals */}
+      <AnimatePresence>
+        {modal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center px-5"
+            style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
+            onClick={() => setModal(null)}
           >
-            <item.icon size={14} style={{ color: item.value > 0 ? item.color : 'rgba(255,255,255,0.12)' }} />
-          </div>
-          <span className="text-white text-xl font-bold" style={{ fontFamily: "'Syne', sans-serif" }}>{item.value}</span>
-          <span className="text-[10px] uppercase tracking-[0.5px]" style={{ color: item.value > 0 ? `${item.color}99` : 'rgba(255,255,255,0.25)', fontFamily: SG }}>{item.label}</span>
-        </button>
-      ))}
-    </div>
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              className="w-full max-w-md max-h-[70vh] overflow-y-auto rounded-2xl p-5"
+              style={{ background: '#1A1726', border: '1px solid rgba(255,255,255,0.08)' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="text-white text-lg font-bold" style={{ fontFamily: "'Syne', sans-serif" }}>
+                  {modal === 'trips' ? 'Completed Trips' : 'Your Stories'}
+                </h3>
+                <button onClick={() => setModal(null)} className="text-white/40 hover:text-white/70 cursor-pointer transition-colors">
+                  <X size={18} />
+                </button>
+              </div>
+
+              {modal === 'trips' && (
+                <div className="flex flex-col gap-3">
+                  {completedTrips.map((trip, i) => {
+                    const dest = getDestination(trip.destinationId)
+                    const comp = getTravelCompanion(trip.companionId)
+                    const compName = trip.companionRemix?.name ?? comp?.character.name ?? 'Companion'
+                    const compPortrait = trip.companionRemix?.imageUrl ?? comp?.character.staticPortrait
+                    const totalMessages = trip.planningChatHistory.length +
+                      Object.values(trip.dayChatHistories).reduce((sum, msgs) => sum + msgs.length, 0)
+                    const daysExplored = trip.itinerary.days.filter((d) => d.completed).length
+                    return (
+                      <div
+                        key={i}
+                        className="rounded-xl overflow-hidden"
+                        style={{ border: '1px solid rgba(255,255,255,0.06)' }}
+                      >
+                        <div className="relative h-24">
+                          {dest && <img src={dest.heroImage} alt="" className="w-full h-full object-cover" style={{ opacity: 0.5 }} />}
+                          <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, #1A1726 0%, transparent 100%)' }} />
+                          <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
+                            <div>
+                              <p className="text-white font-bold text-sm" style={{ fontFamily: "'Syne', sans-serif" }}>
+                                {dest?.countryEmoji} {dest?.city ?? trip.destinationId}
+                              </p>
+                              <p className="text-white/40 text-[11px]" style={{ fontFamily: SG }}>
+                                {daysExplored} days · {totalMessages} messages
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {compPortrait && (
+                                <img src={compPortrait} alt="" className="w-7 h-7 rounded-full object-cover" style={{ border: '1.5px solid rgba(167,139,250,0.4)' }} />
+                              )}
+                              <span className="text-white/50 text-xs" style={{ fontFamily: SG }}>{compName}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                  {completedTrips.length === 0 && (
+                    <p className="text-white/30 text-sm text-center py-6" style={{ fontFamily: SG }}>No completed trips yet</p>
+                  )}
+                </div>
+              )}
+
+              {modal === 'stories' && (
+                <div className="flex flex-col gap-3">
+                  {activeStories.map((s) => {
+                    const pct = Math.round((s.progress.currentStepIndex / s.total) * 100)
+                    return (
+                      <div
+                        key={s.key}
+                        className="rounded-xl overflow-hidden"
+                        style={{ border: '1px solid rgba(255,255,255,0.06)' }}
+                      >
+                        <div className="relative h-24">
+                          {s.universe?.coverImage && <img src={s.universe.coverImage} alt="" className="w-full h-full object-cover" style={{ opacity: 0.4 }} />}
+                          <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, #1A1726 0%, transparent 100%)' }} />
+                          <div className="absolute bottom-3 left-3 right-3">
+                            <p className="text-white font-bold text-sm mb-1" style={{ fontFamily: "'Syne', sans-serif" }}>
+                              {s.universe?.title}
+                            </p>
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: 'rgba(200,75,158,0.15)' }}>
+                                <div className="h-full rounded-full" style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #c84b9e, #e879a8)' }} />
+                              </div>
+                              <span className="text-white/40 text-[11px] shrink-0" style={{ fontFamily: SG }}>
+                                {pct === 100 ? 'Complete' : `${pct}%`}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                  {activeStories.length === 0 && (
+                    <p className="text-white/30 text-sm text-center py-6" style={{ fontFamily: SG }}>No stories started yet</p>
+                  )}
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   )
 }
 
@@ -435,7 +611,7 @@ export function HomePage() {
   const activeCharacterId = useStore((s) => s.activeCharacterId)
   const travelTrips = useStore((s) => s.travelTrips)
   const setActiveTripId = useStore((s) => s.setActiveTripId)
-  const storyMoments = useStore((s) => s.storyMoments)
+
 
   const [mode, setMode] = useState<'travel' | 'stories'>('travel')
   const [activePingModal, setActivePingModal] = useState<AmbientPingDef | null>(null)
@@ -502,11 +678,13 @@ export function HomePage() {
   }
 
   // ─── Journey stats ───
-  const tripsCompleted = Object.values(travelTrips).filter((t) => t.phase === 'complete').length
-  const storiesStarted = Object.values(storyProgress).filter((p) => p.currentStepIndex > 0).length
-  const momentsCollected = storyMoments.length
-  const connectionsFormed = Object.keys(globalAffinities).length
-  const journeyStats = { tripsCompleted, storiesStarted, momentsCollected, connectionsFormed }
+  // TODO: REMOVE MOCK DATA — temporary for visual testing
+  const storyMoments = useStore((s) => s.storyMoments)
+  const tripsCompleted = Object.values(travelTrips).filter((t) => t.phase === 'complete').length || 3
+  const storiesStarted = Object.values(storyProgress).filter((p) => p.currentStepIndex > 0).length || 2
+  const momentsCollected = storyMoments.length || 12
+  const bondsFormed = Object.keys(globalAffinities).length || 5
+  const journeyStats = { tripsCompleted, storiesStarted, momentsCollected, bondsFormed }
 
   // ─── Continue cards ───
   const continueCards = []
@@ -627,7 +805,7 @@ export function HomePage() {
 
             {/* Journey stats */}
             {hasCharacters && (
-              <div className="mb-6 max-w-[480px]">
+              <div className="mb-8">
                 <JourneyStats stats={journeyStats} />
               </div>
             )}
