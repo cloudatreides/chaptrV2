@@ -417,7 +417,6 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
   const travelTrips = useStore((s) => s.travelTrips)
   const storyProgress = useStore((s) => s.storyProgress)
   const setActiveTripId = useStore((s) => s.setActiveTripId)
-  const extendTrip = useStore((s) => s.extendTrip)
 
   const hasAny = stats.tripsCompleted > 0 || stats.storiesStarted > 0
   if (!hasAny) return null
@@ -581,7 +580,7 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
                           {extensions < 2 ? (
                             <div className="flex items-center gap-2">
                               <button
-                                onClick={() => { setActiveTripId(tripId); extendTrip(); navigate('/travel/trip') }}
+                                onClick={() => { setActiveTripId(tripId); navigate('/travel/trip', { state: { extend: true } }) }}
                                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer transition-colors hover:bg-[#7C3AED22]"
                                 style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.2)' }}
                               >

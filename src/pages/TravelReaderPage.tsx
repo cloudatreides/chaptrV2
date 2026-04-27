@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, Send, Loader2, MapPin, ChevronRight, Lock, Check, Play, ChevronDown, Plus, X, Volume2, VolumeX } from 'lucide-react'
 import { useStore } from '../store/useStore'
@@ -88,6 +88,7 @@ function ActionBeat({ text }: { text: string }) {
 
 export function TravelReaderPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const store = useStore()
   const {
     activeTripId, travelTrips, activeCharacterId, characters,
@@ -151,6 +152,17 @@ export function TravelReaderPage() {
       clearInterval(interval)
     }
   }, [addTravelEngagementTime])
+
+  // Handle extend request from HomePage
+  const pendingExtend = useRef(false)
+  useEffect(() => {
+    if ((location.state as any)?.extend && trip?.phase === 'complete' && !pendingExtend.current) {
+      pendingExtend.current = true
+      // Clear the navigation state so it doesn't re-trigger
+      navigate(location.pathname, { replace: true, state: {} })
+      handleExtendTrip()
+    }
+  }, [location.state, trip?.phase])
 
   // Auto-scroll chat
   useEffect(() => {
