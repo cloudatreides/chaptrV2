@@ -498,10 +498,13 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
 
   const latestStory = activeStories[0]
   const latestStoryPct = latestStory ? Math.round((latestStory.progress.currentStepIndex / latestStory.total) * 100) : 0
+  // TODO: REMOVE MOCK DATA — visual testing
+  const latestStoryTitle = latestStory?.universe?.title || 'Seoul Transfer'
+  const latestStoryProgress = latestStoryPct || 64
 
-  const recentMoments = storyMoments
-    .slice(-3)
-    .map((m) => m.beatLabel)
+  const recentMoments = storyMoments.length > 0
+    ? storyMoments.slice(-3).map((m) => m.beatLabel)
+    : ['Shibuya — Day 2', 'Kyoto — Day 4', 'Night Market']
 
   return (
     <>
@@ -535,11 +538,11 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
               onClick={() => stats.storiesStarted > 0 ? setModal('stories') : navigate('/stories')}
             >
               <div className="mt-auto pt-2">
-                {latestStory && (
+                {stats.storiesStarted > 0 && (
                   <div className="mb-2">
-                    <p className="text-white/45 text-[10px] truncate mb-1" style={{ fontFamily: SG }}>{latestStory.universe?.title}</p>
+                    <p className="text-white/45 text-[10px] truncate mb-1" style={{ fontFamily: SG }}>{latestStoryTitle}</p>
                     <div className="w-full h-1 rounded-full overflow-hidden" style={{ background: 'rgba(232,121,168,0.15)' }}>
-                      <div className="h-full rounded-full" style={{ width: `${latestStoryPct}%`, background: '#E879A8' }} />
+                      <div className="h-full rounded-full" style={{ width: `${latestStoryProgress}%`, background: '#E879A8' }} />
                     </div>
                   </div>
                 )}
@@ -591,11 +594,11 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
             >
               <div className="flex items-end justify-between mt-auto">
                 <div className="flex-1 min-w-0 mr-3">
-                  {latestStory && (
+                  {stats.storiesStarted > 0 && (
                     <>
-                      <p className="text-white/50 text-[10px] truncate mb-1.5" style={{ fontFamily: SG }}>{latestStory.universe?.title}</p>
+                      <p className="text-white/50 text-[10px] truncate mb-1.5" style={{ fontFamily: SG }}>{latestStoryTitle}</p>
                       <div className="w-full h-1 rounded-full overflow-hidden" style={{ background: 'rgba(232,121,168,0.15)' }}>
-                        <div className="h-full rounded-full" style={{ width: `${latestStoryPct}%`, background: '#E879A8' }} />
+                        <div className="h-full rounded-full" style={{ width: `${latestStoryProgress}%`, background: '#E879A8' }} />
                       </div>
                     </>
                   )}
