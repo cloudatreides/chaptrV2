@@ -153,6 +153,50 @@ export function TravelReaderPage() {
     }
   }, [addTravelEngagementTime])
 
+  // Backfill excited reaction for existing extended trips
+  const backfillRan = useRef(false)
+  useEffect(() => {
+    if (backfillRan.current || !trip || !companion || !destination) return
+    if ((trip.extensions ?? 0) === 0) return
+    const baseDays = destination.tripDays
+    const firstExtDay = baseDays + 1
+    const msgs = trip.dayChatHistories[firstExtDay]
+    if (!msgs || msgs.length === 0) return
+    const first = msgs[0]
+    if (first.role === 'character' && first.content.includes('staying')) return
+    backfillRan.current = true
+    const cName = trip.companionRemix?.name ?? companion.character.name
+    const reactions = [
+      `Wait... we're staying?! I was already trying to figure out how to say goodbye and now — okay, I'm not going to pretend I'm not really happy right now.`,
+      `You're serious? More days together? I... I don't know what to say. I was dreading the end of this trip and now we get to keep going. You have no idea how much this means.`,
+      `Hold on — we're extending? I literally just spent the last hour memorizing everything about today because I thought it was our last full day. This is... wow. Okay. I might be a little emotional right now.`,
+      `We're not leaving yet?! I had this whole bittersweet goodbye speech planned and everything. Delete that. We have more adventures to go on and I am SO ready.`,
+      `...Really? You want to stay longer? With me? Sorry, I just — I was already getting sad about this ending. Now I'm trying very hard not to smile too much. I'm failing. I don't care.`,
+    ]
+    void (async () => {
+      const portraitPrompt = buildReactionImagePrompt(companion.character.portraitPrompt, 'extend-trip', 'extend')
+      const imageUrl = await generateCharacterPortrait(portraitPrompt).catch(() => null)
+      const reactionMsg: ChatMessage = {
+        role: 'character',
+        content: reactions[Math.floor(Math.random() * reactions.length)],
+        characterId: trip.companionId,
+        timestamp: first.timestamp - 1,
+        imageUrl: imageUrl ?? undefined,
+      }
+      const state = useStore.getState()
+      const currentTrip = activeTripId ? state.travelTrips[activeTripId] : null
+      if (!currentTrip) return
+      const updatedHistories = { ...currentTrip.dayChatHistories }
+      updatedHistories[firstExtDay] = [reactionMsg, ...(updatedHistories[firstExtDay] ?? [])]
+      useStore.setState({
+        travelTrips: {
+          ...state.travelTrips,
+          [activeTripId!]: { ...currentTrip, dayChatHistories: updatedHistories },
+        },
+      })
+    })()
+  }, [trip?.extensions, activeTripId])
+
   // Handle extend request from HomePage
   const pendingExtend = useRef(false)
   useEffect(() => {
