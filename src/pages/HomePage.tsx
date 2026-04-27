@@ -834,7 +834,7 @@ export function HomePage() {
           )}
 
           {/* Journey stats */}
-          <JourneyStats stats={journeyStats} />
+          {hasCharacters && <JourneyStats stats={journeyStats} />}
 
           {/* Continue cards */}
           {continueCards.length > 0 && (
