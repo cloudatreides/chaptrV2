@@ -477,7 +477,7 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
   if (!hasAny) return null
 
   const completedTrips = Object.entries(travelTrips)
-    .filter(([, t]) => t.phase === 'complete')
+    .filter(([, t]) => t.phase === 'complete' || (t.extensions ?? 0) > 0)
     .sort(([, a], [, b]) => b.startedAt - a.startedAt)
 
   const completedDestinations = completedTrips.map(([, t]) => {
@@ -615,11 +615,19 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
                       Object.values(trip.dayChatHistories).reduce((sum, msgs) => sum + msgs.length, 0)
                     const daysExplored = trip.itinerary.days.filter((d) => d.completed).length
                     const extensions = trip.extensions ?? 0
+                    const isExtended = extensions > 0 && trip.phase !== 'complete'
                     return (
                       <div key={i} className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
                         <div className="relative h-24">
                           {dest && <img src={dest.heroImage} alt="" className="w-full h-full object-cover" style={{ opacity: 0.5 }} />}
                           <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, #1A1726 0%, transparent 100%)' }} />
+                          {isExtended && (
+                            <div className="absolute top-2.5 left-2.5 z-10">
+                              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'rgba(124,58,237,0.25)', color: '#A78BFA', border: '1px solid rgba(124,58,237,0.3)', fontFamily: SG }}>
+                                Extended +{extensions * 2}d
+                              </span>
+                            </div>
+                          )}
                           <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
                             <div>
                               <p className="text-white font-bold text-sm" style={{ fontFamily: SG }}>{dest?.countryEmoji} {dest?.city ?? trip.destinationId}</p>
@@ -632,7 +640,16 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
                           </div>
                         </div>
                         <div className="px-3 py-2.5">
-                          {extensions < 2 ? (
+                          {isExtended ? (
+                            <button
+                              onClick={() => { setActiveTripId(tripId); navigate('/travel/trip') }}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer transition-colors hover:bg-[#7C3AED22]"
+                              style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.2)' }}
+                            >
+                              <Compass size={12} className="text-[#A78BFA]" />
+                              <span className="text-[#A78BFA] text-xs font-semibold" style={{ fontFamily: SG }}>Continue exploring</span>
+                            </button>
+                          ) : extensions < 2 ? (
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => { setActiveTripId(tripId); navigate('/travel/trip', { state: { extend: true } }) }}
