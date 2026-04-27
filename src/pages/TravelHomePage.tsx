@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MapPin, ChevronRight, X, Heart, Clock, Sparkles } from 'lucide-react'
+import { MapPin, ChevronRight, ChevronLeft, X, Heart, Clock, Sparkles } from 'lucide-react'
 import { AppSidebar } from '../components/AppSidebar'
 import { useStore } from '../store/useStore'
 import { DESTINATIONS, type Destination } from '../data/travel/destinations'
@@ -39,6 +39,7 @@ export function TravelHomePage() {
   const markerEls = useRef<Map<string, { dot: HTMLDivElement; label: HTMLDivElement; locked: boolean }>>(new Map())
   const selectedIdRef = useRef<string | null>(null)
   const [heroIdx, setHeroIdx] = useState(0)
+  const [heroPaused, setHeroPaused] = useState(false)
 
   const setActiveTripId = useStore((s) => s.setActiveTripId)
 
@@ -69,12 +70,15 @@ export function TravelHomePage() {
 
   useEffect(() => {
     setHeroIdx(0)
-    if (!selectedDest?.heroImages?.length) return
+  }, [selectedDest?.id])
+
+  useEffect(() => {
+    if (heroPaused || !selectedDest?.heroImages?.length) return
     const timer = setInterval(() => {
       setHeroIdx((i) => (i + 1) % selectedDest.heroImages!.length)
-    }, 2000)
+    }, 2500)
     return () => clearInterval(timer)
-  }, [selectedDest?.id])
+  }, [selectedDest?.id, heroPaused])
 
   const selectDest = useCallback((dest: Destination) => {
     setSelectedDest(dest)
@@ -366,7 +370,13 @@ export function TravelHomePage() {
                   className="w-full max-w-[420px] -mt-16 relative z-[200] rounded-2xl overflow-hidden mx-auto"
                   style={{ background: 'rgba(21,16,32,0.95)', backdropFilter: 'blur(12px)', border: '1px solid rgba(124,58,237,0.2)' }}
                 >
-                  <div className="relative h-[180px] overflow-hidden">
+                  <div
+                    className="relative h-[180px] overflow-hidden group/carousel"
+                    onMouseEnter={() => setHeroPaused(true)}
+                    onMouseLeave={() => setHeroPaused(false)}
+                    onTouchStart={() => setHeroPaused(true)}
+                    onTouchEnd={() => setHeroPaused(false)}
+                  >
                     <AnimatePresence initial={false}>
                       <motion.img
                         key={heroIdx}
@@ -389,15 +399,31 @@ export function TravelHomePage() {
                       </div>
                     )}
                     {(selectedDest.heroImages?.length ?? 0) > 1 && (
-                      <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
-                        {selectedDest.heroImages!.map((_, i) => (
-                          <div
-                            key={i}
-                            className="w-1.5 h-1.5 rounded-full transition-all duration-300"
-                            style={{ background: i === heroIdx % selectedDest.heroImages!.length ? '#fff' : 'rgba(255,255,255,0.35)' }}
-                          />
-                        ))}
-                      </div>
+                      <>
+                        <button
+                          onClick={() => setHeroIdx((i) => (i - 1 + selectedDest.heroImages!.length) % selectedDest.heroImages!.length)}
+                          className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center cursor-pointer z-10 opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-200"
+                          style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)' }}
+                        >
+                          <ChevronLeft size={14} className="text-white/80" />
+                        </button>
+                        <button
+                          onClick={() => setHeroIdx((i) => (i + 1) % selectedDest.heroImages!.length)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center cursor-pointer z-10 opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-200"
+                          style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)' }}
+                        >
+                          <ChevronRight size={14} className="text-white/80" />
+                        </button>
+                        <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                          {selectedDest.heroImages!.map((_, i) => (
+                            <div
+                              key={i}
+                              className="w-1.5 h-1.5 rounded-full transition-all duration-300"
+                              style={{ background: i === heroIdx % selectedDest.heroImages!.length ? '#fff' : 'rgba(255,255,255,0.35)' }}
+                            />
+                          ))}
+                        </div>
+                      </>
                     )}
                     <button
                       onClick={handleDeselect}
@@ -532,7 +558,11 @@ export function TravelHomePage() {
                     className="w-full rounded-2xl overflow-hidden"
                     style={{ background: 'rgba(21,16,32,0.95)', backdropFilter: 'blur(12px)', border: '1px solid rgba(124,58,237,0.2)' }}
                   >
-                    <div className="relative h-[200px] overflow-hidden">
+                    <div
+                      className="relative h-[200px] overflow-hidden group/carousel"
+                      onMouseEnter={() => setHeroPaused(true)}
+                      onMouseLeave={() => setHeroPaused(false)}
+                    >
                       <AnimatePresence initial={false}>
                         <motion.img
                           key={heroIdx}
@@ -548,15 +578,31 @@ export function TravelHomePage() {
                       </AnimatePresence>
                       <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, transparent 50%, rgba(21,16,32,0.6) 100%)' }} />
                       {(selectedDest.heroImages?.length ?? 0) > 1 && (
-                        <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
-                          {selectedDest.heroImages!.map((_, i) => (
-                            <div
-                              key={i}
-                              className="w-1.5 h-1.5 rounded-full transition-all duration-300"
-                              style={{ background: i === heroIdx % selectedDest.heroImages!.length ? '#fff' : 'rgba(255,255,255,0.35)' }}
-                            />
-                          ))}
-                        </div>
+                        <>
+                          <button
+                            onClick={() => setHeroIdx((i) => (i - 1 + selectedDest.heroImages!.length) % selectedDest.heroImages!.length)}
+                            className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center cursor-pointer z-10 opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-200"
+                            style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)' }}
+                          >
+                            <ChevronLeft size={14} className="text-white/80" />
+                          </button>
+                          <button
+                            onClick={() => setHeroIdx((i) => (i + 1) % selectedDest.heroImages!.length)}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center cursor-pointer z-10 opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-200"
+                            style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)' }}
+                          >
+                            <ChevronRight size={14} className="text-white/80" />
+                          </button>
+                          <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                            {selectedDest.heroImages!.map((_, i) => (
+                              <div
+                                key={i}
+                                className="w-1.5 h-1.5 rounded-full transition-all duration-300"
+                                style={{ background: i === heroIdx % selectedDest.heroImages!.length ? '#fff' : 'rgba(255,255,255,0.35)' }}
+                              />
+                            ))}
+                          </div>
+                        </>
                       )}
                       {selectedDest.locked && (
                         <div className="absolute inset-0 flex items-center justify-center">
