@@ -606,15 +606,23 @@ export function TravelReaderPage() {
   }
 
   async function handleExtendTrip() {
-    if (!trip || !destination || isGeneratingItinerary) return
+    if (!trip || !destination || !companion || isGeneratingItinerary) return
     setIsGeneratingItinerary(true)
 
     const nextDayNum = trip.itinerary.days.length + 1
+    const cName = trip.companionRemix?.name ?? companion.character.name
     extendTrip()
     setViewMode('transition')
 
-    try {
-      const day = await generateDayItinerary({
+    const blushPrompt = buildReactionImagePrompt(
+      companion.character.portraitPrompt,
+      'extend-trip',
+      'extend',
+    )
+
+    const [portraitUrl, day] = await Promise.allSettled([
+      generateCharacterPortrait(blushPrompt),
+      generateDayItinerary({
         destinationId: trip.destinationId,
         companionId: trip.companionId,
         companionSliders: trip.companionSliders,
@@ -623,15 +631,36 @@ export function TravelReaderPage() {
         dayNumber: nextDayNum,
         previousDays: trip.itinerary.days,
         companionMemories: trip.companionMemories,
-      })
-      updateTripItinerary(day)
+      }),
+    ])
+
+    const extensionReactions = [
+      `Wait... we're staying?! ${cName === companionName ? '' : ''}I was already trying to figure out how to say goodbye and now — okay, I'm not going to pretend I'm not really happy right now.`,
+      `You're serious? More days together? I... I don't know what to say. I was dreading the end of this trip and now we get to keep going. You have no idea how much this means.`,
+      `Hold on — we're extending? I literally just spent the last hour memorizing everything about today because I thought it was our last full day. This is... wow. Okay. I might be a little emotional right now.`,
+      `We're not leaving yet?! I had this whole bittersweet goodbye speech planned and everything. Delete that. We have more adventures to go on and I am SO ready.`,
+      `...Really? You want to stay longer? With me? Sorry, I just — I was already getting sad about this ending. Now I'm trying very hard not to smile too much. I'm failing. I don't care.`,
+    ]
+    const reactionText = extensionReactions[Math.floor(Math.random() * extensionReactions.length)]
+
+    const imageUrl = portraitUrl.status === 'fulfilled' ? portraitUrl.value : undefined
+
+    addTravelDayChatMessage(nextDayNum, {
+      role: 'character',
+      content: reactionText,
+      characterId: trip.companionId,
+      timestamp: Date.now(),
+      imageUrl: imageUrl ?? undefined,
+    })
+
+    if (day.status === 'fulfilled') {
+      updateTripItinerary(day.value)
       setViewMode('day-start')
-    } catch (e) {
-      console.error('Extension day generation error:', e)
+    } else {
+      console.error('Extension day generation error:', day.reason)
       setViewMode('chat')
-    } finally {
-      setIsGeneratingItinerary(false)
     }
+    setIsGeneratingItinerary(false)
   }
 
   async function handlePlayScene() {

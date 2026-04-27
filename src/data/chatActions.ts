@@ -275,6 +275,7 @@ export function buildReactionImagePrompt(
     'serenade': 'eyes closed with a peaceful moved expression, hand over heart, soft blush, listening to music, dreamy warm lighting, deeply touched',
     'comfort': 'arms open reaching out for a hug, soft vulnerable eyes glistening with tears, gentle grateful smile, warm golden lighting, emotionally moved',
     'mystery-box': 'eyes wide with surprise and delight, holding a small gift box, mouth slightly open in excitement, playful curious expression, warm colorful lighting',
+    'extend-trip': 'blushing deeply, hands clasped together near face, eyes sparkling with joyful disbelief, genuinely overwhelmed happy smile, soft warm golden lighting, emotionally touched and flustered',
   }
 
   const modifier = reactionModifiers[actionId] ?? 'blushing, looking touched and emotional, warm lighting'
