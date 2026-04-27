@@ -866,8 +866,12 @@ export function TravelReaderPage() {
         .split(',').slice(0, 5).join(',')
         .replace(/^(anime style|dark|cyberpunk[^,]*|fantasy[^,]*|thriller[^,]*|sci-fi[^,]*)\s*(portrait|illustration|concept art)\s*(portrait\s*)?of\s*/i, '')
         .trim()
+      const companionName = trip?.companionRemix?.name ?? companion?.character.name
+      const enrichedPrompt = includeCompanion && companionDesc
+        ? `${prompt}. The travel companion in this scene is ${companionName}: ${companionDesc}`
+        : prompt
       const image = generateImage({
-        prompt,
+        prompt: enrichedPrompt,
         width: 768,
         height: 432,
         referenceImageUrl: selfieUrl ?? undefined,
