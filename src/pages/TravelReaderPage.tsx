@@ -1155,8 +1155,43 @@ export function TravelReaderPage() {
                         </div>
                         <div className="space-y-3">
                           {day.messages.map((msg, i) => {
-                            if (msg.characterId === '__scene_recap__') return null
-                            if (msg.content.startsWith('📍') || msg.content.startsWith('🍽️')) return null
+                            if (msg.characterId === '__scene_recap__') {
+                              return (
+                                <div key={i} className="flex justify-center my-2">
+                                  <div className="rounded-xl overflow-hidden" style={{ maxWidth: 360, background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.12)' }}>
+                                    {msg.imageUrl && <img src={msg.imageUrl} alt="" className="w-full" style={{ aspectRatio: '16/9', objectFit: 'cover' }} />}
+                                    <div className="px-3 py-2">
+                                      <p className="text-white/50 text-xs" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{msg.content}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              )
+                            }
+                            if (msg.content.startsWith('📍') && msg.imageUrl) {
+                              return (
+                                <div key={i} className="flex justify-start my-1">
+                                  <div className="rounded-xl overflow-hidden" style={{ maxWidth: 320, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                                    <img src={msg.imageUrl} alt="" className="w-full" style={{ aspectRatio: '4/3', objectFit: 'cover' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                                    <div className="px-3 py-2 flex items-center gap-1.5">
+                                      <MapPin size={10} className="text-purple-400/60 shrink-0" />
+                                      <p className="text-white/50 text-xs" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{msg.content.replace('📍 ', '')}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              )
+                            }
+                            if (msg.content.startsWith('🍽️') && msg.imageUrl) {
+                              return (
+                                <div key={i} className="flex justify-start my-1">
+                                  <div className="rounded-xl overflow-hidden" style={{ maxWidth: 320, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                                    <img src={msg.imageUrl} alt="" className="w-full" style={{ aspectRatio: '4/3', objectFit: 'cover' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                                    <div className="px-3 py-2">
+                                      <p className="text-white/50 text-xs" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{msg.content.replace('🍽️ ', '')}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              )
+                            }
                             if (msg.role === 'user') {
                               return (
                                 <div key={i} className="flex justify-end">
@@ -1169,6 +1204,11 @@ export function TravelReaderPage() {
                             const segments = parseSegments(msg.content)
                             return (
                               <div key={i} className="flex flex-col gap-1.5">
+                                {msg.imageUrl && (
+                                  <div className="rounded-xl overflow-hidden" style={{ maxWidth: 360, border: '1px solid rgba(255,255,255,0.08)' }}>
+                                    <img src={msg.imageUrl} alt="" className="w-full" style={{ aspectRatio: '16/9', objectFit: 'cover' }} />
+                                  </div>
+                                )}
                                 {segments.map((seg, j) =>
                                   seg.type === 'action' ? <ActionBeat key={j} text={seg.text} /> : (
                                     <div key={j} className="flex justify-start">
