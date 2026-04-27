@@ -48,7 +48,7 @@ Return ONLY valid JSON matching this exact structure:
       "timeOfDay": "morning" | "afternoon" | "evening" | "night",
       "location": "specific real place or neighborhood",
       "activity": "specific thing they're doing there, 1 sentence",
-      "imagePrompt": "anime style, cinematic scene description for AI image generation, include location details and mood, 1-2 sentences",
+      "imagePrompt": "anime illustration of [scene]. Must describe the scene as a digital anime artwork with cel-shading, vibrant colors, and cinematic composition. Include location details, lighting, and mood. NEVER describe it as a photograph. 1-2 sentences",
       "protagonistVisible": true or false (alternate — some scenes show the traveler, some show the location)
     }
   ]
@@ -58,8 +58,9 @@ Rules:
 - Generate exactly 3-4 scenes per day.
 - Scenes should flow naturally (morning → afternoon → evening, with logical travel between locations).
 - Activities should be specific: "trying tsukemen at a counter-only shop in Shinjuku" not "eating lunch".
-- Image prompts should be vivid and cinematic: mention lighting, mood, weather, time of day.
+- Image prompts MUST describe anime-style illustrations (NOT photographs). Include lighting, mood, weather, time of day.
 - For protagonistVisible scenes, image prompt should describe a young person experiencing the scene.
+- Every image prompt must start with "anime illustration" and describe the art style explicitly.
 - Make Day ${dayNumber} feel distinct from other days — different neighborhood, different energy.`
 
   try {
@@ -101,7 +102,7 @@ Rules:
           timeOfDay: 'morning' as const,
           location: destination.city,
           activity: `Exploring ${destination.city}`,
-          imagePrompt: `Anime style, beautiful morning scene in ${destination.city}, warm golden light, cinematic composition`,
+          imagePrompt: `Anime illustration, cel-shaded, beautiful morning scene in ${destination.city}, warm golden light, cinematic composition, vibrant colors`,
           protagonistVisible: false,
           prose: null,
           companionReaction: null,

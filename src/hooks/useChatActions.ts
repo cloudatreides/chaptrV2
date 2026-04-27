@@ -86,9 +86,9 @@ export function useChatActions({ characterId, universeId, characterMemories }: U
       if (charData?.portraitPrompt) {
         const charDesc = charData.portraitPrompt.match(/portrait of (.+?)(?:,\s*(?:soft|clean|high))/i)?.[1] ?? charData.name
         if (action.id === 'coffee') {
-          sceneImagePrompt = `Anime style, two people at a cozy café: a young person handing a warm coffee to ${charDesc}, warm smiles, gentle steam rising from the cup, soft warm café lighting, K-drama aesthetic, high quality anime art, intimate casual moment, ONLY these two people in the image`
+          sceneImagePrompt = `Anime illustration, cel-shaded, two people at a cozy café: a young person handing a warm coffee to ${charDesc}, warm smiles, gentle steam rising from the cup, soft warm café lighting, intimate casual moment, vibrant anime art, ONLY these two people in the image`
         } else if (action.id === 'serenade') {
-          sceneImagePrompt = `Anime style, romantic scene of two people: a young person singing softly to ${charDesc}, who looks deeply moved with hand over heart and tears in eyes, soft golden lighting, intimate evening atmosphere, K-drama aesthetic, high quality anime art, emotional tender moment, ONLY these two people in the image`
+          sceneImagePrompt = `Anime illustration, cel-shaded, romantic scene of two people: a young person singing softly to ${charDesc}, who looks deeply moved with hand over heart and tears in eyes, soft golden lighting, intimate evening atmosphere, emotional tender moment, vibrant anime art, ONLY these two people in the image`
         }
       }
     }

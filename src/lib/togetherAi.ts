@@ -46,10 +46,13 @@ async function cacheImage(hash: string, imageUrl: string, prompt: string): Promi
   }
 }
 
-/** Generate a scene image using Together AI.
- *  Uses Kontext Pro (img2img, $0.20) only when the protagonist is visible in the
- *  scene AND a selfie reference exists. Otherwise uses Schnell ($0.04).
- *  Schnell results are cached by prompt hash to avoid regenerating identical scenes. */
+const ANIME_STYLE_SUFFIX = '. Digital anime illustration, cel-shaded, clean linework, vibrant colors. NOT a photograph, NOT photorealistic, NOT 3D render.'
+
+function enforceAnimeStyle(prompt: string): string {
+  const stripped = prompt.replace(/\.\s*$/, '')
+  return stripped + ANIME_STYLE_SUFFIX
+}
+
 async function refineCompanionFace(sceneUrl: string, _companionRefUrl: string, companionDesc: string, width: number, height: number): Promise<string | null> {
   const startTime = performance.now()
   try {
@@ -122,10 +125,12 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
     if (cached) return cached
   }
 
+  const animePrompt = enforceAnimeStyle(genderedPrompt)
+
   const body = useKontext
     ? {
         model: 'black-forest-labs/FLUX.1-kontext-pro',
-        prompt: `The reference image shows the protagonist, a ${protagonistGender === 'female' ? 'young woman' : 'young man'}. Place them into the following scene, keeping their face and appearance exactly as shown. IMPORTANT: Any other characters described in the scene (e.g. a Korean male idol, a girl with blue hair) are DIFFERENT people — generate them as new distinct characters, do NOT use the reference face for them. Scene: ${genderedPrompt}`,
+        prompt: `Transform this photo into an anime-style illustration. The reference image shows the protagonist, a ${protagonistGender === 'female' ? 'young woman' : 'young man'}. Redraw them in anime art style and place them into the following scene, keeping their face shape, features, and expression recognizable but rendered as anime. IMPORTANT: Any other characters described in the scene are DIFFERENT people — generate them as new distinct anime characters, do NOT use the reference face for them. Scene: ${animePrompt}`,
         image_url: referenceImageUrl,
         width,
         height,
@@ -135,7 +140,7 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
       }
     : {
         model: 'black-forest-labs/FLUX.1-schnell',
-        prompt: genderedPrompt,
+        prompt: animePrompt,
         aspect_ratio: toAspectRatio(width, height),
         steps: 8,
         n: 1,
@@ -156,12 +161,13 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
       const errText = await response.text().catch(() => '')
       console.warn(`[Scene ${model}] error after ${((performance.now() - startTime) / 1000).toFixed(1)}s:`, response.status, errText)
 
-      // Kontext failed (e.g. invalid reference image) — fall back to Schnell
+      // Kontext failed — fall back to Schnell without protagonist (no random person)
       if (useKontext) {
-        console.log('[Scene] Kontext failed, falling back to Schnell...')
+        console.log('[Scene] Kontext failed, falling back to Schnell (no protagonist)...')
+        const fallbackPrompt = enforceAnimeStyle(genderedPrompt.replace(/a young (?:woman|man|person)[^,.]*[,.]?\s*/gi, ''))
         const schnellBody = {
           model: 'black-forest-labs/FLUX.1-schnell',
-          prompt: genderedPrompt,
+          prompt: fallbackPrompt,
           aspect_ratio: toAspectRatio(width, height),
           steps: 8,
           n: 1,
