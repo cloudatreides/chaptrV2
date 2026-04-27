@@ -393,8 +393,8 @@ function BentoStatCard({ icon: Icon, label, subtitle, color, gradientFrom, onCli
         borderRadius: 18,
       }}
     >
-      <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ background: `linear-gradient(90deg, ${color}, ${color}88, ${color}44)` }} />
-      <div className="absolute -top-8 -left-5 w-36 h-36 rounded-full opacity-[0.06] blur-2xl" style={{ background: color }} />
+      <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ background: `linear-gradient(90deg, ${color}, ${color}cc, ${color}88)` }} />
+      <div className="absolute -top-8 -left-5 w-36 h-36 rounded-full opacity-[0.14] blur-2xl" style={{ background: color }} />
       <div className="relative z-10 flex flex-col h-full p-4 md:p-5">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 md:w-9 md:h-9 rounded-[10px] flex items-center justify-center" style={{ background: `${color}22` }}>
@@ -402,7 +402,7 @@ function BentoStatCard({ icon: Icon, label, subtitle, color, gradientFrom, onCli
           </div>
           <div className="text-left">
             <p className="text-white/70 text-[13px] font-medium" style={{ fontFamily: SG }}>{label}</p>
-            <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.25)', fontFamily: SG }}>{subtitle}</p>
+            <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: SG }}>{subtitle}</p>
           </div>
         </div>
         {children}
@@ -448,10 +448,10 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
         <div className="flex flex-col gap-2.5 md:hidden">
           <BentoStatCard
             icon={Map} label="Trips" value={stats.tripsCompleted} subtitle="completed"
-            color="#A78BFA" gradientFrom="#2D1B69"
+            color="#B794F6" gradientFrom="#2D1B69"
             onClick={() => stats.tripsCompleted > 0 ? setModal('trips') : navigate('/travel')}
           >
-            <div className="flex items-end justify-between mt-auto pt-3">
+            <div className="flex items-end justify-between mt-1.5">
               <span className="text-white text-[42px] font-extrabold leading-none" style={{ fontFamily: SG }}>{stats.tripsCompleted}</span>
             </div>
             {completedDestinations.length > 0 && (
@@ -467,14 +467,14 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
           <div className="grid grid-cols-2 gap-2.5">
             <BentoStatCard
               icon={BookOpen} label="Stories" value={stats.storiesStarted} subtitle="in progress"
-              color="#c84b9e" gradientFrom="#3D1B4E"
+              color="#E879A8" gradientFrom="#3D1B2E"
               onClick={() => stats.storiesStarted > 0 ? setModal('stories') : navigate('/stories')}
             >
               <span className="text-white text-[32px] font-extrabold leading-none mt-auto pt-2 text-right" style={{ fontFamily: SG }}>{stats.storiesStarted}</span>
             </BentoStatCard>
             <BentoStatCard
               icon={Camera} label="Moments" value={stats.momentsCollected} subtitle="captured"
-              color="#60A5FA" gradientFrom="#1B2D4E"
+              color="#5EEAD4" gradientFrom="#1B3D3A"
               onClick={() => navigate('/album')}
             >
               <span className="text-white text-[32px] font-extrabold leading-none mt-auto pt-2 text-right" style={{ fontFamily: SG }}>{stats.momentsCollected}</span>
@@ -486,12 +486,12 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
         <div className="hidden md:flex gap-3 max-w-[800px]">
           <BentoStatCard
             icon={Map} label="Trips" value={stats.tripsCompleted} subtitle="completed"
-            color="#A78BFA" gradientFrom="#2D1B69"
+            color="#B794F6" gradientFrom="#2D1B69"
             onClick={() => stats.tripsCompleted > 0 ? setModal('trips') : navigate('/travel')}
           >
-            <span className="text-white text-[50px] font-extrabold leading-none mt-3" style={{ fontFamily: SG }}>{stats.tripsCompleted}</span>
+            <span className="text-white text-[50px] font-extrabold leading-none mt-1.5" style={{ fontFamily: SG }}>{stats.tripsCompleted}</span>
             {completedDestinations.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-auto pt-3">
+              <div className="flex flex-wrap gap-1.5 mt-2">
                 {completedDestinations.map((d, i) => (
                   <span key={i} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] text-white/70 font-medium" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', fontFamily: SG }}>
                     {d.emoji} {d.city}
@@ -503,17 +503,17 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
           <div className="flex flex-col gap-3 flex-1">
             <BentoStatCard
               icon={BookOpen} label="Stories" value={stats.storiesStarted} subtitle="in progress"
-              color="#c84b9e" gradientFrom="#3D1B4E"
+              color="#E879A8" gradientFrom="#3D1B2E"
               onClick={() => stats.storiesStarted > 0 ? setModal('stories') : navigate('/stories')}
             >
-              <span className="text-white text-[36px] font-extrabold leading-none absolute top-3 right-5" style={{ fontFamily: SG }}>{stats.storiesStarted}</span>
+              <span className="text-white text-[36px] font-extrabold leading-none ml-auto mt-auto" style={{ fontFamily: SG }}>{stats.storiesStarted}</span>
             </BentoStatCard>
             <BentoStatCard
               icon={Camera} label="Moments" value={stats.momentsCollected} subtitle="captured"
-              color="#60A5FA" gradientFrom="#1B2D4E"
+              color="#5EEAD4" gradientFrom="#1B3D3A"
               onClick={() => navigate('/album')}
             >
-              <span className="text-white text-[36px] font-extrabold leading-none absolute top-3 right-5" style={{ fontFamily: SG }}>{stats.momentsCollected}</span>
+              <span className="text-white text-[36px] font-extrabold leading-none ml-auto mt-auto" style={{ fontFamily: SG }}>{stats.momentsCollected}</span>
             </BentoStatCard>
           </div>
         </div>
@@ -582,7 +582,8 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
                                 <Plus size={12} className="text-[#A78BFA]" />
                                 <span className="text-[#A78BFA] text-xs font-semibold" style={{ fontFamily: SG }}>Stay 2 more days</span>
                               </div>
-                              <span className="text-white/20 text-[11px]" style={{ fontFamily: SG }}>$2.99</span>
+                              <span className="text-white/40 text-[11px] line-through" style={{ fontFamily: SG }}>$2.99</span>
+                              <span className="text-emerald-400 text-[11px] font-bold" style={{ fontFamily: SG }}>FREE</span>
                             </div>
                           ) : (
                             <p className="text-white/25 text-[11px] italic" style={{ fontFamily: SG }}>Come back anytime, {compName} will remember you</p>
