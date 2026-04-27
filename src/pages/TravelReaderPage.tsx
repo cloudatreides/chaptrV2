@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, Send, Loader2, MapPin, ChevronRight, Lock, Check, Play, ChevronDown, Plus, X, Volume2, VolumeX } from 'lucide-react'
@@ -832,6 +832,20 @@ export function TravelReaderPage() {
     ? trip.planningChatHistory
     : (trip.dayChatHistories[trip.currentDay] ?? [])
 
+  type PreviousDay = { dayNumber: number; dayTitle: string; messages: ChatMessage[] }
+  const previousDayMessages = useMemo((): PreviousDay[] => {
+    if (trip.phase === 'planning') return []
+    const prev: PreviousDay[] = []
+    for (let d = 1; d < trip.currentDay; d++) {
+      const msgs = trip.dayChatHistories[d]
+      if (msgs && msgs.length > 0) {
+        const dayData = trip.itinerary.days.find((day) => day.dayNumber === d)
+        prev.push({ dayNumber: d, dayTitle: dayData?.theme ?? `Day ${d}`, messages: msgs })
+      }
+    }
+    return prev
+  }, [trip.phase, trip.currentDay, trip.dayChatHistories, trip.itinerary.days])
+
   const planningReady = trip.phase === 'planning' && messages.length >= 6
 
   const arcSegments = [
@@ -1127,6 +1141,59 @@ export function TravelReaderPage() {
                 exit={{ opacity: 0 }}
                 className="px-5 md:px-[60px] py-4"
               >
+                {/* Previous days' chat history */}
+                {previousDayMessages.length > 0 && (
+                  <div className="space-y-4 mb-6 opacity-60">
+                    {previousDayMessages.map((day) => (
+                      <div key={day.dayNumber}>
+                        <div className="flex items-center gap-2 mb-3 mt-2">
+                          <div className="h-px flex-1" style={{ background: 'rgba(124,58,237,0.12)' }} />
+                          <span className="text-[10px] font-semibold tracking-[1.5px] uppercase shrink-0" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'rgba(167,139,250,0.5)' }}>
+                            Day {day.dayNumber}: {day.dayTitle}
+                          </span>
+                          <div className="h-px flex-1" style={{ background: 'rgba(124,58,237,0.12)' }} />
+                        </div>
+                        <div className="space-y-3">
+                          {day.messages.map((msg, i) => {
+                            if (msg.characterId === '__scene_recap__') return null
+                            if (msg.content.startsWith('📍') || msg.content.startsWith('🍽️')) return null
+                            if (msg.role === 'user') {
+                              return (
+                                <div key={i} className="flex justify-end">
+                                  <div className="max-w-[80%] rounded-2xl px-4 py-2.5" style={{ background: '#7C3AED', borderBottomRightRadius: 4 }}>
+                                    <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{msg.content}</p>
+                                  </div>
+                                </div>
+                              )
+                            }
+                            const segments = parseSegments(msg.content)
+                            return (
+                              <div key={i} className="flex flex-col gap-1.5">
+                                {segments.map((seg, j) =>
+                                  seg.type === 'action' ? <ActionBeat key={j} text={seg.text} /> : (
+                                    <div key={j} className="flex justify-start">
+                                      <div className="max-w-[80%] rounded-2xl px-4 py-2.5" style={{ background: 'rgba(255,255,255,0.06)', borderBottomLeftRadius: 4 }}>
+                                        <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{seg.text}</p>
+                                      </div>
+                                    </div>
+                                  )
+                                )}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                    <div className="flex items-center gap-2 mb-3 mt-4">
+                      <div className="h-px flex-1" style={{ background: 'rgba(124,58,237,0.25)' }} />
+                      <span className="text-[10px] font-semibold tracking-[1.5px] uppercase shrink-0" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'rgba(167,139,250,0.7)' }}>
+                        Day {trip.currentDay}: Now
+                      </span>
+                      <div className="h-px flex-1" style={{ background: 'rgba(124,58,237,0.25)' }} />
+                    </div>
+                  </div>
+                )}
+
                 {/* Scene context divider */}
                 {currentScene && (
                   <div className="flex items-center gap-2 mb-4">
