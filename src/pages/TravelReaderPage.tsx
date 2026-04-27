@@ -127,8 +127,8 @@ export function TravelReaderPage() {
 
   const [showLofiLabel, setShowLofiLabel] = useState(true)
 
-  // Stop lofi on unmount
   useEffect(() => {
+    lofiPlayer.play()
     return () => { lofiPlayer.stop() }
   }, [])
 
