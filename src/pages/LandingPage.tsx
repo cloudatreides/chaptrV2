@@ -678,7 +678,7 @@ export function LandingPage() {
               </div>
             </div>
             <div className="h-px mt-6 mb-4" style={{ background: '#1F1F23' }} />
-            <p className="text-[#6B6275]/40 text-[11px]" style={{ fontFamily: SG }}>© 2025 chaptr. All rights reserved.</p>
+            <p className="text-[#6B6275]/40 text-[11px]" style={{ fontFamily: SG }}>© 2026 chaptr. All rights reserved.</p>
           </div>
         </footer>
       </div>
@@ -751,7 +751,7 @@ function MobileFooter() {
             <span key={l} className="text-[#6B6275] text-sm" style={{ fontFamily: SG }}>{l}</span>
           ))}
         </div>
-        <p className="text-[#6B6275]/40 text-[11px]" style={{ fontFamily: SG }}>© 2025 chaptr. All rights reserved.</p>
+        <p className="text-[#6B6275]/40 text-[11px]" style={{ fontFamily: SG }}>© 2026 chaptr. All rights reserved.</p>
       </div>
     </footer>
   )
