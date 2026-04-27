@@ -38,6 +38,7 @@ export function TravelHomePage() {
   const [isLg, setIsLg] = useState(() => window.matchMedia('(min-width: 1024px)').matches)
   const markerEls = useRef<Map<string, { dot: HTMLDivElement; label: HTMLDivElement; locked: boolean }>>(new Map())
   const selectedIdRef = useRef<string | null>(null)
+  const [heroIdx, setHeroIdx] = useState(0)
 
   const setActiveTripId = useStore((s) => s.setActiveTripId)
 
@@ -65,6 +66,15 @@ export function TravelHomePage() {
     controls.enableZoom = false
     globeRef.current.pointOfView({ lat: 30, lng: 120, altitude: 2.2 }, 0)
   }, [globeReady])
+
+  useEffect(() => {
+    setHeroIdx(0)
+    if (!selectedDest?.heroImages?.length) return
+    const timer = setInterval(() => {
+      setHeroIdx((i) => (i + 1) % selectedDest.heroImages!.length)
+    }, 2000)
+    return () => clearInterval(timer)
+  }, [selectedDest?.id])
 
   const selectDest = useCallback((dest: Destination) => {
     setSelectedDest(dest)
@@ -356,13 +366,21 @@ export function TravelHomePage() {
                   className="w-full max-w-[420px] -mt-16 relative z-[200] rounded-2xl overflow-hidden mx-auto"
                   style={{ background: 'rgba(21,16,32,0.95)', backdropFilter: 'blur(12px)', border: '1px solid rgba(124,58,237,0.2)' }}
                 >
-                  <div className="relative h-[100px] overflow-hidden">
-                    <img
-                      src={selectedDest.heroImage}
-                      alt={selectedDest.city}
-                      className="w-full h-full object-cover"
-                      style={{ filter: selectedDest.locked ? 'brightness(0.35) saturate(0.4)' : undefined }}
-                    />
+                  <div className="relative h-[180px] overflow-hidden">
+                    <AnimatePresence initial={false}>
+                      <motion.img
+                        key={heroIdx}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.6 }}
+                        src={(selectedDest.heroImages ?? [selectedDest.heroImage])[heroIdx % (selectedDest.heroImages?.length || 1)]}
+                        alt={selectedDest.city}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        style={{ filter: selectedDest.locked ? 'brightness(0.35) saturate(0.4)' : undefined }}
+                      />
+                    </AnimatePresence>
+                    <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, transparent 50%, rgba(21,16,32,0.6) 100%)' }} />
                     {selectedDest.locked && (
                       <div className="absolute inset-0 flex items-center justify-center">
                         <span className="text-white/30 text-sm font-medium px-4 py-2 rounded-full" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)', fontFamily: SG }}>
@@ -370,9 +388,20 @@ export function TravelHomePage() {
                         </span>
                       </div>
                     )}
+                    {(selectedDest.heroImages?.length ?? 0) > 1 && (
+                      <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                        {selectedDest.heroImages!.map((_, i) => (
+                          <div
+                            key={i}
+                            className="w-1.5 h-1.5 rounded-full transition-all duration-300"
+                            style={{ background: i === heroIdx % selectedDest.heroImages!.length ? '#fff' : 'rgba(255,255,255,0.35)' }}
+                          />
+                        ))}
+                      </div>
+                    )}
                     <button
                       onClick={handleDeselect}
-                      className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer"
+                      className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer z-10"
                       style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
                     >
                       <X size={14} className="text-white/60" />
@@ -503,13 +532,32 @@ export function TravelHomePage() {
                     className="w-full rounded-2xl overflow-hidden"
                     style={{ background: 'rgba(21,16,32,0.95)', backdropFilter: 'blur(12px)', border: '1px solid rgba(124,58,237,0.2)' }}
                   >
-                    <div className="relative h-[140px] overflow-hidden">
-                      <img
-                        src={selectedDest.heroImage}
-                        alt={selectedDest.city}
-                        className="w-full h-full object-cover"
-                        style={{ filter: selectedDest.locked ? 'brightness(0.35) saturate(0.4)' : undefined }}
-                      />
+                    <div className="relative h-[200px] overflow-hidden">
+                      <AnimatePresence initial={false}>
+                        <motion.img
+                          key={heroIdx}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.6 }}
+                          src={(selectedDest.heroImages ?? [selectedDest.heroImage])[heroIdx % (selectedDest.heroImages?.length || 1)]}
+                          alt={selectedDest.city}
+                          className="absolute inset-0 w-full h-full object-cover"
+                          style={{ filter: selectedDest.locked ? 'brightness(0.35) saturate(0.4)' : undefined }}
+                        />
+                      </AnimatePresence>
+                      <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, transparent 50%, rgba(21,16,32,0.6) 100%)' }} />
+                      {(selectedDest.heroImages?.length ?? 0) > 1 && (
+                        <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                          {selectedDest.heroImages!.map((_, i) => (
+                            <div
+                              key={i}
+                              className="w-1.5 h-1.5 rounded-full transition-all duration-300"
+                              style={{ background: i === heroIdx % selectedDest.heroImages!.length ? '#fff' : 'rgba(255,255,255,0.35)' }}
+                            />
+                          ))}
+                        </div>
+                      )}
                       {selectedDest.locked && (
                         <div className="absolute inset-0 flex items-center justify-center">
                           <span className="text-white/30 text-sm font-medium px-4 py-2 rounded-full" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)', fontFamily: SG }}>
@@ -519,7 +567,7 @@ export function TravelHomePage() {
                       )}
                       <button
                         onClick={handleDeselect}
-                        className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer"
+                        className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer z-10"
                         style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
                       >
                         <X size={14} className="text-white/60" />
