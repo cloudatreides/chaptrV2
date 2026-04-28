@@ -66,6 +66,7 @@ export function DepartureScreen({
       height: 576,
       referenceImageUrl: twinSelfieUrl || undefined,
       companionReferenceUrl: companionPortrait || undefined,
+      companionDescription,
       includesProtagonist: hasBothRefs,
       protagonistGender: twinGender,
     }).then((url) => {

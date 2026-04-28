@@ -53,7 +53,7 @@ async function persistImage(imageUrl: string, promptKey: string, category: 'scen
   return uploadImageToStorage(imageUrl, path)
 }
 
-const ANIME_STYLE_SUFFIX = '. Digital anime illustration, cel-shaded, clean linework, vibrant colors. NOT a photograph, NOT photorealistic, NOT 3D render.'
+const ANIME_STYLE_SUFFIX = '. Digital anime illustration, cel-shaded, clean linework, soft shading, expressive eyes, detailed hair, vibrant colors. NOT a photograph, NOT photorealistic, NOT 3D render, NOT western cartoon.'
 
 function enforceAnimeStyle(prompt: string): string {
   const stripped = prompt.replace(/\.\s*$/, '')
@@ -99,26 +99,30 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
   let body: Record<string, unknown>
   let model: string
 
+  const companionHint = companionDescription
+    ? `. The travel companion's appearance: ${companionDescription.split(',').slice(0, 5).join(',')}`
+    : ''
+
   if (useFlux2) {
     model = 'FLUX.2 Pro'
     body = {
       model: 'black-forest-labs/FLUX.2-pro',
-      prompt: `Anime-style illustration. The person from image 1 is the protagonist (a ${protagonistGender === 'female' ? 'young woman' : 'young man'}). The character from image 2 is their travel companion. Draw both characters in the same anime art style, keeping their faces, hairstyles, and features recognizable from the reference images. Scene: ${animePrompt}`,
+      prompt: `Anime-style illustration, cel-shaded, clean linework. The person from image 1 is the protagonist (a ${protagonistGender === 'female' ? 'young woman' : 'young man'}). The character from image 2 is their travel companion${companionHint}. Draw both characters in the SAME consistent anime art style — soft shading, expressive eyes, detailed hair. Keep their faces, hairstyles, and features recognizable from the reference images. Both characters must look like they belong in the same illustration. Scene: ${animePrompt}`,
       reference_images: [referenceImageUrl, companionReferenceUrl],
       width,
       height,
-      steps: 20,
+      steps: 25,
       n: 1,
     }
   } else if (useKontext) {
     model = 'Kontext Pro'
     body = {
       model: 'black-forest-labs/FLUX.1-kontext-pro',
-      prompt: `Transform this photo into an anime-style illustration. The reference image shows the protagonist, a ${protagonistGender === 'female' ? 'young woman' : 'young man'}. Redraw them in anime art style and place them into the following scene, keeping their face shape, features, and expression recognizable but rendered as anime. IMPORTANT: Any other characters described in the scene are DIFFERENT people — generate them as new distinct anime characters, do NOT use the reference face for them. Scene: ${animePrompt}`,
+      prompt: `Transform this photo into an anime-style illustration with cel-shading, clean linework, and expressive eyes. The reference image shows the protagonist, a ${protagonistGender === 'female' ? 'young woman' : 'young man'}. Redraw them in anime art style and place them into the following scene, keeping their face shape, features, and expression recognizable but rendered as anime. IMPORTANT: Any other characters described in the scene are DIFFERENT people — generate them as new distinct anime characters, do NOT use the reference face for them. Scene: ${animePrompt}`,
       image_url: referenceImageUrl,
       width,
       height,
-      steps: 20,
+      steps: 25,
       n: 1,
       response_format: 'url',
     }
