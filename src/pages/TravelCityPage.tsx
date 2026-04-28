@@ -598,9 +598,11 @@ export function TravelCityPage() {
                     <p className="text-white/50 text-xs mt-3" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Animating...</p>
                   </div>
                 ) : remixPhoto ? (
-                  <div className="flex items-center gap-4">
-                    <img src={remixPhoto} alt="" className="w-20 h-20 rounded-full object-cover" style={{ border: '2px solid rgba(124,58,237,0.3)' }} />
-                    <div className="flex flex-col gap-2">
+                  <div>
+                    <div className="rounded-xl overflow-hidden mb-3" style={{ border: '2px solid rgba(124,58,237,0.3)' }}>
+                      <img src={remixPhoto} alt="" className="w-full aspect-square object-cover" />
+                    </div>
+                    <div className="flex items-center gap-4">
                       <button onClick={() => fileRef.current?.click()} className="text-purple-400/70 text-xs hover:text-purple-400 transition-colors cursor-pointer flex items-center gap-1.5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                         <Camera size={12} /> Change photo
                       </button>
