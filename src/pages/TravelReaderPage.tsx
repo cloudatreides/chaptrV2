@@ -106,6 +106,9 @@ export function TravelReaderPage() {
   const companion = trip ? getTravelCompanion(trip.companionId) : null
   const companionName = trip?.companionRemix?.name ?? companion?.character.name ?? ''
   const companionPortrait = trip?.companionRemix?.imageUrl ?? companion?.character.staticPortrait
+  const companionVisualDesc = trip?.companionRemix?.personalityTraits?.length
+    ? trip.companionRemix.personalityTraits.join(', ')
+    : companion?.character.portraitPrompt ?? ''
   const activeChar = characters.find((c) => c.id === activeCharacterId)
 
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
@@ -130,6 +133,7 @@ export function TravelReaderPage() {
   const engagementRef = useRef<number>(Date.now())
 
   const [showLofiLabel, setShowLofiLabel] = useState(true)
+  const [showPortraitModal, setShowPortraitModal] = useState(false)
 
   // Show departure screen for fresh trips (handles Zustand hydration race —
   // useState initializer may fire before store rehydrates from localStorage)
@@ -186,7 +190,7 @@ export function TravelReaderPage() {
       `...Really? You want to stay longer? With me? Sorry, I just — I was already getting sad about this ending. Now I'm trying very hard not to smile too much. I'm failing. I don't care.`,
     ]
     void (async () => {
-      const portraitPrompt = buildReactionImagePrompt(companion.character.portraitPrompt, 'extend-trip', 'extend')
+      const portraitPrompt = buildReactionImagePrompt(companionVisualDesc, 'extend-trip', 'extend')
       const imageUrl = await generateCharacterPortrait(portraitPrompt).catch(() => null)
       const reactionMsg: ChatMessage = {
         role: 'character',
@@ -437,7 +441,7 @@ export function TravelReaderPage() {
 
     try {
       const portraitPrompt = buildReactionImagePrompt(
-        companion.character.portraitPrompt,
+        companionVisualDesc,
         'mystery-box',
         'gift',
       )
@@ -875,11 +879,14 @@ export function TravelReaderPage() {
   async function generateTravelImage(prompt: string, selfieUrl?: string | null, includeCompanion = true): Promise<string | null> {
     try {
       const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 45000))
-      const companionDesc = companion?.character.portraitPrompt
-        .split(',').slice(0, 5).join(',')
-        .replace(/^(anime style|dark|cyberpunk[^,]*|fantasy[^,]*|thriller[^,]*|sci-fi[^,]*)\s*(portrait|illustration|concept art)\s*(portrait\s*)?of\s*/i, '')
-        .trim()
-      const companionName = trip?.companionRemix?.name ?? companion?.character.name
+      const remix = trip?.companionRemix
+      const companionDesc = remix?.personalityTraits?.length
+        ? remix.personalityTraits.join(', ')
+        : companion?.character.portraitPrompt
+          .split(',').slice(0, 5).join(',')
+          .replace(/^(anime style|dark|cyberpunk[^,]*|fantasy[^,]*|thriller[^,]*|sci-fi[^,]*)\s*(portrait|illustration|concept art)\s*(portrait\s*)?of\s*/i, '')
+          .trim()
+      const companionName = remix?.name ?? companion?.character.name
       const enrichedPrompt = includeCompanion && companionDesc
         ? `${prompt}. The travel companion in this scene is ${companionName}: ${companionDesc}`
         : prompt
@@ -987,13 +994,15 @@ export function TravelReaderPage() {
           <button onClick={() => navigate('/travel')} className="text-white/40 hover:text-white/60 cursor-pointer">
             <ArrowLeft size={18} />
           </button>
-          {companionPortrait ? (
-            <SelfieImg src={companionPortrait} alt="" className="w-8 h-8 rounded-full object-cover" fallback={<div className="w-8 h-8 rounded-full flex items-center justify-center text-sm" style={{ background: '#2D2538' }}>{companion.character.avatar}</div>} />
-          ) : (
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm" style={{ background: '#2D2538' }}>
-              {companion.character.avatar}
-            </div>
-          )}
+          <button onClick={() => companionPortrait && setShowPortraitModal(true)} className={`shrink-0 ${companionPortrait ? 'cursor-pointer' : ''}`}>
+            {companionPortrait ? (
+              <SelfieImg src={companionPortrait} alt="" className="w-8 h-8 rounded-full object-cover" fallback={<div className="w-8 h-8 rounded-full flex items-center justify-center text-sm" style={{ background: '#2D2538' }}>{companion.character.avatar}</div>} />
+            ) : (
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm" style={{ background: '#2D2538' }}>
+                {companion.character.avatar}
+              </div>
+            )}
+          </button>
           <div className="flex-1 min-w-0">
             <p className="text-white text-sm font-semibold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               {companionName}
@@ -1032,7 +1041,7 @@ export function TravelReaderPage() {
                 countryEmoji={destination.countryEmoji}
                 companionName={companionName}
                 companionPortrait={companionPortrait}
-                companionDescription={companion.character.portraitPrompt}
+                companionDescription={trip.companionRemix?.personalityTraits?.length ? trip.companionRemix.personalityTraits.join(', ') : companion.character.portraitPrompt}
                 twinSelfieUrl={activeChar?.selfieUrl}
                 twinGender={activeChar?.gender ?? 'male'}
                 heroImage={destination.heroImage}
@@ -1939,6 +1948,44 @@ export function TravelReaderPage() {
             style={{ fontFamily: "'Space Grotesk', sans-serif", background: '#1E1A2E', border: '1px solid rgba(124,58,237,0.3)', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
           >
             {toastMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Companion portrait modal */}
+      <AnimatePresence>
+        {showPortraitModal && companionPortrait && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center px-5"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowPortraitModal(false)}
+          >
+            <div className="absolute inset-0 bg-black/80" />
+            <motion.div
+              className="relative max-w-sm w-full rounded-2xl overflow-hidden"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <SelfieImg
+                src={companionPortrait}
+                alt={companionName}
+                className="w-full aspect-square object-cover"
+                fallback={<div className="w-full aspect-square flex items-center justify-center text-6xl" style={{ background: '#2D2538' }}>{companion.character.avatar}</div>}
+              />
+              <div className="absolute bottom-0 left-0 right-0 p-4" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)' }}>
+                <p className="text-white font-bold text-lg" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{companionName}</p>
+              </div>
+              <button
+                onClick={() => setShowPortraitModal(false)}
+                className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer bg-black/40 hover:bg-black/60 transition-colors"
+              >
+                <X size={16} className="text-white" />
+              </button>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
