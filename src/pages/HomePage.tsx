@@ -483,10 +483,10 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
             >
               <div className="flex items-center gap-1.5 mb-1">
                 <Map size={13} style={{ color: '#B794F6' }} />
-                <span className="text-white/50 text-[11px] font-medium" style={{ fontFamily: SG }}>Trips</span>
+                <span className="text-white/50 text-[11px] font-bold" style={{ fontFamily: SG }}>Trips</span>
               </div>
               <span className="text-white text-[28px] md:text-[32px] font-extrabold leading-none" style={{ fontFamily: SG }}>{stats.tripsCompleted}</span>
-              <span className="text-white/30 text-[10px]" style={{ fontFamily: SG }}>completed</span>
+              <span className="text-white/30 text-[10px] font-medium" style={{ fontFamily: SG }}>completed</span>
             </button>
 
             {/* Divider */}
@@ -499,10 +499,10 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
             >
               <div className="flex items-center gap-1.5 mb-1">
                 <BookOpen size={13} style={{ color: '#E879A8' }} />
-                <span className="text-white/50 text-[11px] font-medium" style={{ fontFamily: SG }}>Stories</span>
+                <span className="text-white/50 text-[11px] font-bold" style={{ fontFamily: SG }}>Stories</span>
               </div>
               <span className="text-white text-[28px] md:text-[32px] font-extrabold leading-none" style={{ fontFamily: SG }}>{stats.storiesStarted}</span>
-              <span className="text-white/30 text-[10px]" style={{ fontFamily: SG }}>in progress</span>
+              <span className="text-white/30 text-[10px] font-medium" style={{ fontFamily: SG }}>in progress</span>
             </button>
 
             {/* Divider */}
@@ -515,10 +515,10 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
             >
               <div className="flex items-center gap-1.5 mb-1">
                 <Camera size={13} style={{ color: '#5EEAD4' }} />
-                <span className="text-white/50 text-[11px] font-medium" style={{ fontFamily: SG }}>Moments</span>
+                <span className="text-white/50 text-[11px] font-bold" style={{ fontFamily: SG }}>Moments</span>
               </div>
               <span className="text-white text-[28px] md:text-[32px] font-extrabold leading-none" style={{ fontFamily: SG }}>{stats.momentsCollected}</span>
-              <span className="text-white/30 text-[10px]" style={{ fontFamily: SG }}>captured</span>
+              <span className="text-white/30 text-[10px] font-medium" style={{ fontFamily: SG }}>captured</span>
             </button>
           </div>
         </div>
