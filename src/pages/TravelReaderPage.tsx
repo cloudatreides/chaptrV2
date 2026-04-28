@@ -131,6 +131,17 @@ export function TravelReaderPage() {
 
   const [showLofiLabel, setShowLofiLabel] = useState(true)
 
+  // Show departure screen for fresh trips (handles Zustand hydration race)
+  const departureChecked = useRef(false)
+  useEffect(() => {
+    if (departureChecked.current) return
+    if (!trip) return
+    if (trip.phase === 'planning' && trip.planningChatHistory.length === 0 && viewMode !== 'departure') {
+      departureChecked.current = true
+      setViewMode('departure')
+    }
+  }, [trip?.phase, trip?.planningChatHistory.length])
+
   useEffect(() => {
     lofiPlayer.play()
     return () => { lofiPlayer.stop() }
@@ -220,6 +231,8 @@ export function TravelReaderPage() {
   useEffect(() => {
     if (!trip || !companion || !destination) return
     if (viewMode === 'departure') return
+    // Don't generate opening message if departure screen hasn't been shown yet
+    if (trip.phase === 'planning' && trip.planningChatHistory.length === 0 && !departureChecked.current) return
     const isPlanning = trip.phase === 'planning'
     const messages = isPlanning ? trip.planningChatHistory : (trip.dayChatHistories[trip.currentDay] ?? [])
     if (messages.length > 0) return
