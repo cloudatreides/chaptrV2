@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Send, Loader2, MapPin, ChevronRight, Lock, Check, Play, ChevronDown, Plus, X, Volume2, VolumeX } from 'lucide-react'
+import { ArrowLeft, Send, Loader2, MapPin, ChevronRight, Lock, Check, Play, ChevronDown, Plus, X, Volume2, VolumeX, ImagePlus } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { getDestination } from '../data/travel/destinations'
 import { getTravelCompanion } from '../data/travel/companions'
@@ -85,6 +85,45 @@ function ActionBeat({ text }: { text: string }) {
     >
       {text}
     </p>
+  )
+}
+
+function SaveToAlbumBtn({ imageUrl, label, destinationId, companionId }: { imageUrl: string; label: string; destinationId: string; companionId: string }) {
+  const addStoryMoment = useStore((s) => s.addStoryMoment)
+  const storyMoments = useStore((s) => s.storyMoments)
+  const alreadySaved = storyMoments.some((m) => m.imageUrl === imageUrl)
+  const [saved, setSaved] = useState(alreadySaved)
+
+  const handleSave = () => {
+    if (saved) return
+    addStoryMoment({
+      id: `travel-${Date.now()}`,
+      imageUrl,
+      characterIds: [companionId],
+      universeId: `travel:${destinationId}`,
+      beatLabel: label,
+      note: '',
+      timestamp: Date.now(),
+    })
+    setSaved(true)
+  }
+
+  return (
+    <motion.button
+      className="absolute bottom-2 right-2 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium backdrop-blur-sm cursor-pointer"
+      style={{
+        background: saved ? 'rgba(34,197,94,0.7)' : 'rgba(0,0,0,0.55)',
+        color: 'rgba(255,255,255,0.9)',
+      }}
+      onClick={handleSave}
+      disabled={saved}
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.4, duration: 0.3 }}
+      whileTap={saved ? {} : { scale: 0.95 }}
+    >
+      {saved ? <><Check size={12} /> Saved</> : <><ImagePlus size={12} /> Save</>}
+    </motion.button>
   )
 }
 
@@ -1270,11 +1309,12 @@ export function TravelReaderPage() {
                             if (msg.characterId === '__scene_recap__') {
                               return (
                                 <div key={i} className="flex justify-center my-2">
-                                  <div className="rounded-xl overflow-hidden" style={{ maxWidth: 360, background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.12)' }}>
+                                  <div className="rounded-xl overflow-hidden relative" style={{ maxWidth: 360, background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.12)' }}>
                                     {msg.imageUrl && <img src={msg.imageUrl} alt="" className="w-full" style={{ aspectRatio: '16/9', objectFit: 'cover' }} />}
                                     <div className="px-3 py-2">
                                       <p className="text-white/50 text-xs" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{msg.content}</p>
                                     </div>
+                                    {msg.imageUrl && <SaveToAlbumBtn imageUrl={msg.imageUrl} label={msg.content} destinationId={trip.destinationId} companionId={trip.companionId} />}
                                   </div>
                                 </div>
                               )
@@ -1282,12 +1322,13 @@ export function TravelReaderPage() {
                             if (msg.content.startsWith('📍') && msg.imageUrl) {
                               return (
                                 <div key={i} className="flex justify-start my-1">
-                                  <div className="rounded-xl overflow-hidden" style={{ maxWidth: 320, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                                  <div className="rounded-xl overflow-hidden relative" style={{ maxWidth: 320, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
                                     <img src={msg.imageUrl} alt="" className="w-full" style={{ aspectRatio: '4/3', objectFit: 'cover' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
                                     <div className="px-3 py-2 flex items-center gap-1.5">
                                       <MapPin size={10} className="text-purple-400/60 shrink-0" />
                                       <p className="text-white/50 text-xs" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{msg.content.replace('📍 ', '')}</p>
                                     </div>
+                                    <SaveToAlbumBtn imageUrl={msg.imageUrl} label={msg.content.replace('📍 ', '')} destinationId={trip.destinationId} companionId={trip.companionId} />
                                   </div>
                                 </div>
                               )
@@ -1295,11 +1336,12 @@ export function TravelReaderPage() {
                             if (msg.content.startsWith('🍽️') && msg.imageUrl) {
                               return (
                                 <div key={i} className="flex justify-start my-1">
-                                  <div className="rounded-xl overflow-hidden" style={{ maxWidth: 320, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                                  <div className="rounded-xl overflow-hidden relative" style={{ maxWidth: 320, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
                                     <img src={msg.imageUrl} alt="" className="w-full" style={{ aspectRatio: '4/3', objectFit: 'cover' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
                                     <div className="px-3 py-2">
                                       <p className="text-white/50 text-xs" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{msg.content.replace('🍽️ ', '')}</p>
                                     </div>
+                                    <SaveToAlbumBtn imageUrl={msg.imageUrl} label={msg.content.replace('🍽️ ', '')} destinationId={trip.destinationId} companionId={trip.companionId} />
                                   </div>
                                 </div>
                               )
@@ -1317,8 +1359,9 @@ export function TravelReaderPage() {
                             return (
                               <div key={i} className="flex flex-col gap-1.5">
                                 {msg.imageUrl && (
-                                  <div className="rounded-xl overflow-hidden" style={{ maxWidth: 360, border: '1px solid rgba(255,255,255,0.08)' }}>
+                                  <div className="rounded-xl overflow-hidden relative" style={{ maxWidth: 360, border: '1px solid rgba(255,255,255,0.08)' }}>
                                     <img src={msg.imageUrl} alt="" className="w-full" style={{ aspectRatio: '16/9', objectFit: 'cover' }} />
+                                    <SaveToAlbumBtn imageUrl={msg.imageUrl} label={`${companionName} moment`} destinationId={trip.destinationId} companionId={trip.companionId} />
                                   </div>
                                 )}
                                 {segments.map((seg, j) =>
@@ -1365,7 +1408,7 @@ export function TravelReaderPage() {
                   <motion.div
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mb-5 rounded-2xl overflow-hidden"
+                    className="mb-5 rounded-2xl overflow-hidden relative"
                     style={{ border: '1px solid rgba(124,58,237,0.15)' }}
                   >
                     <img
@@ -1379,6 +1422,7 @@ export function TravelReaderPage() {
                         You and {companionName} just landed in {destination.city} {destination.countryEmoji}
                       </p>
                     </div>
+                    <SaveToAlbumBtn imageUrl={trip.departureImageUrl} label={`Arrived in ${destination.city}`} destinationId={trip.destinationId} companionId={trip.companionId} />
                   </motion.div>
                 )}
 
@@ -1394,7 +1438,7 @@ export function TravelReaderPage() {
                           className="flex justify-center my-2"
                         >
                           <div
-                            className="rounded-xl overflow-hidden"
+                            className="rounded-xl overflow-hidden relative"
                             style={{ maxWidth: 360, background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.12)' }}
                           >
                             {msg.imageUrl && (
@@ -1413,6 +1457,7 @@ export function TravelReaderPage() {
                                 {msg.content}
                               </p>
                             </div>
+                            {msg.imageUrl && <SaveToAlbumBtn imageUrl={msg.imageUrl} label={msg.content} destinationId={trip.destinationId} companionId={trip.companionId} />}
                           </div>
                         </motion.div>
                       )
@@ -1428,7 +1473,7 @@ export function TravelReaderPage() {
                           className="flex justify-start my-1"
                         >
                           <div
-                            className="rounded-xl overflow-hidden"
+                            className="rounded-xl overflow-hidden relative"
                             style={{ maxWidth: 320, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}
                           >
                             <img
@@ -1447,6 +1492,7 @@ export function TravelReaderPage() {
                                 {msg.content.replace('📍 ', '')}
                               </p>
                             </div>
+                            <SaveToAlbumBtn imageUrl={msg.imageUrl} label={msg.content.replace('📍 ', '')} destinationId={trip.destinationId} companionId={trip.companionId} />
                           </div>
                         </motion.div>
                       )
@@ -1461,7 +1507,7 @@ export function TravelReaderPage() {
                           className="flex justify-start my-1"
                         >
                           <div
-                            className="rounded-xl overflow-hidden"
+                            className="rounded-xl overflow-hidden relative"
                             style={{ maxWidth: 320, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}
                           >
                             <img
@@ -1479,6 +1525,7 @@ export function TravelReaderPage() {
                                 {msg.content.replace('🍽️ ', '')}
                               </p>
                             </div>
+                            <SaveToAlbumBtn imageUrl={msg.imageUrl} label={msg.content.replace('🍽️ ', '')} destinationId={trip.destinationId} companionId={trip.companionId} />
                           </div>
                         </motion.div>
                       )
@@ -1504,10 +1551,11 @@ export function TravelReaderPage() {
                           initial={{ opacity: 0, y: 10, scale: 0.97 }}
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           transition={{ duration: 0.5, ease: 'easeOut' }}
-                          className="rounded-xl overflow-hidden"
+                          className="rounded-xl overflow-hidden relative"
                           style={{ maxWidth: 360, border: '1px solid rgba(255,255,255,0.08)' }}
                         >
                           <img src={msg.imageUrl} alt="" className="w-full" style={{ aspectRatio: '16/9', objectFit: 'cover' }} />
+                          <SaveToAlbumBtn imageUrl={msg.imageUrl} label={`${companionName} moment`} destinationId={trip.destinationId} companionId={trip.companionId} />
                         </motion.div>
                       )}
                       {segments.map((seg, j) =>
