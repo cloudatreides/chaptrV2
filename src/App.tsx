@@ -5,7 +5,7 @@ import { useGameStateSync } from './hooks/useGameStateSync'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { FeedbackModal } from './components/FeedbackModal'
 import { FeedbackFab } from './components/FeedbackFab'
-import { MobileBottomNav } from './components/MobileBottomNav'
+import { MobileNav } from './components/MobileNav'
 import { LoginPage } from './pages/LoginPage'
 import { LandingPage } from './pages/LandingPage'
 
@@ -71,7 +71,7 @@ export default function App() {
           <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-        <MobileBottomNav />
+        <MobileNav />
         <FeedbackFab onClick={() => setFeedbackOpen(true)} />
         <FeedbackModal open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
         </GameStateSync>

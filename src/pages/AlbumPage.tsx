@@ -5,7 +5,6 @@ import { ArrowLeft, X, Share2, Trash2, Camera } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { CAST_ROSTER } from '../data/castRoster'
 import { AppSidebar } from '../components/AppSidebar'
-import { MobileNav } from '../components/MobileNav'
 import { getMomentConfig } from '../data/storyData'
 import { getUniverseGenre } from '../data/storyHelpers'
 import type { StoryMoment } from '../store/useStore'
@@ -247,7 +246,6 @@ export function AlbumPage() {
       </div>
 
       {detailModal}
-      <MobileNav />
     </div>
   )
 }
