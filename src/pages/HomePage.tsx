@@ -807,8 +807,8 @@ export function HomePage() {
   return (
     <div className="bg-bg min-h-screen min-h-dvh">
       {/* ═══ MOBILE ═══ */}
-      <div className="md:hidden flex flex-col h-screen h-dvh">
-        <div className="flex-1 overflow-y-auto px-5 pt-6 pb-5 flex flex-col gap-5">
+      <div className="md:hidden">
+        <div className="overflow-y-auto px-5 pt-6 pb-20 flex flex-col gap-5">
           {/* Header */}
           <div className="flex items-center justify-between">
             <h1 className="text-white font-bold text-[22px]" style={{ fontFamily: SG }}>chaptr</h1>
@@ -848,7 +848,7 @@ export function HomePage() {
         </div>
 
         {/* Bottom tab bar */}
-        <div className="shrink-0 flex items-center justify-center px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]" style={{ borderTop: '1px solid rgba(255,255,255,0.04)', background: '#0D0B12' }}>
+        <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden flex items-center justify-center px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]" style={{ borderTop: '1px solid rgba(255,255,255,0.04)', background: '#0D0B12' }}>
           <div className="flex items-center gap-10">
             <button className="cursor-pointer flex flex-col items-center gap-1">
               <Sparkles size={20} style={{ color: '#c84b9e' }} />
