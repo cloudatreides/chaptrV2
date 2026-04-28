@@ -31,15 +31,15 @@ export default async function handler(req: Request) {
       const result = await googleImageSearch(query, googleKey, googleCx)
       if (result) return jsonResponse(result)
     } catch {
-      // Fall through to Unsplash
+      // Fall through to Pexels
     }
   }
 
-  // Fallback: Unsplash (free tier, 50 req/hr, high-quality photos)
-  const unsplashKey = process.env.UNSPLASH_ACCESS_KEY
-  if (unsplashKey) {
+  // Fallback: Pexels (free, 200 req/hr, high-quality photos)
+  const pexelsKey = process.env.PEXELS_API_KEY
+  if (pexelsKey) {
     try {
-      const result = await unsplashSearch(query, unsplashKey)
+      const result = await pexelsSearch(query, pexelsKey)
       if (result) return jsonResponse(result)
     } catch {
       // No result
@@ -53,7 +53,7 @@ interface ImageResult {
   url: string
   thumb: string
   title: string
-  source: 'google' | 'unsplash'
+  source: 'google' | 'pexels'
 }
 
 function jsonResponse(data: ImageResult | null) {
@@ -92,27 +92,26 @@ async function googleImageSearch(query: string, apiKey: string, cx: string): Pro
   }
 }
 
-async function unsplashSearch(query: string, accessKey: string): Promise<ImageResult | null> {
+async function pexelsSearch(query: string, apiKey: string): Promise<ImageResult | null> {
   const params = new URLSearchParams({
     query,
     per_page: '1',
     orientation: 'landscape',
-    content_filter: 'high',
   })
 
-  const resp = await fetch(`https://api.unsplash.com/search/photos?${params}`, {
-    headers: { Authorization: `Client-ID ${accessKey}` },
+  const resp = await fetch(`https://api.pexels.com/v1/search?${params}`, {
+    headers: { Authorization: apiKey },
   })
   if (!resp.ok) return null
 
   const data = await resp.json()
-  const photo = data.results?.[0]
+  const photo = data.photos?.[0]
   if (!photo) return null
 
   return {
-    url: photo.urls?.regular ?? photo.urls?.full,
-    thumb: photo.urls?.small ?? photo.urls?.thumb,
-    title: photo.alt_description ?? photo.description ?? query,
-    source: 'unsplash',
+    url: photo.src?.large2x ?? photo.src?.large,
+    thumb: photo.src?.medium ?? photo.src?.small,
+    title: photo.alt ?? query,
+    source: 'pexels',
   }
 }
