@@ -31,6 +31,13 @@ function getChapterLabel(stepIndex: number, total: number): string {
 
 // ─── Twin Hero (has character) ───
 
+function SelfieImg({ src, alt, className, fallback }: { src: string; alt: string; className?: string; fallback: React.ReactNode }) {
+  const [failed, setFailed] = useState(false)
+  useEffect(() => setFailed(false), [src])
+  if (failed) return <>{fallback}</>
+  return <img src={src} alt={alt} className={className} onError={() => setFailed(true)} />
+}
+
 function TwinHero({ character, allCharacters, onEdit, onSwitch, onCreateNew }: {
   character: { id: string; name: string; selfieUrl: string | null; bio: string | null }
   allCharacters: { id: string; name: string; selfieUrl: string | null }[]
@@ -44,11 +51,15 @@ function TwinHero({ character, allCharacters, onEdit, onSwitch, onCreateNew }: {
         {/* Selfie */}
         <div className="relative w-full md:w-[280px] h-[240px] md:h-[300px] overflow-hidden" style={{ flexShrink: 0, background: 'linear-gradient(135deg, #1a1028, #2d1f3d)' }}>
           {character.selfieUrl ? (
-            <img
+            <SelfieImg
               src={character.selfieUrl}
               alt={character.name}
               className="w-full h-full object-cover object-center"
-              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+              fallback={
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-5xl font-bold" style={{ color: 'rgba(200,75,158,0.25)', fontFamily: SG }}>{character.name[0]}</span>
+                </div>
+              }
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
@@ -93,7 +104,16 @@ function TwinHero({ character, allCharacters, onEdit, onSwitch, onCreateNew }: {
               }}
             >
               {c.selfieUrl ? (
-                <img src={c.selfieUrl} alt={c.name} className="w-full h-full object-cover" />
+                <SelfieImg
+                  src={c.selfieUrl}
+                  alt={c.name}
+                  className="w-full h-full object-cover"
+                  fallback={
+                    <div className="w-full h-full flex items-center justify-center text-xs font-semibold" style={{ background: 'rgba(200,75,158,0.12)', color: '#c84b9e' }}>
+                      {c.name[0]}
+                    </div>
+                  }
+                />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-xs font-semibold" style={{ background: 'rgba(200,75,158,0.12)', color: '#c84b9e' }}>
                   {c.name[0]}
