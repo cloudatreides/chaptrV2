@@ -27,7 +27,7 @@ export function CharacterSelectPage() {
       <div className="flex flex-col flex-1 w-full max-w-[520px] mx-auto px-5">
         {/* Nav */}
         <div className="flex items-center justify-between pt-12 pb-2">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/home')}>
             <div className="relative shrink-0" style={{ width: 28, height: 28 }}>
               <div className="absolute" style={{ width: 17, height: 21, borderRadius: 3, background: '#7C3AED', transform: 'rotate(8deg)', top: 0, left: 5 }} />
               <div className="absolute" style={{ width: 17, height: 21, borderRadius: 3, background: '#A78BFA', transform: 'rotate(3deg)', top: 1.5, left: 3.5 }} />
@@ -38,7 +38,7 @@ export function CharacterSelectPage() {
         </div>
 
         {/* Back */}
-        <button onClick={() => navigate('/')} className="flex items-center gap-1 text-textSecondary text-sm mt-4 mb-6 hover:text-textPrimary transition-colors w-fit">
+        <button onClick={() => navigate('/home')} className="flex items-center gap-1 text-textSecondary text-sm mt-4 mb-6 hover:text-textPrimary transition-colors w-fit">
           <ChevronLeft size={16} />
           Back
         </button>
