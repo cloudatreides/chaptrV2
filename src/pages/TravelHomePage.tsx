@@ -333,7 +333,7 @@ export function TravelHomePage() {
               {activeTrips.length > 2 && (
                 <button
                   onClick={() => setShowAllTrips(!showAllTrips)}
-                  className="text-[11px] font-medium cursor-pointer transition-colors hover:text-white/60 mt-0.5"
+                  className="w-full text-center text-[11px] font-medium cursor-pointer transition-colors hover:text-white/60 mt-1 py-1.5"
                   style={{ color: '#A78BFA', fontFamily: SG }}
                 >
                   {showAllTrips ? 'Show less' : `Show all ${activeTrips.length} trips`}
