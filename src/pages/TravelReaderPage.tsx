@@ -131,13 +131,11 @@ export function TravelReaderPage() {
 
   const [showLofiLabel, setShowLofiLabel] = useState(true)
 
-  // Show departure screen for fresh trips (handles Zustand hydration race)
-  const departureChecked = useRef(false)
+  // Show departure screen for fresh trips (handles Zustand hydration race —
+  // useState initializer may fire before store rehydrates from localStorage)
   useEffect(() => {
-    if (departureChecked.current) return
-    if (!trip) return
-    if (trip.phase === 'planning' && trip.planningChatHistory.length === 0 && viewMode !== 'departure') {
-      departureChecked.current = true
+    if (!trip || viewMode === 'departure') return
+    if (trip.phase === 'planning' && trip.planningChatHistory.length === 0) {
       setViewMode('departure')
     }
   }, [trip?.phase, trip?.planningChatHistory.length])
@@ -231,8 +229,6 @@ export function TravelReaderPage() {
   useEffect(() => {
     if (!trip || !companion || !destination) return
     if (viewMode === 'departure') return
-    // Don't generate opening message if departure screen hasn't been shown yet
-    if (trip.phase === 'planning' && trip.planningChatHistory.length === 0 && !departureChecked.current) return
     const isPlanning = trip.phase === 'planning'
     const messages = isPlanning ? trip.planningChatHistory : (trip.dayChatHistories[trip.currentDay] ?? [])
     if (messages.length > 0) return
@@ -1027,7 +1023,7 @@ export function TravelReaderPage() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto relative">
           <AnimatePresence mode="wait">
             {/* Departure Screen */}
             {viewMode === 'departure' && (
