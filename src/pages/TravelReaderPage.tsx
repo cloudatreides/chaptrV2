@@ -14,6 +14,7 @@ import { buildReactionImagePrompt } from '../data/chatActions'
 import { DayTransition } from '../components/travel/DayTransition'
 import { TripComplete } from '../components/travel/TripComplete'
 import type { ChatMessage, TripScene } from '../store/useStore'
+import { SelfieImg } from '../components/SelfieImg'
 import { lofiPlayer } from '../lib/lofiPlayer'
 
 type ViewMode = 'chat' | 'scene' | 'transition' | 'day-start' | 'day-end' | 'complete'
@@ -975,7 +976,7 @@ export function TravelReaderPage() {
             <ArrowLeft size={18} />
           </button>
           {companionPortrait ? (
-            <img src={companionPortrait} alt="" className="w-8 h-8 rounded-full object-cover" />
+            <SelfieImg src={companionPortrait} alt="" className="w-8 h-8 rounded-full object-cover" fallback={<div className="w-8 h-8 rounded-full flex items-center justify-center text-sm" style={{ background: '#2D2538' }}>{companion.character.avatar}</div>} />
           ) : (
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm" style={{ background: '#2D2538' }}>
               {companion.character.avatar}
@@ -1192,7 +1193,7 @@ export function TravelReaderPage() {
                   <div className="px-5 md:px-[60px] pb-6">
                     <div className="flex items-center gap-2">
                       {companionPortrait ? (
-                        <img src={companionPortrait} alt="" className="w-5 h-5 rounded-full object-cover" />
+                        <SelfieImg src={companionPortrait} alt="" className="w-5 h-5 rounded-full object-cover" fallback={<div className="w-5 h-5 rounded-full flex items-center justify-center text-[8px]" style={{ background: '#2D2538' }}>{companion.character.avatar}</div>} />
                       ) : (
                         <div className="w-5 h-5 rounded-full flex items-center justify-center text-[8px]" style={{ background: '#2D2538' }}>
                           {companion.character.avatar}
@@ -1796,7 +1797,7 @@ export function TravelReaderPage() {
             className="w-full flex items-center gap-2 py-1.5 cursor-pointer"
           >
             {companionPortrait ? (
-              <img src={companionPortrait} alt="" className="w-6 h-6 rounded-full object-cover" />
+              <SelfieImg src={companionPortrait} alt="" className="w-6 h-6 rounded-full object-cover" fallback={<div className="w-6 h-6 rounded-full flex items-center justify-center text-xs" style={{ background: '#2D2538' }}>{companion.character.avatar}</div>} />
             ) : (
               <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs" style={{ background: '#2D2538' }}>
                 {companion.character.avatar}

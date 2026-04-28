@@ -5,6 +5,7 @@ import { ArrowLeft, X, Shuffle, Camera, Plus, Trash2 } from 'lucide-react'
 import Cropper from 'react-easy-crop'
 import type { Area } from 'react-easy-crop'
 import { AppSidebar } from '../components/AppSidebar'
+import { SelfieImg } from '../components/SelfieImg'
 import { useStore, type CustomCompanion } from '../store/useStore'
 import { getDestination } from '../data/travel/destinations'
 import { TRAVEL_COMPANIONS, DEFAULT_SLIDERS, getCompanionIntro, type CompanionSliders, type CompanionRemix, type TravelCompanion } from '../data/travel/companions'
@@ -280,7 +281,7 @@ export function TravelCityPage() {
               className="inline-flex items-center gap-3 rounded-xl px-4 py-3 mb-8"
               style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.15)' }}
             >
-              <img src={activeChar.selfieUrl} alt="" className="w-9 h-9 rounded-full object-cover" />
+              <SelfieImg src={activeChar.selfieUrl} alt="" className="w-9 h-9 rounded-full object-cover" fallback={<div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold" style={{ background: 'rgba(124,58,237,0.15)', color: '#A78BFA' }}>{activeChar.name[0]}</div>} />
               <div>
                 <p className="text-white text-sm font-medium" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                   Your twin — You'll appear in every scene
@@ -368,7 +369,16 @@ export function TravelCityPage() {
                   >
                     <div className="relative aspect-[3/4] overflow-hidden">
                       {portraitSrc ? (
-                        <img src={portraitSrc} alt={cc.remix.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <SelfieImg
+                          src={portraitSrc}
+                          alt={cc.remix.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          fallback={
+                            <div className="w-full h-full flex items-center justify-center text-4xl" style={{ background: '#2D2538' }}>
+                              {base.character.avatar}
+                            </div>
+                          }
+                        />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-4xl" style={{ background: '#2D2538' }}>
                           {base.character.avatar}

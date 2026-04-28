@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ChevronLeft, Pencil, Plus, Trash2, User } from 'lucide-react'
 import { useStore } from '../store/useStore'
+import { SelfieImg } from '../components/SelfieImg'
 
 const MAX_CHARACTERS = 3
 const SG = "'Space Grotesk', sans-serif"
@@ -71,7 +72,7 @@ export function CharacterSelectPage() {
                   style={{ background: 'rgba(200,75,158,0.12)', border: `2px solid ${isActive ? '#c84b9e' : 'rgba(200,75,158,0.2)'}` }}
                 >
                   {char.selfieUrl ? (
-                    <img src={char.selfieUrl} alt={char.name} className="w-full h-full object-cover" />
+                    <SelfieImg src={char.selfieUrl} alt={char.name} className="w-full h-full object-cover" fallback={<User size={20} className="text-accent" />} />
                   ) : (
                     <User size={20} className="text-accent" />
                   )}

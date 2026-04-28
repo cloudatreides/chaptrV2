@@ -10,6 +10,7 @@ import { getStoryData } from '../data/stories'
 import { getEligibleAmbientPings } from '../data/ambientPings'
 import { getCharacter, CHARACTERS } from '../data/characters'
 import { AppSidebar } from '../components/AppSidebar'
+import { SelfieImg } from '../components/SelfieImg'
 import { AmbientPingModal } from '../components/AmbientPingModal'
 import { DESTINATIONS, getDestination } from '../data/travel/destinations'
 import { getTravelCompanion } from '../data/travel/companions'
@@ -30,13 +31,6 @@ function getChapterLabel(stepIndex: number, total: number): string {
 }
 
 // ─── Twin Hero (has character) ───
-
-function SelfieImg({ src, alt, className, fallback }: { src: string; alt: string; className?: string; fallback: React.ReactNode }) {
-  const [failed, setFailed] = useState(false)
-  useEffect(() => setFailed(false), [src])
-  if (failed) return <>{fallback}</>
-  return <img src={src} alt={alt} className={className} onError={() => setFailed(true)} />
-}
 
 function TwinHero({ character, allCharacters, onEdit, onSwitch, onCreateNew }: {
   character: { id: string; name: string; selfieUrl: string | null; bio: string | null }
@@ -191,8 +185,17 @@ function ContinueCard({ type, title, subtitle, meta, image, onClick }: {
       style={{ background: '#13101c', border: `1px solid ${type === 'travel' ? 'rgba(124,58,237,0.12)' : 'rgba(200,75,158,0.12)'}` }}
     >
       {image && (
-        <div className="w-12 h-12 md:w-14 md:h-14 rounded-lg overflow-hidden shrink-0">
-          <img src={image} alt="" className="w-full h-full object-cover" />
+        <div className="w-12 h-12 md:w-14 md:h-14 rounded-lg overflow-hidden shrink-0" style={{ background: 'linear-gradient(135deg, #1a1028, #2d1f3d)' }}>
+          <SelfieImg
+            src={image}
+            alt=""
+            className="w-full h-full object-cover"
+            fallback={
+              <div className="w-full h-full flex items-center justify-center">
+                {type === 'travel' ? <Compass size={18} className="text-white/15" /> : <BookOpen size={18} className="text-white/15" />}
+              </div>
+            }
+          />
         </div>
       )}
       <div className="flex-1 min-w-0">
@@ -603,7 +606,7 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
                               <p className="text-white/40 text-[11px]" style={{ fontFamily: SG }}>{daysExplored} days · {totalMessages} messages</p>
                             </div>
                             <div className="flex items-center gap-2">
-                              {compPortrait && <img src={compPortrait} alt="" className="w-7 h-7 rounded-full object-cover" style={{ border: '1.5px solid rgba(167,139,250,0.4)' }} />}
+                              {compPortrait && <SelfieImg src={compPortrait} alt="" className="w-7 h-7 rounded-full object-cover" style={{ border: '1.5px solid rgba(167,139,250,0.4)' }} fallback={<div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px]" style={{ background: '#2D2538', border: '1.5px solid rgba(167,139,250,0.4)' }}>{compName[0]}</div>} />}
                               <span className="text-white/50 text-xs" style={{ fontFamily: SG }}>{compName}</span>
                             </div>
                           </div>
