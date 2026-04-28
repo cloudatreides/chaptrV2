@@ -122,7 +122,6 @@ export function CreateCharacterPage() {
     setCroppedAreaPixels(croppedPixels)
   }, [])
 
-  const loveInterestName = gender === 'male' ? 'Yuna' : gender === 'female' ? 'Jiwon' : null
   const isCropping = !!rawImage
   const hasPhoto = !!originalPhoto
   const finalPhoto = styledPhoto ?? originalPhoto
@@ -273,11 +272,6 @@ export function CreateCharacterPage() {
               </button>
             ))}
           </div>
-          {loveInterestName && (
-            <motion.p className="text-textMuted text-xs mt-2" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              Your story partner: <span className="text-accent">{loveInterestName}</span>
-            </motion.p>
-          )}
         </motion.div>
 
         {/* ── Section 2: Personality ── */}
