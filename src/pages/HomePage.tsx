@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, Pencil, MessageCircle, LogOut, Compass, BookOpen, ChevronRight, ChevronLeft, Camera, Sparkles, Plus, Map, X } from 'lucide-react'
+import { ArrowRight, Pencil, MessageCircle, LogOut, Compass, BookOpen, ChevronRight, ChevronLeft, Camera, Sparkles, Plus, Map, X, Image } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { UNIVERSES, GENRE_FILTERS } from '../data/storyData'
 import { useAuth } from '../contexts/AuthContext'
@@ -807,7 +807,7 @@ export function HomePage() {
   return (
     <div className="bg-bg min-h-screen min-h-dvh">
       {/* ═══ MOBILE ═══ */}
-      <div className="md:hidden flex flex-col min-h-screen min-h-dvh">
+      <div className="md:hidden flex flex-col h-screen h-dvh">
         <div className="flex-1 overflow-y-auto px-5 pt-6 pb-5 flex flex-col gap-5">
           {/* Header */}
           <div className="flex items-center justify-between">
@@ -848,19 +848,23 @@ export function HomePage() {
         </div>
 
         {/* Bottom tab bar */}
-        <div className="shrink-0 flex items-center justify-center px-5 py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.04)', background: '#0D0B12' }}>
+        <div className="shrink-0 flex items-center justify-center px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]" style={{ borderTop: '1px solid rgba(255,255,255,0.04)', background: '#0D0B12' }}>
           <div className="flex items-center gap-10">
             <button className="cursor-pointer flex flex-col items-center gap-1">
               <Sparkles size={20} style={{ color: '#c84b9e' }} />
               <span className="text-[10px] font-semibold" style={{ color: '#c84b9e', fontFamily: SG }}>Home</span>
             </button>
+            <button onClick={() => navigate('/travel')} className="cursor-pointer flex flex-col items-center gap-1">
+              <Compass size={20} style={{ color: 'rgba(255,255,255,0.3)' }} />
+              <span className="text-[10px] font-medium" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: SG }}>Travel</span>
+            </button>
             <button onClick={() => navigate('/stories')} className="cursor-pointer flex flex-col items-center gap-1">
               <BookOpen size={20} style={{ color: 'rgba(255,255,255,0.3)' }} />
               <span className="text-[10px] font-medium" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: SG }}>Stories</span>
             </button>
-            <button onClick={() => navigate('/travel')} className="cursor-pointer flex flex-col items-center gap-1">
-              <Compass size={20} style={{ color: 'rgba(255,255,255,0.3)' }} />
-              <span className="text-[10px] font-medium" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: SG }}>Travel</span>
+            <button onClick={() => navigate('/album')} className="cursor-pointer flex flex-col items-center gap-1">
+              <Image size={20} style={{ color: 'rgba(255,255,255,0.3)' }} />
+              <span className="text-[10px] font-medium" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: SG }}>Album</span>
             </button>
           </div>
         </div>
