@@ -816,7 +816,7 @@ export function HomePage() {
           </div>
 
           {/* Twin Hero or Upload CTA */}
-          {hasCharacters && activeCharacter ? (
+          {hasCharacters && activeCharacter?.selfieUrl ? (
             <TwinHero character={activeCharacter} allCharacters={characters} onEdit={() => navigate('/characters')} onSwitch={(id) => setActiveCharacter(id)} onCreateNew={() => navigate('/create-character')} />
           ) : (
             <UploadHero onClick={() => navigate('/create-character')} />
@@ -888,7 +888,7 @@ export function HomePage() {
 
             {/* Twin Hero or Upload CTA */}
             <div className="mb-6">
-              {hasCharacters && activeCharacter ? (
+              {hasCharacters && activeCharacter?.selfieUrl ? (
                 <TwinHero character={activeCharacter} allCharacters={characters} onEdit={() => navigate('/characters')} onSwitch={(id) => setActiveCharacter(id)} onCreateNew={() => navigate('/create-character')} />
               ) : (
                 <UploadHero onClick={() => navigate('/create-character')} />
