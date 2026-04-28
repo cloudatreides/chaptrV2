@@ -12,6 +12,7 @@ import { TRAVEL_COMPANIONS, DEFAULT_SLIDERS, getCompanionIntro, type CompanionSl
 import { stylizeSelfie } from '../lib/togetherAi'
 import { getCroppedImg } from '../lib/cropImage'
 import { uploadSelfieToStorage } from '../lib/supabase'
+import { ambientAudio } from '../lib/ambientAudio'
 
 export function TravelCityPage() {
   const { destinationId } = useParams<{ destinationId: string }>()
@@ -217,6 +218,8 @@ export function TravelCityPage() {
     if (!charId) {
       charId = createCharacter({ name: 'Traveler', gender: 'female', selfieUrl: null, bio: null })
     }
+
+    ambientAudio.unlock()
 
     if (selectedCustom && selectedBase) {
       startTrip(destination!.id, selectedCustom.baseId, selectedCustom.sliders, selectedCustom.remix)

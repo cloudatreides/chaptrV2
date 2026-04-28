@@ -17,6 +17,7 @@ import { TripComplete } from '../components/travel/TripComplete'
 import type { ChatMessage, TripScene } from '../store/useStore'
 import { SelfieImg } from '../components/SelfieImg'
 import { lofiPlayer } from '../lib/lofiPlayer'
+import { ambientAudio } from '../lib/ambientAudio'
 
 type ViewMode = 'chat' | 'scene' | 'transition' | 'day-start' | 'day-end' | 'complete' | 'departure'
 
@@ -185,7 +186,18 @@ export function TravelReaderPage() {
 
   useEffect(() => {
     lofiPlayer.play()
-    return () => { lofiPlayer.stop() }
+    const unlockAudio = () => {
+      ambientAudio.unlock()
+      document.removeEventListener('touchstart', unlockAudio)
+      document.removeEventListener('click', unlockAudio)
+    }
+    document.addEventListener('touchstart', unlockAudio, { once: true })
+    document.addEventListener('click', unlockAudio, { once: true })
+    return () => {
+      lofiPlayer.stop()
+      document.removeEventListener('touchstart', unlockAudio)
+      document.removeEventListener('click', unlockAudio)
+    }
   }, [])
 
   // Hide lofi label after 5 seconds
