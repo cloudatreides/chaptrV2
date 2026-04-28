@@ -12,12 +12,13 @@ import { extractMemories } from '../lib/claude/memory'
 import { generateSceneImage as generateImage, generateCharacterPortrait } from '../lib/togetherAi'
 import { buildReactionImagePrompt } from '../data/chatActions'
 import { DayTransition } from '../components/travel/DayTransition'
+import { DepartureScreen } from '../components/travel/DepartureScreen'
 import { TripComplete } from '../components/travel/TripComplete'
 import type { ChatMessage, TripScene } from '../store/useStore'
 import { SelfieImg } from '../components/SelfieImg'
 import { lofiPlayer } from '../lib/lofiPlayer'
 
-type ViewMode = 'chat' | 'scene' | 'transition' | 'day-start' | 'day-end' | 'complete'
+type ViewMode = 'chat' | 'scene' | 'transition' | 'day-start' | 'day-end' | 'complete' | 'departure'
 
 function stripMetaTags(text: string): string {
   return text
@@ -97,6 +98,7 @@ export function TravelReaderPage() {
     setTripScene, setTripSceneImage, advanceTravelScene, advanceTravelDay,
     setTripPhase, updateTravelAffinity, addCompanionMemory, addTravelEngagementTime,
     completeTrip, extendTrip, resetTrip, setIsStreaming, isStreaming, updateCompanionSliders,
+    setDepartureImage,
   } = store
 
   const trip = activeTripId ? travelTrips[activeTripId] : null
@@ -108,6 +110,7 @@ export function TravelReaderPage() {
 
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
     if (trip?.phase === 'complete') return 'complete'
+    if (trip?.phase === 'planning' && trip.planningChatHistory.length === 0) return 'departure'
     return 'chat'
   })
   const [input, setInput] = useState('')
@@ -216,6 +219,7 @@ export function TravelReaderPage() {
   // Generate opening message when entering chat
   useEffect(() => {
     if (!trip || !companion || !destination) return
+    if (viewMode === 'departure') return
     const isPlanning = trip.phase === 'planning'
     const messages = isPlanning ? trip.planningChatHistory : (trip.dayChatHistories[trip.currentDay] ?? [])
     if (messages.length > 0) return
@@ -249,7 +253,7 @@ export function TravelReaderPage() {
       if (result.suggestions) setSuggestions(result.suggestions)
     })()
     return () => { cancelled = true }
-  }, [trip?.phase, trip?.currentDay, trip?.currentSceneIndex])
+  }, [trip?.phase, trip?.currentDay, trip?.currentSceneIndex, viewMode])
 
   function getCurrentScene(): TripScene | null {
     if (!trip) return null
@@ -1012,6 +1016,24 @@ export function TravelReaderPage() {
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto">
           <AnimatePresence mode="wait">
+            {/* Departure Screen */}
+            {viewMode === 'departure' && (
+              <DepartureScreen
+                key="departure"
+                cityName={destination.city}
+                countryEmoji={destination.countryEmoji}
+                companionName={companionName}
+                companionPortrait={companionPortrait}
+                companionDescription={companion.character.portraitPrompt}
+                twinSelfieUrl={activeChar?.selfieUrl}
+                twinGender={activeChar?.gender ?? 'male'}
+                heroImage={destination.heroImage}
+                existingImageUrl={trip.departureImageUrl}
+                onImageGenerated={(url) => setDepartureImage(url)}
+                onContinue={() => setViewMode('chat')}
+              />
+            )}
+
             {/* Transition Screen */}
             {viewMode === 'transition' && (
               <motion.div

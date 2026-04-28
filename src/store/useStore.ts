@@ -104,6 +104,7 @@ export interface TripProgress {
   startedAt: number
   totalEngagementMs: number
   extensions?: number
+  departureImageUrl?: string
 }
 
 export interface CustomCompanion {
@@ -274,6 +275,7 @@ interface StoreState {
   updateTravelAffinity: (delta: number) => void
   addCompanionMemory: (memory: string) => void
   addTravelEngagementTime: (ms: number) => void
+  setDepartureImage: (url: string) => void
   completeTrip: () => void
   extendTrip: () => void
   resetTrip: () => void
@@ -872,6 +874,17 @@ export const useStore = create<StoreState>()(
           travelTrips: {
             ...s.travelTrips,
             [id]: { ...trip, totalEngagementMs: trip.totalEngagementMs + ms },
+          },
+        }
+      }),
+
+      setDepartureImage: (url) => set((s) => {
+        const id = s.activeTripId
+        if (!id || !s.travelTrips[id]) return {}
+        return {
+          travelTrips: {
+            ...s.travelTrips,
+            [id]: { ...s.travelTrips[id], departureImageUrl: url },
           },
         }
       }),
