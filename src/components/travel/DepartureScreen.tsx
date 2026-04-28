@@ -53,9 +53,12 @@ export function DepartureScreen({
     if (existingImageUrl || generating.current) return
     generating.current = true
 
-    const playerDesc = twinGender === 'female' ? 'a young woman with a backpack' : 'a young man with a backpack'
-    const companionShort = companionDescription.split(',').slice(0, 3).join(',')
-    const prompt = `${playerDesc} and ${companionShort} standing together at a bright airport terminal window, golden hour sunlight streaming in, a plane visible on the tarmac outside. Both smiling and excited, ready for their trip to ${cityName}. Warm cinematic lighting, shallow depth of field, travel photography style`
+    const playerDesc = twinGender === 'female' ? 'a young woman' : 'a young man'
+    const companionAppearance = companionDescription
+      .replace(/^Anime style portrait of /i, '')
+      .replace(/,\s*(soft|clean|high quality|detailed|K-drama|energetic|studio)[^,]*/gi, '')
+      .split(',').slice(0, 5).join(',')
+    const prompt = `Two close friends with backpacks at an airport gate window, a plane on the tarmac outside. On the left: ${playerDesc}. On the right: ${companionAppearance}. Both smiling, excited to travel. Warm golden hour light through large windows, no text, no signs, no departure boards. Destination: ${cityName}`
 
     generateSceneImage({
       prompt,

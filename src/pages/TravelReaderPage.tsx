@@ -1076,7 +1076,7 @@ export function TravelReaderPage() {
                 countryEmoji={destination.countryEmoji}
                 companionName={companionName}
                 companionPortrait={companionPortrait}
-                companionDescription={companionVisualDesc}
+                companionDescription={companion?.character.portraitPrompt ?? companionVisualDesc}
                 twinSelfieUrl={activeChar?.selfieUrl}
                 twinGender={activeChar?.gender ?? 'male'}
                 heroImage={destination.heroImage}
