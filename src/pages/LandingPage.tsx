@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { motion } from 'framer-motion'
@@ -153,6 +153,7 @@ function DestinationCarousel({ onCardClick }: { onCardClick?: (dest: typeof ALL_
 function MobileDestinationCarousel({ onCardClick }: { onCardClick?: (dest: typeof ALL_DESTINATIONS[number]) => void }) {
   const allDests = [...ALL_DESTINATIONS].sort((a, b) => Number(a.locked ?? false) - Number(b.locked ?? false))
   const scrollRef = useRef<HTMLDivElement>(null)
+  const pausedRef = useRef(false)
   const cardWidth = 240
   const gap = 12
 
@@ -160,6 +161,33 @@ function MobileDestinationCarousel({ onCardClick }: { onCardClick?: (dest: typeo
     if (!scrollRef.current) return
     const amount = cardWidth + gap
     scrollRef.current.scrollBy({ left: dir === 'right' ? amount : -amount, behavior: 'smooth' })
+  }, [])
+
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+
+    const iv = setInterval(() => {
+      if (pausedRef.current) return
+      const maxScroll = el.scrollWidth - el.clientWidth
+      if (el.scrollLeft >= maxScroll - 2) {
+        el.scrollTo({ left: 0, behavior: 'smooth' })
+      } else {
+        el.scrollBy({ left: cardWidth + gap, behavior: 'smooth' })
+      }
+    }, 3000)
+
+    const pause = () => { pausedRef.current = true }
+    const resume = () => { setTimeout(() => { pausedRef.current = false }, 4000) }
+
+    el.addEventListener('touchstart', pause, { passive: true })
+    el.addEventListener('touchend', resume, { passive: true })
+
+    return () => {
+      clearInterval(iv)
+      el.removeEventListener('touchstart', pause)
+      el.removeEventListener('touchend', resume)
+    }
   }, [])
 
   return (
@@ -203,14 +231,14 @@ function MobileDestinationCarousel({ onCardClick }: { onCardClick?: (dest: typeo
         ))}
       </div>
       <button
-        onClick={() => scroll('left')}
+        onClick={() => { pausedRef.current = true; scroll('left'); setTimeout(() => { pausedRef.current = false }, 4000) }}
         className="absolute left-1 top-[60px] z-10 w-8 h-8 rounded-full flex items-center justify-center"
         style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
       >
         <ChevronLeft size={18} className="text-white/80" />
       </button>
       <button
-        onClick={() => scroll('right')}
+        onClick={() => { pausedRef.current = true; scroll('right'); setTimeout(() => { pausedRef.current = false }, 4000) }}
         className="absolute right-1 top-[60px] z-10 w-8 h-8 rounded-full flex items-center justify-center"
         style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
       >
