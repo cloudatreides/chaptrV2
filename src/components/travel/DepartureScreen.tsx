@@ -53,16 +53,15 @@ export function DepartureScreen({
     if (existingImageUrl || generating.current) return
     generating.current = true
 
-    const playerDesc = twinGender === 'female' ? 'a young woman' : 'a young man'
-    const companionShort = companionDescription.split(',').slice(0, 5).join(',')
-    const prompt = `Two friends at an airport departure gate, excited to travel together. ${playerDesc} and ${companionShort}, both standing by the window with a plane visible on the tarmac behind them. They are smiling, carrying backpacks, ready for adventure. Airport terminal with warm morning light streaming through large windows, departure boards in the background. Destination: ${cityName}`
+    const playerDesc = twinGender === 'female' ? 'a young woman with a backpack' : 'a young man with a backpack'
+    const companionShort = companionDescription.split(',').slice(0, 3).join(',')
+    const prompt = `${playerDesc} and ${companionShort} standing together at a bright airport terminal window, golden hour sunlight streaming in, a plane visible on the tarmac outside. Both smiling and excited, ready for their trip to ${cityName}. Warm cinematic lighting, shallow depth of field, travel photography style`
 
     generateSceneImage({
       prompt,
       width: 768,
       height: 576,
-      referenceImageUrl: twinSelfieUrl || undefined,
-      includesProtagonist: true,
+      includesProtagonist: false,
       protagonistGender: twinGender,
     }).then((url) => {
       if (url) onImageGenerated(url)
@@ -75,7 +74,7 @@ export function DepartureScreen({
     if (beat < BEATS.length) {
       if (beat > 0) ambientAudio.playSfx('beat-tick')
       if (beat === 2) ambientAudio.playSfx('whoosh')
-      const t = setTimeout(() => setBeat((b) => b + 1), 1800)
+      const t = setTimeout(() => setBeat((b) => b + 1), 1400)
       return () => clearTimeout(t)
     }
     ambientAudio.playSfx('arrival-chime')
