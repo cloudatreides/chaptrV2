@@ -314,11 +314,11 @@ VIBE:
     vibeTags: ['Night Markets', 'Hot Springs', 'Bubble Tea'],
     heroImage: '/dest-taipei.png',
     heroImages: [
-      'https://images.unsplash.com/photo-1690966391381-6ad0b9551c3b?w=800&q=80',
+      'https://images.unsplash.com/photo-1470004914212-05527e49370b?w=800&q=80',
       'https://images.unsplash.com/photo-1588420722689-b41b2adaa3b0?w=800&q=80',
       'https://images.unsplash.com/photo-1635177686461-9323c98bed89?w=800&q=80',
       'https://images.unsplash.com/photo-1590598627400-35df15daf7d0?w=800&q=80',
-      'https://images.unsplash.com/photo-1470004914212-05527e49370b?w=800&q=80',
+      'https://images.unsplash.com/photo-1690966391381-6ad0b9551c3b?w=800&q=80',
     ],
     tripDays: 5,
     description: 'Night markets, mountain trails, and the friendliest city in Asia.',
