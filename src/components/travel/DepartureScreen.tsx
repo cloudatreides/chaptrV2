@@ -55,14 +55,18 @@ export function DepartureScreen({
     if (existingImageUrl || generating.current) return
     generating.current = true
 
-    const highlightHint = highlights?.length ? `, featuring ${highlights[0].toLowerCase()}` : ''
-    const prompt = `Cinematic wide shot of ${cityName} skyline at golden hour, seen through an airport terminal window. A plane on the tarmac ready for departure. Warm sunlight streaming through large glass windows, beautiful destination awaiting${highlightHint}. Travel photography, atmospheric, no people, no text, no signs`
+    const hasBothRefs = !!(twinSelfieUrl && companionPortrait)
+    const prompt = hasBothRefs
+      ? `Two friends at an airport gate, excited to travel to ${cityName}. They stand side by side with backpacks, a plane visible through the window behind them. Warm golden hour light streaming through large terminal windows, no text, no signs, no departure boards`
+      : `Cinematic wide shot of ${cityName} skyline at golden hour, seen through an airport terminal window. A plane on the tarmac ready for departure. Warm sunlight, atmospheric, no people, no text, no signs`
 
     generateSceneImage({
       prompt,
       width: 768,
       height: 576,
-      includesProtagonist: false,
+      referenceImageUrl: twinSelfieUrl || undefined,
+      companionReferenceUrl: companionPortrait || undefined,
+      includesProtagonist: hasBothRefs,
       protagonistGender: twinGender,
     }).then((url) => {
       if (url) onImageGenerated(url)
