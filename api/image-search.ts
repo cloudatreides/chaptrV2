@@ -23,7 +23,7 @@ export default async function handler(req: Request) {
     })
   }
 
-  // Try Google Custom Search if configured (100 free/day, better results)
+  // Try Google Custom Search if configured (100 free/day, best results)
   const googleKey = process.env.GOOGLE_CSE_API_KEY
   const googleCx = process.env.GOOGLE_CSE_CX
   if (googleKey && googleCx) {
@@ -31,16 +31,19 @@ export default async function handler(req: Request) {
       const result = await googleImageSearch(query, googleKey, googleCx)
       if (result) return jsonResponse(result)
     } catch {
-      // Fall through to Wikipedia
+      // Fall through to Unsplash
     }
   }
 
-  // Fallback: Wikipedia (free, no key, decent landmark coverage)
-  try {
-    const result = await wikipediaImageSearch(query)
-    if (result) return jsonResponse(result)
-  } catch {
-    // No result
+  // Fallback: Unsplash (free tier, 50 req/hr, high-quality photos)
+  const unsplashKey = process.env.UNSPLASH_ACCESS_KEY
+  if (unsplashKey) {
+    try {
+      const result = await unsplashSearch(query, unsplashKey)
+      if (result) return jsonResponse(result)
+    } catch {
+      // No result
+    }
   }
 
   return jsonResponse(null)
@@ -50,7 +53,7 @@ interface ImageResult {
   url: string
   thumb: string
   title: string
-  source: 'google' | 'wikipedia'
+  source: 'google' | 'unsplash'
 }
 
 function jsonResponse(data: ImageResult | null) {
@@ -89,56 +92,27 @@ async function googleImageSearch(query: string, apiKey: string, cx: string): Pro
   }
 }
 
-async function wikipediaImageSearch(query: string): Promise<ImageResult | null> {
-  // Search for the Wikipedia page
-  const searchParams = new URLSearchParams({
-    action: 'query',
-    format: 'json',
-    list: 'search',
-    srsearch: query,
-    srlimit: '3',
-    origin: '*',
+async function unsplashSearch(query: string, accessKey: string): Promise<ImageResult | null> {
+  const params = new URLSearchParams({
+    query,
+    per_page: '1',
+    orientation: 'landscape',
+    content_filter: 'high',
   })
 
-  const searchResp = await fetch(`https://en.wikipedia.org/w/api.php?${searchParams}`)
-  if (!searchResp.ok) return null
+  const resp = await fetch(`https://api.unsplash.com/search/photos?${params}`, {
+    headers: { Authorization: `Client-ID ${accessKey}` },
+  })
+  if (!resp.ok) return null
 
-  const searchData = await searchResp.json()
-  const pages = searchData.query?.search
-  if (!pages || pages.length === 0) return null
+  const data = await resp.json()
+  const photo = data.results?.[0]
+  if (!photo) return null
 
-  // Try each result until we find one with an image
-  for (const page of pages) {
-    const imageParams = new URLSearchParams({
-      action: 'query',
-      format: 'json',
-      titles: page.title,
-      prop: 'pageimages',
-      pithumbsize: '800',
-      origin: '*',
-    })
-
-    const imageResp = await fetch(`https://en.wikipedia.org/w/api.php?${imageParams}`)
-    if (!imageResp.ok) continue
-
-    const imageData = await imageResp.json()
-    const pageData = Object.values(imageData.query?.pages ?? {})[0] as any
-    const thumbSrc = pageData?.thumbnail?.source
-    const pageImg = pageData?.pageimage ?? ''
-    if (thumbSrc && !isLogoOrIcon(pageImg)) {
-      return {
-        url: thumbSrc,
-        thumb: thumbSrc,
-        title: pageData.title ?? query,
-        source: 'wikipedia',
-      }
-    }
+  return {
+    url: photo.urls?.regular ?? photo.urls?.full,
+    thumb: photo.urls?.small ?? photo.urls?.thumb,
+    title: photo.alt_description ?? photo.description ?? query,
+    source: 'unsplash',
   }
-
-  return null
-}
-
-function isLogoOrIcon(filename: string): boolean {
-  const lower = filename.toLowerCase()
-  return /logo|icon|symbol|emblem|seal|coat.of.arms|flag.of|\.svg/i.test(lower)
 }
