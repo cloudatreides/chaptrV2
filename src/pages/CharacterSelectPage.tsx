@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft, Pencil, Plus, Trash2, User } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { SelfieImg } from '../components/SelfieImg'
@@ -13,14 +14,20 @@ export function CharacterSelectPage() {
   const activeCharacterId = useStore((s) => s.activeCharacterId)
   const setActiveCharacter = useStore((s) => s.setActiveCharacter)
   const deleteCharacter = useStore((s) => s.deleteCharacter)
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
 
   const handleSetActive = (charId: string) => {
     setActiveCharacter(charId)
   }
 
-  const handleDelete = (e: React.MouseEvent, charId: string) => {
+  const handleDeleteClick = (e: React.MouseEvent, charId: string) => {
     e.stopPropagation()
-    deleteCharacter(charId)
+    setDeleteTarget(charId)
+  }
+
+  const confirmDelete = () => {
+    if (deleteTarget) deleteCharacter(deleteTarget)
+    setDeleteTarget(null)
   }
 
   return (
@@ -113,7 +120,7 @@ export function CharacterSelectPage() {
                     </button>
                   )}
                   <button
-                    onClick={(e) => handleDelete(e, char.id)}
+                    onClick={(e) => handleDeleteClick(e, char.id)}
                     className="cursor-pointer text-textMuted hover:text-red-400 transition-colors p-1.5 rounded-lg hover:bg-white/5"
                   >
                     <Trash2 size={14} />
@@ -141,6 +148,48 @@ export function CharacterSelectPage() {
           )}
         </div>
       </div>
+
+      {/* Delete confirmation modal */}
+      <AnimatePresence>
+        {deleteTarget && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center px-5"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="absolute inset-0 bg-black/60" onClick={() => setDeleteTarget(null)} />
+            <motion.div
+              className="relative w-full max-w-[340px] rounded-2xl p-6 text-center"
+              style={{ background: '#1a1525', border: '1px solid #2a2040' }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+            >
+              <p className="text-textPrimary font-semibold text-lg mb-1" style={{ fontFamily: SG }}>Delete twin?</p>
+              <p className="text-textSecondary text-sm mb-6">
+                This will permanently remove <span className="text-textPrimary font-medium">{characters.find((c) => c.id === deleteTarget)?.name}</span> and all their data.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setDeleteTarget(null)}
+                  className="cursor-pointer flex-1 py-2.5 rounded-xl text-sm font-medium text-textSecondary transition-colors hover:text-textPrimary"
+                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid #2a2040' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  className="cursor-pointer flex-1 py-2.5 rounded-xl text-sm font-medium text-white transition-colors hover:brightness-110"
+                  style={{ background: '#dc2626' }}
+                >
+                  Delete
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
