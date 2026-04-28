@@ -269,7 +269,7 @@ export function CreateCharacterPage() {
                 }}
                 onClick={() => setGender(g)}
               >
-                {g === 'male' ? '♂ Male' : '♀ Female'}
+                {g === 'male' ? 'Male' : 'Female'}
               </button>
             ))}
           </div>
