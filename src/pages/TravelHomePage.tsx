@@ -73,7 +73,7 @@ export function TravelHomePage() {
     controls.autoRotateSpeed = 0.6
     controls.enableZoom = false
     globeRef.current.pointOfView({ lat: 30, lng: 120, altitude: 2.2 }, 0)
-    startWind(0.08, 2000)
+    startWind(0.2, 2000)
     return () => stopWind(500)
   }, [globeReady])
 
@@ -241,7 +241,7 @@ export function TravelHomePage() {
   const handleDeselect = useCallback(() => {
     setSelectedDest(null)
     playSfx('/audio/whoosh.wav', 0.1)
-    startWind(0.08, 1500)
+    startWind(0.2, 1500)
     if (globeRef.current) {
       const controls = globeRef.current.controls()
       controls.autoRotate = true
