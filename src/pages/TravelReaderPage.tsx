@@ -1362,7 +1362,7 @@ export function TravelReaderPage() {
                             if (msg.role === 'user') {
                               return (
                                 <div key={i} className="flex justify-end">
-                                  <div className="max-w-[80%] rounded-2xl px-4 py-2.5" style={{ background: '#7C3AED', borderBottomRightRadius: 4 }}>
+                                  <div className="max-w-[80%] rounded-2xl px-4 py-2.5 break-words" style={{ background: '#7C3AED', borderBottomRightRadius: 4 }}>
                                     <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{msg.content}</p>
                                   </div>
                                 </div>
@@ -1380,7 +1380,7 @@ export function TravelReaderPage() {
                                 {segments.map((seg, j) =>
                                   seg.type === 'action' ? <ActionBeat key={j} text={seg.text} /> : (
                                     <div key={j} className="flex justify-start">
-                                      <div className="max-w-[80%] rounded-2xl px-4 py-2.5" style={{ background: 'rgba(255,255,255,0.06)', borderBottomLeftRadius: 4 }}>
+                                      <div className="max-w-[80%] rounded-2xl px-4 py-2.5 break-words" style={{ background: 'rgba(255,255,255,0.06)', borderBottomLeftRadius: 4 }}>
                                         <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{seg.text}</p>
                                       </div>
                                     </div>
@@ -1547,7 +1547,7 @@ export function TravelReaderPage() {
                     if (msg.role === 'user') {
                       return (
                         <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex justify-end">
-                          <div className="max-w-[80%] rounded-2xl px-4 py-2.5" style={{ background: '#7C3AED', borderBottomRightRadius: 4 }}>
+                          <div className="max-w-[80%] rounded-2xl px-4 py-2.5 break-words" style={{ background: '#7C3AED', borderBottomRightRadius: 4 }}>
                             <p className="text-[14px] leading-relaxed whitespace-pre-wrap text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                               {msg.content}
                             </p>
@@ -1576,7 +1576,7 @@ export function TravelReaderPage() {
                           <ActionBeat key={j} text={seg.text} />
                         ) : (
                           <div key={j} className="flex justify-start">
-                            <div className="max-w-[80%] rounded-2xl px-4 py-2.5" style={{ background: 'rgba(255,255,255,0.06)', borderBottomLeftRadius: 4 }}>
+                            <div className="max-w-[80%] rounded-2xl px-4 py-2.5 break-words" style={{ background: 'rgba(255,255,255,0.06)', borderBottomLeftRadius: 4 }}>
                               <p className="text-[14px] leading-relaxed whitespace-pre-wrap text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                                 {seg.text}
                               </p>
@@ -1603,7 +1603,7 @@ export function TravelReaderPage() {
                           <ActionBeat key={j} text={seg.text} />
                         ) : (
                           <div key={j} className="flex justify-start">
-                            <div className="max-w-[80%] rounded-2xl px-4 py-2.5" style={{ background: 'rgba(255,255,255,0.06)', borderBottomLeftRadius: 4 }}>
+                            <div className="max-w-[80%] rounded-2xl px-4 py-2.5 break-words" style={{ background: 'rgba(255,255,255,0.06)', borderBottomLeftRadius: 4 }}>
                               <p className="text-[14px] leading-relaxed text-white whitespace-pre-wrap" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                                 {seg.text}
                               </p>
@@ -1631,7 +1631,7 @@ export function TravelReaderPage() {
 
         {/* Bottom Controls */}
         {viewMode === 'chat' && (
-          <div className="shrink-0 px-5 md:px-[60px] pb-5 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="shrink-0 px-5 md:px-[60px] pb-5 pt-3 safe-bottom" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
             {/* Inline phase actions — compact, non-intrusive (no planning CTA here — sidebar only) */}
             {!isStreaming && trip.phase === 'day' && currentScene && !currentScene.prose && (
               <button

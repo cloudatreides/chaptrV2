@@ -294,7 +294,7 @@ export function CastPage() {
         <AnimatePresence>
           {selectMode && selectedIds.length >= 2 && (
             <motion.div
-              className="fixed bottom-6 left-5 right-5 z-40"
+              className="fixed bottom-24 left-5 right-5 z-40"
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
             >
               <button

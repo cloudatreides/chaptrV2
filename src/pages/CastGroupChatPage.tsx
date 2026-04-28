@@ -438,7 +438,7 @@ export function CastGroupChatPage() {
                 </div>
               ) : (
                 <div
-                  className="px-3.5 py-2.5 text-[13px] leading-relaxed"
+                  className="px-3.5 py-2.5 text-[13px] leading-relaxed break-words"
                   style={{
                     background: msg.role === 'user'
                       ? 'linear-gradient(135deg, rgba(200,75,158,0.25), rgba(139,92,246,0.25))'
@@ -492,7 +492,7 @@ export function CastGroupChatPage() {
       <div className="md:hidden flex flex-col min-h-screen min-h-dvh">
         {/* Header */}
         <div className="shrink-0">
-          <div className="flex items-center justify-between px-5 pt-14 pb-3">
+          <div className="flex items-center justify-between px-5 pt-14 pb-3 safe-top">
             <button onClick={() => navigate('/cast')} className="cursor-pointer flex items-center gap-2 text-white/50 text-sm">
               <ArrowLeft size={20} className="text-white" /> Cast
             </button>
