@@ -440,7 +440,6 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
   const navigate = useNavigate()
   const travelTrips = useStore((s) => s.travelTrips)
   const storyProgress = useStore((s) => s.storyProgress)
-  const storyMoments = useStore((s) => s.storyMoments)
   const setActiveTripId = useStore((s) => s.setActiveTripId)
 
   const hasAny = stats.tripsCompleted > 0 || stats.storiesStarted > 0
@@ -449,11 +448,6 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
   const completedTrips = Object.entries(travelTrips)
     .filter(([, t]) => t.phase === 'complete' || (t.extensions ?? 0) > 0)
     .sort(([, a], [, b]) => b.startedAt - a.startedAt)
-
-  const completedDestinations = completedTrips.map(([, t]) => {
-    const dest = getDestination(t.destinationId)
-    return dest ? { emoji: dest.countryEmoji, city: dest.city } : null
-  }).filter(Boolean) as { emoji: string; city: string }[]
 
   const activeStories = Object.entries(storyProgress)
     .filter(([, p]) => p.currentStepIndex > 0)
@@ -464,16 +458,6 @@ function JourneyStats({ stats }: { stats: { tripsCompleted: number; storiesStart
       return { key, universeId, progress: p, universe, total }
     })
     .filter((s) => s.universe)
-
-  const latestStory = activeStories[0]
-  const latestStoryPct = latestStory ? Math.round((latestStory.progress.currentStepIndex / latestStory.total) * 100) : 0
-  // TODO: REMOVE MOCK DATA — visual testing
-  const latestStoryTitle = latestStory?.universe?.title || 'Seoul Transfer'
-  const latestStoryProgress = latestStoryPct || 64
-
-  const recentMoments = storyMoments.length > 0
-    ? storyMoments.slice(-3).map((m) => m.beatLabel)
-    : ['Shibuya — Day 2', 'Kyoto — Day 4', 'Night Market']
 
   return (
     <>
