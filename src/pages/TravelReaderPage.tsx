@@ -1355,6 +1355,28 @@ export function TravelReaderPage() {
                   </div>
                 )}
 
+                {/* Departure image */}
+                {trip.phase === 'planning' && trip.departureImageUrl && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-5 rounded-2xl overflow-hidden"
+                    style={{ border: '1px solid rgba(124,58,237,0.15)' }}
+                  >
+                    <img
+                      src={trip.departureImageUrl}
+                      alt=""
+                      className="w-full"
+                      style={{ aspectRatio: '4/3', objectFit: 'cover' }}
+                    />
+                    <div className="px-4 py-3" style={{ background: 'rgba(124,58,237,0.06)' }}>
+                      <p className="text-white/50 text-xs" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                        You and {companionName} just landed in {destination.city} {destination.countryEmoji}
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+
                 {/* Messages */}
                 <div className="space-y-4">
                   {messages.map((msg, i) => {
