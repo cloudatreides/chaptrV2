@@ -47,6 +47,7 @@ export function TravelHomePage() {
   const setActiveTripId = useStore((s) => s.setActiveTripId)
   const deleteTrip = useStore((s) => s.deleteTrip)
   const [tripMenuOpen, setTripMenuOpen] = useState<string | null>(null)
+  const [showAllTrips, setShowAllTrips] = useState(false)
 
   const activeTrips = activeCharacterId
     ? Object.entries(travelTrips).filter(([key, trip]) => key.startsWith(`${activeCharacterId}:`) && trip.phase !== 'complete')
@@ -268,7 +269,7 @@ export function TravelHomePage() {
               <p className="text-white/40 text-[10px] font-semibold tracking-[1.5px] uppercase mb-1" style={{ fontFamily: SG }}>
                 {activeTrips.length === 1 ? 'Continue your trip' : `${activeTrips.length} trips in progress`}
               </p>
-              {activeTrips.map(([tripId, trip]) => {
+              {(showAllTrips ? activeTrips : activeTrips.slice(0, 2)).map(([tripId, trip]) => {
                 const dest = DESTINATIONS.find((d) => d.id === trip.destinationId)
                 const phaseLabel = trip.phase === 'planning' ? 'Planning' : trip.phase === 'recap' ? 'Recap' : 'Exploring'
                 return (
@@ -321,6 +322,15 @@ export function TravelHomePage() {
                   </div>
                 )
               })}
+              {activeTrips.length > 2 && (
+                <button
+                  onClick={() => setShowAllTrips(!showAllTrips)}
+                  className="text-[11px] font-medium cursor-pointer transition-colors hover:text-white/60 mt-0.5"
+                  style={{ color: '#A78BFA', fontFamily: SG }}
+                >
+                  {showAllTrips ? 'Show less' : `Show all ${activeTrips.length} trips`}
+                </button>
+              )}
             </motion.div>
           )}
 
