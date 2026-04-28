@@ -31,46 +31,55 @@ export async function playSfx(src: string, volume = 0.5) {
   }
 }
 
-let windNode: AudioBufferSourceNode | null = null
-let windGain: GainNode | null = null
+let spaceNodes: OscillatorNode[] = []
+let spaceGain: GainNode | null = null
 
-export function startWind(volume = 0.04, fadeMs = 1500) {
+export function startWind(volume = 0.08, fadeMs = 1500) {
   try {
     const c = getCtx()
     if (c.state === 'suspended') c.resume()
-    if (windNode) return
-
-    const sampleRate = c.sampleRate
-    const duration = 4
-    const len = sampleRate * duration
-    const buf = c.createBuffer(1, len, sampleRate)
-    const data = buf.getChannelData(0)
-    for (let i = 0; i < len; i++) {
-      data[i] = (Math.random() * 2 - 1) * 0.5
-    }
-
-    const source = c.createBufferSource()
-    source.buffer = buf
-    source.loop = true
-
-    const lp = c.createBiquadFilter()
-    lp.type = 'lowpass'
-    lp.frequency.value = 400
-    lp.Q.value = 0.5
-
-    const hp = c.createBiquadFilter()
-    hp.type = 'highpass'
-    hp.frequency.value = 80
+    if (spaceNodes.length) return
 
     const gain = c.createGain()
     gain.gain.setValueAtTime(0, c.currentTime)
     gain.gain.linearRampToValueAtTime(volume, c.currentTime + fadeMs / 1000)
+    gain.connect(c.destination)
 
-    source.connect(lp).connect(hp).connect(gain).connect(c.destination)
-    source.start()
+    const tones = [
+      { freq: 55, type: 'sine' as OscillatorType, vol: 0.4 },
+      { freq: 82.5, type: 'sine' as OscillatorType, vol: 0.25 },
+      { freq: 110, type: 'sine' as OscillatorType, vol: 0.15 },
+      { freq: 165, type: 'triangle' as OscillatorType, vol: 0.08 },
+    ]
 
-    windNode = source
-    windGain = gain
+    for (const t of tones) {
+      const osc = c.createOscillator()
+      osc.type = t.type
+      osc.frequency.value = t.freq
+
+      const lfo = c.createOscillator()
+      lfo.type = 'sine'
+      lfo.frequency.value = 0.05 + Math.random() * 0.1
+      const lfoGain = c.createGain()
+      lfoGain.gain.value = t.freq * 0.008
+      lfo.connect(lfoGain).connect(osc.frequency)
+      lfo.start()
+
+      const oscGain = c.createGain()
+      oscGain.gain.value = t.vol
+
+      const lp = c.createBiquadFilter()
+      lp.type = 'lowpass'
+      lp.frequency.value = 300
+      lp.Q.value = 0.7
+
+      osc.connect(oscGain).connect(lp).connect(gain)
+      osc.start()
+
+      spaceNodes.push(osc, lfo)
+    }
+
+    spaceGain = gain
   } catch {
     // silent fail
   }
@@ -78,13 +87,13 @@ export function startWind(volume = 0.04, fadeMs = 1500) {
 
 export function stopWind(fadeMs = 1200) {
   try {
-    if (!windGain || !windNode) return
+    if (!spaceGain || !spaceNodes.length) return
     const c = getCtx()
-    windGain.gain.linearRampToValueAtTime(0, c.currentTime + fadeMs / 1000)
-    const node = windNode
-    setTimeout(() => { try { node.stop() } catch {} }, fadeMs + 100)
-    windNode = null
-    windGain = null
+    spaceGain.gain.linearRampToValueAtTime(0, c.currentTime + fadeMs / 1000)
+    const nodes = [...spaceNodes]
+    setTimeout(() => { nodes.forEach(n => { try { n.stop() } catch {} }) }, fadeMs + 100)
+    spaceNodes = []
+    spaceGain = null
   } catch {
     // silent fail
   }
