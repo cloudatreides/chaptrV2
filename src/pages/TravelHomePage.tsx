@@ -274,9 +274,20 @@ export function TravelHomePage() {
           {/* Active Trips */}
           {activeTrips.length > 0 && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 flex flex-col gap-2">
-              <p className="text-white/40 text-[10px] font-semibold tracking-[1.5px] uppercase mb-1" style={{ fontFamily: SG }}>
-                {activeTrips.length === 1 ? 'Continue your trip' : `${activeTrips.length} trips in progress`}
-              </p>
+              {activeTrips.length <= 2 ? (
+                <p className="text-white/40 text-[10px] font-semibold tracking-[1.5px] uppercase mb-1" style={{ fontFamily: SG }}>
+                  {activeTrips.length === 1 ? 'Continue your trip' : `${activeTrips.length} trips in progress`}
+                </p>
+              ) : (
+                <button
+                  onClick={() => setShowAllTrips(!showAllTrips)}
+                  className="flex items-center gap-1.5 text-white/40 text-[10px] font-semibold tracking-[1.5px] uppercase mb-1 cursor-pointer hover:text-white/60 transition-colors"
+                  style={{ fontFamily: SG }}
+                >
+                  {activeTrips.length} trips in progress
+                  <ChevronRight size={12} className={`transition-transform ${showAllTrips ? 'rotate-90' : ''}`} />
+                </button>
+              )}
               {(showAllTrips ? activeTrips : activeTrips.slice(0, 2)).map(([tripId, trip]) => {
                 const dest = DESTINATIONS.find((d) => d.id === trip.destinationId)
                 const phaseLabel = trip.phase === 'planning' ? 'Planning' : trip.phase === 'recap' ? 'Recap' : 'Exploring'
@@ -330,15 +341,6 @@ export function TravelHomePage() {
                   </div>
                 )
               })}
-              {activeTrips.length > 2 && (
-                <button
-                  onClick={() => setShowAllTrips(!showAllTrips)}
-                  className="w-full text-center text-[11px] font-medium cursor-pointer transition-colors hover:text-white/60 mt-1 py-1.5"
-                  style={{ color: '#A78BFA', fontFamily: SG }}
-                >
-                  {showAllTrips ? 'Show less' : `Show all ${activeTrips.length} trips`}
-                </button>
-              )}
             </motion.div>
           )}
 
