@@ -211,7 +211,7 @@ export function AlbumPage() {
 
   const content = (
     <div className="flex-1 overflow-y-auto">
-      <div className="px-5 md:px-8 py-8 md:py-10 max-w-[800px]">
+      <div className="px-5 md:px-8 py-8 md:py-10 pb-24 md:pb-10 max-w-[800px]">
         {/* Mobile back */}
         <button
           onClick={() => navigate('/home')}

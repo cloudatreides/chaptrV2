@@ -238,7 +238,7 @@ export function TravelCityPage() {
     <div className="flex h-dvh" style={{ background: '#0A0810' }}>
       <AppSidebar />
       <div className="flex-1 overflow-y-auto">
-        <div className="page-container px-5 md:px-[60px] py-8 md:py-12">
+        <div className="page-container px-5 md:px-[60px] py-8 md:py-12 pb-24 md:pb-12">
           {/* Back */}
           <button
             onClick={() => navigate('/travel')}

@@ -171,7 +171,7 @@ export function CastPage() {
         )}
         <div className="w-full h-px bg-white/5" />
 
-        <div className="flex-1 overflow-y-auto px-5 py-5 flex flex-col gap-5">
+        <div className="flex-1 overflow-y-auto px-5 py-5 pb-24 flex flex-col gap-5">
           {/* Unlocked */}
           <div>
             <div className="flex items-center justify-between mb-3">

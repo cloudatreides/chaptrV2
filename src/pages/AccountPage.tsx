@@ -78,7 +78,7 @@ export function AccountPage() {
 
   const content = (
     <div className="flex-1 min-h-screen overflow-y-auto" style={{ background: '#0d0b12' }}>
-      <div className="w-full max-w-[600px] mx-auto px-5 md:px-8 py-8 md:py-12">
+      <div className="w-full max-w-[600px] mx-auto px-5 md:px-8 py-8 md:py-12 pb-24 md:pb-12">
         {/* Mobile back button */}
         <button
           onClick={() => navigate('/home')}
