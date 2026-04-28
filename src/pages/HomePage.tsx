@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, Pencil, MessageCircle, LogOut, Compass, BookOpen, ChevronRight, ChevronLeft, Camera, Sparkles, Plus, Map, X, Image } from 'lucide-react'
+import { ArrowRight, Pencil, MessageCircle, LogOut, Compass, BookOpen, ChevronRight, ChevronLeft, Camera, Sparkles, Plus, Map, X } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { UNIVERSES, GENRE_FILTERS } from '../data/storyData'
 import { useAuth } from '../contexts/AuthContext'
@@ -847,27 +847,6 @@ export function HomePage() {
           </div>
         </div>
 
-        {/* Bottom tab bar */}
-        <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden flex items-center justify-center px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]" style={{ borderTop: '1px solid rgba(255,255,255,0.04)', background: '#0D0B12' }}>
-          <div className="flex items-center gap-10">
-            <button className="cursor-pointer flex flex-col items-center gap-1">
-              <Sparkles size={20} style={{ color: '#c84b9e' }} />
-              <span className="text-[10px] font-semibold" style={{ color: '#c84b9e', fontFamily: SG }}>Home</span>
-            </button>
-            <button onClick={() => navigate('/travel')} className="cursor-pointer flex flex-col items-center gap-1">
-              <Compass size={20} style={{ color: 'rgba(255,255,255,0.3)' }} />
-              <span className="text-[10px] font-medium" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: SG }}>Travel</span>
-            </button>
-            <button onClick={() => navigate('/stories')} className="cursor-pointer flex flex-col items-center gap-1">
-              <BookOpen size={20} style={{ color: 'rgba(255,255,255,0.3)' }} />
-              <span className="text-[10px] font-medium" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: SG }}>Stories</span>
-            </button>
-            <button onClick={() => navigate('/album')} className="cursor-pointer flex flex-col items-center gap-1">
-              <Image size={20} style={{ color: 'rgba(255,255,255,0.3)' }} />
-              <span className="text-[10px] font-medium" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: SG }}>Album</span>
-            </button>
-          </div>
-        </div>
       </div>
 
       {/* ═══ DESKTOP ═══ */}
