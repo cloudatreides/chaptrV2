@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { motion } from 'framer-motion'
-import { ArrowRight, Globe, BookOpen, ChevronRight, X, MapPin, Clock, Sparkles } from 'lucide-react'
+import { ArrowRight, Globe, BookOpen, ChevronRight, ChevronLeft, X, MapPin, Clock, Sparkles } from 'lucide-react'
 import { AnimatePresence } from 'framer-motion'
 import { AuthModal } from '../components/AuthModal'
 import { UNIVERSES } from '../data/storyData'
@@ -119,7 +119,7 @@ function DestinationCarousel({ onCardClick }: { onCardClick?: (dest: typeof ALL_
             onClick={() => onCardClick?.(dest)}
           >
             <div className="relative w-full h-44 overflow-hidden">
-              <img src={dest.heroImage} alt={dest.city} className="w-full h-full object-cover" />
+              <img src={dest.heroImage} alt={dest.city} className="w-full h-full object-cover" loading="lazy" />
               <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 50%, #111016 100%)' }} />
               {dest.locked && (
                 <span
@@ -148,6 +148,78 @@ function DestinationCarousel({ onCardClick }: { onCardClick?: (dest: typeof ALL_
   )
 }
 
+// ─── Mobile Destination Carousel (manual scroll + arrows) ───
+
+function MobileDestinationCarousel({ onCardClick }: { onCardClick?: (dest: typeof ALL_DESTINATIONS[number]) => void }) {
+  const allDests = [...ALL_DESTINATIONS].sort((a, b) => Number(a.locked ?? false) - Number(b.locked ?? false))
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const cardWidth = 240
+  const gap = 12
+
+  const scroll = useCallback((dir: 'left' | 'right') => {
+    if (!scrollRef.current) return
+    const amount = cardWidth + gap
+    scrollRef.current.scrollBy({ left: dir === 'right' ? amount : -amount, behavior: 'smooth' })
+  }, [])
+
+  return (
+    <div className="relative">
+      <div
+        ref={scrollRef}
+        className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide scroll-smooth"
+        style={{ scrollSnapType: 'x mandatory' }}
+      >
+        {allDests.map((dest) => (
+          <div
+            key={dest.id}
+            className="rounded-2xl overflow-hidden shrink-0 flex flex-col cursor-pointer"
+            style={{ width: cardWidth, background: '#111016', border: '1px solid rgba(255,255,255,0.03)', scrollSnapAlign: 'start' }}
+            onClick={() => onCardClick?.(dest)}
+          >
+            <div className="relative w-full h-36 overflow-hidden">
+              <img src={dest.heroImage} alt={dest.city} className="w-full h-full object-cover" loading="lazy" />
+              <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 50%, #111016 100%)' }} />
+              {dest.locked && (
+                <span
+                  className="absolute top-2.5 right-2.5 text-[9px] font-semibold px-2 py-0.5 rounded-full"
+                  style={{ background: 'rgba(0,0,0,0.6)', color: 'rgba(255,255,255,0.5)', fontFamily: SG, backdropFilter: 'blur(4px)' }}
+                >
+                  Soon
+                </span>
+              )}
+            </div>
+            <div className="flex flex-col gap-1 p-3">
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm">{dest.countryEmoji}</span>
+                <p className="text-white font-semibold text-sm" style={{ fontFamily: SG }}>{dest.city}</p>
+              </div>
+              <div className="flex gap-1.5">
+                {dest.vibeTags.slice(0, 2).map((tag) => (
+                  <span key={tag} className="text-[10px] font-medium" style={{ color: '#A78BFA', fontFamily: SG }}>{tag}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <button
+        onClick={() => scroll('left')}
+        className="absolute left-1 top-[60px] z-10 w-8 h-8 rounded-full flex items-center justify-center"
+        style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
+      >
+        <ChevronLeft size={18} className="text-white/80" />
+      </button>
+      <button
+        onClick={() => scroll('right')}
+        className="absolute right-1 top-[60px] z-10 w-8 h-8 rounded-full flex items-center justify-center"
+        style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
+      >
+        <ChevronRight size={18} className="text-white/80" />
+      </button>
+    </div>
+  )
+}
+
 // ─── Story Card ───
 
 function StoryCard({ story, size = 'md', onClick }: { story: typeof UNIVERSES[number]; size?: 'sm' | 'md'; onClick?: (story: typeof UNIVERSES[number]) => void }) {
@@ -158,7 +230,7 @@ function StoryCard({ story, size = 'md', onClick }: { story: typeof UNIVERSES[nu
       onClick={() => onClick?.(story)}
     >
       <div className="relative w-full h-24 md:h-44 overflow-hidden">
-        <img src={story.image} alt={story.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+        <img src={story.image} alt={story.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 50%, #111016 100%)' }} />
       </div>
       <div className="flex flex-col gap-1 p-2.5 md:p-4">
@@ -502,7 +574,9 @@ export function LandingPage() {
               title="Explore the world, scene by scene"
               description="Pick a city, choose a companion, and live your dream trip scene by scene."
             />
-            <DestinationCarousel onCardClick={setPreviewDest} />
+          </div>
+          <div className="px-3">
+            <MobileDestinationCarousel onCardClick={setPreviewDest} />
           </div>
         </section>
 
