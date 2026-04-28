@@ -40,7 +40,6 @@ export function DepartureScreen({
   twinSelfieUrl,
   twinGender,
   heroImage,
-  highlights,
   onContinue,
   onImageGenerated,
   existingImageUrl,
