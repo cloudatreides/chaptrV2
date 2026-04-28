@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase, uploadImageToStorage } from './supabase'
 
 export interface GenerateSceneParams {
   prompt: string
@@ -44,6 +44,13 @@ async function cacheImage(hash: string, imageUrl: string, prompt: string): Promi
   } catch {
     // Silent fail — caching is best-effort
   }
+}
+
+async function persistImage(imageUrl: string, promptKey: string, category: 'scenes' | 'portraits'): Promise<string> {
+  if (!imageUrl || imageUrl.startsWith('data:')) return imageUrl
+  const hash = await hashPrompt(promptKey)
+  const path = `${category}/${hash}.png`
+  return uploadImageToStorage(imageUrl, path)
 }
 
 const ANIME_STYLE_SUFFIX = '. Digital anime illustration, cel-shaded, clean linework, vibrant colors. NOT a photograph, NOT photorealistic, NOT 3D render.'
@@ -184,9 +191,10 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
           const fallbackUrl = fallbackData.data?.[0]?.url
           if (fallbackUrl) {
             console.log(`[Scene Schnell fallback] generated in ${elapsed}s`)
+            const persisted = await persistImage(fallbackUrl, cacheKey, 'scenes')
             const hash = await hashPrompt(cacheKey)
-            cacheImage(hash, fallbackUrl, genderedPrompt)
-            return fallbackUrl
+            cacheImage(hash, persisted, genderedPrompt)
+            return persisted
           }
           const fb64 = fallbackData.data?.[0]?.b64_json
           if (fb64) {
@@ -211,17 +219,19 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
     }
 
     console.log(`[Scene ${model}] generated in ${elapsed}s`)
-    if (!useKontext) {
-      const hash = await hashPrompt(cacheKey)
-      cacheImage(hash, resultUrl, genderedPrompt)
-    }
 
     if (companionReferenceUrl && companionDescription && !resultUrl.startsWith('data:')) {
       const refined = await refineCompanionFace(resultUrl, companionReferenceUrl, companionDescription, width, height)
-      if (refined) return refined
+      if (refined) resultUrl = refined
     }
 
-    return resultUrl
+    const persisted = await persistImage(resultUrl, useKontext ? `${cacheKey}|${referenceImageUrl}` : cacheKey, 'scenes')
+    if (!useKontext) {
+      const hash = await hashPrompt(cacheKey)
+      cacheImage(hash, persisted, genderedPrompt)
+    }
+
+    return persisted
   } catch (e) {
     console.error(`[Scene ${model}] failed after ${((performance.now() - startTime) / 1000).toFixed(1)}s:`, e)
     return null
@@ -251,7 +261,7 @@ export async function generateCharacterPortrait(prompt: string): Promise<string 
 
     const data = await response.json()
     const url = data.data?.[0]?.url
-    if (url) return url
+    if (url) return persistImage(url, prompt, 'portraits')
     const b64 = data.data?.[0]?.b64_json
     if (b64) return `data:image/png;base64,${b64}`
     return null

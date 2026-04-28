@@ -70,6 +70,29 @@ export async function getPlaythrough(id: string): Promise<PlaythroughData & { id
 
 // ─── Selfie Storage ───
 
+export async function uploadImageToStorage(imageUrl: string, path: string): Promise<string> {
+  try {
+    if (imageUrl.startsWith('data:') || imageUrl.includes('tbrnfiixertryutrijau.supabase.co')) {
+      return imageUrl
+    }
+    const res = await fetch(imageUrl)
+    if (!res.ok) return imageUrl
+    const blob = await res.blob()
+    const { error } = await supabase.storage
+      .from('chaptr-images')
+      .upload(path, blob, { contentType: 'image/png', upsert: true })
+    if (error) {
+      console.warn('[Image persist] upload failed:', error.message)
+      return imageUrl
+    }
+    const { data } = supabase.storage.from('chaptr-images').getPublicUrl(path)
+    return data.publicUrl
+  } catch (e) {
+    console.warn('[Image persist] error:', e)
+    return imageUrl
+  }
+}
+
 /** Upload a styled selfie (data URL) to Supabase Storage and return a public URL.
  *  Used so FLUX.1 Kontext Pro receives a real URL instead of a base64 payload. */
 export async function uploadSelfieToStorage(dataUrl: string, id: string): Promise<string | null> {
