@@ -279,6 +279,7 @@ interface StoreState {
   completeTrip: () => void
   extendTrip: () => void
   resetTrip: () => void
+  deleteTrip: (tripId: string) => void
 
   // ── Custom (remixed) companions ──
   customCompanions: CustomCompanion[]
@@ -927,6 +928,12 @@ export const useStore = create<StoreState>()(
         const newTrips = { ...s.travelTrips }
         delete newTrips[id]
         return { travelTrips: newTrips, activeTripId: null }
+      }),
+
+      deleteTrip: (tripId) => set((s) => {
+        const newTrips = { ...s.travelTrips }
+        delete newTrips[tripId]
+        return { travelTrips: newTrips, activeTripId: s.activeTripId === tripId ? null : s.activeTripId }
       }),
 
       // ── Streaming (ephemeral) ──

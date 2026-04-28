@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MapPin, ChevronRight, ChevronLeft, X, Heart, Clock, Sparkles } from 'lucide-react'
+import { MapPin, ChevronRight, ChevronLeft, X, Heart, Clock, Sparkles, MoreVertical, Trash2 } from 'lucide-react'
 import { AppSidebar } from '../components/AppSidebar'
 import { useStore } from '../store/useStore'
 import { DESTINATIONS, type Destination } from '../data/travel/destinations'
@@ -45,6 +45,8 @@ export function TravelHomePage() {
   const [canScrollRight, setCanScrollRight] = useState(true)
 
   const setActiveTripId = useStore((s) => s.setActiveTripId)
+  const deleteTrip = useStore((s) => s.deleteTrip)
+  const [tripMenuOpen, setTripMenuOpen] = useState<string | null>(null)
 
   const activeTrips = activeCharacterId
     ? Object.entries(travelTrips).filter(([key, trip]) => key.startsWith(`${activeCharacterId}:`) && trip.phase !== 'complete')
@@ -270,26 +272,53 @@ export function TravelHomePage() {
                 const dest = DESTINATIONS.find((d) => d.id === trip.destinationId)
                 const phaseLabel = trip.phase === 'planning' ? 'Planning' : trip.phase === 'recap' ? 'Recap' : 'Exploring'
                 return (
-                  <button
-                    key={tripId}
-                    onClick={() => { setActiveTripId(tripId); navigate('/travel/trip') }}
-                    className="w-full max-w-lg flex items-center gap-3 px-4 py-3 rounded-xl text-left cursor-pointer transition-colors"
-                    style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.12), rgba(200,75,158,0.06))', border: '1px solid rgba(124,58,237,0.15)' }}
-                  >
-                    <span className="text-xl flex-shrink-0">{dest?.countryEmoji ?? '🌍'}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-white text-sm font-semibold truncate" style={{ fontFamily: "'Syne', sans-serif" }}>
-                        {dest?.city ?? 'Trip'} — Day {trip.currentDay}
-                      </p>
-                    </div>
-                    <span
-                      className="text-[10px] font-medium px-2 py-0.5 rounded-full flex-shrink-0"
-                      style={{ background: 'rgba(124,58,237,0.15)', color: '#A78BFA', fontFamily: SG }}
+                  <div key={tripId} className="relative w-full max-w-lg">
+                    <button
+                      onClick={() => { setActiveTripId(tripId); navigate('/travel/trip') }}
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left cursor-pointer transition-colors"
+                      style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.12), rgba(200,75,158,0.06))', border: '1px solid rgba(124,58,237,0.15)' }}
                     >
-                      {phaseLabel}
-                    </span>
-                    <ChevronRight size={14} className="text-white/30 flex-shrink-0" />
-                  </button>
+                      <span className="text-xl flex-shrink-0">{dest?.countryEmoji ?? '🌍'}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white text-sm font-semibold truncate" style={{ fontFamily: "'Syne', sans-serif" }}>
+                          {dest?.city ?? 'Trip'} — Day {trip.currentDay}
+                        </p>
+                      </div>
+                      <span
+                        className="text-[10px] font-medium px-2 py-0.5 rounded-full flex-shrink-0"
+                        style={{ background: 'rgba(124,58,237,0.15)', color: '#A78BFA', fontFamily: SG }}
+                      >
+                        {phaseLabel}
+                      </span>
+                      <div
+                        className="p-1 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0"
+                        onClick={(e) => { e.stopPropagation(); setTripMenuOpen(tripMenuOpen === tripId ? null : tripId) }}
+                      >
+                        <MoreVertical size={14} className="text-white/30" />
+                      </div>
+                    </button>
+                    <AnimatePresence>
+                      {tripMenuOpen === tripId && (
+                        <>
+                          <div className="fixed inset-0 z-40" onClick={() => setTripMenuOpen(null)} />
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="absolute right-0 top-full mt-1 z-50 rounded-lg py-1 px-1"
+                            style={{ background: '#1E1A2E', border: '1px solid rgba(255,255,255,0.08)', minWidth: 140 }}
+                          >
+                            <button
+                              onClick={() => { deleteTrip(tripId); setTripMenuOpen(null) }}
+                              className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-left text-red-400 text-xs font-medium cursor-pointer hover:bg-white/5 transition-colors"
+                            >
+                              <Trash2 size={12} /> Delete trip
+                            </button>
+                          </motion.div>
+                        </>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 )
               })}
             </motion.div>
