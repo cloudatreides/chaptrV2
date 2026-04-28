@@ -1080,6 +1080,7 @@ export function TravelReaderPage() {
                 twinSelfieUrl={activeChar?.selfieUrl}
                 twinGender={activeChar?.gender ?? 'male'}
                 heroImage={destination.heroImage}
+                highlights={destination.highlights}
                 existingImageUrl={trip.departureImageUrl}
                 onImageGenerated={(url) => setDepartureImage(url)}
                 onContinue={() => setViewMode('chat')}

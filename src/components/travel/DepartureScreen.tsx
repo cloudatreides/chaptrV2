@@ -25,6 +25,7 @@ interface DepartureScreenProps {
   twinSelfieUrl?: string | null
   twinGender: 'male' | 'female'
   heroImage?: string
+  highlights?: string[]
   onContinue: () => void
   onImageGenerated: (url: string) => void
   existingImageUrl?: string
@@ -39,6 +40,7 @@ export function DepartureScreen({
   twinSelfieUrl,
   twinGender,
   heroImage,
+  highlights,
   onContinue,
   onImageGenerated,
   existingImageUrl,
@@ -53,12 +55,8 @@ export function DepartureScreen({
     if (existingImageUrl || generating.current) return
     generating.current = true
 
-    const playerDesc = twinGender === 'female' ? 'a young woman' : 'a young man'
-    const companionAppearance = companionDescription
-      .replace(/^Anime style portrait of /i, '')
-      .replace(/,\s*(soft|clean|high quality|detailed|K-drama|energetic|studio)[^,]*/gi, '')
-      .split(',').slice(0, 5).join(',')
-    const prompt = `Two close friends with backpacks at an airport gate window, a plane on the tarmac outside. On the left: ${playerDesc}. On the right: ${companionAppearance}. Both smiling, excited to travel. Warm golden hour light through large windows, no text, no signs, no departure boards. Destination: ${cityName}`
+    const highlightHint = highlights?.length ? `, featuring ${highlights[0].toLowerCase()}` : ''
+    const prompt = `Cinematic wide shot of ${cityName} skyline at golden hour, seen through an airport terminal window. A plane on the tarmac ready for departure. Warm sunlight streaming through large glass windows, beautiful destination awaiting${highlightHint}. Travel photography, atmospheric, no people, no text, no signs`
 
     generateSceneImage({
       prompt,
