@@ -43,12 +43,12 @@ function TwinHero({ character, allCharacters, onEdit, onSwitch, onCreateNew }: {
     <div className="flex flex-col gap-3">
       <div className="relative rounded-2xl overflow-hidden flex flex-col md:flex-row" style={{ border: '1px solid rgba(200,75,158,0.12)', background: '#13101c' }}>
         {/* Selfie */}
-        <div className="relative w-full md:w-[280px] h-[240px] md:h-[300px] overflow-hidden" style={{ flexShrink: 0, background: 'linear-gradient(135deg, #1a1028, #2d1f3d)' }}>
+        <div className="relative w-full md:w-[280px] md:h-[300px] overflow-hidden" style={{ flexShrink: 0, background: 'linear-gradient(135deg, #1a1028, #2d1f3d)' }}>
           {character.selfieUrl ? (
             <SelfieImg
               src={character.selfieUrl}
               alt={character.name}
-              className="w-full h-full object-cover object-center"
+              className="w-full md:h-full object-contain md:object-cover object-center"
               fallback={
                 <div className="w-full h-full flex items-center justify-center">
                   <span className="text-5xl font-bold" style={{ color: 'rgba(200,75,158,0.25)', fontFamily: SG }}>{character.name[0]}</span>
