@@ -507,7 +507,7 @@ export function TravelReaderPage() {
 
     const currentScene = getCurrentScene()
     const locationContext = currentScene ? `${currentScene.location}, ${destination.city}` : destination.city
-    const companionDesc = companion.character.portraitPrompt
+    const companionDesc = companionVisualDesc
       .split(',').slice(0, 4).join(',')
       .replace(/^(anime style|dark|cyberpunk[^,]*|fantasy[^,]*|thriller[^,]*|sci-fi[^,]*)\s*(portrait|illustration|concept art)\s*(portrait\s*)?of\s*/i, '')
       .trim()
@@ -577,7 +577,7 @@ export function TravelReaderPage() {
 
     const currentScene = getCurrentScene()
     const locationContext = currentScene ? `${currentScene.location}, ${destination.city}` : destination.city
-    const companionDesc = companion.character.portraitPrompt.split(',').slice(0, 4).join(',')
+    const companionDesc = companionVisualDesc.split(',').slice(0, 4).join(',')
     const playerGender = activeChar?.gender === 'male' ? 'a young man' : 'a young woman'
 
     const recentMessages = (isPlanning ? trip.planningChatHistory : (trip.dayChatHistories[trip.currentDay] ?? [])).slice(-4)
@@ -675,7 +675,7 @@ export function TravelReaderPage() {
     setViewMode('transition')
 
     const blushPrompt = buildReactionImagePrompt(
-      companion.character.portraitPrompt,
+      companionVisualDesc,
       'extend-trip',
       'extend',
     )
@@ -879,14 +879,10 @@ export function TravelReaderPage() {
   async function generateTravelImage(prompt: string, selfieUrl?: string | null, includeCompanion = true): Promise<string | null> {
     try {
       const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 45000))
-      const remix = trip?.companionRemix
-      const companionDesc = remix?.personalityTraits?.length
-        ? remix.personalityTraits.join(', ')
-        : companion?.character.portraitPrompt
-          .split(',').slice(0, 5).join(',')
-          .replace(/^(anime style|dark|cyberpunk[^,]*|fantasy[^,]*|thriller[^,]*|sci-fi[^,]*)\s*(portrait|illustration|concept art)\s*(portrait\s*)?of\s*/i, '')
-          .trim()
-      const companionName = remix?.name ?? companion?.character.name
+      const companionDesc = companionVisualDesc
+        .split(',').slice(0, 5).join(',')
+        .replace(/^(anime style|dark|cyberpunk[^,]*|fantasy[^,]*|thriller[^,]*|sci-fi[^,]*)\s*(portrait|illustration|concept art)\s*(portrait\s*)?of\s*/i, '')
+        .trim()
       const enrichedPrompt = includeCompanion && companionDesc
         ? `${prompt}. The travel companion in this scene is ${companionName}: ${companionDesc}`
         : prompt
@@ -1041,7 +1037,7 @@ export function TravelReaderPage() {
                 countryEmoji={destination.countryEmoji}
                 companionName={companionName}
                 companionPortrait={companionPortrait}
-                companionDescription={trip.companionRemix?.personalityTraits?.length ? trip.companionRemix.personalityTraits.join(', ') : companion.character.portraitPrompt}
+                companionDescription={companionVisualDesc}
                 twinSelfieUrl={activeChar?.selfieUrl}
                 twinGender={activeChar?.gender ?? 'male'}
                 heroImage={destination.heroImage}
