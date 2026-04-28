@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plane } from 'lucide-react'
 import { generateSceneImage } from '../../lib/togetherAi'
+import { ambientAudio } from '../../lib/ambientAudio'
 import { SelfieImg } from '../SelfieImg'
 
 const SG = "'Space Grotesk', sans-serif"
@@ -70,10 +71,13 @@ export function DepartureScreen({
   // Animated beat sequence → auto-advance to chat
   useEffect(() => {
     if (beat < BEATS.length) {
+      if (beat > 0) ambientAudio.playSfx('beat-tick')
+      if (beat === 1) ambientAudio.playSfx('whoosh')
       const t = setTimeout(() => setBeat((b) => b + 1), 1200)
       return () => clearTimeout(t)
     }
-    // All beats done — show final state briefly then auto-continue
+    // All beats done — play arrival chime then auto-continue
+    ambientAudio.playSfx('arrival-chime')
     const t = setTimeout(() => setDone(true), 800)
     return () => clearTimeout(t)
   }, [beat])

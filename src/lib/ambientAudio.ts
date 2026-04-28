@@ -213,6 +213,72 @@ class AmbientAudioManager {
     this.state.isPlaying = true
   }
 
+  /** Short synthesized SFX — no audio files needed */
+  playSfx(type: 'beat-tick' | 'whoosh' | 'arrival-chime'): void {
+    if (this.state.isMuted) return
+    const ctx = this.ensureContext()
+    const now = ctx.currentTime
+
+    if (type === 'beat-tick') {
+      // Soft UI tick — two quick sine pings
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(880, now)
+      osc.frequency.exponentialRampToValueAtTime(660, now + 0.08)
+      gain.gain.setValueAtTime(0.12, now)
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15)
+      osc.connect(gain)
+      gain.connect(this.state.masterGain!)
+      osc.start(now)
+      osc.stop(now + 0.15)
+    }
+
+    if (type === 'whoosh') {
+      // Filtered noise sweep — like air rushing past
+      const bufferSize = ctx.sampleRate * 0.6
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate)
+      const data = buffer.getChannelData(0)
+      for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1
+      const noise = ctx.createBufferSource()
+      noise.buffer = buffer
+      const filter = ctx.createBiquadFilter()
+      filter.type = 'bandpass'
+      filter.frequency.setValueAtTime(300, now)
+      filter.frequency.exponentialRampToValueAtTime(2000, now + 0.25)
+      filter.frequency.exponentialRampToValueAtTime(400, now + 0.5)
+      filter.Q.value = 1.5
+      const gain = ctx.createGain()
+      gain.gain.setValueAtTime(0, now)
+      gain.gain.linearRampToValueAtTime(0.08, now + 0.1)
+      gain.gain.linearRampToValueAtTime(0, now + 0.55)
+      noise.connect(filter)
+      filter.connect(gain)
+      gain.connect(this.state.masterGain!)
+      noise.start(now)
+      noise.stop(now + 0.6)
+    }
+
+    if (type === 'arrival-chime') {
+      // Two-note ascending chime — warm and resolved
+      const notes = [523.25, 783.99] // C5 → G5
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+        osc.type = 'sine'
+        osc.frequency.value = freq
+        const start = now + i * 0.15
+        gain.gain.setValueAtTime(0, start)
+        gain.gain.linearRampToValueAtTime(0.1, start + 0.03)
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.6)
+        osc.connect(gain)
+        gain.connect(this.state.masterGain!)
+        osc.start(start)
+        osc.stop(start + 0.6)
+      })
+    }
+  }
+
   stop(): void {
     this.crossfadeTo('silent')
     this.state.isPlaying = false
