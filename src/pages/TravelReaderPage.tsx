@@ -225,10 +225,9 @@ export function TravelReaderPage() {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [trip?.planningChatHistory.length, trip?.dayChatHistories, streamedText])
 
-  // Generate opening message when entering chat
+  // Generate opening message (runs even during departure so it's ready when chat appears)
   useEffect(() => {
     if (!trip || !companion || !destination) return
-    if (viewMode === 'departure') return
     const isPlanning = trip.phase === 'planning'
     const messages = isPlanning ? trip.planningChatHistory : (trip.dayChatHistories[trip.currentDay] ?? [])
     if (messages.length > 0) return
@@ -262,7 +261,7 @@ export function TravelReaderPage() {
       if (result.suggestions) setSuggestions(result.suggestions)
     })()
     return () => { cancelled = true }
-  }, [trip?.phase, trip?.currentDay, trip?.currentSceneIndex, viewMode])
+  }, [trip?.phase, trip?.currentDay, trip?.currentSceneIndex])
 
   function getCurrentScene(): TripScene | null {
     if (!trip) return null
