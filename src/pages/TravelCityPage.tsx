@@ -20,6 +20,7 @@ export function TravelCityPage() {
   const destination = getDestination(destinationId ?? '')
   const activeCharacterId = useStore((s) => s.activeCharacterId)
   const characters = useStore((s) => s.characters)
+  const setActiveCharacter = useStore((s) => s.setActiveCharacter)
   const activeChar = characters.find((c) => c.id === activeCharacterId)
   const startTrip = useStore((s) => s.startTrip)
   const createCharacter = useStore((s) => s.createCharacter)
@@ -279,24 +280,50 @@ export function TravelCityPage() {
           </div>
 
           {/* Twin Banner */}
-          {activeChar?.selfieUrl && (
+          {activeChar && (
             <div
-              className="inline-flex items-center gap-3 rounded-xl px-4 py-3 mb-8"
+              className="flex items-center gap-3 rounded-xl px-4 py-3 mb-8"
               style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.15)' }}
             >
-              <SelfieImg src={activeChar.selfieUrl} alt="" className="w-9 h-9 rounded-full object-cover" fallback={<div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold" style={{ background: 'rgba(124,58,237,0.15)', color: '#A78BFA' }}>{activeChar.name[0]}</div>} />
-              <div>
-                <p className="text-white text-sm font-medium" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                  Your twin — You'll appear in every scene
-                </p>
-              </div>
-              <button
-                onClick={() => navigate(`/edit-character/${activeCharacterId}`)}
-                className="text-purple-400/70 text-xs hover:text-purple-400 transition-colors cursor-pointer ml-2"
-                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-              >
-                Change
-              </button>
+              {characters.length > 1 ? (
+                <>
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    {characters.map((c) => (
+                      <button
+                        key={c.id}
+                        onClick={() => setActiveCharacter(c.id)}
+                        className="cursor-pointer shrink-0 rounded-full overflow-hidden transition-all"
+                        style={{
+                          width: c.id === activeCharacterId ? 40 : 32,
+                          height: c.id === activeCharacterId ? 40 : 32,
+                          border: c.id === activeCharacterId ? '2px solid #A78BFA' : '2px solid rgba(255,255,255,0.1)',
+                          opacity: c.id === activeCharacterId ? 1 : 0.5,
+                        }}
+                      >
+                        {c.selfieUrl ? (
+                          <SelfieImg src={c.selfieUrl} alt={c.name} className="w-full h-full object-cover" fallback={<div className="w-full h-full flex items-center justify-center text-xs font-semibold" style={{ background: 'rgba(124,58,237,0.15)', color: '#A78BFA' }}>{c.name[0]}</div>} />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-xs font-semibold" style={{ background: 'rgba(124,58,237,0.15)', color: '#A78BFA' }}>{c.name[0]}</div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-white/40 text-xs shrink-0" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                    Travelling as <span className="text-white/70 font-medium">{activeChar.name}</span>
+                  </p>
+                </>
+              ) : (
+                <>
+                  {activeChar.selfieUrl ? (
+                    <SelfieImg src={activeChar.selfieUrl} alt="" className="w-9 h-9 rounded-full object-cover" fallback={<div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold" style={{ background: 'rgba(124,58,237,0.15)', color: '#A78BFA' }}>{activeChar.name[0]}</div>} />
+                  ) : (
+                    <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold" style={{ background: 'rgba(124,58,237,0.15)', color: '#A78BFA' }}>{activeChar.name[0]}</div>
+                  )}
+                  <p className="text-white text-sm font-medium flex-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                    Travelling as {activeChar.name}
+                  </p>
+                </>
+              )}
             </div>
           )}
 
