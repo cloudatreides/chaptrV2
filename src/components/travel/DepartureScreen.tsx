@@ -58,11 +58,8 @@ export function DepartureScreen({
       prompt,
       width: 768,
       height: 576,
-      referenceImageUrl: twinSelfieUrl,
-      companionReferenceUrl: companionPortrait,
-      companionDescription: companionShort,
+      includesProtagonist: false,
       protagonistGender: twinGender,
-      includesProtagonist: !!twinSelfieUrl,
     }).then((url) => {
       if (url) onImageGenerated(url)
     })
