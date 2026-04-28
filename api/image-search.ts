@@ -123,10 +123,12 @@ async function wikipediaImageSearch(query: string): Promise<ImageResult | null> 
 
     const imageData = await imageResp.json()
     const pageData = Object.values(imageData.query?.pages ?? {})[0] as any
-    if (pageData?.thumbnail?.source) {
+    const thumbSrc = pageData?.thumbnail?.source
+    const pageImg = pageData?.pageimage ?? ''
+    if (thumbSrc && !isLogoOrIcon(pageImg)) {
       return {
-        url: pageData.thumbnail.source,
-        thumb: pageData.thumbnail.source,
+        url: thumbSrc,
+        thumb: thumbSrc,
         title: pageData.title ?? query,
         source: 'wikipedia',
       }
@@ -134,4 +136,9 @@ async function wikipediaImageSearch(query: string): Promise<ImageResult | null> 
   }
 
   return null
+}
+
+function isLogoOrIcon(filename: string): boolean {
+  const lower = filename.toLowerCase()
+  return /logo|icon|symbol|emblem|seal|coat.of.arms|flag.of|\.svg/i.test(lower)
 }
