@@ -706,7 +706,7 @@ export function HomePage() {
   const [activePingModal, setActivePingModal] = useState<AmbientPingDef | null>(null)
 
   const hasCharacters = characters.length > 0
-  const activeCharacter = characters[0]
+  const activeCharacter = characters.find((c) => c.id === activeCharacterId) ?? characters[0]
 
   // ─── Ambient pings ───
   useEffect(() => {
