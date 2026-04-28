@@ -6,6 +6,7 @@ import { AppSidebar } from '../components/AppSidebar'
 import { useStore } from '../store/useStore'
 import { DESTINATIONS, type Destination } from '../data/travel/destinations'
 import Globe, { type GlobeMethods } from 'react-globe.gl'
+import { playSfx } from '../lib/sfx'
 
 const SG = "'Space Grotesk', sans-serif"
 
@@ -106,6 +107,8 @@ export function TravelHomePage() {
 
   const selectDest = useCallback((dest: Destination) => {
     setSelectedDest(dest)
+    playSfx('/audio/pin-click.wav', 0.4)
+    playSfx('/audio/whoosh.wav', 0.15)
     if (globeRef.current) {
       const controls = globeRef.current.controls()
       controls.autoRotate = false
@@ -234,6 +237,7 @@ export function TravelHomePage() {
 
   const handleDeselect = useCallback(() => {
     setSelectedDest(null)
+    playSfx('/audio/whoosh.wav', 0.1)
     if (globeRef.current) {
       const controls = globeRef.current.controls()
       controls.autoRotate = true
