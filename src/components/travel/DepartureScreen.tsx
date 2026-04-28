@@ -10,7 +10,9 @@ const SYNE = "'Syne', sans-serif"
 
 const BEATS = [
   { text: 'Packing bags...', icon: '🎒' },
+  { text: 'Heading to the airport...', icon: '🚕' },
   { text: 'Boarding now...', icon: '✈️' },
+  { text: 'Cruising at 35,000 ft...', icon: '☁️' },
   { text: 'Touching down...', icon: '🛬' },
 ]
 
@@ -42,7 +44,8 @@ export function DepartureScreen({
   existingImageUrl,
 }: DepartureScreenProps) {
   const [beat, setBeat] = useState(0)
-  const [done, setDone] = useState(false)
+  const [beatsFinished, setBeatsFinished] = useState(false)
+  const [imageReady, setImageReady] = useState(!!existingImageUrl)
   const generating = useRef(false)
 
   // Kick off image generation in background
@@ -58,33 +61,38 @@ export function DepartureScreen({
       prompt,
       width: 768,
       height: 576,
-      includesProtagonist: false,
+      referenceImageUrl: twinSelfieUrl || undefined,
+      includesProtagonist: true,
       protagonistGender: twinGender,
     }).then((url) => {
       if (url) onImageGenerated(url)
+      setImageReady(true)
     })
   }, [])
 
-  // Animated beat sequence → auto-advance to chat
+  // Animated beat sequence
   useEffect(() => {
     if (beat < BEATS.length) {
       if (beat > 0) ambientAudio.playSfx('beat-tick')
-      if (beat === 1) ambientAudio.playSfx('whoosh')
-      const t = setTimeout(() => setBeat((b) => b + 1), 1200)
+      if (beat === 2) ambientAudio.playSfx('whoosh')
+      const t = setTimeout(() => setBeat((b) => b + 1), 1800)
       return () => clearTimeout(t)
     }
-    // All beats done — play arrival chime then auto-continue
     ambientAudio.playSfx('arrival-chime')
-    const t = setTimeout(() => setDone(true), 800)
+    const t = setTimeout(() => setBeatsFinished(true), 800)
     return () => clearTimeout(t)
   }, [beat])
 
+  // Auto-continue only when beats are done AND image is ready (or max 20s timeout)
   useEffect(() => {
-    if (done) {
+    if (!beatsFinished) return
+    if (imageReady) {
       const t = setTimeout(onContinue, 600)
       return () => clearTimeout(t)
     }
-  }, [done])
+    const maxWait = setTimeout(() => onContinue(), 8000)
+    return () => clearTimeout(maxWait)
+  }, [beatsFinished, imageReady])
 
   return (
     <motion.div
@@ -237,10 +245,23 @@ export function DepartureScreen({
                 transition={{ type: 'spring', stiffness: 200 }}
                 className="flex items-center gap-2"
               >
-                <span className="text-lg">🌏</span>
-                <span className="text-white/80 text-sm font-semibold" style={{ fontFamily: SG }}>
-                  You're here.
-                </span>
+                {imageReady ? (
+                  <>
+                    <span className="text-lg">🌏</span>
+                    <span className="text-white/80 text-sm font-semibold" style={{ fontFamily: SG }}>
+                      You're here.
+                    </span>
+                  </>
+                ) : (
+                  <motion.span
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="text-white/60 text-sm font-medium"
+                    style={{ fontFamily: SG }}
+                  >
+                    Almost there...
+                  </motion.span>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
