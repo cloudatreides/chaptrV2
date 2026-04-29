@@ -56,8 +56,11 @@ export function AdminImageBenchPage() {
   const activeCharId = useStore((s) => s.activeCharacterId)
   const activeChar = characters.find((c) => c.id === activeCharId) ?? characters[0]
 
-  // Initial values: prefer localStorage (so refresh keeps your test URLs), then
-  // fall back to the active twin's stored selfie + Yuna's portrait.
+  // Initial values: prefer localStorage so refresh keeps your test URLs.
+  // BUT: if the saved twin URL is ephemeral (dead Together AI) OR the active
+  // twin's current selfie differs from what's saved (= you created/switched
+  // twins since the last bench run), prefer the live twin selfie. Otherwise
+  // the bench would lock onto stale URLs forever.
   const initial = (() => {
     try {
       const raw = localStorage.getItem(BENCH_STORAGE_KEY)
@@ -66,7 +69,14 @@ export function AdminImageBenchPage() {
     return null
   })()
 
-  const [twinUrl, setTwinUrl] = useState(initial?.twinUrl ?? activeChar?.selfieUrl ?? '')
+  const liveTwinUrl = activeChar?.selfieUrl ?? ''
+  const savedTwinUrl = initial?.twinUrl ?? ''
+  const initialTwinUrl =
+    !savedTwinUrl || isEphemeralLike(savedTwinUrl) || (liveTwinUrl && liveTwinUrl !== savedTwinUrl)
+      ? liveTwinUrl
+      : savedTwinUrl
+
+  const [twinUrl, setTwinUrl] = useState(initialTwinUrl)
   const [companionUrl, setCompanionUrl] = useState(initial?.companionUrl ?? getTravelCompanion('yuna')?.character.staticPortrait ?? '')
   const [prompt, setPrompt] = useState(initial?.prompt ?? DEFAULT_PROMPT)
   const [results, setResults] = useState<Record<ModelId, Result>>({} as Record<ModelId, Result>)
@@ -80,6 +90,7 @@ export function AdminImageBenchPage() {
   }, [twinUrl, companionUrl, prompt])
 
   const twinUrlIsEphemeral = !!twinUrl && isEphemeralLike(twinUrl)
+  const canResetToActive = !!liveTwinUrl && twinUrl !== liveTwinUrl
 
   const updateResult = (id: ModelId, r: Result) => setResults((prev) => ({ ...prev, [id]: r }))
   const setBusy = (id: ModelId, b: boolean) => setRunning((prev) => ({ ...prev, [id]: b }))
@@ -198,7 +209,20 @@ export function AdminImageBenchPage() {
         {/* Inputs */}
         <div className="grid md:grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="text-white/50 text-xs uppercase tracking-widest mb-1 block">Twin selfie URL</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-white/50 text-xs uppercase tracking-widest block">
+                Twin selfie URL
+                {activeChar?.name && <span className="text-white/30 normal-case ml-2">({activeChar.name})</span>}
+              </label>
+              {canResetToActive && (
+                <button
+                  onClick={() => setTwinUrl(liveTwinUrl)}
+                  className="cursor-pointer text-[10px] uppercase tracking-widest text-[#c84b9e] hover:text-[#e060b8]"
+                >
+                  Use active twin
+                </button>
+              )}
+            </div>
             <input
               type="text"
               value={twinUrl}
