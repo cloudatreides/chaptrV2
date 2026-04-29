@@ -1,10 +1,16 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, Loader2, Image as ImageIcon } from 'lucide-react'
+import { ChevronLeft, Loader2, Image as ImageIcon, AlertTriangle } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { generateSceneImage } from '../lib/togetherAi'
 import { generateNanoBananaImage } from '../lib/nanoBanana'
 import { getTravelCompanion } from '../data/travel/companions'
+
+const BENCH_STORAGE_KEY = 'chaptr-image-bench-inputs'
+
+function isEphemeralLike(u: string): boolean {
+  return u.includes('api.together.ai/shrt') || u.includes('api.together.xyz/shrt') || u.includes('together.ai/imgproxy')
+}
 
 const SG = "'Space Grotesk', sans-serif"
 
@@ -50,11 +56,30 @@ export function AdminImageBenchPage() {
   const activeCharId = useStore((s) => s.activeCharacterId)
   const activeChar = characters.find((c) => c.id === activeCharId) ?? characters[0]
 
-  const [twinUrl, setTwinUrl] = useState(activeChar?.selfieUrl ?? '')
-  const [companionUrl, setCompanionUrl] = useState(getTravelCompanion('yuna')?.character.staticPortrait ?? '')
-  const [prompt, setPrompt] = useState(DEFAULT_PROMPT)
+  // Initial values: prefer localStorage (so refresh keeps your test URLs), then
+  // fall back to the active twin's stored selfie + Yuna's portrait.
+  const initial = (() => {
+    try {
+      const raw = localStorage.getItem(BENCH_STORAGE_KEY)
+      if (raw) return JSON.parse(raw) as { twinUrl?: string; companionUrl?: string; prompt?: string }
+    } catch { /* fall through */ }
+    return null
+  })()
+
+  const [twinUrl, setTwinUrl] = useState(initial?.twinUrl ?? activeChar?.selfieUrl ?? '')
+  const [companionUrl, setCompanionUrl] = useState(initial?.companionUrl ?? getTravelCompanion('yuna')?.character.staticPortrait ?? '')
+  const [prompt, setPrompt] = useState(initial?.prompt ?? DEFAULT_PROMPT)
   const [results, setResults] = useState<Record<ModelId, Result>>({} as Record<ModelId, Result>)
   const [running, setRunning] = useState<Record<ModelId, boolean>>({} as Record<ModelId, boolean>)
+
+  // Persist inputs across refresh so the bench survives reloads.
+  useEffect(() => {
+    try {
+      localStorage.setItem(BENCH_STORAGE_KEY, JSON.stringify({ twinUrl, companionUrl, prompt }))
+    } catch { /* localStorage may be disabled */ }
+  }, [twinUrl, companionUrl, prompt])
+
+  const twinUrlIsEphemeral = !!twinUrl && isEphemeralLike(twinUrl)
 
   const updateResult = (id: ModelId, r: Result) => setResults((prev) => ({ ...prev, [id]: r }))
   const setBusy = (id: ModelId, b: boolean) => setRunning((prev) => ({ ...prev, [id]: b }))
@@ -156,6 +181,19 @@ export function AdminImageBenchPage() {
         <p className="text-white/40 text-sm mb-6">
           Same prompt, same references, every available model. Compare identity match, style, and latency.
         </p>
+
+        {twinUrlIsEphemeral && (
+          <div className="mb-6 p-4 rounded-xl flex gap-3 items-start" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}>
+            <AlertTriangle size={18} className="text-red-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-red-300 text-sm font-semibold mb-1">Twin URL is dead (Together AI ephemeral)</p>
+              <p className="text-red-300/70 text-xs leading-relaxed">
+                The twin selfie URL is <span className="font-mono">api.together.ai/shrt/...</span> — those expire after ~1 hour. FLUX/Kontext won't have a real reference, so identity match will fail.
+                Fix: go to <span className="font-mono">/home</span> → click "Upload selfie" → upload a fresh photo. The new URL will be on Supabase storage and persist. Then come back here.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Inputs */}
         <div className="grid md:grid-cols-2 gap-4 mb-4">
