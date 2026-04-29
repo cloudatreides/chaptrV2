@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, Loader2, Image as ImageIcon, AlertTriangle, Trash2 } from 'lucide-react'
+import { ChevronLeft, Loader2, Image as ImageIcon, AlertTriangle, Trash2, RefreshCcw } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
+import { supabase } from '../lib/supabase'
 import { useStore } from '../store/useStore'
 import { generateSceneImage } from '../lib/togetherAi'
 import { generateNanoBananaImage } from '../lib/nanoBanana'
@@ -63,6 +65,72 @@ export function AdminImageBenchPage() {
   const deleteCharacter = useStore((s) => s.deleteCharacter)
   const customCompanions = useStore((s) => s.customCompanions)
   const activeChar = characters.find((c) => c.id === activeCharId) ?? characters[0]
+  const { user } = useAuth()
+  const [isResetting, setIsResetting] = useState(false)
+
+  // One-click factory reset: wipes BOTH local store and cloud user_game_state.
+  // Builds an explicit empty-state row in cloud so any other tab still in
+  // memory that hydrates next will get empty too — breaks the multi-tab
+  // re-population loop without needing the user to close all browsers.
+  async function factoryReset() {
+    const ok = confirm(
+      'FACTORY RESET\n\n' +
+      'This wipes ALL twins, trips, stories, moments — both locally AND in your Supabase save game.\n\n' +
+      'Cannot be undone. Continue?'
+    )
+    if (!ok) return
+    setIsResetting(true)
+    try {
+      // 1. Wipe cloud first — write an empty canonical state so any other tab
+      //    that hydrates next gets empty too. We use upsert (allowed by RLS)
+      //    rather than delete (which may not have a policy).
+      if (user) {
+        const emptyState = {
+          characters: [],
+          activeCharacterId: null,
+          selectedUniverse: null,
+          storyProgress: {},
+          gemBalance: 50,
+          globalAffinities: {},
+          playthroughHistory: [],
+          ambientPings: [],
+          lastSessionTimestamp: Date.now(),
+          castChatThreads: {},
+          unlockedCastIds: ['sora', 'jiwon', 'yuna'],
+          groupCastThreads: {},
+          favoriteCastIds: [],
+          storyMoments: [],
+          customCompanions: [],
+          travelTrips: {},
+          activeTripId: null,
+        }
+        const { error } = await supabase
+          .from('user_game_state')
+          .upsert(
+            { user_id: user.id, state: emptyState, updated_at: new Date().toISOString() },
+            { onConflict: 'user_id' }
+          )
+        if (error) {
+          alert('Cloud reset failed: ' + (error.message ?? 'unknown'))
+          setIsResetting(false)
+          return
+        }
+      }
+
+      // 2. Wipe local. removeItem is more compatible than clear() on Safari ITP
+      //    contexts. Try-catch each call so a SecurityError doesn't abort.
+      try { localStorage.removeItem('chaptr-v2-story') } catch { /* Safari ITP */ }
+      try { localStorage.removeItem('chaptr-v2-uid') } catch { /* Safari ITP */ }
+      try { localStorage.removeItem('chaptr-image-bench-inputs') } catch { /* Safari ITP */ }
+
+      // 3. Hard reload from server. This kills any in-tab Zustand subscriber
+      //    that might otherwise re-save the old in-memory state to cloud.
+      window.location.href = '/home'
+    } catch (e) {
+      alert('Reset failed: ' + String(e))
+      setIsResetting(false)
+    }
+  }
 
   // Remixed companions you created — only the ones with a custom photo are
   // useful here, since the bench needs an image URL to feed the model.
@@ -220,10 +288,24 @@ export function AdminImageBenchPage() {
           <ChevronLeft size={16} /> Back
         </button>
 
-        <h1 className="text-white text-3xl font-bold mb-1">Image bench</h1>
-        <p className="text-white/40 text-sm mb-6">
-          Same prompt, same references, every available model. Compare identity match, style, and latency.
-        </p>
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <h1 className="text-white text-3xl font-bold mb-1">Image bench</h1>
+            <p className="text-white/40 text-sm">
+              Same prompt, same references, every available model. Compare identity match, style, and latency.
+            </p>
+          </div>
+          <button
+            onClick={factoryReset}
+            disabled={isResetting}
+            className="cursor-pointer flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+            style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)', color: '#fca5a5' }}
+            title="Wipe all twins, trips, stories — both local and cloud. Used to recover from corrupted state."
+          >
+            {isResetting ? <Loader2 size={14} className="animate-spin" /> : <RefreshCcw size={14} />}
+            {isResetting ? 'Resetting...' : 'Factory reset'}
+          </button>
+        </div>
 
         {twinUrlIsEphemeral && (
           <div className="mb-6 p-4 rounded-xl flex gap-3 items-start" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}>
