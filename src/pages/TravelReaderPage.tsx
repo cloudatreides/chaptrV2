@@ -1432,6 +1432,13 @@ export function TravelReaderPage() {
                     {parseSegments(sceneProse || currentScene.prose || '').map((seg, j) =>
                       seg.type === 'action' ? (
                         <ActionBeat key={j} text={seg.text} />
+                      ) : isStreaming ? (
+                        <StreamedText
+                          key={j}
+                          text={seg.text}
+                          className="text-white text-[15px] leading-[1.8]"
+                          style={{ fontFamily: "'Source Serif 4', Georgia, serif" }}
+                        />
                       ) : (
                         <p
                           key={j}
@@ -1442,7 +1449,6 @@ export function TravelReaderPage() {
                         </p>
                       )
                     )}
-                    {isStreaming && <span className="inline-block w-0.5 h-4 bg-purple-400/60 ml-0.5 animate-pulse align-text-bottom" />}
                   </div>
 
                   {/* Scene Actions */}

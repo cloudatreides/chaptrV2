@@ -16,6 +16,7 @@ import { ChatActionBubble } from './ChatActionBubble'
 import { ChatReactionImage } from './ChatReactionImage'
 import { useChatActions } from '../hooks/useChatActions'
 import type { ChatAction } from '../data/chatActions'
+import { StreamedText } from './StreamedText'
 
 // Mood labels based on exchange count — feels organic, not mechanical
 const MOOD_STAGES: Record<string, string[]> = {
@@ -633,8 +634,7 @@ export function ChatScene({ stepId, characterId, maxExchanges, minExchanges = 3,
               )}
             </div>
             <div className="chat-bubble chat-bubble-character">
-              {streamedReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '').replace(/\n?\[SUGGESTIONS:.*$/, '')}
-              <span className="cursor-blink text-accent ml-0.5">|</span>
+              <StreamedText text={streamedReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '').replace(/\n?\[SUGGESTIONS:.*$/, '')} />
             </div>
           </motion.div>
         )}

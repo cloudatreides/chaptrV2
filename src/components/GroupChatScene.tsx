@@ -16,6 +16,7 @@ import { ChatActionBubble } from './ChatActionBubble'
 import { ChatReactionImage } from './ChatReactionImage'
 import { useChatActions } from '../hooks/useChatActions'
 import type { ChatAction } from '../data/chatActions'
+import { StreamedText } from './StreamedText'
 
 // ─── Types ───
 
@@ -502,8 +503,7 @@ export function GroupChatScene({ stepId: _stepId, characters, minExchanges = 2, 
                   <div className="flex items-end gap-2 justify-start">
                     <CharAvatar characterId={streamingCharId} />
                     <div className="chat-bubble chat-bubble-character">
-                      {streamedReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '').replace(/\n?\[SUGGESTIONS:.*$/, '')}
-                      <span className="cursor-blink text-accent ml-0.5">|</span>
+                      <StreamedText text={streamedReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '').replace(/\n?\[SUGGESTIONS:.*$/, '')} />
                     </div>
                   </div>
                 </>

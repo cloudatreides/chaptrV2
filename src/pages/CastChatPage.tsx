@@ -14,6 +14,7 @@ import { ChatReactionImage } from '../components/ChatReactionImage'
 import { useChatActions } from '../hooks/useChatActions'
 import { parseActionFromMessage, type ChatAction, getDareOptions } from '../data/chatActions'
 import type { CastChatMessage } from '../store/useStore'
+import { StreamedText } from '../components/StreamedText'
 
 export function CastChatPage() {
   const { characterId } = useParams<{ characterId: string }>()
@@ -485,9 +486,8 @@ export function CastChatPage() {
       {isStreaming && streamingContent && (
         <div className="flex gap-2.5">
           {characterAvatar()}
-          <div className="max-w-[80%] px-3.5 py-2.5 text-[13px] leading-relaxed" style={{ background: '#1A1624', color: '#E8E3F0', borderRadius: '2px 14px 14px 14px' }}>
-            {streamingContent}
-            <span className="inline-block w-1.5 h-4 bg-accent/50 ml-0.5 animate-pulse" />
+          <div className="max-w-[80%] px-3.5 py-2.5" style={{ background: '#1A1624', borderRadius: '2px 14px 14px 14px' }}>
+            <StreamedText text={streamingContent} className="text-[13px] leading-relaxed" style={{ color: '#E8E3F0' }} />
           </div>
         </div>
       )}

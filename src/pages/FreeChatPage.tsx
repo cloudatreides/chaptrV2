@@ -17,6 +17,7 @@ import { ChatActionBubble } from '../components/ChatActionBubble'
 import { ChatReactionImage } from '../components/ChatReactionImage'
 import { useChatActions } from '../hooks/useChatActions'
 import type { ChatAction } from '../data/chatActions'
+import { StreamedText } from '../components/StreamedText'
 
 // ─── Mood stages (from SceneChat) ───
 
@@ -680,8 +681,7 @@ export function FreeChatPage() {
               )}
             </div>
             <div className="chat-bubble chat-bubble-character">
-              {streamedReply}
-              <span className="cursor-blink text-accent ml-0.5">|</span>
+              <StreamedText text={streamedReply} />
             </div>
           </motion.div>
         )}

@@ -17,6 +17,7 @@ import { ChatActionBubble } from './ChatActionBubble'
 import { ChatReactionImage } from './ChatReactionImage'
 import { useChatActions } from '../hooks/useChatActions'
 import type { ChatAction } from '../data/chatActions'
+import { StreamedText } from './StreamedText'
 
 // ─── Mood stages (reused from ChatScene) ───
 
@@ -836,8 +837,7 @@ export function SceneChat({ stepId, characters, minCharactersTalkedTo = 1, story
               )}
             </div>
             <div className="chat-bubble chat-bubble-character">
-              {streamedReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '').replace(/\n?\[SUGGESTIONS:.*$/, '')}
-              <span className="cursor-blink text-accent ml-0.5">|</span>
+              <StreamedText text={streamedReply.replace(/\n?\[AFFINITY:[+-]?\d+\]\s*$/, '').replace(/\n?\[SUGGESTIONS:.*$/, '')} />
             </div>
           </motion.div>
         )}
