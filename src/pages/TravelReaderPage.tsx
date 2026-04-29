@@ -171,8 +171,12 @@ export function TravelReaderPage() {
     setIsRegeneratingDeparture(true)
     try {
       const hasBothRefs = !!(activeChar?.selfieUrl && companionPortrait)
+      const protagGender = activeChar?.gender ?? 'male'
+      const compGender = companion?.character.gender
+      const protagNoun = protagGender === 'female' ? 'young woman' : 'young man'
+      const compNoun = compGender === 'male' ? 'young man' : compGender === 'female' ? 'young woman' : 'young person'
       const prompt = hasBothRefs
-        ? `Two friends at an airport gate, excited to travel to ${destination.city}. They stand side by side with backpacks, a plane visible through the window behind them. Warm golden hour light streaming through large terminal windows, no text, no signs, no departure boards`
+        ? `A ${protagNoun} (the protagonist, from image 1) and a ${compNoun} (their travel companion, from image 2) standing side by side at an airport gate, both with backpacks, excited to travel to ${destination.city}. A plane visible through the window behind them. Warm golden hour light streaming through large terminal windows, no text, no signs, no departure boards`
         : `Cinematic wide shot of ${destination.city} skyline at golden hour, seen through an airport terminal window. A plane on the tarmac ready for departure. Warm sunlight, atmospheric, no people, no text, no signs`
       const url = await generateImage({
         prompt,
@@ -182,7 +186,8 @@ export function TravelReaderPage() {
         companionReferenceUrl: companionPortrait || undefined,
         companionDescription: companion?.character.portraitPrompt ?? companionVisualDesc,
         includesProtagonist: hasBothRefs,
-        protagonistGender: activeChar?.gender ?? 'male',
+        protagonistGender: protagGender,
+        companionGender: compGender,
       })
       if (url) setDepartureImage(url)
     } finally {
@@ -1116,6 +1121,7 @@ export function TravelReaderPage() {
                 companionDescription={companion?.character.portraitPrompt ?? companionVisualDesc}
                 twinSelfieUrl={activeChar?.selfieUrl}
                 twinGender={activeChar?.gender ?? 'male'}
+                companionGender={companion?.character.gender}
                 heroImage={destination.heroImage}
                 highlights={destination.highlights}
                 existingImageUrl={trip.departureImageUrl}

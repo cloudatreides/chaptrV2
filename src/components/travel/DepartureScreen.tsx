@@ -24,11 +24,18 @@ interface DepartureScreenProps {
   companionDescription: string
   twinSelfieUrl?: string | null
   twinGender: 'male' | 'female'
+  companionGender?: 'male' | 'female' | 'non-binary' | 'unknown'
   heroImage?: string
   highlights?: string[]
   onContinue: () => void
   onImageGenerated: (url: string) => void
   existingImageUrl?: string
+}
+
+function genderNoun(g: 'male' | 'female' | 'non-binary' | 'unknown' | undefined, fallback: 'man' | 'woman'): string {
+  if (g === 'male') return 'young man'
+  if (g === 'female') return 'young woman'
+  return `young ${fallback}`
 }
 
 export function DepartureScreen({
@@ -39,6 +46,7 @@ export function DepartureScreen({
   companionDescription,
   twinSelfieUrl,
   twinGender,
+  companionGender,
   heroImage,
   onContinue,
   onImageGenerated,
@@ -55,8 +63,10 @@ export function DepartureScreen({
     generating.current = true
 
     const hasBothRefs = !!(twinSelfieUrl && companionPortrait)
+    const protagNoun = genderNoun(twinGender, 'man')
+    const compNoun = genderNoun(companionGender, 'woman')
     const prompt = hasBothRefs
-      ? `Two friends at an airport gate, excited to travel to ${cityName}. They stand side by side with backpacks, a plane visible through the window behind them. Warm golden hour light streaming through large terminal windows, no text, no signs, no departure boards`
+      ? `A ${protagNoun} (the protagonist, from image 1) and a ${compNoun} (their travel companion, from image 2) standing side by side at an airport gate, both with backpacks, excited to travel to ${cityName}. A plane visible through the window behind them. Warm golden hour light streaming through large terminal windows, no text, no signs, no departure boards`
       : `Cinematic wide shot of ${cityName} skyline at golden hour, seen through an airport terminal window. A plane on the tarmac ready for departure. Warm sunlight, atmospheric, no people, no text, no signs`
 
     generateSceneImage({
@@ -68,6 +78,7 @@ export function DepartureScreen({
       companionDescription,
       includesProtagonist: hasBothRefs,
       protagonistGender: twinGender,
+      companionGender,
     }).then((url) => {
       if (url) onImageGenerated(url)
       setImageReady(true)

@@ -8,6 +8,7 @@ export interface GenerateSceneParams {
   companionReferenceUrl?: string | null
   companionDescription?: string
   protagonistGender?: 'male' | 'female'
+  companionGender?: 'male' | 'female' | 'non-binary' | 'unknown'
   includesProtagonist?: boolean
   moodContext?: string
 }
@@ -62,7 +63,7 @@ function enforceAnimeStyle(prompt: string): string {
 
 
 export async function generateSceneImage(params: GenerateSceneParams): Promise<string | null> {
-  const { prompt, width = 768, height = 576, referenceImageUrl, companionReferenceUrl, companionDescription, protagonistGender, includesProtagonist = true, moodContext } = params
+  const { prompt, width = 768, height = 576, referenceImageUrl, companionReferenceUrl, companionDescription, protagonistGender, companionGender, includesProtagonist = true, moodContext } = params
 
   // Tier selection: both refs → FLUX.2 Pro, single ref → Kontext Pro, none → Schnell
   const useFlux2 = !!referenceImageUrl && !!companionReferenceUrl && includesProtagonist
@@ -103,11 +104,14 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
     ? `. The travel companion's appearance: ${companionDescription.split(',').slice(0, 5).join(',')}`
     : ''
 
+  const protagNoun = protagonistGender === 'female' ? 'young woman' : 'young man'
+  const compNoun = companionGender === 'male' ? 'young man' : companionGender === 'female' ? 'young woman' : 'young person'
+
   if (useFlux2) {
     model = 'FLUX.2 Pro'
     body = {
       model: 'black-forest-labs/FLUX.2-pro',
-      prompt: `Anime-style illustration, cel-shaded, clean linework. The person from image 1 is the protagonist (a ${protagonistGender === 'female' ? 'young woman' : 'young man'}). The character from image 2 is their travel companion${companionHint}. Draw both characters in the SAME consistent anime art style — soft shading, expressive eyes, detailed hair. Keep their faces, hairstyles, and features recognizable from the reference images. Both characters must look like they belong in the same illustration. Scene: ${animePrompt}`,
+      prompt: `Anime-style illustration, cel-shaded, clean linework. CRITICAL: image 1 is the protagonist — a ${protagNoun}. Image 2 is the travel companion — a ${compNoun}${companionHint}. The protagonist MUST be rendered as a ${protagNoun} (matching image 1's gender, face, and hair). The companion MUST be rendered as a ${compNoun} (matching image 2's gender, face, and hair). Do not swap genders. Draw both in the SAME consistent anime art style — soft shading, expressive eyes, detailed hair. Both characters must look like they belong in the same illustration. Scene: ${animePrompt}`,
       reference_images: [referenceImageUrl, companionReferenceUrl],
       width,
       height,
@@ -118,7 +122,7 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
     model = 'Kontext Pro'
     body = {
       model: 'black-forest-labs/FLUX.1-kontext-pro',
-      prompt: `Transform this photo into an anime-style illustration with cel-shading, clean linework, and expressive eyes. The reference image shows the protagonist, a ${protagonistGender === 'female' ? 'young woman' : 'young man'}. Redraw them in anime art style and place them into the following scene, keeping their face shape, features, and expression recognizable but rendered as anime. IMPORTANT: Any other characters described in the scene are DIFFERENT people — generate them as new distinct anime characters, do NOT use the reference face for them. Scene: ${animePrompt}`,
+      prompt: `Transform this photo into an anime-style illustration with cel-shading, clean linework, and expressive eyes. The reference image shows the protagonist, a ${protagNoun}. Redraw them in anime art style as a ${protagNoun} and place them into the following scene, keeping their face shape, features, and expression recognizable but rendered as anime. Do not change their gender. IMPORTANT: Any other characters described in the scene are DIFFERENT people — generate them as new distinct anime characters, do NOT use the reference face for them. Scene: ${animePrompt}`,
       image_url: referenceImageUrl,
       width,
       height,
