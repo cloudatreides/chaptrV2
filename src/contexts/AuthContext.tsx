@@ -17,18 +17,28 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
-/** Hydrate the Zustand store from Supabase saved state */
+/** Hydrate the Zustand store from Supabase saved state.
+ *  Hydrate when EITHER:
+ *    (a) local has no meaningful data (fresh login, just-cleared localStorage), OR
+ *    (b) cloud is newer than local (last-write-wins for same-user multi-device).
+ *  Old logic compared timestamps only and was poisoned by the store's default
+ *  lastSessionTimestamp = Date.now() at init, which always made fresh local
+ *  state look "newer" than cloud and silently discarded the user's data. */
 async function hydrateFromCloud(userId: string) {
   const cloudState = await loadGameState(userId)
-  if (!cloudState) return // No saved state — first-time user or never synced
+  if (!cloudState) return
 
-  // Compare timestamps: use whichever is newer (cloud vs local)
-  const localTimestamp = useStore.getState().lastSessionTimestamp ?? 0
+  const local = useStore.getState()
+  const hasLocalData =
+    (local.characters?.length ?? 0) > 0 ||
+    Object.keys(local.storyProgress ?? {}).length > 0 ||
+    Object.keys(local.travelTrips ?? {}).length > 0
+
+  const localTimestamp = local.lastSessionTimestamp ?? 0
   const cloudTimestamp = (cloudState.lastSessionTimestamp as number) ?? 0
 
-  if (cloudTimestamp >= localTimestamp) {
-    // Cloud is newer or equal — hydrate store from cloud
-    useStore.setState(cloudState)
+  if (!hasLocalData || cloudTimestamp >= localTimestamp) {
+    useStore.setState(cloudState as Partial<typeof local>)
   }
 }
 
@@ -111,6 +121,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         favoriteCastIds: state.favoriteCastIds,
         storyMoments: state.storyMoments,
         customCompanions: state.customCompanions,
+        travelTrips: state.travelTrips,
+        activeTripId: state.activeTripId,
       }
       await saveGameState(userId, partialState)
     }

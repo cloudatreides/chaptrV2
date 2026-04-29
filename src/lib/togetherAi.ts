@@ -47,8 +47,9 @@ async function cacheImage(hash: string, imageUrl: string, prompt: string): Promi
   }
 }
 
-async function persistImage(imageUrl: string, promptKey: string, category: 'scenes' | 'portraits'): Promise<string> {
-  if (!imageUrl || imageUrl.startsWith('data:')) return imageUrl
+async function persistImage(imageUrl: string, promptKey: string, category: 'scenes' | 'portraits'): Promise<string | null> {
+  if (!imageUrl) return null
+  if (imageUrl.startsWith('data:')) return imageUrl
   const hash = await hashPrompt(promptKey)
   const path = `${category}/${hash}.png`
   return uploadImageToStorage(imageUrl, path)
@@ -179,8 +180,10 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
           if (fallbackUrl) {
             console.log(`[Scene Schnell fallback] generated in ${elapsed}s`)
             const persisted = await persistImage(fallbackUrl, cacheKey, 'scenes')
-            const hash = await hashPrompt(cacheKey)
-            cacheImage(hash, persisted, genderedPrompt)
+            if (persisted) {
+              const hash = await hashPrompt(cacheKey)
+              cacheImage(hash, persisted, genderedPrompt)
+            }
             return persisted
           }
           const fb64 = fallbackData.data?.[0]?.b64_json
@@ -206,7 +209,7 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
 
     const persistKey = (useFlux2 || useKontext) ? `${cacheKey}|${referenceImageUrl}` : cacheKey
     const persisted = await persistImage(resultUrl, persistKey, 'scenes')
-    if (!useFlux2 && !useKontext) {
+    if (persisted && !useFlux2 && !useKontext) {
       const hash = await hashPrompt(cacheKey)
       cacheImage(hash, persisted, genderedPrompt)
     }

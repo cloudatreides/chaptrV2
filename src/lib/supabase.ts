@@ -70,26 +70,48 @@ export async function getPlaythrough(id: string): Promise<PlaythroughData & { id
 
 // ─── Selfie Storage ───
 
-export async function uploadImageToStorage(imageUrl: string, path: string): Promise<string> {
+async function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onloadend = () => resolve(reader.result as string)
+    reader.onerror = reject
+    reader.readAsDataURL(blob)
+  })
+}
+
+/** Persist an image URL to Supabase storage. Returns a durable URL or null —
+ *  NEVER an ephemeral CDN URL. If Supabase upload fails but we already have
+ *  the blob, falls back to a data: URL so the image still works (heavier in
+ *  localStorage but zero broken-link risk). If even the fetch fails, returns
+ *  null so callers can skip storing the result. */
+export async function uploadImageToStorage(imageUrl: string, path: string): Promise<string | null> {
   try {
+    // Already-durable URLs pass through unchanged.
     if (imageUrl.startsWith('data:') || imageUrl.includes('tbrnfiixertryutrijau.supabase.co')) {
       return imageUrl
     }
     const res = await fetch(imageUrl)
-    if (!res.ok) return imageUrl
+    if (!res.ok) {
+      console.warn('[Image persist] source fetch failed:', res.status, imageUrl.slice(0, 80))
+      return null
+    }
     const blob = await res.blob()
     const { error } = await supabase.storage
       .from('chaptr-images')
       .upload(path, blob, { contentType: 'image/png', upsert: true })
     if (error) {
-      console.warn('[Image persist] upload failed:', error.message)
-      return imageUrl
+      console.warn('[Image persist] Supabase upload failed, falling back to data: URL:', error.message)
+      try {
+        return await blobToDataUrl(blob)
+      } catch {
+        return null
+      }
     }
     const { data } = supabase.storage.from('chaptr-images').getPublicUrl(path)
     return data.publicUrl
   } catch (e) {
     console.warn('[Image persist] error:', e)
-    return imageUrl
+    return null
   }
 }
 

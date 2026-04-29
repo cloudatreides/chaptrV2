@@ -27,6 +27,9 @@ export function useGameStateSync() {
         favoriteCastIds: state.favoriteCastIds,
         storyMoments: state.storyMoments,
         customCompanions: state.customCompanions,
+        // Travel state — was previously local-only and silently lost on logout.
+        travelTrips: state.travelTrips,
+        activeTripId: state.activeTripId,
       }
       queueSave(user.id, partialState)
     })
