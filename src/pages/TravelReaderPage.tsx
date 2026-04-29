@@ -17,6 +17,8 @@ import { DepartureScreen } from '../components/travel/DepartureScreen'
 import { TripComplete } from '../components/travel/TripComplete'
 import type { ChatMessage, TripScene } from '../store/useStore'
 import { SelfieImg } from '../components/SelfieImg'
+import { StreamedText } from '../components/StreamedText'
+import { TypingIndicator } from '../components/TypingIndicator'
 import { lofiPlayer } from '../lib/lofiPlayer'
 import { ambientAudio } from '../lib/ambientAudio'
 
@@ -1804,23 +1806,23 @@ export function TravelReaderPage() {
                         ) : (
                           <div key={j} className="flex justify-start">
                             <div className="max-w-[80%] rounded-2xl px-4 py-2.5 break-words" style={{ background: 'rgba(255,255,255,0.06)', borderBottomLeftRadius: 4 }}>
-                              <p className="text-[14px] leading-relaxed text-white whitespace-pre-wrap" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                                {seg.text}
-                              </p>
+                              <StreamedText
+                                text={seg.text}
+                                className="text-[14px] leading-relaxed text-white"
+                                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                              />
                             </div>
                           </div>
                         )
                       )}
-                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-purple-400/60 animate-pulse ml-1" />
                     </div>
                   )}
 
                   {isStreaming && !streamedText && (
-                    <div className="flex justify-start">
-                      <div className="px-4 py-2.5">
-                        <Loader2 size={16} className="text-white/30 animate-spin" />
-                      </div>
-                    </div>
+                    <TypingIndicator
+                      avatarUrl={companionPortrait}
+                      fallback={companion.character.avatar}
+                    />
                   )}
                 </div>
                 <div ref={chatEndRef} />
