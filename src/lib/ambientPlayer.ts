@@ -46,7 +46,15 @@ const VIBE_TRACKS: Record<Vibe, string[]> = {
   'nordic': ['/audio/ambient/nordic.mp3'],
 }
 
-const FALLBACK_TRACKS = ['/audio/ambient/fallback.mp3']
+const FALLBACK_TRACKS = [
+  '/audio/ambient/lofi-1.mp3',
+  '/audio/ambient/lofi-2.mp3',
+  '/audio/ambient/lofi-3.mp3',
+  '/audio/ambient/lofi-4.mp3',
+  '/audio/ambient/lofi-5.mp3',
+  '/audio/ambient/lofi-6.mp3',
+  '/audio/ambient/lofi-7.mp3',
+]
 
 class AmbientPlayer {
   private audio: HTMLAudioElement | null = null
@@ -86,11 +94,12 @@ class AmbientPlayer {
     audio.volume = 0
     audio.preload = 'auto'
     audio.addEventListener('error', () => {
-      // Per-vibe file missing → swap to fallback once
-      if (audio.src.endsWith(FALLBACK_TRACKS[0])) return
-      audio.src = FALLBACK_TRACKS[0]
-      audio.load()
-      if (this._enabled) audio.play().then(() => this.fadeTo(VOLUME)).catch(() => {})
+      // Per-vibe file missing → swap entire track list to fallback so prev/next cycles through it
+      if (this.currentTracks === FALLBACK_TRACKS) return
+      this.currentTracks = FALLBACK_TRACKS
+      this.trackIndex = 0
+      this.persistIndex()
+      this.loadAndPlay()
     }, { once: true })
     return audio
   }
