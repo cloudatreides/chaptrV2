@@ -974,7 +974,7 @@ export const useStore = create<StoreState>()(
     }),
     {
       name: 'chaptr-v2-story',
-      version: 9,
+      version: 10,
       migrate: (persisted: any, version: number) => {
         if (version < 2 && persisted) {
           // Migrate from flat store to multi-character
@@ -1047,6 +1047,41 @@ export const useStore = create<StoreState>()(
         }
         if (version < 9 && persisted) {
           persisted.customCompanions = persisted.customCompanions ?? []
+        }
+        if (version < 10 && persisted) {
+          // Strip ephemeral Together AI URLs that have expired (or will).
+          // These leak into characters / customCompanions / trip scene + departure
+          // images when an upload to Supabase silently failed in older code.
+          const isEphemeral = (u: unknown): u is string =>
+            typeof u === 'string' && (
+              u.includes('api.together.ai/shrt') ||
+              u.includes('api.together.xyz/shrt') ||
+              u.includes('together.ai/imgproxy')
+            )
+          if (Array.isArray(persisted.characters)) {
+            persisted.characters = persisted.characters.map((c: any) =>
+              isEphemeral(c?.selfieUrl) ? { ...c, selfieUrl: null } : c
+            )
+          }
+          if (Array.isArray(persisted.customCompanions)) {
+            persisted.customCompanions = persisted.customCompanions.map((c: any) =>
+              isEphemeral(c?.remix?.imageUrl)
+                ? { ...c, remix: { ...c.remix, imageUrl: undefined } }
+                : c
+            )
+          }
+          if (persisted.travelTrips && typeof persisted.travelTrips === 'object') {
+            for (const trip of Object.values(persisted.travelTrips as Record<string, any>)) {
+              if (trip && isEphemeral(trip.departureImageUrl)) {
+                trip.departureImageUrl = undefined
+              }
+              if (trip?.sceneImages && typeof trip.sceneImages === 'object') {
+                for (const k of Object.keys(trip.sceneImages)) {
+                  if (isEphemeral(trip.sceneImages[k])) delete trip.sceneImages[k]
+                }
+              }
+            }
+          }
         }
         return persisted
       },
