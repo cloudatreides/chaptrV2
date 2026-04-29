@@ -57,19 +57,27 @@ export default async function handler(req: Request) {
       }
     }
   } else {
-    // Food (and any non-place query): Pexels first — stock food photos are great
-    if (pexelsKey) {
-      try {
-        const result = await pexelsSearch(query, pexelsKey)
-        if (result) return jsonResponse(result)
-      } catch {
-        // Fall through
-      }
+    // Food: Wikipedia first — named dishes have infobox photos that beat
+    // stock-photo guesses (Pexels returned a NYC hot dog cart for "pad thai")
+    try {
+      const result = await wikipediaImageSearch(query)
+      if (result) return jsonResponse(result)
+    } catch {
+      // Fall through
     }
 
     if (googleKey && googleCx) {
       try {
         const result = await googleImageSearch(query, googleKey, googleCx)
+        if (result) return jsonResponse(result)
+      } catch {
+        // Fall through to Pexels
+      }
+    }
+
+    if (pexelsKey) {
+      try {
+        const result = await pexelsSearch(query, pexelsKey)
         if (result) return jsonResponse(result)
       } catch {
         // No result
