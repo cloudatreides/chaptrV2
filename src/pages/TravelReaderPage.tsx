@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Send, Loader2, MapPin, ChevronRight, Lock, Check, Play, ChevronDown, Plus, X, Volume2, VolumeX, ImagePlus } from 'lucide-react'
+import { ArrowLeft, Send, Loader2, MapPin, ChevronRight, Lock, Check, Play, ChevronDown, Plus, X, Volume2, VolumeX, ImagePlus, RefreshCw } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { getDestination } from '../data/travel/destinations'
 import { getTravelCompanion } from '../data/travel/companions'
@@ -164,6 +164,31 @@ export function TravelReaderPage() {
   const [showCompanionSettings, setShowCompanionSettings] = useState(false)
   const [imageLoadingSceneId, setImageLoadingSceneId] = useState<string | null>(null)
   const [isGeneratingChatImage, setIsGeneratingChatImage] = useState(false)
+  const [isRegeneratingDeparture, setIsRegeneratingDeparture] = useState(false)
+
+  const regenerateDepartureImage = async () => {
+    if (!destination || !companionName || isRegeneratingDeparture) return
+    setIsRegeneratingDeparture(true)
+    try {
+      const hasBothRefs = !!(activeChar?.selfieUrl && companionPortrait)
+      const prompt = hasBothRefs
+        ? `Two friends at an airport gate, excited to travel to ${destination.city}. They stand side by side with backpacks, a plane visible through the window behind them. Warm golden hour light streaming through large terminal windows, no text, no signs, no departure boards`
+        : `Cinematic wide shot of ${destination.city} skyline at golden hour, seen through an airport terminal window. A plane on the tarmac ready for departure. Warm sunlight, atmospheric, no people, no text, no signs`
+      const url = await generateImage({
+        prompt,
+        width: 768,
+        height: 576,
+        referenceImageUrl: activeChar?.selfieUrl || undefined,
+        companionReferenceUrl: companionPortrait || undefined,
+        companionDescription: companion?.character.portraitPrompt ?? companionVisualDesc,
+        includesProtagonist: hasBothRefs,
+        protagonistGender: activeChar?.gender ?? 'male',
+      })
+      if (url) setDepartureImage(url)
+    } finally {
+      setIsRegeneratingDeparture(false)
+    }
+  }
   const [localSliders, setLocalSliders] = useState<{ chattiness: number; planningStyle: number; vibe: number } | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [showActions, setShowActions] = useState(false)
@@ -1428,8 +1453,22 @@ export function TravelReaderPage() {
                       src={trip.departureImageUrl}
                       alt=""
                       className="w-full"
-                      style={{ aspectRatio: '4/3', objectFit: 'cover' }}
+                      style={{ aspectRatio: '4/3', objectFit: 'cover', opacity: isRegeneratingDeparture ? 0.4 : 1, transition: 'opacity 0.2s' }}
                     />
+                    {isRegeneratingDeparture && (
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ aspectRatio: '4/3' }}>
+                        <Loader2 size={28} className="animate-spin text-white/70" />
+                      </div>
+                    )}
+                    <button
+                      onClick={regenerateDepartureImage}
+                      disabled={isRegeneratingDeparture}
+                      className="cursor-pointer absolute top-2.5 left-2.5 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-colors hover:bg-black/70 disabled:opacity-60 disabled:cursor-not-allowed"
+                      style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)', color: 'rgba(255,255,255,0.85)', fontFamily: "'Space Grotesk', sans-serif", border: '1px solid rgba(255,255,255,0.08)' }}
+                    >
+                      <RefreshCw size={11} className={isRegeneratingDeparture ? 'animate-spin' : ''} />
+                      {isRegeneratingDeparture ? 'Regenerating...' : 'Regenerate'}
+                    </button>
                     <div className="px-4 py-3" style={{ background: 'rgba(124,58,237,0.06)' }}>
                       <p className="text-white/50 text-xs" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                         You and {companionName} just landed in {destination.city} {destination.countryEmoji}
