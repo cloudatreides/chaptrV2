@@ -730,12 +730,16 @@ export function HomePage() {
 
   const hasCharacters = characters.length > 0
   const activeCharacter = characters.find((c) => c.id === activeCharacterId) ?? characters[0]
+  // Treat ephemeral URLs (eg. Together AI shrt URLs that already expired) as
+  // "no selfie" — they 404 on load and would otherwise mask the upload-CTA.
+  const hasUsableSelfie = (c: typeof activeCharacter | undefined) =>
+    !!c?.selfieUrl && !c.selfieUrl.includes('api.together.ai/shrt') && !c.selfieUrl.includes('api.together.xyz/shrt') && !c.selfieUrl.includes('together.ai/imgproxy')
   // Prefer to render a twin that actually has a selfie. If the active twin
   // doesn't have one but a sibling does, show the sibling so we never fall
   // back to the "Upload a selfie" hero when twins already exist.
-  const characterToShow = activeCharacter?.selfieUrl
+  const characterToShow = hasUsableSelfie(activeCharacter)
     ? activeCharacter
-    : (characters.find((c) => c.selfieUrl) ?? activeCharacter)
+    : (characters.find(hasUsableSelfie) ?? activeCharacter)
 
   // ─── Ambient pings ───
   useEffect(() => {
@@ -845,10 +849,10 @@ export function HomePage() {
           </div>
 
           {/* Twin Hero or Upload CTA */}
-          {hasCharacters && characterToShow?.selfieUrl ? (
-            <TwinHero character={characterToShow} allCharacters={characters} onEdit={() => navigate('/characters')} onSwitch={(id) => setActiveCharacter(id)} onCreateNew={() => navigate('/create-character')} onSetDefault={(id) => setDefaultCharacter(id)} />
+          {hasCharacters && hasUsableSelfie(characterToShow) ? (
+            <TwinHero character={characterToShow!} allCharacters={characters} onEdit={() => navigate('/characters')} onSwitch={(id) => setActiveCharacter(id)} onCreateNew={() => navigate('/create-character')} onSetDefault={(id) => setDefaultCharacter(id)} />
           ) : (
-            <UploadHero onClick={() => navigate('/create-character')} />
+            <UploadHero onClick={() => navigate(hasCharacters && activeCharacter ? `/create-character?edit=${activeCharacter.id}` : '/create-character')} />
           )}
 
           {/* Journey stats */}
@@ -896,10 +900,10 @@ export function HomePage() {
 
             {/* Twin Hero or Upload CTA */}
             <div className="mb-6">
-              {hasCharacters && activeCharacter?.selfieUrl ? (
-                <TwinHero character={activeCharacter} allCharacters={characters} onEdit={() => navigate('/characters')} onSwitch={(id) => setActiveCharacter(id)} onCreateNew={() => navigate('/create-character')} onSetDefault={(id) => setDefaultCharacter(id)} />
+              {hasCharacters && hasUsableSelfie(characterToShow) ? (
+                <TwinHero character={characterToShow!} allCharacters={characters} onEdit={() => navigate('/characters')} onSwitch={(id) => setActiveCharacter(id)} onCreateNew={() => navigate('/create-character')} onSetDefault={(id) => setDefaultCharacter(id)} />
               ) : (
-                <UploadHero onClick={() => navigate('/create-character')} />
+                <UploadHero onClick={() => navigate(hasCharacters && activeCharacter ? `/create-character?edit=${activeCharacter.id}` : '/create-character')} />
               )}
             </div>
 
