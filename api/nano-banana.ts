@@ -4,14 +4,14 @@ export const config = { runtime: 'edge' }
 
 const MAX_REQUESTS_PER_MINUTE = 20
 
-// Try these model names in order. Different keys / regions / waitlists expose
-// different IDs — the API returns 404 if a name isn't available to the key.
+// Verified model IDs (matched against Gemini ListModels output, Apr 2026):
+//   gemini-3.1-flash-image-preview  → "Nano Banana 2"
+//   gemini-3-pro-image-preview      → "Nano Banana Pro"
+//   gemini-2.5-flash-image          → "Nano Banana" (original)
 const PRIMARY_CHAIN = [
-  'gemini-3-pro-image-preview',     // Nano Banana 2 / Pro (Gemini 3 image)
-  'gemini-3-pro-image',
-  'gemini-2.5-flash-image-preview', // Nano Banana original (Gemini 2.5 image)
+  'gemini-3.1-flash-image-preview',
+  'gemini-3-pro-image-preview',
   'gemini-2.5-flash-image',
-  'gemini-2.0-flash-exp-image-generation',
 ]
 
 interface RequestBody {
@@ -51,7 +51,7 @@ async function callGemini(model: string, prompt: string, refs: { data: string; m
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       contents: [{ parts }],
-      generationConfig: { responseModalities: ['IMAGE'] },
+      generationConfig: { responseModalities: ['TEXT', 'IMAGE'] },
     }),
   })
 }

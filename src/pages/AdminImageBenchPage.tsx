@@ -10,14 +10,21 @@ const SG = "'Space Grotesk', sans-serif"
 
 const DEFAULT_PROMPT = `Anime illustration, two people in the foreground, posing for a photo together at an airport gate: a young man on the left and a young woman on the right, both smiling at the camera, both wearing backpacks, excited to travel to Bangkok. Behind them, large terminal windows show a plane on the tarmac in warm golden hour light. No text, no signs, no departure boards`
 
-type ModelId = 'flux2' | 'kontext' | 'schnell' | 'nano-banana-2' | 'nano-banana'
+type ModelId = 'flux2' | 'kontext' | 'schnell' | 'nano-banana-2' | 'nano-banana-pro' | 'nano-banana'
 
 const MODEL_LABELS: Record<ModelId, string> = {
   'flux2': 'FLUX.2 Pro',
   'kontext': 'Kontext Pro',
   'schnell': 'Schnell',
-  'nano-banana-2': 'Nano Banana 2 (Gemini 3)',
+  'nano-banana-2': 'Nano Banana 2 (Gemini 3.1 Flash)',
+  'nano-banana-pro': 'Nano Banana Pro (Gemini 3 Pro)',
   'nano-banana': 'Nano Banana (Gemini 2.5)',
+}
+
+const NANO_MODEL_IDS: Partial<Record<ModelId, string>> = {
+  'nano-banana-2': 'gemini-3.1-flash-image-preview',
+  'nano-banana-pro': 'gemini-3-pro-image-preview',
+  'nano-banana': 'gemini-2.5-flash-image',
 }
 
 interface Result {
@@ -95,7 +102,8 @@ export function AdminImageBenchPage() {
   }
 
   async function runNano(model: ModelId) {
-    const apiModel = model === 'nano-banana-2' ? 'gemini-3-pro-image-preview' : 'gemini-2.5-flash-image-preview'
+    const apiModel = NANO_MODEL_IDS[model]
+    if (!apiModel) return
     setBusy(model, true)
     updateResult(model, {})
     const t0 = performance.now()
@@ -119,6 +127,7 @@ export function AdminImageBenchPage() {
     runKontext()
     runSchnell()
     runNano('nano-banana-2')
+    runNano('nano-banana-pro')
     runNano('nano-banana')
   }
 
@@ -192,6 +201,9 @@ export function AdminImageBenchPage() {
           </button>
           <button onClick={() => runNano('nano-banana-2')} className="cursor-pointer px-4 py-2 rounded-lg bg-[#1a1525] border border-[#2a2040] text-white/80 text-sm">
             Nano Banana 2 only
+          </button>
+          <button onClick={() => runNano('nano-banana-pro')} className="cursor-pointer px-4 py-2 rounded-lg bg-[#1a1525] border border-[#2a2040] text-white/80 text-sm">
+            Nano Banana Pro only
           </button>
           <button onClick={() => runNano('nano-banana')} className="cursor-pointer px-4 py-2 rounded-lg bg-[#1a1525] border border-[#2a2040] text-white/80 text-sm">
             Nano Banana only
