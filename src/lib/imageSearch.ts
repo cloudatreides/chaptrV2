@@ -2,18 +2,19 @@ const cache = new Map<string, string | null>()
 
 export async function fetchPlaceImage(placeName: string, city: string): Promise<string | null> {
   const query = `${placeName} ${city}`
-  if (cache.has(query)) return cache.get(query)!
+  const cacheKey = `place:${query}`
+  if (cache.has(cacheKey)) return cache.get(cacheKey)!
 
   try {
-    const resp = await fetch(`/api/image-search?q=${encodeURIComponent(query)}`)
+    const resp = await fetch(`/api/image-search?type=place&q=${encodeURIComponent(query)}`)
     if (!resp.ok) return null
 
     const data = await resp.json()
     const url = data?.url ?? null
-    cache.set(query, url)
+    cache.set(cacheKey, url)
     return url
   } catch {
-    cache.set(query, null)
+    cache.set(cacheKey, null)
     return null
   }
 }
@@ -29,18 +30,19 @@ export function parsePlaceTags(text: string): { cleanText: string; places: strin
 
 export async function fetchFoodImage(dishName: string, _city: string): Promise<string | null> {
   const query = `${dishName} dish close up photo`
-  if (cache.has(query)) return cache.get(query)!
+  const cacheKey = `food:${query}`
+  if (cache.has(cacheKey)) return cache.get(cacheKey)!
 
   try {
-    const resp = await fetch(`/api/image-search?q=${encodeURIComponent(query)}`)
+    const resp = await fetch(`/api/image-search?type=food&q=${encodeURIComponent(query)}`)
     if (!resp.ok) return null
 
     const data = await resp.json()
     const url = data?.url ?? null
-    cache.set(query, url)
+    cache.set(cacheKey, url)
     return url
   } catch {
-    cache.set(query, null)
+    cache.set(cacheKey, null)
     return null
   }
 }
