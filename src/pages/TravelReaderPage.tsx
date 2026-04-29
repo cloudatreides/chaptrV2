@@ -1401,6 +1401,22 @@ export function TravelReaderPage() {
             </span>
             <ChevronUp size={10} className="text-purple-300/60" />
           </button>
+          {!isStreaming && trip.phase === 'day' && currentScene?.prose && (() => {
+            const dayChatMessages = trip.dayChatHistories[trip.currentDay] ?? []
+            const userMsgCount = dayChatMessages.filter((m) => m.role === 'user').length
+            return userMsgCount >= 2 ? (
+              <button
+                onClick={handleNextScene}
+                className="shrink-0 h-8 rounded-full flex items-center gap-1 px-2.5 cursor-pointer transition-colors hover:bg-white/10"
+                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)' }}
+                title="Next scene"
+                aria-label="Next scene"
+              >
+                <span className="text-[11px] text-white/85 font-medium" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Next</span>
+                <ChevronRight size={11} className="text-white/60" />
+              </button>
+            ) : null
+          })()}
           <motion.div
             animate={!ambientPlaying && showAmbientLabel ? { scale: [1, 1.04, 1] } : {}}
             transition={!ambientPlaying && showAmbientLabel ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } : {}}

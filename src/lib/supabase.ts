@@ -86,16 +86,25 @@ async function blobToDataUrl(blob: Blob): Promise<string> {
  *  null so callers can skip storing the result. */
 export async function uploadImageToStorage(imageUrl: string, path: string): Promise<string | null> {
   try {
-    // Already-durable URLs pass through unchanged.
-    if (imageUrl.startsWith('data:') || imageUrl.includes('tbrnfiixertryutrijau.supabase.co')) {
+    // Supabase URLs pass through unchanged.
+    if (imageUrl.includes('tbrnfiixertryutrijau.supabase.co')) {
       return imageUrl
     }
-    const res = await fetch(imageUrl)
-    if (!res.ok) {
-      console.warn('[Image persist] source fetch failed:', res.status, imageUrl.slice(0, 80))
-      return null
+    let blob: Blob
+    if (imageUrl.startsWith('data:')) {
+      // data: URL → convert to blob (no network, no CORS)
+      const res = await fetch(imageUrl)
+      blob = await res.blob()
+    } else {
+      // External URL (e.g. Together AI). Many CDNs block CORS, so this can fail —
+      // prefer b64_json from upstream so we end up in the data: branch above.
+      const res = await fetch(imageUrl)
+      if (!res.ok) {
+        console.warn('[Image persist] source fetch failed:', res.status, imageUrl.slice(0, 80))
+        return null
+      }
+      blob = await res.blob()
     }
-    const blob = await res.blob()
     const { error } = await supabase.storage
       .from('chaptr-images')
       .upload(path, blob, { contentType: 'image/png', upsert: true })

@@ -49,7 +49,6 @@ async function cacheImage(hash: string, imageUrl: string, prompt: string): Promi
 
 async function persistImage(imageUrl: string, promptKey: string, category: 'scenes' | 'portraits'): Promise<string | null> {
   if (!imageUrl) return null
-  if (imageUrl.startsWith('data:')) return imageUrl
   const hash = await hashPrompt(promptKey)
   const path = `${category}/${hash}.png`
   return uploadImageToStorage(imageUrl, path)
@@ -143,7 +142,7 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
       height,
       steps: 25,
       n: 1,
-      response_format: 'url',
+      response_format: 'b64_json',
     }
   } else {
     model = 'Schnell'
@@ -153,7 +152,7 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
       aspect_ratio: toAspectRatio(width, height),
       steps: 8,
       n: 1,
-      response_format: 'url',
+      response_format: 'b64_json',
     }
   }
 
@@ -180,7 +179,7 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
           aspect_ratio: toAspectRatio(width, height),
           steps: 8,
           n: 1,
-          response_format: 'url',
+          response_format: 'b64_json',
         }
         const fallbackResp = await fetch('/api/together', {
           method: 'POST',
@@ -247,7 +246,7 @@ export async function generateCharacterPortrait(prompt: string): Promise<string 
         aspect_ratio: '1:1',
         steps: 4,
         n: 1,
-        response_format: 'url',
+        response_format: 'b64_json',
       }),
     })
 
