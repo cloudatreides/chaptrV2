@@ -136,15 +136,22 @@ export function AdminImageBenchPage() {
   }
 
 
-  // Remixed companions you created — only the ones with a custom photo are
-  // useful here, since the bench needs an image URL to feed the model.
-  // Skip ephemeral Together AI URLs that have expired — they'd 404.
-  const allRemixesWithPhoto = customCompanions.filter((c) => !!c.remix.imageUrl)
-  const remixOptions = allRemixesWithPhoto
-    .filter((c) => !isEphemeralLike(c.remix.imageUrl!))
-    .map((c) => ({ name: c.remix.name, url: c.remix.imageUrl! }))
-  const deadRemixNames = allRemixesWithPhoto
-    .filter((c) => isEphemeralLike(c.remix.imageUrl!))
+  // Remixed companions you created. Use the custom uploaded photo if present
+  // and not ephemeral; otherwise fall back to the base companion's static
+  // portrait so every remix is selectable in the bench.
+  const remixOptions = customCompanions
+    .map((c) => {
+      const customUrl = c.remix.imageUrl && !isEphemeralLike(c.remix.imageUrl) ? c.remix.imageUrl : null
+      const base = getTravelCompanion(c.baseId)
+      const url = customUrl ?? base?.character.staticPortrait ?? null
+      const label = base && base.character.name !== c.remix.name
+        ? `${c.remix.name} (remix of ${base.character.name})`
+        : c.remix.name
+      return url ? { name: label, url } : null
+    })
+    .filter((o): o is { name: string; url: string } => o !== null)
+  const deadRemixNames = customCompanions
+    .filter((c) => c.remix.imageUrl && isEphemeralLike(c.remix.imageUrl) && !getTravelCompanion(c.baseId)?.character.staticPortrait)
     .map((c) => c.remix.name)
 
   // Initial values: prefer localStorage so refresh keeps your test URLs.
