@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Lock, MessageCircle, X, Users, Check, Star } from 'lucide-react'
+import { ArrowLeft, Lock, MessageCircle, X, Users, Check, Star, Plane } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { AppSidebar } from '../components/AppSidebar'
 import { CAST_ROSTER, UNIVERSE_COLORS, getCastCharacter } from '../data/castRoster'
 import { getAffinityTier } from '../lib/affinity'
+import { getTravelCompanion } from '../data/travel/companions'
 import type { CastMember } from '../data/castRoster'
 
 export function CastPage() {
@@ -16,6 +17,21 @@ export function CastPage() {
   const groupCastThreads = useStore((s) => s.groupCastThreads)
   const favoriteCastIds = useStore((s) => s.favoriteCastIds)
   const toggleFavoriteCast = useStore((s) => s.toggleFavoriteCast)
+  const customCompanions = useStore((s) => s.customCompanions)
+  const travelTrips = useStore((s) => s.travelTrips)
+  const setActiveTripId = useStore((s) => s.setActiveTripId)
+
+  function handleCustomClick(_customId: string, baseId: string, remixName: string) {
+    const trip = Object.entries(travelTrips).find(([, t]) =>
+      t.companionId === baseId && (t.companionRemix?.name === remixName || (!t.companionRemix && getTravelCompanion(baseId)?.character.name === remixName))
+    )
+    if (trip) {
+      setActiveTripId(trip[0])
+      navigate('/travel/trip')
+    } else {
+      navigate('/travel')
+    }
+  }
 
   // Existing group chats (ones with messages)
   const existingGroupChats = Object.entries(groupCastThreads)
@@ -228,6 +244,43 @@ export function CastPage() {
               })}
             </div>
           </div>
+
+          {/* Travel companions (remixed) */}
+          {!selectMode && customCompanions.length > 0 && (
+            <div>
+              <p className="text-[#a78bfa]/60 text-[10px] font-semibold tracking-[2px] uppercase mb-3">YOUR TRAVEL COMPANIONS</p>
+              <div className="grid grid-cols-2 gap-3">
+                {customCompanions.map((cc, i) => {
+                  const base = getTravelCompanion(cc.baseId)
+                  const portrait = cc.remix.imageUrl ?? base?.character.staticPortrait
+                  return (
+                    <motion.button
+                      key={cc.id}
+                      onClick={() => handleCustomClick(cc.id, cc.baseId, cc.remix.name)}
+                      className="cursor-pointer relative flex flex-col items-center gap-1.5 rounded-2xl p-3 pb-2.5 text-center"
+                      style={{ background: '#111016', border: '1px solid rgba(167,139,250,0.22)' }}
+                      initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
+                      whileTap={{ scale: 0.97 }}
+                    >
+                      <div className="absolute top-1.5 right-1.5 flex items-center gap-1 px-1.5 py-0.5 rounded-md" style={{ background: 'rgba(167,139,250,0.12)' }}>
+                        <Plane size={8} className="text-purple-300/80" />
+                        <span className="text-[8px] font-semibold text-purple-200/80">Travel</span>
+                      </div>
+                      <div className="w-12 h-12 rounded-full overflow-hidden shrink-0" style={{ border: '2px solid #a78bfa', background: '#1A1624' }}>
+                        {portrait ? (
+                          <img src={portrait} alt={cc.remix.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-xl">{base?.character.avatar ?? cc.remix.name[0]}</div>
+                        )}
+                      </div>
+                      <p className="text-white text-[11px] font-semibold">{cc.remix.name}</p>
+                      <p className="text-white/30 text-[9px]">Remix of {base?.character.name ?? cc.baseId}</p>
+                    </motion.button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Locked — inviting cards (hidden in select mode) */}
           {!selectMode && locked.length > 0 && (
@@ -465,6 +518,49 @@ export function CastPage() {
               )
             })}
           </div>
+
+          {/* Travel companions (remixed) */}
+          {!selectMode && customCompanions.length > 0 && (
+            <div className="mb-10">
+              <p className="text-[#a78bfa]/60 text-[11px] font-semibold tracking-[1.5px] uppercase mb-4">YOUR TRAVEL COMPANIONS</p>
+              <div className="grid grid-cols-3 gap-4">
+                {customCompanions.map((cc, i) => {
+                  const base = getTravelCompanion(cc.baseId)
+                  const portrait = cc.remix.imageUrl ?? base?.character.staticPortrait
+                  return (
+                    <motion.button
+                      key={cc.id}
+                      onClick={() => handleCustomClick(cc.id, cc.baseId, cc.remix.name)}
+                      className="cursor-pointer relative flex items-center gap-4 rounded-2xl p-4 text-left transition-all hover:brightness-110"
+                      style={{ background: '#111016', border: '1px solid rgba(167,139,250,0.22)' }}
+                      initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
+                    >
+                      <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-md" style={{ background: 'rgba(167,139,250,0.12)' }}>
+                        <Plane size={9} className="text-purple-300/80" />
+                        <span className="text-[9px] font-semibold text-purple-200/80">Travel</span>
+                      </div>
+                      <div className="w-16 h-16 rounded-full overflow-hidden shrink-0" style={{ border: '2px solid #a78bfa', background: '#1A1624' }}>
+                        {portrait ? (
+                          <img src={portrait} alt={cc.remix.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-2xl">{base?.character.avatar ?? cc.remix.name[0]}</div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0 pr-12">
+                        <p className="text-white font-semibold mb-1">{cc.remix.name}</p>
+                        <p className="text-white/30 text-xs mb-1">Remix of {base?.character.name ?? cc.baseId}</p>
+                        {cc.remix.personalityTraits.length > 0 && (
+                          <p className="text-white/40 text-xs italic truncate">
+                            {cc.remix.personalityTraits.slice(0, 2).join(', ')}
+                          </p>
+                        )}
+                      </div>
+                    </motion.button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Locked — with hover cards (hidden in select mode) */}
           {!selectMode && locked.length > 0 && (
