@@ -330,6 +330,7 @@ export function TravelReaderPage() {
         sceneContext: currentScene ? `${currentScene.location} — ${currentScene.activity}` : undefined,
         tripContext: buildTripContext(),
         bio: activeChar?.bio ?? null,
+        playerName: activeChar?.name ?? null,
       })
       if (cancelled) return
       const msg: ChatMessage = {
@@ -411,6 +412,7 @@ export function TravelReaderPage() {
         companionMemories: trip.companionMemories,
         travelAffinityScore: trip.travelAffinityScore,
         bio: activeChar?.bio ?? null,
+        playerName: activeChar?.name ?? null,
         signal: abortRef.current.signal,
       })
 
@@ -540,6 +542,7 @@ export function TravelReaderPage() {
           companionMemories: trip.companionMemories,
           travelAffinityScore: trip.travelAffinityScore,
           bio: activeChar?.bio ?? null,
+          playerName: activeChar?.name ?? null,
         }),
       ])
 
@@ -610,6 +613,7 @@ export function TravelReaderPage() {
           companionMemories: trip.companionMemories,
           travelAffinityScore: trip.travelAffinityScore,
           bio: activeChar?.bio ?? null,
+          playerName: activeChar?.name ?? null,
         }),
       ])
 
@@ -682,6 +686,7 @@ export function TravelReaderPage() {
           companionMemories: trip.companionMemories,
           travelAffinityScore: trip.travelAffinityScore,
           bio: activeChar?.bio ?? null,
+          playerName: activeChar?.name ?? null,
         }),
       ])
 
@@ -894,6 +899,7 @@ export function TravelReaderPage() {
         sceneContext: `${scene.location} — ${scene.activity}`,
         tripContext: buildTripContext(),
         bio: activeChar?.bio ?? null,
+        playerName: activeChar?.name ?? null,
       })
       const msg: ChatMessage = {
         role: 'character',

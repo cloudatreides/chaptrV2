@@ -1,0 +1,4658 @@
+{
+  "version": "2.10",
+  "children": [
+    {
+      "type": "frame",
+      "id": "EE5Jc",
+      "x": 0,
+      "y": 3,
+      "name": "01 Cover",
+      "clip": true,
+      "width": 1920,
+      "height": 1080,
+      "fill": "#0A0A0A",
+      "children": [
+        {
+          "type": "frame",
+          "id": "O7Gbs",
+          "layoutPosition": "absolute",
+          "x": 960,
+          "y": 0,
+          "name": "HeroImage",
+          "width": 960,
+          "height": 1080,
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "./images/generated-1775301678080.png",
+            "mode": "fill"
+          }
+        },
+        {
+          "type": "rectangle",
+          "id": "3hXiw",
+          "layoutPosition": "absolute",
+          "x": 0,
+          "y": 0,
+          "name": "Overlay",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 90,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#0A0A0AFF",
+                "position": 0
+              },
+              {
+                "color": "#0A0A0A99",
+                "position": 0.5
+              },
+              {
+                "color": "#0A0A0A00",
+                "position": 1
+              }
+            ]
+          },
+          "width": 1920,
+          "height": 1080
+        },
+        {
+          "type": "frame",
+          "id": "SF7XV",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 0,
+          "name": "LeftContent",
+          "width": 820,
+          "height": 1080,
+          "layout": "vertical",
+          "gap": 24,
+          "justifyContent": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "pcsf7",
+              "name": "eyebrow",
+              "fill": "#FF2D78",
+              "content": "AI-NATIVE INTERACTIVE STORY",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "600",
+              "letterSpacing": 4
+            },
+            {
+              "type": "text",
+              "id": "4rzee",
+              "name": "title",
+              "fill": "#FFFFFF",
+              "content": "CHAPTR",
+              "lineHeight": 0.9,
+              "fontFamily": "Playfair Display",
+              "fontSize": 160,
+              "fontWeight": "700"
+            },
+            {
+              "type": "rectangle",
+              "id": "nZf8j",
+              "name": "Divider",
+              "fill": "#FF2D78",
+              "width": 80,
+              "height": 4
+            },
+            {
+              "type": "text",
+              "id": "RDknT",
+              "name": "subtitle",
+              "fill": "#FFFFFFFF",
+              "textGrowth": "fixed-width",
+              "width": 720,
+              "content": "You upload your face.\nYou make the choices.\nYou get the ending.",
+              "lineHeight": 1.3,
+              "fontFamily": "Inter",
+              "fontSize": 32,
+              "fontWeight": "300"
+            },
+            {
+              "type": "text",
+              "id": "7YemK",
+              "name": "meta",
+              "fill": "#A1A1AA",
+              "content": "Business Case · 2026",
+              "fontFamily": "Inter",
+              "fontSize": 20,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "Tny36",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 1020,
+          "name": "SlideNum",
+          "fill": "#A1A1AA",
+          "content": "01 / 08",
+          "fontFamily": "Inter",
+          "fontSize": 18,
+          "fontWeight": "normal"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "I9IJg",
+      "x": 2020,
+      "y": 3,
+      "name": "02 Problem",
+      "clip": true,
+      "width": 1920,
+      "height": 1080,
+      "fill": "#0A0A0A",
+      "children": [
+        {
+          "type": "frame",
+          "id": "G6nwY",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 0,
+          "name": "Left",
+          "width": 840,
+          "height": 1080,
+          "layout": "vertical",
+          "gap": 40,
+          "justifyContent": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "lJJg1",
+              "name": "label2",
+              "fill": "#FF2D78",
+              "content": "THE PROBLEM",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "600",
+              "letterSpacing": 4
+            },
+            {
+              "type": "text",
+              "id": "QIcJ5",
+              "name": "title2",
+              "fill": "#FFFFFF",
+              "textGrowth": "fixed-width",
+              "width": 800,
+              "content": "Reading is passive.\nFans want IN.",
+              "lineHeight": 1.05,
+              "fontFamily": "Playfair Display",
+              "fontSize": 72,
+              "fontWeight": "700"
+            },
+            {
+              "type": "rectangle",
+              "id": "6wkMU",
+              "name": "divider2",
+              "fill": "#FF2D78",
+              "width": 60,
+              "height": 3
+            },
+            {
+              "type": "frame",
+              "id": "F35Nr",
+              "name": "p1",
+              "gap": 20,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 5,
+                  "id": "R4eBK",
+                  "name": "dot1",
+                  "fill": "#FF2D78",
+                  "width": 10,
+                  "height": 10
+                },
+                {
+                  "type": "text",
+                  "id": "ihXT4",
+                  "name": "p1text",
+                  "fill": "#FFFFFF",
+                  "textGrowth": "fixed-width",
+                  "width": 790,
+                  "content": "120M+ Wattpad readers consume stories they can't shape or influence",
+                  "lineHeight": 1.3,
+                  "fontFamily": "Inter",
+                  "fontSize": 28,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Jd0Q2",
+              "name": "p2",
+              "gap": 20,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 5,
+                  "id": "1Xood",
+                  "name": "dot2",
+                  "fill": "#FF2D78",
+                  "width": 10,
+                  "height": 10
+                },
+                {
+                  "type": "text",
+                  "id": "zrCpD",
+                  "name": "p2text",
+                  "fill": "#FFFFFF",
+                  "textGrowth": "fixed-width",
+                  "width": 790,
+                  "content": "K-pop fans write 4M+ fanfics — none are interactive. The genre exists but the medium is broken.",
+                  "lineHeight": 1.3,
+                  "fontFamily": "Inter",
+                  "fontSize": 28,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "YcqEF",
+              "name": "p3",
+              "gap": 20,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 5,
+                  "id": "4lHJN",
+                  "name": "dot3",
+                  "fill": "#FF2D78",
+                  "width": 10,
+                  "height": 10
+                },
+                {
+                  "type": "text",
+                  "id": "o0rmd",
+                  "name": "p3text",
+                  "fill": "#FFFFFF",
+                  "textGrowth": "fixed-width",
+                  "width": 790,
+                  "content": "Visual novels exist but YOU are never the protagonist — the fantasy is always one step removed.",
+                  "lineHeight": 1.3,
+                  "fontFamily": "Inter",
+                  "fontSize": 28,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "dxP9l",
+          "layoutPosition": "absolute",
+          "x": 1080,
+          "y": 0,
+          "name": "Right",
+          "width": 720,
+          "height": 1080,
+          "layout": "vertical",
+          "gap": 16,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "TvtXc",
+              "name": "bigNum",
+              "fill": "#FF2D78",
+              "content": "120M+",
+              "fontFamily": "Playfair Display",
+              "fontSize": 120,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "lhxx3",
+              "name": "bigNumLabel",
+              "fill": "#A1A1AA",
+              "textGrowth": "fixed-width",
+              "width": 500,
+              "content": "interactive fiction readers\nglobally — underserved",
+              "lineHeight": 1.4,
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 28,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "3F8Rb",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 1020,
+          "name": "slideNum2",
+          "fill": "#A1A1AA",
+          "content": "02 / 08",
+          "fontFamily": "Inter",
+          "fontSize": 18,
+          "fontWeight": "normal"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Ea5sy",
+      "x": 4040,
+      "y": 3,
+      "name": "03 Solution",
+      "clip": true,
+      "width": 1920,
+      "height": 1080,
+      "fill": "#0A0A0A",
+      "children": [
+        {
+          "type": "frame",
+          "id": "iuO2W",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 120,
+          "name": "Top",
+          "width": 1680,
+          "height": 300,
+          "layout": "vertical",
+          "gap": 20,
+          "children": [
+            {
+              "type": "text",
+              "id": "v0eTh",
+              "name": "label3",
+              "fill": "#FF2D78",
+              "content": "THE SOLUTION",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "600",
+              "letterSpacing": 4
+            },
+            {
+              "type": "text",
+              "id": "NfKzB",
+              "name": "title3",
+              "fill": "#FFFFFF",
+              "content": "You are the protagonist.",
+              "lineHeight": 0.95,
+              "fontFamily": "Playfair Display",
+              "fontSize": 80,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "KMVCG",
+              "name": "sub3",
+              "fill": "#A1A1AA",
+              "textGrowth": "fixed-width",
+              "width": 1400,
+              "content": "Chaptr is an AI-native interactive K-pop romance story — you upload your face, make choices that branch the narrative,\nchat with real AI characters, and receive a shareable relationship reveal that's uniquely yours.",
+              "lineHeight": 1.4,
+              "fontFamily": "Inter",
+              "fontSize": 26,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "BSNWJ",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 560,
+          "name": "Steps",
+          "width": 1680,
+          "height": 380,
+          "gap": 40,
+          "children": [
+            {
+              "type": "frame",
+              "id": "Dqz0e",
+              "name": "step1",
+              "width": "fill_container",
+              "fill": "#141414",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 20,
+              "padding": 40,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Wqy82",
+                  "name": "StepImg1",
+                  "width": "fill_container",
+                  "height": 180,
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "./images/generated-1775302144332.png",
+                    "mode": "fill"
+                  },
+                  "cornerRadius": 8
+                },
+                {
+                  "type": "text",
+                  "id": "yQ6iY",
+                  "name": "step1num",
+                  "fill": "#FF2D78",
+                  "content": "01",
+                  "fontFamily": "Playfair Display",
+                  "fontSize": 56,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "flxUi",
+                  "name": "step1title",
+                  "fill": "#FFFFFF",
+                  "content": "Upload Your Face",
+                  "fontFamily": "Inter",
+                  "fontSize": 28,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "6YJYi",
+                  "name": "step1desc",
+                  "fill": "#A1A1AA",
+                  "textGrowth": "fixed-width",
+                  "width": 380,
+                  "content": "Your selfie is auto-stylized to anime via FLUX.1.1-pro. You become the visual protagonist instantly.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Inter",
+                  "fontSize": 22,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "LI5aO",
+              "name": "step2",
+              "width": "fill_container",
+              "fill": "#141414",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 20,
+              "padding": 40,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "x1I1l",
+                  "name": "StepImg2",
+                  "width": "fill_container",
+                  "height": 180,
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "./images/generated-1775302160995.png",
+                    "mode": "fill"
+                  },
+                  "cornerRadius": 8
+                },
+                {
+                  "type": "text",
+                  "id": "bZOkN",
+                  "name": "step2num",
+                  "fill": "#FF2D78",
+                  "content": "02",
+                  "fontFamily": "Playfair Display",
+                  "fontSize": 56,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "MEtJq",
+                  "name": "step2title",
+                  "fill": "#FFFFFF",
+                  "content": "Make Choices. Chat Live.",
+                  "fontFamily": "Inter",
+                  "fontSize": 28,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "dSeBt",
+                  "name": "step2desc",
+                  "fill": "#A1A1AA",
+                  "textGrowth": "fixed-width",
+                  "width": 380,
+                  "content": "Branch the story through key decisions. Chat freeform with Jiwon or Sora — AI characters powered by Claude.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Inter",
+                  "fontSize": 22,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ecdGz",
+              "name": "step3",
+              "width": "fill_container",
+              "fill": "#141414",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 20,
+              "padding": 40,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "VnWYI",
+                  "name": "StepImg3",
+                  "width": "fill_container",
+                  "height": 180,
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "./images/generated-1775302177459.png",
+                    "mode": "fill"
+                  },
+                  "cornerRadius": 8
+                },
+                {
+                  "type": "text",
+                  "id": "Gn5vc",
+                  "name": "step3num",
+                  "fill": "#FF2D78",
+                  "content": "03",
+                  "fontFamily": "Playfair Display",
+                  "fontSize": 56,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "pVyGo",
+                  "name": "step3title",
+                  "fill": "#FFFFFF",
+                  "content": "Get Your Ending. Share It.",
+                  "fontFamily": "Inter",
+                  "fontSize": 28,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "QcR8E",
+                  "name": "step3desc",
+                  "fill": "#A1A1AA",
+                  "textGrowth": "fixed-width",
+                  "width": 380,
+                  "content": "4 unique endings based on your choices. A shareable relationship reveal card — your story, your result.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Inter",
+                  "fontSize": 22,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "bJRKM",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 1020,
+          "name": "slideNum3",
+          "fill": "#A1A1AA",
+          "content": "03 / 08",
+          "fontFamily": "Inter",
+          "fontSize": 18,
+          "fontWeight": "normal"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "DN9Dq",
+      "x": 6060,
+      "y": 3,
+      "name": "04 Market",
+      "clip": true,
+      "width": 1920,
+      "height": 1080,
+      "fill": "#0A0A0A",
+      "children": [
+        {
+          "type": "frame",
+          "id": "cvHuP",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 120,
+          "name": "Top",
+          "width": 800,
+          "height": 200,
+          "layout": "vertical",
+          "gap": 16,
+          "children": [
+            {
+              "type": "text",
+              "id": "XZsCD",
+              "name": "label4",
+              "fill": "#FF2D78",
+              "content": "MARKET OPPORTUNITY",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "600",
+              "letterSpacing": 4
+            },
+            {
+              "type": "text",
+              "id": "fk7Iw",
+              "name": "title4",
+              "fill": "#FFFFFF",
+              "textGrowth": "fixed-width",
+              "width": 780,
+              "content": "Bottoms-up to\n$25M serviceable.",
+              "lineHeight": 1,
+              "fontFamily": "Playfair Display",
+              "fontSize": 72,
+              "fontWeight": "700"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "RBykM",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 380,
+          "name": "Cols",
+          "width": 1680,
+          "height": 560,
+          "gap": 32,
+          "children": [
+            {
+              "type": "frame",
+              "id": "Wcc9E",
+              "name": "tamBox",
+              "width": "fill_container",
+              "fill": "#0F0F0F",
+              "cornerRadius": 12,
+              "stroke": {
+                "align": "inside",
+                "thickness": 1,
+                "fill": "#1F1F1F"
+              },
+              "layout": "vertical",
+              "gap": 16,
+              "padding": 40,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "e6kmY",
+                  "name": "tamLabel",
+                  "fill": "#A1A1AA",
+                  "content": "TAM",
+                  "fontFamily": "Inter",
+                  "fontSize": 16,
+                  "fontWeight": "700",
+                  "letterSpacing": 3
+                },
+                {
+                  "type": "text",
+                  "id": "QmMJ2",
+                  "name": "tamNum",
+                  "fill": "#FFFFFF",
+                  "content": "$8B",
+                  "fontFamily": "Playfair Display",
+                  "fontSize": 88,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "ihLZK",
+                  "name": "tamTitle",
+                  "fill": "#FFFFFF",
+                  "textGrowth": "fixed-width",
+                  "width": 420,
+                  "content": "Interactive Fiction\n& Visual Novels",
+                  "lineHeight": 1.3,
+                  "fontFamily": "Inter",
+                  "fontSize": 24,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "gIiSZ",
+                  "name": "tamDesc",
+                  "fill": "#A1A1AA",
+                  "textGrowth": "fixed-width",
+                  "width": 420,
+                  "content": "120M+ global readers of Wattpad, AO3, fanfic platforms. Growing 18% YoY as Gen Z moves from passive to participatory media.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "Inter",
+                  "fontSize": 20,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Sbg8t",
+              "name": "samBox",
+              "width": "fill_container",
+              "fill": "#140006",
+              "cornerRadius": 12,
+              "stroke": {
+                "align": "inside",
+                "thickness": 1,
+                "fill": "#FF2D7830"
+              },
+              "layout": "vertical",
+              "gap": 16,
+              "padding": 40,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "hztLZ",
+                  "name": "samLabel",
+                  "fill": "#FF2D78",
+                  "content": "SAM",
+                  "fontFamily": "Inter",
+                  "fontSize": 16,
+                  "fontWeight": "700",
+                  "letterSpacing": 3
+                },
+                {
+                  "type": "text",
+                  "id": "57wKT",
+                  "name": "samNum",
+                  "fill": "#FFFFFF",
+                  "content": "$1.2B",
+                  "fontFamily": "Playfair Display",
+                  "fontSize": 88,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "9q5n8",
+                  "name": "samTitle",
+                  "fill": "#FFFFFF",
+                  "textGrowth": "fixed-width",
+                  "width": 420,
+                  "content": "K-pop & Anime Romance\nFans, 18–28, Mobile",
+                  "lineHeight": 1.3,
+                  "fontFamily": "Inter",
+                  "fontSize": 24,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "QoMTv",
+                  "name": "samDesc",
+                  "fill": "#A1A1AA",
+                  "textGrowth": "fixed-width",
+                  "width": 420,
+                  "content": "15M fans who actively consume idol fanfic + visual media. Proven willingness to pay: BTS merch alone = $50 ARPU/yr.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "Inter",
+                  "fontSize": 20,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Bl3Sb",
+              "name": "somBox",
+              "width": "fill_container",
+              "fill": "#0A0A0A",
+              "cornerRadius": 12,
+              "stroke": {
+                "align": "inside",
+                "thickness": 1,
+                "fill": "#1F1F1F"
+              },
+              "layout": "vertical",
+              "gap": 16,
+              "padding": 40,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "eXCnt",
+                  "name": "somLabel",
+                  "fill": "#A1A1AA",
+                  "content": "SOM",
+                  "fontFamily": "Inter",
+                  "fontSize": 16,
+                  "fontWeight": "700",
+                  "letterSpacing": 3
+                },
+                {
+                  "type": "text",
+                  "id": "ujdQ2",
+                  "name": "somNum",
+                  "fill": "#FF2D78",
+                  "content": "$25M",
+                  "fontFamily": "Playfair Display",
+                  "fontSize": 88,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "onewe",
+                  "name": "somTitle",
+                  "fill": "#FFFFFF",
+                  "textGrowth": "fixed-width",
+                  "width": 420,
+                  "content": "Year 3 Target\n(500K users)",
+                  "lineHeight": 1.3,
+                  "fontFamily": "Inter",
+                  "fontSize": 24,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "id9MU",
+                  "name": "somDesc",
+                  "fill": "#A1A1AA",
+                  "textGrowth": "fixed-width",
+                  "width": 420,
+                  "content": "500K paying users at $50 ARPU/yr. Bottoms-up: 2% conversion of SAM via viral reveal mechanic + creator content loop.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "Inter",
+                  "fontSize": 20,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "moGhp",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 1020,
+          "name": "slideNum4",
+          "fill": "#A1A1AA",
+          "content": "04 / 08",
+          "fontFamily": "Inter",
+          "fontSize": 18,
+          "fontWeight": "normal"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "mgNSd",
+      "x": 8080,
+      "y": 3,
+      "name": "05 Business Model",
+      "clip": true,
+      "width": 1920,
+      "height": 1080,
+      "fill": "#0A0A0A",
+      "children": [
+        {
+          "type": "frame",
+          "id": "jLep9",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 120,
+          "name": "Top",
+          "width": 1200,
+          "height": 180,
+          "layout": "vertical",
+          "gap": 16,
+          "children": [
+            {
+              "type": "text",
+              "id": "WsuyA",
+              "name": "label5",
+              "fill": "#FF2D78",
+              "content": "BUSINESS MODEL",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "600",
+              "letterSpacing": 4
+            },
+            {
+              "type": "text",
+              "id": "eMqGi",
+              "name": "title5",
+              "fill": "#FFFFFF",
+              "textGrowth": "fixed-width",
+              "width": 1180,
+              "content": "Three-tier pipeline. Each layer feeds the next.",
+              "lineHeight": 1.05,
+              "fontFamily": "Playfair Display",
+              "fontSize": 64,
+              "fontWeight": "700"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "jqFOo",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 360,
+          "name": "Tiers",
+          "width": 1680,
+          "height": 340,
+          "children": [
+            {
+              "type": "frame",
+              "id": "gzIsX",
+              "name": "tier1",
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": "#1A0008",
+              "layout": "vertical",
+              "gap": 20,
+              "padding": 40,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "U43iH",
+                  "name": "t1top",
+                  "gap": 16,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "ScaKd",
+                      "name": "t1badge",
+                      "fill": "#FF2D78",
+                      "cornerRadius": 4,
+                      "padding": [
+                        6,
+                        14
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "0RHdc",
+                          "name": "t1badgeText",
+                          "fill": "#FFFFFF",
+                          "content": "FREE",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "gnJH4",
+                      "name": "t1title",
+                      "fill": "#FFFFFF",
+                      "content": "Energy Gate",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "XIr4P",
+                  "name": "t1price",
+                  "fill": "#FF2D78",
+                  "content": "$0",
+                  "fontFamily": "Playfair Display",
+                  "fontSize": 72,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "ffOE3",
+                  "name": "t1desc",
+                  "fill": "#A1A1AA",
+                  "textGrowth": "fixed-width",
+                  "width": 460,
+                  "content": "5 story beats/day free. Readers hook on the narrative, hit the energy wall mid-arc — right at peak tension.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Inter",
+                  "fontSize": 22,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "8Zjzx",
+              "name": "arrow1",
+              "width": 60,
+              "height": "fill_container",
+              "fill": "#0A0A0A",
+              "layout": "vertical",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "bfxkT",
+                  "name": "arr1",
+                  "fill": "#FF2D78",
+                  "content": "→",
+                  "fontFamily": "Inter",
+                  "fontSize": 36,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "3apmv",
+              "name": "tier2",
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": "#14000A",
+              "layout": "vertical",
+              "gap": 20,
+              "padding": 40,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "KiGQN",
+                  "name": "t2top",
+                  "gap": 16,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "7Ap2W",
+                      "name": "t2badge",
+                      "fill": "#FF2D78",
+                      "cornerRadius": 4,
+                      "padding": [
+                        6,
+                        14
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "p8KdK",
+                          "name": "t2badgeText",
+                          "fill": "#FFFFFF",
+                          "content": "PREMIUM",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "83j23",
+                      "name": "t2title",
+                      "fill": "#FFFFFF",
+                      "content": "Subscription",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "gRZY0",
+                  "name": "t2price",
+                  "fill": "#FF2D78",
+                  "content": "$14.99/mo",
+                  "fontFamily": "Playfair Display",
+                  "fontSize": 64,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "czOyf",
+                  "name": "t2desc",
+                  "fill": "#A1A1AA",
+                  "textGrowth": "fixed-width",
+                  "width": 460,
+                  "content": "Unlimited beats, all endings, early access to new arcs. ~$180/yr LTV if retained 12 months.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Inter",
+                  "fontSize": 22,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "TiKQH",
+              "name": "arrow2",
+              "width": 60,
+              "height": "fill_container",
+              "fill": "#0A0A0A",
+              "layout": "vertical",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "N1uiq",
+                  "name": "arr2",
+                  "fill": "#FF2D78",
+                  "content": "→",
+                  "fontFamily": "Inter",
+                  "fontSize": 36,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "CIUCA",
+              "name": "tier3",
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": "#0D000D",
+              "layout": "vertical",
+              "gap": 20,
+              "padding": 40,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "pIpdF",
+                  "name": "t3top",
+                  "gap": 16,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "ub8S2",
+                      "name": "t3badge",
+                      "fill": "#9B2FFF",
+                      "cornerRadius": 4,
+                      "padding": [
+                        6,
+                        14
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "gtlla",
+                          "name": "t3badgeText",
+                          "fill": "#FFFFFF",
+                          "content": "CREATOR",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "aT7UG",
+                      "name": "t3title",
+                      "fill": "#FFFFFF",
+                      "content": "Rev Share",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "Yydee",
+                  "name": "t3price",
+                  "fill": "#9B2FFF",
+                  "content": "70/30",
+                  "fontFamily": "Playfair Display",
+                  "fontSize": 72,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "zgfg0",
+                  "name": "t3desc",
+                  "fill": "#A1A1AA",
+                  "textGrowth": "fixed-width",
+                  "width": 460,
+                  "content": "Fan creators build story arcs, earn 70% of revenue their arc generates. Platform takes 30%.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Inter",
+                  "fontSize": 22,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "oLjJ0",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 740,
+          "name": "Econ",
+          "width": 1680,
+          "height": 200,
+          "gap": 60,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "6kj14",
+              "name": "econLabel",
+              "fill": "#A1A1AA",
+              "content": "UNIT ECONOMICS",
+              "fontFamily": "Inter",
+              "fontSize": 16,
+              "fontWeight": "600",
+              "letterSpacing": 3
+            },
+            {
+              "type": "frame",
+              "id": "GoRAs",
+              "name": "econ1",
+              "layout": "vertical",
+              "gap": 4,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "qn3iv",
+                  "name": "econ1n",
+                  "fill": "#FFFFFF",
+                  "content": "$14.99",
+                  "fontFamily": "Playfair Display",
+                  "fontSize": 40,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "Nz3Mq",
+                  "name": "econ1l",
+                  "fill": "#A1A1AA",
+                  "content": "monthly sub",
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "uOHxC",
+              "name": "econ2",
+              "layout": "vertical",
+              "gap": 4,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "hdmp6",
+                  "name": "econ2n",
+                  "fill": "#FFFFFF",
+                  "content": "~$180",
+                  "fontFamily": "Playfair Display",
+                  "fontSize": 40,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "LPj8R",
+                  "name": "econ2l",
+                  "fill": "#A1A1AA",
+                  "content": "annual LTV (12mo retain)",
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "1sMPS",
+              "name": "econ3",
+              "layout": "vertical",
+              "gap": 4,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "FMo3C",
+                  "name": "econ3n",
+                  "fill": "#FF2D78",
+                  "content": "<$1",
+                  "fontFamily": "Playfair Display",
+                  "fontSize": 40,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "Rdp17",
+                  "name": "econ3l",
+                  "fill": "#A1A1AA",
+                  "content": "CAC (organic-first GTM)",
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "r4ilG",
+              "name": "econ4",
+              "layout": "vertical",
+              "gap": 4,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "350HC",
+                  "name": "econ4n",
+                  "fill": "#FF2D78",
+                  "content": ">180x",
+                  "fontFamily": "Playfair Display",
+                  "fontSize": 40,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "lYEgY",
+                  "name": "econ4l",
+                  "fill": "#A1A1AA",
+                  "content": "LTV:CAC ratio (projected)",
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "Aj1wy",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 1020,
+          "name": "slideNum5",
+          "fill": "#A1A1AA",
+          "content": "05 / 08",
+          "fontFamily": "Inter",
+          "fontSize": 18,
+          "fontWeight": "normal"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ls7GF",
+      "x": 10100,
+      "y": 5,
+      "name": "06 Traction",
+      "clip": true,
+      "width": 1920,
+      "height": 1080,
+      "fill": "#0A0A0A",
+      "children": [
+        {
+          "type": "frame",
+          "id": "DaE0h",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 120,
+          "name": "Top",
+          "width": 1680,
+          "height": 160,
+          "layout": "vertical",
+          "gap": 16,
+          "children": [
+            {
+              "type": "text",
+              "id": "VWnx0",
+              "name": "label6",
+              "fill": "#FF2D78",
+              "content": "TRACTION & VALIDATION",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "600",
+              "letterSpacing": 4
+            },
+            {
+              "type": "text",
+              "id": "XJDK7",
+              "name": "title6",
+              "fill": "#FFFFFF",
+              "textGrowth": "fixed-width",
+              "width": 1680,
+              "content": "Signal is real. Demand is organic.",
+              "lineHeight": 1,
+              "fontFamily": "Playfair Display",
+              "fontSize": 72,
+              "fontWeight": "700"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "1mqEh",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 340,
+          "name": "Grid",
+          "width": 1680,
+          "height": 580,
+          "gap": 32,
+          "children": [
+            {
+              "type": "frame",
+              "id": "9P3Ug",
+              "name": "leftCards",
+              "width": 780,
+              "layout": "vertical",
+              "gap": 32,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "836ZY",
+                  "name": "card1",
+                  "width": "fill_container",
+                  "fill": "#0F0F0F",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 16,
+                  "padding": 36,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Gih75",
+                      "name": "c1label",
+                      "fill": "#FF2D78",
+                      "content": "REDDIT SIGNAL",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "700",
+                      "letterSpacing": 3
+                    },
+                    {
+                      "type": "text",
+                      "id": "bv44V",
+                      "name": "c1quote",
+                      "fill": "#FFFFFF",
+                      "textGrowth": "fixed-width",
+                      "width": 680,
+                      "content": "\"Why isn't there a K-pop visual novel where I'm the love interest?? I would literally pay for this\"",
+                      "lineHeight": 1.4,
+                      "fontFamily": "Inter",
+                      "fontSize": 26,
+                      "fontWeight": "normal",
+                      "fontStyle": "italic"
+                    },
+                    {
+                      "type": "text",
+                      "id": "3xXRv",
+                      "name": "c1meta",
+                      "fill": "#A1A1AA",
+                      "content": "r/kpop · 847 upvotes",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "EtPyw",
+                  "name": "card2",
+                  "width": "fill_container",
+                  "fill": "#0F0F0F",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 16,
+                  "padding": 36,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "TADYZ",
+                      "name": "c2label",
+                      "fill": "#FF2D78",
+                      "content": "FANFICTION DEMAND",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "700",
+                      "letterSpacing": 3
+                    },
+                    {
+                      "type": "text",
+                      "id": "n5jBZ",
+                      "name": "c2quote",
+                      "fill": "#FFFFFF",
+                      "textGrowth": "fixed-width",
+                      "width": 680,
+                      "content": "\"Imagine a Choose Your Own Adventure but it's a BTS fanfic and you're the main character. Someone build this.\"",
+                      "lineHeight": 1.4,
+                      "fontFamily": "Inter",
+                      "fontSize": 26,
+                      "fontWeight": "normal",
+                      "fontStyle": "italic"
+                    },
+                    {
+                      "type": "text",
+                      "id": "AekBY",
+                      "name": "c2meta",
+                      "fill": "#A1A1AA",
+                      "content": "r/fanfiction · 1.2K upvotes",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "atVrk",
+              "name": "rightCards",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 32,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "SJumf",
+                  "name": "statCard",
+                  "width": "fill_container",
+                  "fill": "#140006",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 20,
+                  "padding": 36,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "aeovp",
+                      "name": "scLabel",
+                      "fill": "#FF2D78",
+                      "content": "PROTOTYPE",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "700",
+                      "letterSpacing": 3
+                    },
+                    {
+                      "type": "frame",
+                      "id": "MTO5J",
+                      "name": "scStats",
+                      "gap": 40,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "Xtw6s",
+                          "name": "sc1",
+                          "layout": "vertical",
+                          "gap": 4,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ZXaMq",
+                              "name": "sc1n",
+                              "fill": "#FFFFFF",
+                              "content": "V2",
+                              "fontFamily": "Playfair Display",
+                              "fontSize": 56,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "dj0zx",
+                              "name": "sc1l",
+                              "fill": "#A1A1AA",
+                              "content": "live at chaptr-v2.vercel.app",
+                              "fontFamily": "Inter",
+                              "fontSize": 18,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "kRkxr",
+                          "name": "sc2",
+                          "layout": "vertical",
+                          "gap": 4,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "IFeOX",
+                              "name": "sc2n",
+                              "fill": "#FF2D78",
+                              "content": "2 wks",
+                              "fontFamily": "Playfair Display",
+                              "fontSize": 56,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "EKISp",
+                              "name": "sc2l",
+                              "fill": "#A1A1AA",
+                              "content": "solo build time",
+                              "fontFamily": "Inter",
+                              "fontSize": 18,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "LUBDU",
+                      "name": "scDesc",
+                      "fill": "#A1A1AA",
+                      "textGrowth": "fixed-width",
+                      "width": 820,
+                      "content": "Full branching story engine, AI character chat (Claude Haiku), anime selfie stylization (FLUX.1.1-pro), 4 endings + shareable reveal card. Solo-built in 2 weeks — proves the core loop is buildable and cost-efficient.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 22,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "OXgOx",
+                  "name": "wedgeCard",
+                  "width": "fill_container",
+                  "fill": "#0A0A0A",
+                  "cornerRadius": 12,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#FF2D7840"
+                  },
+                  "layout": "vertical",
+                  "gap": 16,
+                  "padding": 36,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "6Kabz",
+                      "name": "wLabel",
+                      "fill": "#FF2D78",
+                      "content": "WHY NOW",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "700",
+                      "letterSpacing": 3
+                    },
+                    {
+                      "type": "text",
+                      "id": "BuKK9",
+                      "name": "wText",
+                      "fill": "#FFFFFF",
+                      "textGrowth": "fixed-width",
+                      "width": 820,
+                      "content": "FLUX + Claude costs dropped 10x in 12 months. Real-time AI character chat is now feasible at <$0.01/session. The infrastructure window is open.",
+                      "lineHeight": 1.4,
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "Ozw0g",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 1020,
+          "name": "slideNum6",
+          "fill": "#A1A1AA",
+          "content": "06 / 08",
+          "fontFamily": "Inter",
+          "fontSize": 18,
+          "fontWeight": "normal"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "tAHuJ",
+      "x": 12120,
+      "y": 4,
+      "name": "07 Competitive",
+      "clip": true,
+      "width": 1920,
+      "height": 1080,
+      "fill": "#0A0A0A",
+      "children": [
+        {
+          "type": "frame",
+          "id": "LnCsL",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 80,
+          "name": "Top",
+          "width": 760,
+          "height": 200,
+          "layout": "vertical",
+          "gap": 12,
+          "children": [
+            {
+              "type": "text",
+              "id": "7o3HM",
+              "name": "label7",
+              "fill": "#FF2D78",
+              "content": "COMPETITIVE LANDSCAPE",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "600",
+              "letterSpacing": 4
+            },
+            {
+              "type": "text",
+              "id": "bmROj",
+              "name": "title7",
+              "fill": "#FFFFFF",
+              "textGrowth": "fixed-width",
+              "width": 740,
+              "content": "We own the\nupper-right corner.",
+              "lineHeight": 1.05,
+              "fontFamily": "Playfair Display",
+              "fontSize": 64,
+              "fontWeight": "700"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "StjJR",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 320,
+          "name": "Matrix",
+          "width": 960,
+          "height": 680,
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "WWfD5",
+              "x": 100,
+              "y": 0,
+              "name": "yAxisLine",
+              "fill": "#2A2A2A",
+              "width": 2,
+              "height": 640
+            },
+            {
+              "type": "rectangle",
+              "id": "4c242",
+              "x": 0,
+              "y": 320,
+              "name": "xAxisLine",
+              "fill": "#2A2A2A",
+              "width": 960,
+              "height": 2
+            },
+            {
+              "type": "text",
+              "id": "jYDNy",
+              "x": 20,
+              "y": 0,
+              "name": "yTopLabel",
+              "fill": "#A1A1AA",
+              "textGrowth": "fixed-width",
+              "width": 80,
+              "content": "High\nInteractivity",
+              "lineHeight": 1.3,
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "MFw12",
+              "x": 20,
+              "y": 590,
+              "name": "yBotLabel",
+              "fill": "#A1A1AA",
+              "textGrowth": "fixed-width",
+              "width": 80,
+              "content": "Low\nInteractivity",
+              "lineHeight": 1.3,
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "iZS6X",
+              "x": 110,
+              "y": 330,
+              "name": "xLeftLabel",
+              "fill": "#A1A1AA",
+              "content": "Generic",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "9HgVm",
+              "x": 810,
+              "y": 330,
+              "name": "xRightLabel",
+              "fill": "#A1A1AA",
+              "content": "Personalized",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "ellipse",
+              "id": "1Xc9A",
+              "x": 200,
+              "y": 520,
+              "name": "dotWattpad",
+              "fill": "#555555",
+              "width": 14,
+              "height": 14
+            },
+            {
+              "type": "text",
+              "id": "5axck",
+              "x": 120,
+              "y": 500,
+              "name": "lblWattpad",
+              "fill": "#A1A1AA",
+              "content": "Wattpad / AO3",
+              "fontFamily": "Inter",
+              "fontSize": 20,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "ellipse",
+              "id": "JX6Ov",
+              "x": 430,
+              "y": 440,
+              "name": "dotEpisode",
+              "fill": "#888888",
+              "width": 14,
+              "height": 14
+            },
+            {
+              "type": "text",
+              "id": "dnuDD",
+              "x": 360,
+              "y": 420,
+              "name": "lblEpisode",
+              "fill": "#A1A1AA",
+              "content": "Episode / Choices",
+              "fontFamily": "Inter",
+              "fontSize": 20,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "ellipse",
+              "id": "kEbID",
+              "x": 200,
+              "y": 100,
+              "name": "dotAIDungeon",
+              "fill": "#888888",
+              "width": 14,
+              "height": 14
+            },
+            {
+              "type": "text",
+              "id": "DBG3W",
+              "x": 110,
+              "y": 80,
+              "name": "lblAIDungeon",
+              "fill": "#A1A1AA",
+              "content": "AI Dungeon",
+              "fontFamily": "Inter",
+              "fontSize": 20,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "ellipse",
+              "id": "VCVhZ",
+              "x": 770,
+              "y": 40,
+              "name": "chapterGlow",
+              "fill": "#FF2D7830",
+              "width": 80,
+              "height": 80
+            },
+            {
+              "type": "ellipse",
+              "id": "FbpPd",
+              "x": 800,
+              "y": 70,
+              "name": "chapterDot",
+              "fill": "#FF2D78",
+              "width": 20,
+              "height": 20
+            },
+            {
+              "type": "text",
+              "id": "tdPEc",
+              "x": 720,
+              "y": 20,
+              "name": "lblChaptr",
+              "fill": "#FF2D78",
+              "content": "CHAPTR",
+              "fontFamily": "Inter",
+              "fontSize": 22,
+              "fontWeight": "700"
+            },
+            {
+              "type": "ellipse",
+              "id": "9c0Jk",
+              "x": 660,
+              "y": 160,
+              "name": "mcDot",
+              "fill": "#FF2D78",
+              "width": 14,
+              "height": 14
+            },
+            {
+              "type": "text",
+              "id": "ylvTv",
+              "x": 575,
+              "y": 140,
+              "name": "mcLabel",
+              "fill": "#FFFFFF",
+              "content": "MeChat",
+              "fontFamily": "Inter",
+              "fontSize": 20,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "ellipse",
+              "id": "9jMkY",
+              "x": 720,
+              "y": 230,
+              "name": "simDot",
+              "fill": "#FF2D78",
+              "width": 14,
+              "height": 14
+            },
+            {
+              "type": "text",
+              "id": "bnW18",
+              "x": 638,
+              "y": 210,
+              "name": "simLabel",
+              "fill": "#FFFFFF",
+              "content": "Simmy",
+              "fontFamily": "Inter",
+              "fontSize": 20,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "1Y3u5",
+          "layoutPosition": "absolute",
+          "x": 1160,
+          "y": 320,
+          "name": "RightPanel",
+          "width": 640,
+          "height": 640,
+          "layout": "vertical",
+          "gap": 32,
+          "children": [
+            {
+              "type": "frame",
+              "id": "WYn1I",
+              "name": "wedge1",
+              "width": "fill_container",
+              "fill": "#140006",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 12,
+              "padding": 32,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "NxD7d",
+                  "name": "w1title",
+                  "fill": "#FF2D78",
+                  "content": "Our wedge",
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "700",
+                  "letterSpacing": 2
+                },
+                {
+                  "type": "text",
+                  "id": "lbJCE",
+                  "name": "w1text",
+                  "fill": "#FFFFFF",
+                  "textGrowth": "fixed-width",
+                  "width": 560,
+                  "content": "Only product that combines high interactivity (branching + freeform AI chat) with deep personalization (your face, your choices, your ending).",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Inter",
+                  "fontSize": 22,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "s3a76",
+              "name": "wedge2",
+              "width": "fill_container",
+              "fill": "#0F0F0F",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 12,
+              "padding": 32,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "KYsdo",
+                  "name": "w2title",
+                  "fill": "#A1A1AA",
+                  "content": "Why incumbents won't solve it",
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "700",
+                  "letterSpacing": 2
+                },
+                {
+                  "type": "text",
+                  "id": "8CaFW",
+                  "name": "w2text",
+                  "fill": "#FFFFFF",
+                  "textGrowth": "fixed-width",
+                  "width": 560,
+                  "content": "MeChat & Simmy have personalization but zero narrative structure — you chat, nothing happens. Episode has story but zero AI personalization. AI Dungeon has freedom but no IP, no idol fantasy, no visual identity. None combine structured branching story + AI chat + your face in the protagonist role.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Inter",
+                  "fontSize": 22,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "sXNjq",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 1020,
+          "name": "slideNum7",
+          "fill": "#A1A1AA",
+          "content": "07 / 08",
+          "fontFamily": "Inter",
+          "fontSize": 18,
+          "fontWeight": "normal"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Yf2hp",
+      "x": 14140,
+      "y": 4,
+      "name": "08 Go-to-Market",
+      "clip": true,
+      "width": 1920,
+      "height": 1080,
+      "fill": "#0A0A0A",
+      "children": [
+        {
+          "type": "frame",
+          "id": "Qc4at",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 80,
+          "name": "Top",
+          "width": 1400,
+          "height": 180,
+          "layout": "vertical",
+          "gap": 12,
+          "children": [
+            {
+              "type": "text",
+              "id": "xiSsT",
+              "name": "label8",
+              "fill": "#FF2D78",
+              "content": "GO-TO-MARKET",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "600",
+              "letterSpacing": 4
+            },
+            {
+              "type": "text",
+              "id": "5D2Tt",
+              "name": "title8",
+              "fill": "#FFFFFF",
+              "textGrowth": "fixed-width",
+              "width": 1380,
+              "content": "Organic-first. Viral mechanic built in.",
+              "lineHeight": 1,
+              "fontFamily": "Playfair Display",
+              "fontSize": 72,
+              "fontWeight": "700"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "j3ulf",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 310,
+          "name": "Phases",
+          "width": 1680,
+          "height": 480,
+          "gap": 32,
+          "children": [
+            {
+              "type": "frame",
+              "id": "XtxTP",
+              "name": "ph1",
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": "#0F0F0F",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 20,
+              "padding": 40,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "DmhXe",
+                  "name": "ph1head",
+                  "gap": 16,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "3UEXd",
+                      "name": "ph1badge",
+                      "fill": "#FF2D78",
+                      "cornerRadius": 4,
+                      "padding": [
+                        6,
+                        14
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "u87bM",
+                          "name": "ph1badgeT",
+                          "fill": "#FFFFFF",
+                          "content": "PHASE 1",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "pd62j",
+                      "name": "ph1target",
+                      "fill": "#FFFFFF",
+                      "content": "0 → 1,000 users",
+                      "fontFamily": "Inter",
+                      "fontSize": 22,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "p5W8o",
+                  "name": "ph1title",
+                  "fill": "#FF2D78",
+                  "textGrowth": "fixed-width",
+                  "width": 480,
+                  "content": "Reddit seeding + viral reveal hook",
+                  "fontFamily": "Inter",
+                  "fontSize": 26,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "frame",
+                  "id": "AvCYW",
+                  "name": "ph1items",
+                  "layout": "vertical",
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "XUEQw",
+                      "name": "ph1i1",
+                      "fill": "#FFFFFF",
+                      "textGrowth": "fixed-width",
+                      "width": 480,
+                      "content": "→  Post prototype to r/kpop, r/fanfiction, r/visualnovels with the reveal card as the hook",
+                      "lineHeight": 1.4,
+                      "fontFamily": "Inter",
+                      "fontSize": 20,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "q0MP1",
+                      "name": "ph1i2",
+                      "fill": "#FFFFFF",
+                      "textGrowth": "fixed-width",
+                      "width": 480,
+                      "content": "→  Share your reveal card mechanic = organic Twitter/TikTok bait (\"my K-pop ending was...\")",
+                      "lineHeight": 1.4,
+                      "fontFamily": "Inter",
+                      "fontSize": 20,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "pCUwx",
+                      "name": "ph1i3",
+                      "fill": "#FFFFFF",
+                      "textGrowth": "fixed-width",
+                      "width": 480,
+                      "content": "→  Target fan account collabs: 10–20 K-pop micro-accounts (10K–100K followers)",
+                      "lineHeight": 1.4,
+                      "fontFamily": "Inter",
+                      "fontSize": 20,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "tz7pp",
+                  "name": "ph1metric",
+                  "fill": "#A1A1AA",
+                  "textGrowth": "fixed-width",
+                  "width": 480,
+                  "content": "Goal: 1K users, 10% weekly retention, validate energy-gate conversion",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "7f0al",
+              "name": "ph2",
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": "#0F0F0F",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 20,
+              "padding": 40,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "PYjyC",
+                  "name": "ph2head",
+                  "gap": 16,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "OAOyv",
+                      "name": "ph2badge",
+                      "fill": "#9B2FFF",
+                      "cornerRadius": 4,
+                      "padding": [
+                        6,
+                        14
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "VzJEQ",
+                          "name": "ph2badgeT",
+                          "fill": "#FFFFFF",
+                          "content": "PHASE 2",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "mUCUR",
+                      "name": "ph2target",
+                      "fill": "#FFFFFF",
+                      "content": "1K → 10,000 users",
+                      "fontFamily": "Inter",
+                      "fontSize": 22,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "rC0HA",
+                  "name": "ph2title",
+                  "fill": "#9B2FFF",
+                  "textGrowth": "fixed-width",
+                  "width": 480,
+                  "content": "Creator program + share loop flywheel",
+                  "fontFamily": "Inter",
+                  "fontSize": 26,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "frame",
+                  "id": "C1ZzV",
+                  "name": "ph2items",
+                  "layout": "vertical",
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Pz8Uz",
+                      "name": "ph2i1",
+                      "fill": "#FFFFFF",
+                      "textGrowth": "fixed-width",
+                      "width": 480,
+                      "content": "→  Open creator program: fan writers build arcs, earn 70% rev share",
+                      "lineHeight": 1.4,
+                      "fontFamily": "Inter",
+                      "fontSize": 20,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "13ZNN",
+                      "name": "ph2i2",
+                      "fill": "#FFFFFF",
+                      "textGrowth": "fixed-width",
+                      "width": 480,
+                      "content": "→  Each creator promotes their own arc to their audience = zero CAC acquisition",
+                      "lineHeight": 1.4,
+                      "fontFamily": "Inter",
+                      "fontSize": 20,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "MdGtz",
+                      "name": "ph2i3",
+                      "fill": "#FFFFFF",
+                      "textGrowth": "fixed-width",
+                      "width": 480,
+                      "content": "→  TikTok reveal card format: #ChaptrEnding trend — shareable result cards engineered for For You page",
+                      "lineHeight": 1.4,
+                      "fontFamily": "Inter",
+                      "fontSize": 20,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "CYShE",
+                  "name": "ph2metric",
+                  "fill": "#A1A1AA",
+                  "textGrowth": "fixed-width",
+                  "width": 480,
+                  "content": "Goal: 10K users, 3+ arcs live, first creator earning revenue",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "18pJp",
+              "name": "ph3",
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": "#140006",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 20,
+              "padding": 40,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "zf3I7",
+                  "name": "ph3head",
+                  "gap": 16,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "aJLps",
+                      "name": "ph3badge",
+                      "fill": "#FF2D78",
+                      "cornerRadius": 4,
+                      "padding": [
+                        6,
+                        14
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "XPp49",
+                          "name": "ph3badgeT",
+                          "fill": "#FFFFFF",
+                          "content": "NORTH STAR",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "XGEGI",
+                      "name": "ph3target",
+                      "fill": "#FFFFFF",
+                      "content": "The viral loop",
+                      "fontFamily": "Inter",
+                      "fontSize": 22,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "8utgm",
+                  "name": "ph3title",
+                  "fill": "#FF2D78",
+                  "textGrowth": "fixed-width",
+                  "width": 480,
+                  "content": "Share card → new user → sub → reveal → share",
+                  "lineHeight": 1.3,
+                  "fontFamily": "Inter",
+                  "fontSize": 24,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "YAAqc",
+                  "name": "ph3desc",
+                  "fill": "#FFFFFF",
+                  "textGrowth": "fixed-width",
+                  "width": 480,
+                  "content": "Every user who shares their reveal card is a distribution channel. The ending IS the ad. No paid acquisition needed at scale.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "Inter",
+                  "fontSize": 22,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "mLhM3",
+                  "name": "ph3kpi",
+                  "layout": "vertical",
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "um0Ah",
+                      "name": "kpi1",
+                      "fill": "#A1A1AA",
+                      "content": "K-factor target: >1.1",
+                      "fontFamily": "Inter",
+                      "fontSize": 20,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "RQHY5",
+                      "name": "kpi2",
+                      "fill": "#A1A1AA",
+                      "content": "CAC target: <$1 organic",
+                      "fontFamily": "Inter",
+                      "fontSize": 20,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "CUyLU",
+                      "name": "kpi3",
+                      "fill": "#FF2D78",
+                      "content": "LTV:CAC target: >260x",
+                      "fontFamily": "Inter",
+                      "fontSize": 20,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "xaRoG",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 1020,
+          "name": "slideNum8",
+          "fill": "#A1A1AA",
+          "content": "08 / 08",
+          "fontFamily": "Inter",
+          "fontSize": 18,
+          "fontWeight": "normal"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "1O2rG",
+      "x": 16157,
+      "y": 3,
+      "name": "08b Competitor Deep Dive",
+      "clip": true,
+      "width": 1920,
+      "height": 1080,
+      "fill": "#0A0A0A",
+      "children": [
+        {
+          "type": "frame",
+          "id": "ufALA",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 80,
+          "name": "cdTop",
+          "width": 1680,
+          "height": 160,
+          "layout": "vertical",
+          "gap": 12,
+          "children": [
+            {
+              "type": "text",
+              "id": "XshWe",
+              "name": "cdLabel",
+              "fill": "#FF2D78",
+              "content": "COMPETITOR DEEP DIVE",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "600",
+              "letterSpacing": 4
+            },
+            {
+              "type": "text",
+              "id": "BAUCw",
+              "name": "cdTitle",
+              "fill": "#FFFFFF",
+              "textGrowth": "fixed-width",
+              "width": 1680,
+              "content": "They chat. We story.",
+              "lineHeight": 1,
+              "fontFamily": "Playfair Display",
+              "fontSize": 80,
+              "fontWeight": "700"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "72OBR",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 290,
+          "name": "cdRow",
+          "width": 1680,
+          "height": 680,
+          "gap": 32,
+          "children": [
+            {
+              "type": "frame",
+              "id": "yPjSa",
+              "name": "mechatCard",
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": "#0F0F0F",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "B72vo",
+                  "name": "mechatImg",
+                  "width": "fill_container",
+                  "height": 220,
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "./images/generated-1775307223267.png",
+                    "mode": "fill"
+                  },
+                  "cornerRadius": [
+                    12,
+                    12,
+                    0,
+                    0
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "6Otbe",
+                  "name": "mechatBody",
+                  "layout": "vertical",
+                  "gap": 16,
+                  "padding": 28,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "srZmc",
+                      "name": "mechatHeader",
+                      "gap": 12,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "HxmL0",
+                          "name": "mechatBadge",
+                          "fill": "#1A1A1A",
+                          "cornerRadius": 4,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#333333"
+                          },
+                          "padding": [
+                            4,
+                            12
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "jsDai",
+                              "name": "mechatBadgeT",
+                              "fill": "#A1A1AA",
+                              "content": "DATING SIM",
+                              "fontFamily": "Inter",
+                              "fontSize": 13,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "Bvrg6",
+                          "name": "mechatName",
+                          "fill": "#FFFFFF",
+                          "content": "MeChat",
+                          "fontFamily": "Inter",
+                          "fontSize": 26,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "i3a2d",
+                      "name": "mechatPrice",
+                      "fill": "#FFFFFF",
+                      "content": "Free + Gem IAP",
+                      "fontFamily": "Playfair Display",
+                      "fontSize": 36,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "8UYE8",
+                      "name": "mechatStrength",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "rwOnY",
+                          "name": "mechatSLabel",
+                          "fill": "#A1A1AA",
+                          "content": "STRENGTHS",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "700",
+                          "letterSpacing": 2
+                        },
+                        {
+                          "type": "text",
+                          "id": "M4ltd",
+                          "name": "mechatS1",
+                          "fill": "#FFFFFF",
+                          "textGrowth": "fixed-width",
+                          "width": 440,
+                          "content": "✓  400K DL/mo · iOS + Android scale",
+                          "fontFamily": "Inter",
+                          "fontSize": 20,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "ZnlZL",
+                          "name": "mechatS2",
+                          "fill": "#FFFFFF",
+                          "textGrowth": "fixed-width",
+                          "width": 440,
+                          "content": "✓  Tinder-style UI, addictive choice loops",
+                          "fontFamily": "Inter",
+                          "fontSize": 20,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "dqf3z",
+                      "name": "mechatWeak",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "59scW",
+                          "name": "mechatWLabel",
+                          "fill": "#FF2D78",
+                          "content": "GAPS",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "700",
+                          "letterSpacing": 2
+                        },
+                        {
+                          "type": "text",
+                          "id": "xVDax",
+                          "name": "mechatW1",
+                          "fill": "#FF2D78",
+                          "textGrowth": "fixed-width",
+                          "width": 440,
+                          "content": "✗  You're never IN the story (no selfie)",
+                          "fontFamily": "Inter",
+                          "fontSize": 20,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "e6OKc",
+                          "name": "mechatW2",
+                          "fill": "#FF2D78",
+                          "textGrowth": "fixed-width",
+                          "width": 440,
+                          "content": "✗  Gem-gated choices feel pay-to-read",
+                          "fontFamily": "Inter",
+                          "fontSize": 20,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "kUYo7",
+                          "name": "mechatW3",
+                          "fill": "#FF2D78",
+                          "textGrowth": "fixed-width",
+                          "width": 440,
+                          "content": "✗  Static art — no AI photo generation",
+                          "fontFamily": "Inter",
+                          "fontSize": 20,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "774aQ",
+              "name": "simmyCard",
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": "#0F0F0F",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "j7VWg",
+                  "name": "simmyImg",
+                  "width": "fill_container",
+                  "height": 220,
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "./images/generated-1775307521880.png",
+                    "mode": "fill"
+                  },
+                  "cornerRadius": [
+                    12,
+                    12,
+                    0,
+                    0
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "RleC0",
+                  "name": "simmyBody",
+                  "layout": "vertical",
+                  "gap": 16,
+                  "padding": 28,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "uN7N6",
+                      "name": "simmyHeader",
+                      "gap": 12,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "Ni0W4",
+                          "name": "simmyBadge",
+                          "fill": "#1A1A1A",
+                          "cornerRadius": 4,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#333333"
+                          },
+                          "padding": [
+                            4,
+                            12
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "CKGA2",
+                              "name": "simmyBadgeT",
+                              "fill": "#A1A1AA",
+                              "content": "CLOSEST RIVAL",
+                              "fontFamily": "Inter",
+                              "fontSize": 13,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "yJrdb",
+                          "name": "simmyName",
+                          "fill": "#FFFFFF",
+                          "content": "Simmy",
+                          "fontFamily": "Inter",
+                          "fontSize": 26,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "g9Bqi",
+                      "name": "simmyPrice",
+                      "fill": "#FFFFFF",
+                      "content": "Free + Gems (2/AI photo)",
+                      "fontFamily": "Playfair Display",
+                      "fontSize": 36,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "t87TI",
+                      "name": "simmyStrength",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "LImqw",
+                          "name": "simmySLabel",
+                          "fill": "#A1A1AA",
+                          "content": "STRENGTHS",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "700",
+                          "letterSpacing": 2
+                        },
+                        {
+                          "type": "text",
+                          "id": "NoBq7",
+                          "name": "simmyS1",
+                          "fill": "#FFFFFF",
+                          "textGrowth": "fixed-width",
+                          "width": 440,
+                          "content": "✓  Selfie-in-story viral loop · #4 App Store",
+                          "fontFamily": "Inter",
+                          "fontSize": 20,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "lEr81",
+                          "name": "simmyS2",
+                          "fill": "#FFFFFF",
+                          "textGrowth": "fixed-width",
+                          "width": 440,
+                          "content": "✓  $3.7M raised · hybrid story + chat",
+                          "fontFamily": "Inter",
+                          "fontSize": 20,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "WV4WG",
+                      "name": "simmyWeak",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Q0Hcw",
+                          "name": "simmyWLabel",
+                          "fill": "#FF2D78",
+                          "content": "GAPS",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "700",
+                          "letterSpacing": 2
+                        },
+                        {
+                          "type": "text",
+                          "id": "hpeYu",
+                          "name": "simmyW1",
+                          "fill": "#FF2D78",
+                          "textGrowth": "fixed-width",
+                          "width": 440,
+                          "content": "✗  Romance-only — no genre variety",
+                          "fontFamily": "Inter",
+                          "fontSize": 20,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "485HL",
+                          "name": "simmyW2",
+                          "fill": "#FF2D78",
+                          "textGrowth": "fixed-width",
+                          "width": 440,
+                          "content": "✗  Celebrity IP risk (BTS, Zendaya likenesses)",
+                          "fontFamily": "Inter",
+                          "fontSize": 20,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "74PK3",
+                          "name": "simmyW3",
+                          "fill": "#FF2D78",
+                          "textGrowth": "fixed-width",
+                          "width": 440,
+                          "content": "✗  iOS only — no web or Android",
+                          "fontFamily": "Inter",
+                          "fontSize": 20,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "cxe7A",
+              "name": "winCard",
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": "#140006",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 24,
+              "padding": 40,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "v79us",
+                  "name": "winTop",
+                  "layout": "vertical",
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "PtqGa",
+                      "name": "winLabel",
+                      "fill": "#FF2D78",
+                      "content": "WHY CHAPTR WINS",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "700",
+                      "letterSpacing": 3
+                    },
+                    {
+                      "type": "text",
+                      "id": "05vIL",
+                      "name": "winTitle",
+                      "fill": "#FFFFFF",
+                      "textGrowth": "fixed-width",
+                      "width": 420,
+                      "content": "They built chatbots.\nWe built a story.",
+                      "lineHeight": 1.1,
+                      "fontFamily": "Playfair Display",
+                      "fontSize": 48,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Wuu3w",
+                  "name": "winPoints",
+                  "layout": "vertical",
+                  "gap": 16,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "pMTM9",
+                      "name": "wp1",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "naSjT",
+                          "name": "wp1t",
+                          "fill": "#FFFFFF",
+                          "content": "Story arc + AI chat",
+                          "fontFamily": "Inter",
+                          "fontSize": 20,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "MeSHb",
+                          "name": "wp1d",
+                          "fill": "#A1A1AA",
+                          "textGrowth": "fixed-width",
+                          "width": 420,
+                          "content": "K-pop niche authenticity — genre fans not generic romance chasers",
+                          "lineHeight": 1.4,
+                          "fontFamily": "Inter",
+                          "fontSize": 18,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "KLrA1",
+                      "name": "wp2",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "tRVQx",
+                          "name": "wp2t",
+                          "fill": "#FFFFFF",
+                          "content": "Your face = the protagonist",
+                          "fontFamily": "Inter",
+                          "fontSize": 20,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "aYF4B",
+                          "name": "wp2d",
+                          "fill": "#A1A1AA",
+                          "textGrowth": "fixed-width",
+                          "width": 420,
+                          "content": "Original archetypes — zero celebrity IP risk unlike Simmy",
+                          "lineHeight": 1.4,
+                          "fontFamily": "Inter",
+                          "fontSize": 18,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "YTxvW",
+                      "name": "wp3",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "I9Aal",
+                          "name": "wp3t",
+                          "fill": "#FFFFFF",
+                          "content": "Viral reveal mechanic",
+                          "fontFamily": "Inter",
+                          "fontSize": 20,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "JqlGC",
+                          "name": "wp3d",
+                          "fill": "#A1A1AA",
+                          "textGrowth": "fixed-width",
+                          "width": 420,
+                          "content": "Web + mobile + multi-genre roadmap — Simmy is iOS romance-only",
+                          "lineHeight": 1.4,
+                          "fontFamily": "Inter",
+                          "fontSize": 18,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "cSzjJ",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 1020,
+          "name": "cdSlideNum",
+          "fill": "#A1A1AA",
+          "content": "08b / —",
+          "fontFamily": "Inter",
+          "fontSize": 18,
+          "fontWeight": "normal"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "DOzcJ",
+      "x": 18177,
+      "y": 3,
+      "name": "09 Scaling Paths",
+      "clip": true,
+      "width": 1920,
+      "height": 1080,
+      "fill": "#0A0A0A",
+      "children": [
+        {
+          "type": "frame",
+          "id": "B67JL",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 120,
+          "name": "Top",
+          "width": 1200,
+          "height": 180,
+          "layout": "vertical",
+          "gap": 16,
+          "children": [
+            {
+              "type": "text",
+              "id": "03wON",
+              "name": "eyebrow",
+              "fill": "#FF2D78",
+              "content": "THE THREE SCALING PATHS",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "600",
+              "letterSpacing": 4
+            },
+            {
+              "type": "text",
+              "id": "8ryxo",
+              "name": "title",
+              "fill": "#FFFFFF",
+              "textGrowth": "fixed-width",
+              "width": 1200,
+              "content": "Same engine. Bigger worlds.",
+              "lineHeight": 1.05,
+              "fontFamily": "Playfair Display",
+              "fontSize": 64,
+              "fontWeight": "700"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "RHS71",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 340,
+          "name": "PathCards",
+          "width": 1680,
+          "height": 580,
+          "gap": 40,
+          "children": [
+            {
+              "type": "frame",
+              "id": "YHWcX",
+              "name": "Path1",
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": "#1A0008",
+              "cornerRadius": 8,
+              "layout": "vertical",
+              "gap": 20,
+              "padding": 40,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Sneec",
+                  "name": "p1badge",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "3Z9SD",
+                      "name": "p1badgeBg",
+                      "fill": "#FF2D78",
+                      "cornerRadius": 4,
+                      "padding": [
+                        4,
+                        12
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Ktc0q",
+                          "name": "p1badgeText",
+                          "fill": "#FFFFFF",
+                          "content": "NOW",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "s9TeP",
+                      "name": "p1timeline",
+                      "fill": "#A1A1AA",
+                      "content": "Solo, near-term",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "HOxQC",
+                  "name": "p1title",
+                  "fill": "#FFFFFF",
+                  "textGrowth": "fixed-width",
+                  "width": 420,
+                  "content": "Multiple\nStory Worlds",
+                  "lineHeight": 1.05,
+                  "fontFamily": "Playfair Display",
+                  "fontSize": 48,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "rectangle",
+                  "id": "9qTfC",
+                  "name": "p1divider",
+                  "fill": "#FF2D78",
+                  "width": 60,
+                  "height": 3
+                },
+                {
+                  "type": "text",
+                  "id": "5LsR1",
+                  "name": "p1desc",
+                  "fill": "#A1A1AA",
+                  "textGrowth": "fixed-width",
+                  "width": 420,
+                  "content": "3–5 distinct worlds. Same engine,\ndifferent genre + characters + art style.\nSelfie protagonist works across all.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "npGdM",
+                  "name": "p1ceiling",
+                  "fill": "#FF2D78",
+                  "content": "Ceiling: ~10–15 worlds",
+                  "fontFamily": "Inter",
+                  "fontSize": 16,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "so3eo",
+              "name": "Path2",
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": "#14000A",
+              "cornerRadius": 8,
+              "layout": "vertical",
+              "gap": 20,
+              "padding": 40,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "wnbiV",
+                  "name": "p2badge",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "rHD7i",
+                      "name": "p2badgeBg",
+                      "fill": "#9B2FFF",
+                      "cornerRadius": 4,
+                      "padding": [
+                        4,
+                        12
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "EMy9a",
+                          "name": "p2badgeText",
+                          "fill": "#FFFFFF",
+                          "content": "MONTH 3–4",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "pLLKl",
+                      "name": "p2timeline",
+                      "fill": "#A1A1AA",
+                      "content": "Medium-term",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "Q6DxP",
+                  "name": "p2title",
+                  "fill": "#FFFFFF",
+                  "textGrowth": "fixed-width",
+                  "width": 420,
+                  "content": "Creator\nLayer",
+                  "lineHeight": 1.05,
+                  "fontFamily": "Playfair Display",
+                  "fontSize": 48,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "rectangle",
+                  "id": "9Gl6p",
+                  "name": "p2divider",
+                  "fill": "#9B2FFF",
+                  "width": 60,
+                  "height": 3
+                },
+                {
+                  "type": "text",
+                  "id": "TFGDJ",
+                  "name": "p2desc",
+                  "fill": "#A1A1AA",
+                  "textGrowth": "fixed-width",
+                  "width": 420,
+                  "content": "Lightweight story world builder.\nCreators define characters + beats.\nClaude generates prose dynamically.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "nzbKC",
+                  "name": "p2moat",
+                  "fill": "#9B2FFF",
+                  "textGrowth": "fixed-width",
+                  "width": 420,
+                  "content": "The real moat: 1,000 creators > you shipping 10",
+                  "fontFamily": "Inter",
+                  "fontSize": 16,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "11plM",
+              "name": "Path3",
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": "#0D000D",
+              "cornerRadius": 8,
+              "layout": "vertical",
+              "gap": 20,
+              "padding": 40,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "etT9a",
+                  "name": "p3badge",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "PnI3k",
+                      "name": "p3badgeBg",
+                      "fill": "#4A1D96",
+                      "cornerRadius": 4,
+                      "padding": [
+                        4,
+                        12
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "H54oW",
+                          "name": "p3badgeText",
+                          "fill": "#FFFFFF",
+                          "content": "MONTH 6+",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "AiiOx",
+                      "name": "p3timeline",
+                      "fill": "#A1A1AA",
+                      "content": "Longer-term, highest ceiling",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "TBy6z",
+                  "name": "p3title",
+                  "fill": "#FFFFFF",
+                  "textGrowth": "fixed-width",
+                  "width": 420,
+                  "content": "IP\nLicensing",
+                  "lineHeight": 1.05,
+                  "fontFamily": "Playfair Display",
+                  "fontSize": 48,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "rectangle",
+                  "id": "ZPl6f",
+                  "name": "p3divider",
+                  "fill": "#4A1D96",
+                  "width": 60,
+                  "height": 3
+                },
+                {
+                  "type": "text",
+                  "id": "bwaFj",
+                  "name": "p3desc",
+                  "fill": "#A1A1AA",
+                  "textGrowth": "fixed-width",
+                  "width": 420,
+                  "content": "Webtoon publishers, K-drama studios,\nindie fiction authors license IP into\nChaptr's protagonist engine.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "gVWQE",
+                  "name": "p3ceiling",
+                  "fill": "#4A1D96",
+                  "textGrowth": "fixed-width",
+                  "width": 420,
+                  "content": "Ceiling: platform powering all licensed AI fiction",
+                  "fontFamily": "Inter",
+                  "fontSize": 16,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "jBer8",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 1020,
+          "name": "slideNum",
+          "fill": "#A1A1AA",
+          "content": "09 / 12",
+          "fontFamily": "Inter",
+          "fontSize": 18,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "frame",
+          "id": "OJ3TW",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 960,
+          "name": "BuildSequence",
+          "width": 1680,
+          "height": 40,
+          "gap": 40,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "GlR87",
+              "name": "arrow1",
+              "fill": "#FF2D78",
+              "content": "Story Worlds →",
+              "fontFamily": "Inter",
+              "fontSize": 16,
+              "fontWeight": "600"
+            },
+            {
+              "type": "text",
+              "id": "R2yn0",
+              "name": "arrow2",
+              "fill": "#9B2FFF",
+              "content": "Creator Tools →",
+              "fontFamily": "Inter",
+              "fontSize": 16,
+              "fontWeight": "600"
+            },
+            {
+              "type": "text",
+              "id": "CvKdL",
+              "name": "arrow3",
+              "fill": "#4A1D96",
+              "content": "IP Licensing",
+              "fontFamily": "Inter",
+              "fontSize": 16,
+              "fontWeight": "600"
+            },
+            {
+              "type": "text",
+              "id": "5kYXL",
+              "name": "label",
+              "fill": "#A1A1AA",
+              "content": "Each path de-risks the next.",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "normal",
+              "fontStyle": "italic"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "egxnq",
+      "x": 20197,
+      "y": 3,
+      "name": "10 Path 1 — Story Worlds",
+      "clip": true,
+      "width": 1920,
+      "height": 1080,
+      "fill": "#0A0A0A",
+      "children": [
+        {
+          "type": "frame",
+          "id": "kLgyw",
+          "layoutPosition": "absolute",
+          "x": 0,
+          "y": 0,
+          "name": "HeroImage",
+          "width": 1920,
+          "height": 1080,
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "../projects/chaptr-v2/public/step2-world.jpeg",
+            "mode": "fill"
+          }
+        },
+        {
+          "type": "rectangle",
+          "id": "N26uY",
+          "layoutPosition": "absolute",
+          "x": 0,
+          "y": 0,
+          "name": "Overlay",
+          "fill": [
+            {
+              "type": "gradient",
+              "gradientType": "linear",
+              "enabled": true,
+              "rotation": 180,
+              "size": {
+                "height": 1
+              },
+              "colors": [
+                {
+                  "color": "#0A0A0AFF",
+                  "position": 0
+                },
+                {
+                  "color": "#0A0A0ACC",
+                  "position": 0.4
+                },
+                {
+                  "color": "#0A0A0A66",
+                  "position": 0.7
+                },
+                {
+                  "color": "#0A0A0A33",
+                  "position": 1
+                }
+              ]
+            },
+            {
+              "type": "gradient",
+              "gradientType": "linear",
+              "enabled": true,
+              "rotation": 90,
+              "size": {
+                "height": 1
+              },
+              "colors": [
+                {
+                  "color": "#0A0A0AFF",
+                  "position": 0
+                },
+                {
+                  "color": "#0A0A0A00",
+                  "position": 0.3
+                }
+              ]
+            }
+          ],
+          "width": 1920,
+          "height": 1080
+        },
+        {
+          "type": "frame",
+          "id": "1OQsh",
+          "layoutPosition": "absolute",
+          "x": 0,
+          "y": 0,
+          "name": "Left",
+          "width": 880,
+          "height": 1080,
+          "layout": "vertical",
+          "gap": 24,
+          "padding": [
+            120,
+            60,
+            60,
+            120
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "tg70o",
+              "name": "eyebrow",
+              "fill": "#FF2D78",
+              "content": "PATH 1 — NEAR-TERM",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "600",
+              "letterSpacing": 4
+            },
+            {
+              "type": "text",
+              "id": "LOljx",
+              "name": "title",
+              "fill": "#FFFFFF",
+              "textGrowth": "fixed-width",
+              "width": 760,
+              "content": "Multiple\nStory Worlds",
+              "lineHeight": 1.05,
+              "fontFamily": "Playfair Display",
+              "fontSize": 56,
+              "fontWeight": "700"
+            },
+            {
+              "type": "rectangle",
+              "id": "XThAI",
+              "name": "divider",
+              "fill": "#FF2D78",
+              "width": 60,
+              "height": 3
+            },
+            {
+              "type": "text",
+              "id": "DbbF9",
+              "name": "desc",
+              "fill": "#FFFFFFCC",
+              "textGrowth": "fixed-width",
+              "width": 700,
+              "content": "Same engine, different genre + characters + art style. Each world is a new STORY_STEPS array — the engine doesn't change.",
+              "lineHeight": 1.5,
+              "fontFamily": "Inter",
+              "fontSize": 20,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "nNLPR",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 700,
+          "name": "WorldCards",
+          "width": 1680,
+          "height": 280,
+          "gap": 16,
+          "children": [
+            {
+              "type": "frame",
+              "id": "GoDCf",
+              "name": "Starfall",
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": "#1A0510E6",
+              "cornerRadius": 8,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "GhlF4",
+                  "name": "w1name",
+                  "fill": "#FF2D78",
+                  "content": "Starfall",
+                  "fontFamily": "Playfair Display",
+                  "fontSize": 28,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "1sfhb",
+                  "name": "w1genre",
+                  "fill": "#FFFFFF",
+                  "content": "K-pop romance",
+                  "fontFamily": "Inter",
+                  "fontSize": 16,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "UnqRa",
+                  "name": "w1chars",
+                  "fill": "#A1A1AA",
+                  "content": "Idol + trainee",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "Nd5jB",
+                  "name": "w1style",
+                  "fill": "#A1A1AA",
+                  "content": "Anime",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal",
+                  "fontStyle": "italic"
+                },
+                {
+                  "type": "frame",
+                  "id": "xW6JT",
+                  "name": "w1badge",
+                  "fill": "#FF2D78",
+                  "cornerRadius": 4,
+                  "padding": [
+                    3,
+                    8
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "LjiXy",
+                      "name": "w1badgeT",
+                      "fill": "#FFFFFF",
+                      "content": "LIVE",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "700"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "umrm1",
+              "name": "Thornwick",
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": "#12061AE6",
+              "cornerRadius": 8,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "UJIV9",
+                  "name": "w2name",
+                  "fill": "#9B2FFF",
+                  "content": "Thornwick",
+                  "fontFamily": "Playfair Display",
+                  "fontSize": 28,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "JbndA",
+                  "name": "w2genre",
+                  "fill": "#FFFFFF",
+                  "content": "Dark fantasy romance",
+                  "fontFamily": "Inter",
+                  "fontSize": 16,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "4QOe5",
+                  "name": "w2chars",
+                  "fill": "#A1A1AA",
+                  "content": "Knight + sorcerer",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "kWE6q",
+                  "name": "w2style",
+                  "fill": "#A1A1AA",
+                  "content": "Painterly",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal",
+                  "fontStyle": "italic"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "u1Rrg",
+              "name": "Signal",
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": "#061218E6",
+              "cornerRadius": 8,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "lssYq",
+                  "name": "w3name",
+                  "fill": "#00D4FF",
+                  "content": "Signal",
+                  "fontFamily": "Playfair Display",
+                  "fontSize": 28,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "C50Cs",
+                  "name": "w3genre",
+                  "fill": "#FFFFFF",
+                  "content": "Cyberpunk thriller",
+                  "fontFamily": "Inter",
+                  "fontSize": 16,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "YjsHr",
+                  "name": "w3chars",
+                  "fill": "#A1A1AA",
+                  "content": "Hacker + detective",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "ZhNJZ",
+                  "name": "w3style",
+                  "fill": "#A1A1AA",
+                  "content": "Neon noir",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal",
+                  "fontStyle": "italic"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "gHhZI",
+              "name": "SakuraAcademy",
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": "#180D14E6",
+              "cornerRadius": 8,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "7WRnA",
+                  "name": "w4name",
+                  "fill": "#FFB3D9",
+                  "content": "Sakura Academy",
+                  "fontFamily": "Playfair Display",
+                  "fontSize": 28,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "hRB9W",
+                  "name": "w4genre",
+                  "fill": "#FFFFFF",
+                  "content": "High school slice-of-life",
+                  "fontFamily": "Inter",
+                  "fontSize": 16,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "Mt7qQ",
+                  "name": "w4chars",
+                  "fill": "#A1A1AA",
+                  "content": "Transfer student arc",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "qdy1B",
+                  "name": "w4style",
+                  "fill": "#A1A1AA",
+                  "content": "Manga",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal",
+                  "fontStyle": "italic"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "sss1r",
+              "name": "TheUnderstudies",
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": "#141008E6",
+              "cornerRadius": 8,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "9b1FP",
+                  "name": "w5name",
+                  "fill": "#FFD700",
+                  "content": "The Understudies",
+                  "fontFamily": "Playfair Display",
+                  "fontSize": 28,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "rrVfJ",
+                  "name": "w5genre",
+                  "fill": "#FFFFFF",
+                  "content": "Broadway drama",
+                  "fontFamily": "Inter",
+                  "fontSize": 16,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "sKafT",
+                  "name": "w5chars",
+                  "fill": "#A1A1AA",
+                  "content": "Rivals-to-lovers",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "0bQF0",
+                  "name": "w5style",
+                  "fill": "#A1A1AA",
+                  "content": "Illustrated",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal",
+                  "fontStyle": "italic"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "XNtw1",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 1020,
+          "name": "slideNum",
+          "fill": "#A1A1AA",
+          "content": "10 / 12",
+          "fontFamily": "Inter",
+          "fontSize": 18,
+          "fontWeight": "normal"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "WRxTv",
+      "x": 22217,
+      "y": 3,
+      "name": "11 Path 2 — Creator Layer",
+      "clip": true,
+      "width": 1920,
+      "height": 1080,
+      "fill": "#0A0A0A",
+      "children": [
+        {
+          "type": "frame",
+          "id": "zsifI",
+          "layoutPosition": "absolute",
+          "x": 960,
+          "y": 0,
+          "name": "HeroImage",
+          "width": 960,
+          "height": 1080,
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "../projects/chaptr-v2/public/step3-story.jpeg",
+            "mode": "fill"
+          }
+        },
+        {
+          "type": "rectangle",
+          "id": "uEIXL",
+          "layoutPosition": "absolute",
+          "x": 0,
+          "y": 0,
+          "name": "Overlay",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 90,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#0A0A0AFF",
+                "position": 0
+              },
+              {
+                "color": "#0A0A0A99",
+                "position": 0.5
+              },
+              {
+                "color": "#0A0A0A00",
+                "position": 1
+              }
+            ]
+          },
+          "width": 1920,
+          "height": 1080
+        },
+        {
+          "type": "frame",
+          "id": "r1XdB",
+          "layoutPosition": "absolute",
+          "x": 0,
+          "y": 0,
+          "name": "Left",
+          "width": 960,
+          "height": 1080,
+          "layout": "vertical",
+          "gap": 24,
+          "padding": [
+            120,
+            60,
+            60,
+            120
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "FaPiB",
+              "name": "eyebrow11",
+              "fill": "#9B2FFF",
+              "content": "PATH 2 — MEDIUM-TERM",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "600",
+              "letterSpacing": 4
+            },
+            {
+              "type": "text",
+              "id": "MX49c",
+              "name": "title11",
+              "fill": "#FFFFFF",
+              "textGrowth": "fixed-width",
+              "width": 780,
+              "content": "Creator\nLayer",
+              "lineHeight": 1.05,
+              "fontFamily": "Playfair Display",
+              "fontSize": 56,
+              "fontWeight": "700"
+            },
+            {
+              "type": "rectangle",
+              "id": "hQVB5",
+              "name": "divider11",
+              "fill": "#9B2FFF",
+              "width": 60,
+              "height": 3
+            },
+            {
+              "type": "text",
+              "id": "8vFBb",
+              "name": "desc11",
+              "fill": "#A1A1AA",
+              "textGrowth": "fixed-width",
+              "width": 780,
+              "content": "The Episode model, but AI-native. Creators define the skeleton — Claude generates the prose, dialogue, and branches dynamically.",
+              "lineHeight": 1.5,
+              "fontFamily": "Inter",
+              "fontSize": 20,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "mMmjm",
+              "name": "defLabel",
+              "fill": "#9B2FFF",
+              "content": "CREATORS DEFINE",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "700",
+              "letterSpacing": 3
+            },
+            {
+              "type": "frame",
+              "id": "kGGYp",
+              "name": "DefineList",
+              "width": 780,
+              "layout": "vertical",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "CaT2r",
+                  "name": "d1",
+                  "fill": "#FFFFFF",
+                  "content": "World setting (a few paragraphs of lore)",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "eRmqS",
+                  "name": "d2",
+                  "fill": "#FFFFFF",
+                  "content": "2–3 characters (name, personality, visual prompt)",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "15CIK",
+                  "name": "d3",
+                  "fill": "#FFFFFF",
+                  "content": "Emotional arc (meet → tension → crisis → resolution)",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "P5ih7",
+                  "name": "d4",
+                  "fill": "#FFFFFF",
+                  "content": "5–8 story beat milestones (not full prose)",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "7N5E2",
+              "name": "EconRow",
+              "width": 780,
+              "gap": 60,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "djsbT",
+                  "name": "e1",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "oL4Kb",
+                      "name": "e1n",
+                      "fill": "#9B2FFF",
+                      "content": "20–30%",
+                      "fontFamily": "Playfair Display",
+                      "fontSize": 40,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "3UVb1",
+                      "name": "e1l",
+                      "fill": "#A1A1AA",
+                      "content": "creator rev share",
+                      "fontFamily": "Inter",
+                      "fontSize": 16,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "JVifh",
+                  "name": "e2",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "y8cxa",
+                      "name": "e2n",
+                      "fill": "#FFFFFF",
+                      "content": "$0",
+                      "fontFamily": "Playfair Display",
+                      "fontSize": 40,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Eqi89",
+                      "name": "e2l",
+                      "fill": "#A1A1AA",
+                      "content": "authoring cost to you",
+                      "fontFamily": "Inter",
+                      "fontSize": 16,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "27TjM",
+                  "name": "e3",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "NAIrd",
+                      "name": "e3n",
+                      "fill": "#FFFFFF",
+                      "content": "1,000+",
+                      "fontFamily": "Playfair Display",
+                      "fontSize": 40,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "qUXpy",
+                      "name": "e3l",
+                      "fill": "#A1A1AA",
+                      "content": "worlds vs you shipping 10",
+                      "fontFamily": "Inter",
+                      "fontSize": 16,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "rnYVF",
+              "name": "moat11",
+              "fill": "#9B2FFF",
+              "textGrowth": "fixed-width",
+              "width": 780,
+              "content": "Character.AI has millions of characters but zero narrative structure. Chaptr has structure + character + personalized protagonist. No one has that combination.",
+              "lineHeight": 1.4,
+              "fontFamily": "Inter",
+              "fontSize": 16,
+              "fontWeight": "600"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "XL7wT",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 1020,
+          "name": "slideNum11",
+          "fill": "#A1A1AA",
+          "content": "11 / 12",
+          "fontFamily": "Inter",
+          "fontSize": 18,
+          "fontWeight": "normal"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "YrBWn",
+      "x": 24237,
+      "y": 3,
+      "name": "12 Path 3 — IP Licensing",
+      "clip": true,
+      "width": 1920,
+      "height": 1080,
+      "fill": "#0A0A0A",
+      "children": [
+        {
+          "type": "frame",
+          "id": "wtWPJ",
+          "layoutPosition": "absolute",
+          "x": 960,
+          "y": 0,
+          "name": "HeroImage",
+          "width": 960,
+          "height": 1080,
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "./images/generated-1775454887553.png",
+            "mode": "fill"
+          }
+        },
+        {
+          "type": "rectangle",
+          "id": "3RAtE",
+          "layoutPosition": "absolute",
+          "x": 0,
+          "y": 0,
+          "name": "Overlay",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 90,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#0A0A0AFF",
+                "position": 0
+              },
+              {
+                "color": "#0A0A0A99",
+                "position": 0.5
+              },
+              {
+                "color": "#0A0A0A00",
+                "position": 1
+              }
+            ]
+          },
+          "width": 1920,
+          "height": 1080
+        },
+        {
+          "type": "frame",
+          "id": "C9v3Y",
+          "layoutPosition": "absolute",
+          "x": 0,
+          "y": 0,
+          "name": "Left",
+          "width": 960,
+          "height": 1080,
+          "layout": "vertical",
+          "gap": 24,
+          "padding": [
+            120,
+            60,
+            60,
+            120
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "yHcGT",
+              "name": "eyebrow12",
+              "fill": "#4A1D96",
+              "content": "PATH 3 — LONGER-TERM",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "600",
+              "letterSpacing": 4
+            },
+            {
+              "type": "text",
+              "id": "mYLmx",
+              "name": "title12",
+              "fill": "#FFFFFF",
+              "textGrowth": "fixed-width",
+              "width": 780,
+              "content": "IP\nLicensing",
+              "lineHeight": 1.05,
+              "fontFamily": "Playfair Display",
+              "fontSize": 56,
+              "fontWeight": "700"
+            },
+            {
+              "type": "rectangle",
+              "id": "sa1iE",
+              "name": "divider12",
+              "fill": "#4A1D96",
+              "width": 60,
+              "height": 3
+            },
+            {
+              "type": "text",
+              "id": "LPdZK",
+              "name": "desc12",
+              "fill": "#A1A1AA",
+              "textGrowth": "fixed-width",
+              "width": 780,
+              "content": "Real IP holders — webtoon publishers, K-drama studios, indie fiction authors with Patreon audiences — want interactive AI experiences for their characters. Chaptr has the engine to run them.",
+              "lineHeight": 1.5,
+              "fontFamily": "Inter",
+              "fontSize": 20,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "0X6rB",
+              "name": "dealLabel",
+              "fill": "#4A1D96",
+              "content": "THE DEAL",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "700",
+              "letterSpacing": 3
+            },
+            {
+              "type": "text",
+              "id": "bEObw",
+              "name": "dealDesc",
+              "fill": "#FFFFFF",
+              "textGrowth": "fixed-width",
+              "width": 780,
+              "content": "An official webtoon or K-drama IP licensed inside Chaptr's \"you are the protagonist\" engine = a B2B SaaS or rev-share deal.",
+              "lineHeight": 1.5,
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "IYVbk",
+              "name": "whyLabel",
+              "fill": "#4A1D96",
+              "content": "WHY US, NOT CHARACTER.AI",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "700",
+              "letterSpacing": 3
+            },
+            {
+              "type": "frame",
+              "id": "y9EGt",
+              "name": "WhyList",
+              "width": 780,
+              "layout": "vertical",
+              "gap": 12,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "GmIQ2",
+                  "name": "w1",
+                  "fill": "#A1A1AA",
+                  "textGrowth": "fixed-width",
+                  "width": 780,
+                  "content": "Character.AI can't run licensed IP at scale — no narrative structure, massive legal overhead",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "qoQZR",
+                  "name": "w2",
+                  "fill": "#A1A1AA",
+                  "textGrowth": "fixed-width",
+                  "width": 780,
+                  "content": "Chaptr has narrative arc + emotional payoff + personalized protagonist — the full package IP holders need",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "E2YFv",
+              "name": "ceiling12",
+              "fill": "#4A1D96",
+              "textGrowth": "fixed-width",
+              "width": 780,
+              "content": "Ceiling: become the platform that powers all licensed AI interactive fiction.",
+              "lineHeight": 1.4,
+              "fontFamily": "Inter",
+              "fontSize": 16,
+              "fontWeight": "600"
+            },
+            {
+              "type": "text",
+              "id": "ttnrh",
+              "name": "signal12",
+              "fill": "#A1A1AA",
+              "textGrowth": "fixed-width",
+              "width": 780,
+              "content": "Signal to watch: if any story world in Path 1 gets strong organic traction, that's the one to approach IP holders about.",
+              "lineHeight": 1.4,
+              "fontFamily": "Inter",
+              "fontSize": 16,
+              "fontWeight": "normal",
+              "fontStyle": "italic"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "gD4ZT",
+          "layoutPosition": "absolute",
+          "x": 120,
+          "y": 1020,
+          "name": "slideNum12",
+          "fill": "#A1A1AA",
+          "content": "12 / 12",
+          "fontFamily": "Inter",
+          "fontSize": 18,
+          "fontWeight": "normal"
+        }
+      ]
+    }
+  ]
+}

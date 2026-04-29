@@ -284,8 +284,9 @@ export function getTravelCompanion(characterId: string): TravelCompanion | undef
   return TRAVEL_COMPANIONS.find((c) => c.characterId === characterId)
 }
 
-export function getCompanionIntro(companion: TravelCompanion, destinationId: string): string {
-  return companion.travelIntroByCity[destinationId] ?? companion.travelIntro
+export function getCompanionIntro(companion: TravelCompanion, destinationId: string, playerName?: string | null): string {
+  const intro = companion.travelIntroByCity[destinationId] ?? companion.travelIntro
+  return playerName ? `${playerName}! ${intro}` : intro
 }
 
 export function buildTravelSystemPrompt(companion: TravelCompanion, sliders: CompanionSliders, destinationKnowledge: string, remix?: CompanionRemix): string {

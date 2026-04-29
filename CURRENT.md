@@ -1,69 +1,44 @@
 # Chaptr V2 — Current Session State
 
 ## In Progress
-- **Homepage Journey Stats redesign** — started but not visually validated yet. Code changes are in place but need browser testing.
+- Image generation consistency — scene images still don't perfectly match twin/companion portrait styles (different FLUX models used)
 
 ## Done This Session
 
-### Journey Stats Redesign (partial)
-- Expanded stats from 2 items (Trips, Stories) back to 4 (Trips, Stories, Moments, Bonds)
-- Extracted `JourneyStatCard` component with new visual treatment:
-  - Gradient background fills (135deg from accent color)
-  - Colored box shadows / glow under active cards
-  - Ambient glow blob (blurred orb behind icon)
-  - Rounded-xl icon containers with inner glow
-  - Larger numbers (text-2xl/3xl), colored labels
-  - Desktop subtitles ("completed", "in progress", "captured", "formed")
-- Desktop: full-width `grid-cols-4` (removed `max-w-[480px]` constraint)
-- Mobile: `grid-cols-2` with 2x2 layout
-- Each card is clickable: Trips/Stories open modals, Moments → /album, Bonds → /characters
-- Added `Image` and `Heart` lucide icons to imports
+### Mobile Landing Page Performance + UX
+- Replaced auto-scroll CSS animation carousel with manual swipe + arrow buttons on mobile (MobileDestinationCarousel component)
+- Added auto-scroll back (3s interval) that pauses on touch/arrow tap, resumes after 4s
+- Added `loading="lazy"` to all destination card images (28 destinations × ~650KB each = ~18MB was loading eagerly)
+- Added `loading="lazy"` to story card images
+- Mobile carousel now renders only 28 images (not 56 — removed the duplication needed for infinite CSS loop)
 
-### Pencil Design Attempt
-- Attempted to design homepage in chaptr.pen but hit Pencil MCP screenshot rendering limitation (newly created nodes don't render in screenshots during the session)
-- Deleted all test frames — no leftover artifacts in chaptr.pen
+### Image Generation Consistency
+- FLUX.2 Pro scene prompts now include companion visual description (was passed as param but never used)
+- Added explicit style anchors ("cel-shaded, soft shading, expressive eyes, detailed hair") to FLUX.2 Pro and Kontext Pro prompts
+- Bumped generation steps 20 → 25 for FLUX.2 Pro and Kontext Pro
+- Added "NOT western cartoon" to anime style suffix to prevent style drift
+- DepartureScreen now passes `companionDescription` through to `generateSceneImage`
 
 ## Done Previous Sessions
-- "Stay Longer" monetisation CTA on trip complete
-- Homepage stats modals (trips + stories detail views)
-- Two-pass image generation for companion face consistency
-- Chat image UX, action beats, text readability
-- Companion remix flow, globe expansion to 13 cities
-- Day transition screens, 28 destination covers
-- Food image support, landmark photos
+- Mobile QA pass (copyright year, text sizes, viewport testing)
+- Stay 2 More Days flow (HomePage → TravelReaderPage)
+- $2.99 pricing display, chat history continuity
+- Journey Stats bento, companion remix, globe expansion
+- Day transitions, destination covers, food/landmark images
 - Landing page, companion cards, globe UX
 - Travel Mode (Phases 1-5), multi-chapter stories
-- Lofi beats, sidebar consistency, Safari fixes
 
 ## Next
-
-### 1. Validate Journey Stats redesign in browser
-- Open localhost:5173, check desktop homepage
-- Verify the 4 cards render with glowing gradients, colored shadows, ambient orbs
-- Check mobile layout (2x2 grid)
-- If visual treatment isn't bold enough, push further — the goal is DRAMATICALLY different from the flat cards, not a subtle polish
-
-### 2. Consider deeper homepage redesign
-- The stats section was the focus, but the rest of the homepage could use similar visual upgrades
-- Continue cards, mode toggle, browse grid could all get richer treatment
-- Consider bento-style asymmetric layouts
-
-### 3. Full browser playtest
-- Test Stay Longer flow end-to-end
-- Test stats modals with real completed trip data
-- Test food image feature end-to-end
-
-### 4. GTM launch
-- GTM-PLAYBOOK.md is ready — execute channel strategy
-- 13 available destinations, 7 playable stories
+1. **Test image consistency live** — start a new trip and compare departure scene vs twin/companion portraits
+2. **GTM launch** — GTM-PLAYBOOK.md is ready, 30 destinations, 7+ stories
+3. **Mobile polish** — continue testing on real phone
 
 ## Key Files
-- `src/pages/HomePage.tsx` — `JourneyStatCard` component (new), `JourneyStats` updated with 4 metrics
-- `src/pages/TravelReaderPage.tsx` — travel chat, stay longer handler, two-pass image gen
-- `src/components/travel/TripComplete.tsx` — trip complete screen with Stay Longer CTA
-- `src/store/useStore.ts` — storyMoments, globalAffinities used for Moments/Bonds counts
+- `src/lib/togetherAi.ts` — all image generation (FLUX.2 Pro scenes, Kontext Pro selfie stylize, Schnell portraits)
+- `src/components/travel/DepartureScreen.tsx` — departure scene generation with both character refs
+- `src/pages/LandingPage.tsx` — MobileDestinationCarousel with auto-scroll + arrows + lazy loading
+- `src/pages/TravelReaderPage.tsx` — travel reader with scene generation calls
 
 ## Blockers
+- Scene images use FLUX.2 Pro while portraits use FLUX.1 Schnell — inherently different model styles. Prompt alignment helps but can't fully solve cross-model consistency.
 - Safari selfie image not loading (likely base64 data URL too large)
-- Two-pass companion refinement quality unknown — needs live testing
-- Pencil MCP screenshot tool can't render newly created nodes — limits design iteration in Pencil

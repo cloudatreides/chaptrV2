@@ -190,9 +190,10 @@ export async function* streamTravelChatReply(params: {
   companionMemories: string[]
   travelAffinityScore: number
   bio: string | null
+  playerName: string | null
   signal?: AbortSignal
 }): AsyncGenerator<string> {
-  const { companionId, companionSliders, companionRemix, destinationId, messages, chatType, sceneContext, tripContext, companionMemories, travelAffinityScore, bio, signal } = params
+  const { companionId, companionSliders, companionRemix, destinationId, messages, chatType, sceneContext, tripContext, companionMemories, travelAffinityScore, bio, playerName, signal } = params
   const companion = getTravelCompanion(companionId)
   const destination = getDestination(destinationId)
   if (!companion || !destination) throw new Error(`Missing companion or destination`)
@@ -200,6 +201,9 @@ export async function* streamTravelChatReply(params: {
   let system = buildTravelSystemPrompt(companion, companionSliders, destination.locationKnowledge, companionRemix)
 
   if (bio) system += `\nTraveler personality: "${bio}"`
+  if (playerName) {
+    system += `\n\nTRAVELER NAME: ${playerName}. Address them by name occasionally — sprinkle it in naturally, especially when reacting to something they said, asking them a direct question, or starting a new beat in the conversation. Don't overuse it (no more than once every few messages). Mix "you" and "${playerName}" so it feels like a real friend talking, not a chatbot.`
+  }
 
   if (travelAffinityScore > 60) {
     system += `\n\nYou've been traveling together for a while now. You're comfortable, open, and genuine. Inside jokes have started forming. You reference shared moments naturally.`
@@ -295,19 +299,23 @@ export async function generateTravelOpeningMessage(params: {
   sceneContext?: string
   tripContext?: string
   bio: string | null
+  playerName: string | null
 }): Promise<{ content: string; suggestions?: string[] }> {
-  const { companionId, companionSliders, companionRemix, destinationId, chatType, sceneContext, tripContext, bio } = params
+  const { companionId, companionSliders, companionRemix, destinationId, chatType, sceneContext, tripContext, bio, playerName } = params
   const companion = getTravelCompanion(companionId)
   const destination = getDestination(destinationId)
   if (!companion || !destination) return { content: '...' }
 
   if (chatType === 'planning') {
-    return { content: getCompanionIntro(companion, destinationId) }
+    return { content: getCompanionIntro(companion, destinationId, playerName) }
   }
 
   let system = buildTravelSystemPrompt(companion, companionSliders, destination.locationKnowledge, companionRemix)
   if (bio) system += `\nTraveler personality: "${bio}"`
   if (tripContext) system += `\n\nTRIP SO FAR: ${tripContext}`
+  if (playerName) {
+    system += `\n\nTRAVELER NAME: ${playerName}. Open by addressing them by name — this is the start of a new beat in the trip, so greeting them by name makes it feel personal and real.`
+  }
 
   const openerInstructions: Record<string, string> = {
     reaction: `You just experienced something with the traveler. React naturally. 1-2 sentences. ${sceneContext ? `What happened: ${sceneContext}` : ''}`,
