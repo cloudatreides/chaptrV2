@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, Pencil, MessageCircle, LogOut, Compass, BookOpen, ChevronRight, ChevronLeft, Camera, Sparkles, Plus, Map, X } from 'lucide-react'
+import { ArrowRight, Pencil, MessageCircle, LogOut, Compass, BookOpen, ChevronRight, ChevronLeft, Camera, Sparkles, Plus, Map, X, Star } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { UNIVERSES, GENRE_FILTERS } from '../data/storyData'
 import { useAuth } from '../contexts/AuthContext'
@@ -32,13 +32,16 @@ function getChapterLabel(stepIndex: number, total: number): string {
 
 // ─── Twin Hero (has character) ───
 
-function TwinHero({ character, allCharacters, onEdit, onSwitch, onCreateNew }: {
+function TwinHero({ character, allCharacters, onEdit, onSwitch, onCreateNew, onSetDefault }: {
   character: { id: string; name: string; selfieUrl: string | null; bio: string | null }
   allCharacters: { id: string; name: string; selfieUrl: string | null }[]
   onEdit: () => void
   onSwitch: (id: string) => void
   onCreateNew: () => void
+  onSetDefault: (id: string) => void
 }) {
+  const isDefault = allCharacters[0]?.id === character.id
+  const canSetDefault = allCharacters.length > 1 && !isDefault
   return (
     <div className="flex flex-col gap-3">
       <div className="relative rounded-2xl overflow-hidden flex flex-col md:flex-row" style={{ border: '1px solid rgba(200,75,158,0.12)', background: '#13101c' }}>
@@ -72,13 +75,32 @@ function TwinHero({ character, allCharacters, onEdit, onSwitch, onCreateNew }: {
               {character.bio}
             </p>
           )}
-          <button
-            onClick={onEdit}
-            className="cursor-pointer w-fit flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium transition-colors hover:bg-white/5"
-            style={{ color: 'rgba(255,255,255,0.45)', border: '1px solid rgba(255,255,255,0.08)', fontFamily: SG }}
-          >
-            <Pencil size={12} /> Edit twin
-          </button>
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={onEdit}
+              className="cursor-pointer w-fit flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium transition-colors hover:bg-white/5"
+              style={{ color: 'rgba(255,255,255,0.45)', border: '1px solid rgba(255,255,255,0.08)', fontFamily: SG }}
+            >
+              <Pencil size={12} /> Edit twin
+            </button>
+            {canSetDefault && (
+              <button
+                onClick={() => onSetDefault(character.id)}
+                className="cursor-pointer w-fit flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium transition-colors hover:bg-[rgba(200,75,158,0.12)]"
+                style={{ color: '#c84b9e', border: '1px solid rgba(200,75,158,0.25)', background: 'rgba(200,75,158,0.06)', fontFamily: SG }}
+              >
+                <Star size={12} /> Set as default
+              </button>
+            )}
+            {isDefault && allCharacters.length > 1 && (
+              <span
+                className="w-fit flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium"
+                style={{ color: 'rgba(200,75,158,0.7)', fontFamily: SG }}
+              >
+                <Star size={12} fill="currentColor" /> Default twin
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
@@ -690,6 +712,7 @@ export function HomePage() {
   const characters = useStore((s) => s.characters)
   const storyProgress = useStore((s) => s.storyProgress)
   const setActiveCharacter = useStore((s) => s.setActiveCharacter)
+  const setDefaultCharacter = useStore((s) => s.setDefaultCharacter)
   const setSelectedUniverse = useStore((s) => s.setSelectedUniverse)
   const globalAffinities = useStore((s) => s.globalAffinities)
   const ambientPings = useStore((s) => s.ambientPings)
@@ -817,7 +840,7 @@ export function HomePage() {
 
           {/* Twin Hero or Upload CTA */}
           {hasCharacters && activeCharacter?.selfieUrl ? (
-            <TwinHero character={activeCharacter} allCharacters={characters} onEdit={() => navigate('/characters')} onSwitch={(id) => setActiveCharacter(id)} onCreateNew={() => navigate('/create-character')} />
+            <TwinHero character={activeCharacter} allCharacters={characters} onEdit={() => navigate('/characters')} onSwitch={(id) => setActiveCharacter(id)} onCreateNew={() => navigate('/create-character')} onSetDefault={(id) => setDefaultCharacter(id)} />
           ) : (
             <UploadHero onClick={() => navigate('/create-character')} />
           )}
@@ -868,7 +891,7 @@ export function HomePage() {
             {/* Twin Hero or Upload CTA */}
             <div className="mb-6">
               {hasCharacters && activeCharacter?.selfieUrl ? (
-                <TwinHero character={activeCharacter} allCharacters={characters} onEdit={() => navigate('/characters')} onSwitch={(id) => setActiveCharacter(id)} onCreateNew={() => navigate('/create-character')} />
+                <TwinHero character={activeCharacter} allCharacters={characters} onEdit={() => navigate('/characters')} onSwitch={(id) => setActiveCharacter(id)} onCreateNew={() => navigate('/create-character')} onSetDefault={(id) => setDefaultCharacter(id)} />
               ) : (
                 <UploadHero onClick={() => navigate('/create-character')} />
               )}

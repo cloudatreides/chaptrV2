@@ -179,6 +179,7 @@ interface StoreState {
   createCharacter: (char: Omit<PlayerCharacter, 'id' | 'createdAt'>) => string
   deleteCharacter: (id: string) => void
   setActiveCharacter: (id: string) => void
+  setDefaultCharacter: (id: string) => void
   updateCharacter: (id: string, updates: Partial<Pick<PlayerCharacter, 'name' | 'gender' | 'selfieUrl' | 'bio'>>) => void
 
   // ── Universe ──
@@ -368,6 +369,13 @@ export const useStore = create<StoreState>()(
       }),
 
       setActiveCharacter: (id) => set({ activeCharacterId: id }),
+
+      setDefaultCharacter: (id) => set((s) => {
+        const target = s.characters.find((c) => c.id === id)
+        if (!target) return s
+        const rest = s.characters.filter((c) => c.id !== id)
+        return { characters: [target, ...rest], activeCharacterId: id }
+      }),
 
       updateCharacter: (id, updates) => set((s) => ({
         characters: s.characters.map((c) => c.id === id ? { ...c, ...updates } : c),
