@@ -12,6 +12,7 @@ import { getCharacter, CHARACTERS } from '../data/characters'
 import { AppSidebar } from '../components/AppSidebar'
 import { SelfieImg } from '../components/SelfieImg'
 import { AmbientPingModal } from '../components/AmbientPingModal'
+import { SyncIndicator } from '../components/SyncIndicator'
 import { DESTINATIONS, getDestination } from '../data/travel/destinations'
 import { getTravelCompanion } from '../data/travel/companions'
 import type { AmbientPingDef } from '../data/ambientPings'
@@ -845,7 +846,10 @@ export function HomePage() {
           {/* Header */}
           <div className="flex items-center justify-between">
             <h1 className="text-white font-bold text-[22px]" style={{ fontFamily: SG }}>chaptr</h1>
-            <button onClick={signOut} className="cursor-pointer w-9 h-9 rounded-full flex items-center justify-center hover:bg-white/5"><LogOut size={16} className="text-white/30" /></button>
+            <div className="flex items-center gap-2 relative">
+              <SyncIndicator />
+              <button onClick={signOut} className="cursor-pointer w-9 h-9 rounded-full flex items-center justify-center hover:bg-white/5"><LogOut size={16} className="text-white/30" /></button>
+            </div>
           </div>
 
           {/* Twin Hero or Upload CTA */}
@@ -895,7 +899,10 @@ export function HomePage() {
                   {hasCharacters ? 'Your world awaits' : 'Create your twin'}
                 </h1>
               </div>
-              <button onClick={signOut} className="cursor-pointer w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/5"><LogOut size={16} className="text-white/30" /></button>
+              <div className="flex items-center gap-3 relative">
+                <SyncIndicator />
+                <button onClick={signOut} className="cursor-pointer w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/5"><LogOut size={16} className="text-white/30" /></button>
+              </div>
             </div>
 
             {/* Twin Hero or Upload CTA */}

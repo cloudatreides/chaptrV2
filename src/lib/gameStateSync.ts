@@ -6,8 +6,30 @@ import { supabase } from './supabase'
 
 const TABLE = 'user_game_state'
 
+// Tracks the most recent save outcome so the UI can show a sync indicator.
+// Subscribers are notified on change.
+export type SyncStatus = 'idle' | 'saving' | 'saved' | 'error'
+interface SyncState {
+  status: SyncStatus
+  lastError?: string
+  lastSavedAt?: number
+}
+let _syncState: SyncState = { status: 'idle' }
+const _syncSubs = new Set<(s: SyncState) => void>()
+function setSync(next: SyncState) {
+  _syncState = next
+  _syncSubs.forEach((s) => s(next))
+}
+export function getSyncState(): SyncState { return _syncState }
+export function subscribeSync(fn: (s: SyncState) => void): () => void {
+  _syncSubs.add(fn)
+  fn(_syncState)
+  return () => _syncSubs.delete(fn)
+}
+
 /** Save the full partialize state to Supabase for the current user */
 export async function saveGameState(userId: string, state: Record<string, unknown>): Promise<boolean> {
+  setSync({ status: 'saving' })
   try {
     const { error } = await supabase
       .from(TABLE)
@@ -18,12 +40,17 @@ export async function saveGameState(userId: string, state: Record<string, unknow
       }, { onConflict: 'user_id' })
 
     if (error) {
-      console.error('Failed to save game state:', error)
+      const msg = `${error.code ?? ''} ${error.message ?? ''} ${error.details ?? ''} ${error.hint ?? ''}`.trim()
+      console.error('[GameStateSync] save failed:', error)
+      setSync({ status: 'error', lastError: msg || 'Unknown Supabase error' })
       return false
     }
+    setSync({ status: 'saved', lastSavedAt: Date.now() })
     return true
   } catch (e) {
-    console.error('Game state save error:', e)
+    const msg = e instanceof Error ? e.message : String(e)
+    console.error('[GameStateSync] save threw:', e)
+    setSync({ status: 'error', lastError: msg })
     return false
   }
 }
