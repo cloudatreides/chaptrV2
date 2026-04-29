@@ -223,7 +223,7 @@ export function TravelReaderPage() {
   const abortRef = useRef<AbortController | null>(null)
   const engagementRef = useRef<number>(Date.now())
 
-  const [showLofiLabel, setShowLofiLabel] = useState(true)
+  const [showAmbientLabel, setShowAmbientLabel] = useState(true)
   const [showPortraitModal, setShowPortraitModal] = useState(false)
   const [showProgressSheet, setShowProgressSheet] = useState(false)
 
@@ -237,24 +237,25 @@ export function TravelReaderPage() {
   }, [trip?.phase, trip?.planningChatHistory.length])
 
   useEffect(() => {
-    lofiPlayer.play()
+    if (trip?.destinationId) ambientPlayer.play(trip.destinationId)
     const unlockAudio = () => {
       ambientAudio.unlock()
+      if (trip?.destinationId) ambientPlayer.play(trip.destinationId)
       document.removeEventListener('touchstart', unlockAudio)
       document.removeEventListener('click', unlockAudio)
     }
     document.addEventListener('touchstart', unlockAudio, { once: true })
     document.addEventListener('click', unlockAudio, { once: true })
     return () => {
-      lofiPlayer.stop()
+      ambientPlayer.stop()
       document.removeEventListener('touchstart', unlockAudio)
       document.removeEventListener('click', unlockAudio)
     }
-  }, [])
+  }, [trip?.destinationId])
 
-  // Hide lofi label after 5 seconds
+  // Hide ambient label after 5 seconds
   useEffect(() => {
-    const t = setTimeout(() => setShowLofiLabel(false), 5000)
+    const t = setTimeout(() => setShowAmbientLabel(false), 5000)
     return () => clearTimeout(t)
   }, [])
 
@@ -1260,19 +1261,19 @@ export function TravelReaderPage() {
           </button>
           <motion.button
             onClick={() => {
-              const playing = lofiPlayer.toggle()
-              setLofiPlaying(playing)
-              setShowLofiLabel(false)
+              const playing = ambientPlayer.toggle(trip.destinationId)
+              setAmbientPlaying(playing)
+              setShowAmbientLabel(false)
             }}
-            animate={!lofiPlaying && showLofiLabel ? { scale: [1, 1.08, 1] } : {}}
-            transition={!lofiPlaying && showLofiLabel ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } : {}}
+            animate={!ambientPlaying && showAmbientLabel ? { scale: [1, 1.08, 1] } : {}}
+            transition={!ambientPlaying && showAmbientLabel ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } : {}}
             className="shrink-0 h-8 rounded-full flex items-center gap-1.5 px-2.5 cursor-pointer transition-colors hover:bg-white/5"
-            style={{ background: lofiPlaying ? 'rgba(139,92,246,0.12)' : 'transparent', border: lofiPlaying ? '1px solid rgba(139,92,246,0.2)' : '1px solid rgba(255,255,255,0.08)' }}
-            title={lofiPlaying ? 'Pause lofi' : 'Play lofi'}
+            style={{ background: ambientPlaying ? 'rgba(139,92,246,0.12)' : 'transparent', border: ambientPlaying ? '1px solid rgba(139,92,246,0.2)' : '1px solid rgba(255,255,255,0.08)' }}
+            title={ambientPlaying ? 'Pause ambient' : 'Play ambient'}
           >
-            {lofiPlaying ? <Volume2 size={14} className="text-purple-400" /> : <VolumeX size={14} className="text-white/40" />}
-            {showLofiLabel && !lofiPlaying && (
-              <span className="text-[11px] text-white/40 pr-0.5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>lofi</span>
+            {ambientPlaying ? <Volume2 size={14} className="text-purple-400" /> : <VolumeX size={14} className="text-white/40" />}
+            {showAmbientLabel && !ambientPlaying && (
+              <span className="text-[11px] text-white/40 pr-0.5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>ambient</span>
             )}
           </motion.button>
         </div>
