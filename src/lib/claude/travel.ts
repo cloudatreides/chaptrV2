@@ -268,10 +268,22 @@ Format: [SUGGESTIONS: "reply 1" | "reply 2" | "reply 3"]
 - Keep each under 50 characters
 - They should be contextual to what you just said`
 
-  const chatMessages = messages.map((m) => ({
-    role: m.role === 'user' ? 'user' as const : 'assistant' as const,
-    content: m.content,
-  }))
+  // UI-only messages (place/food carousels, scene recaps, "show me" image cards)
+  // are not real dialogue — strip them so the LLM doesn't mimic the 🍽️/📍
+  // emoji pattern in its own replies.
+  const isUiCard = (m: ChatMessage): boolean => {
+    if (m.role !== 'character') return false
+    if (m.characterId === '__scene_recap__') return true
+    if (m.content.startsWith('📍 ') || m.content.startsWith('🍽️ ') || m.content.startsWith('📸 ')) return true
+    return false
+  }
+
+  const chatMessages = messages
+    .filter((m) => !isUiCard(m))
+    .map((m) => ({
+      role: m.role === 'user' ? 'user' as const : 'assistant' as const,
+      content: m.content,
+    }))
 
   const response = await fetch('/api/claude', {
     method: 'POST',
