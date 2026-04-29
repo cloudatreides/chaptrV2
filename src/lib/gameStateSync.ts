@@ -51,7 +51,14 @@ let saveTimer: ReturnType<typeof setTimeout> | null = null
 let pendingUserId: string | null = null
 let pendingState: Record<string, unknown> | null = null
 
-/** Queue a debounced save (5 second delay to batch rapid changes) */
+// 1.5s debounce. The old 5s window was a frequent footgun: if the user
+// refreshed, navigated, or closed the tab within 5 seconds of creating a
+// twin, the save never fired and the twin was lost on next hydrate. 1.5s is
+// short enough that most realistic flows survive it, long enough to batch
+// rapid changes (eg name+gender+bio edits in quick succession).
+const DEBOUNCE_MS = 1500
+
+/** Queue a debounced save */
 export function queueSave(userId: string, state: Record<string, unknown>) {
   pendingUserId = userId
   pendingState = state
@@ -63,10 +70,11 @@ export function queueSave(userId: string, state: Record<string, unknown>) {
     saveTimer = null
     pendingUserId = null
     pendingState = null
-  }, 5000)
+  }, DEBOUNCE_MS)
 }
 
-/** Flush any pending save immediately (call before sign-out) */
+/** Flush any pending save immediately. Call before sign-out OR before
+ *  navigation/refresh-prone moments (eg right after createCharacter). */
 export async function flushPendingSave(): Promise<void> {
   if (saveTimer) {
     clearTimeout(saveTimer)

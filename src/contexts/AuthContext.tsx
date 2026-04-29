@@ -18,12 +18,20 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 /** Hydrate the Zustand store from Supabase saved state.
- *  Hydrate when EITHER:
- *    (a) local has no meaningful data (fresh login, just-cleared localStorage), OR
- *    (b) cloud is newer than local (last-write-wins for same-user multi-device).
- *  Old logic compared timestamps only and was poisoned by the store's default
- *  lastSessionTimestamp = Date.now() at init, which always made fresh local
- *  state look "newer" than cloud and silently discarded the user's data. */
+ *
+ *  Pre-GTM strategy: prefer local whenever local has data. Cloud only wins
+ *  when localStorage is empty (genuinely-fresh device or post-signOut). The
+ *  old timestamp comparison was unreliable because:
+ *   - lastSessionTimestamp only updated on home-page mount, not on character
+ *     mutations. A user could create a twin and refresh within the cloud
+ *     sync's 5s debounce window — local would have the new twin but a stale
+ *     timestamp, cloud would have the old state with a fresher (sync-time)
+ *     timestamp, and hydrate would silently overwrite the local twin with
+ *     pre-twin cloud state. Exactly what was happening.
+ *
+ *  Trade-off: multi-device same-user conflicts now favor whichever device the
+ *  user is on. Acceptable for single-builder testing pre-GTM. Post-launch we
+ *  need proper per-entity merge logic. */
 async function hydrateFromCloud(userId: string) {
   const cloudState = await loadGameState(userId)
   if (!cloudState) return
@@ -34,10 +42,7 @@ async function hydrateFromCloud(userId: string) {
     Object.keys(local.storyProgress ?? {}).length > 0 ||
     Object.keys(local.travelTrips ?? {}).length > 0
 
-  const localTimestamp = local.lastSessionTimestamp ?? 0
-  const cloudTimestamp = (cloudState.lastSessionTimestamp as number) ?? 0
-
-  if (!hasLocalData || cloudTimestamp >= localTimestamp) {
+  if (!hasLocalData) {
     useStore.setState(cloudState as Partial<typeof local>)
   }
 }

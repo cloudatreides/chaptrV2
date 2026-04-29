@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useStore } from '../store/useStore'
 import { useAuth } from '../contexts/AuthContext'
-import { queueSave } from '../lib/gameStateSync'
+import { queueSave, flushPendingSave } from '../lib/gameStateSync'
 
 /** Subscribe to store changes and auto-save to Supabase for logged-in users */
 export function useGameStateSync() {
@@ -9,6 +9,14 @@ export function useGameStateSync() {
 
   useEffect(() => {
     if (!user) return
+
+    // Best-effort flush on tab close / refresh / navigation. The browser may
+    // not wait for the async fetch, but if the debounce timer was already
+    // close to firing, this gives us the maximum chance of getting the latest
+    // state into Supabase before the page unloads.
+    const onBeforeUnload = () => { flushPendingSave() }
+    window.addEventListener('beforeunload', onBeforeUnload)
+    window.addEventListener('pagehide', onBeforeUnload)
 
     const unsub = useStore.subscribe((state) => {
       const partialState = {
@@ -34,6 +42,10 @@ export function useGameStateSync() {
       queueSave(user.id, partialState)
     })
 
-    return unsub
+    return () => {
+      unsub()
+      window.removeEventListener('beforeunload', onBeforeUnload)
+      window.removeEventListener('pagehide', onBeforeUnload)
+    }
   }, [user])
 }
