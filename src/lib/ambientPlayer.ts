@@ -1,4 +1,5 @@
 const STORAGE_KEY = 'chaptr-ambient-playing'
+const TRACK_INDEX_KEY = 'chaptr-ambient-track-index'
 const VOLUME = 0.35
 const FADE_MS = 1500
 
@@ -36,34 +37,47 @@ const DESTINATION_VIBES: Record<string, Vibe> = {
   jaipur: 'desert-exotic',
 }
 
-const VIBE_FILES: Record<Vibe, string> = {
-  'asian-metro': '/audio/ambient/asian-metro.mp3',
-  'western-metro': '/audio/ambient/western-metro.mp3',
-  'european-old-city': '/audio/ambient/european-old-city.mp3',
-  'latin': '/audio/ambient/latin.mp3',
-  'desert-exotic': '/audio/ambient/desert-exotic.mp3',
-  'nordic': '/audio/ambient/nordic.mp3',
+const VIBE_TRACKS: Record<Vibe, string[]> = {
+  'asian-metro': ['/audio/ambient/asian-metro.mp3'],
+  'western-metro': ['/audio/ambient/western-metro.mp3'],
+  'european-old-city': ['/audio/ambient/european-old-city.mp3'],
+  'latin': ['/audio/ambient/latin.mp3'],
+  'desert-exotic': ['/audio/ambient/desert-exotic.mp3'],
+  'nordic': ['/audio/ambient/nordic.mp3'],
 }
 
-const FALLBACK_SRC = '/audio/ambient/fallback.mp3'
+const FALLBACK_TRACKS = ['/audio/ambient/fallback.mp3']
 
 class AmbientPlayer {
   private audio: HTMLAudioElement | null = null
-  private currentSrc: string | null = null
+  private currentTracks: string[] = FALLBACK_TRACKS
+  private trackIndex = 0
   private _enabled: boolean
   private fadeInterval: ReturnType<typeof setInterval> | null = null
 
   constructor() {
     this._enabled = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) !== 'false' : true
+    const stored = typeof localStorage !== 'undefined' ? parseInt(localStorage.getItem(TRACK_INDEX_KEY) ?? '0', 10) : 0
+    this.trackIndex = Number.isFinite(stored) ? stored : 0
   }
 
   get isEnabled(): boolean {
     return this._enabled
   }
 
-  private getSrcForDestination(destinationId: string): string {
-    const vibe = DESTINATION_VIBES[destinationId] ?? 'european-old-city'
-    return VIBE_FILES[vibe]
+  get trackCount(): number {
+    return this.currentTracks.length
+  }
+
+  private getTracksForDestination(destinationId: string): string[] {
+    const vibe = DESTINATION_VIBES[destinationId]
+    if (!vibe) return FALLBACK_TRACKS
+    return VIBE_TRACKS[vibe] ?? FALLBACK_TRACKS
+  }
+
+  private currentSrc(): string {
+    const idx = ((this.trackIndex % this.currentTracks.length) + this.currentTracks.length) % this.currentTracks.length
+    return this.currentTracks[idx]
   }
 
   private buildAudio(src: string): HTMLAudioElement {
@@ -71,28 +85,79 @@ class AmbientPlayer {
     audio.loop = true
     audio.volume = 0
     audio.preload = 'auto'
-    // Fall back to the legacy lofi file if the per-vibe file is missing
     audio.addEventListener('error', () => {
-      if (audio.src.includes(FALLBACK_SRC)) return
-      audio.src = FALLBACK_SRC
+      // Per-vibe file missing → swap to fallback once
+      if (audio.src.endsWith(FALLBACK_TRACKS[0])) return
+      audio.src = FALLBACK_TRACKS[0]
       audio.load()
       if (this._enabled) audio.play().then(() => this.fadeTo(VOLUME)).catch(() => {})
     }, { once: true })
     return audio
   }
 
-  play(destinationId: string): void {
-    if (!this._enabled) return
-    const src = this.getSrcForDestination(destinationId)
-    if (!this.audio || this.currentSrc !== src) {
-      if (this.audio) {
-        this.audio.pause()
-        this.audio.src = ''
-      }
-      this.audio = this.buildAudio(src)
-      this.currentSrc = src
+  private loadAndPlay(): void {
+    if (this.audio) {
+      this.audio.pause()
+      this.audio.src = ''
     }
-    this.audio.play().then(() => this.fadeTo(VOLUME)).catch(() => {})
+    this.audio = this.buildAudio(this.currentSrc())
+    if (this._enabled) {
+      this.audio.play().then(() => this.fadeTo(VOLUME)).catch(() => {})
+    }
+  }
+
+  play(destinationId: string): void {
+    const tracks = this.getTracksForDestination(destinationId)
+    const tracksChanged = tracks.join('|') !== this.currentTracks.join('|')
+    if (tracksChanged) {
+      this.currentTracks = tracks
+      this.trackIndex = 0
+      this.persistIndex()
+    }
+    if (!this._enabled) return
+    if (!this.audio || this.audio.src === '' || tracksChanged) {
+      this.loadAndPlay()
+    } else {
+      this.audio.play().then(() => this.fadeTo(VOLUME)).catch(() => {})
+    }
+  }
+
+  next(): void {
+    if (this.currentTracks.length <= 1) {
+      // Single track → restart from 0
+      if (this.audio) {
+        this.audio.currentTime = 0
+        if (this._enabled) this.audio.play().then(() => this.fadeTo(VOLUME)).catch(() => {})
+      }
+      return
+    }
+    this.trackIndex = (this.trackIndex + 1) % this.currentTracks.length
+    this.persistIndex()
+    this.loadAndPlay()
+  }
+
+  prev(): void {
+    // Mirror typical media players: if more than 3s in, restart current; otherwise go back a track
+    if (this.audio && this.audio.currentTime > 3) {
+      this.audio.currentTime = 0
+      return
+    }
+    if (this.currentTracks.length <= 1) {
+      if (this.audio) {
+        this.audio.currentTime = 0
+        if (this._enabled) this.audio.play().then(() => this.fadeTo(VOLUME)).catch(() => {})
+      }
+      return
+    }
+    this.trackIndex = (this.trackIndex - 1 + this.currentTracks.length) % this.currentTracks.length
+    this.persistIndex()
+    this.loadAndPlay()
+  }
+
+  private persistIndex(): void {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(TRACK_INDEX_KEY, String(this.trackIndex))
+    }
   }
 
   private fadeTo(target: number): void {

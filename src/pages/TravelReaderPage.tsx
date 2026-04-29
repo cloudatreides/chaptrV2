@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Send, Loader2, MapPin, ChevronRight, Lock, Check, Play, ChevronDown, ChevronUp, Plus, X, Volume2, VolumeX, ImagePlus, RefreshCw, Map } from 'lucide-react'
+import { ArrowLeft, Send, Loader2, MapPin, ChevronRight, Lock, Check, Play, ChevronDown, ChevronUp, Plus, X, Volume2, VolumeX, ImagePlus, RefreshCw, Map, SkipBack, SkipForward } from 'lucide-react'
 import { Drawer } from 'vaul'
 import { useStore } from '../store/useStore'
 import { getDestination } from '../data/travel/destinations'
@@ -1401,23 +1401,46 @@ export function TravelReaderPage() {
             </span>
             <ChevronUp size={10} className="text-purple-300/60" />
           </button>
-          <motion.button
-            onClick={() => {
-              const playing = ambientPlayer.toggle(trip.destinationId)
-              setAmbientPlaying(playing)
-              setShowAmbientLabel(false)
-            }}
-            animate={!ambientPlaying && showAmbientLabel ? { scale: [1, 1.08, 1] } : {}}
+          <motion.div
+            animate={!ambientPlaying && showAmbientLabel ? { scale: [1, 1.04, 1] } : {}}
             transition={!ambientPlaying && showAmbientLabel ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } : {}}
-            className="shrink-0 h-8 rounded-full flex items-center gap-1.5 px-2.5 cursor-pointer transition-colors hover:bg-white/5"
+            className="shrink-0 h-8 rounded-full flex items-center gap-0.5 px-1"
             style={{ background: ambientPlaying ? 'rgba(139,92,246,0.12)' : 'transparent', border: ambientPlaying ? '1px solid rgba(139,92,246,0.2)' : '1px solid rgba(255,255,255,0.08)' }}
-            title={ambientPlaying ? 'Pause ambient' : 'Play ambient'}
           >
-            {ambientPlaying ? <Volume2 size={14} className="text-purple-400" /> : <VolumeX size={14} className="text-white/40" />}
+            <button
+              onClick={() => ambientPlayer.prev()}
+              disabled={!ambientPlaying}
+              className="w-6 h-6 rounded-full flex items-center justify-center cursor-pointer transition-colors hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed"
+              title="Previous / restart"
+              aria-label="Previous track"
+            >
+              <SkipBack size={11} className={ambientPlaying ? 'text-purple-300' : 'text-white/40'} />
+            </button>
+            <button
+              onClick={() => {
+                const playing = ambientPlayer.toggle(trip.destinationId)
+                setAmbientPlaying(playing)
+                setShowAmbientLabel(false)
+              }}
+              className="w-6 h-6 rounded-full flex items-center justify-center cursor-pointer transition-colors hover:bg-white/5"
+              title={ambientPlaying ? 'Pause ambient' : 'Play ambient'}
+              aria-label={ambientPlaying ? 'Pause ambient' : 'Play ambient'}
+            >
+              {ambientPlaying ? <Volume2 size={13} className="text-purple-400" /> : <VolumeX size={13} className="text-white/40" />}
+            </button>
+            <button
+              onClick={() => ambientPlayer.next()}
+              disabled={!ambientPlaying}
+              className="w-6 h-6 rounded-full flex items-center justify-center cursor-pointer transition-colors hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed"
+              title="Next track"
+              aria-label="Next track"
+            >
+              <SkipForward size={11} className={ambientPlaying ? 'text-purple-300' : 'text-white/40'} />
+            </button>
             {showAmbientLabel && !ambientPlaying && (
-              <span className="text-[11px] text-white/40 pr-0.5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>ambient</span>
+              <span className="text-[11px] text-white/40 pl-0.5 pr-1.5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>ambient</span>
             )}
-          </motion.button>
+          </motion.div>
         </div>
 
         {/* Main Content */}
