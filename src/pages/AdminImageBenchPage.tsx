@@ -16,6 +16,14 @@ const SG = "'Space Grotesk', sans-serif"
 
 const DEFAULT_PROMPT = `Anime illustration, two people in the foreground, posing for a photo together at an airport gate: a young man on the left and a young woman on the right, both smiling at the camera, both wearing backpacks, excited to travel to Bangkok. Behind them, large terminal windows show a plane on the tarmac in warm golden hour light. No text, no signs, no departure boards`
 
+// All companion portraits in /public. Add new ones here when you add files to /public.
+const COMPANION_PORTRAIT_NAMES = [
+  'alex','aria','bramble','camille','cog','dex','dohyun','ellis','ghost','hajin',
+  'host','jieun','jiwon','jordan','kael','kai','kira','lucien','mae','mei',
+  'mira','nari','noor','novak','orion','ren','rivera','rowan','sable','sora',
+  'soyeon','sunwoo','taehyun','tanaka','thorne','voss','wren','yejin','yuna','zara',
+] as const
+
 type ModelId = 'flux2' | 'kontext' | 'schnell' | 'nano-banana-2' | 'nano-banana-pro' | 'nano-banana'
 
 const MODEL_LABELS: Record<ModelId, string> = {
@@ -82,6 +90,15 @@ export function AdminImageBenchPage() {
   const [prompt, setPrompt] = useState(initial?.prompt ?? DEFAULT_PROMPT)
   const [results, setResults] = useState<Record<ModelId, Result>>({} as Record<ModelId, Result>)
   const [running, setRunning] = useState<Record<ModelId, boolean>>({} as Record<ModelId, boolean>)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+
+  // Close modal on ESC
+  useEffect(() => {
+    if (!previewUrl) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setPreviewUrl(null) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [previewUrl])
 
   // Persist inputs across refresh so the bench survives reloads.
   useEffect(() => {
@@ -297,20 +314,53 @@ export function AdminImageBenchPage() {
               className="w-full bg-[#13101c] border border-[#2a2040] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#c84b9e]"
             />
             {twinUrl && (
-              <img src={twinUrl} alt="twin" className="mt-2 w-20 h-20 rounded-lg object-cover" />
+              <button
+                type="button"
+                onClick={() => setPreviewUrl(twinUrl)}
+                className="mt-2 cursor-pointer hover:opacity-80 transition-opacity"
+                title="Click to view full size"
+              >
+                <img src={twinUrl} alt="twin" className="w-20 h-20 rounded-lg object-cover" />
+              </button>
             )}
           </div>
           <div>
             <label className="text-white/50 text-xs uppercase tracking-widest mb-1 block">Companion portrait URL</label>
+            <div className="flex gap-2 mb-2">
+              <select
+                value={(() => {
+                  const match = COMPANION_PORTRAIT_NAMES.find((n) => companionUrl === `/${n}-portrait.png`)
+                  return match ?? '__custom__'
+                })()}
+                onChange={(e) => {
+                  const v = e.target.value
+                  if (v !== '__custom__') setCompanionUrl(`/${v}-portrait.png`)
+                }}
+                className="flex-1 bg-[#13101c] border border-[#2a2040] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#c84b9e] cursor-pointer"
+                style={{ fontFamily: SG }}
+              >
+                <option value="__custom__">— pick a companion —</option>
+                {COMPANION_PORTRAIT_NAMES.map((n) => (
+                  <option key={n} value={n}>{n.charAt(0).toUpperCase() + n.slice(1)}</option>
+                ))}
+              </select>
+            </div>
             <input
               type="text"
               value={companionUrl}
               onChange={(e) => setCompanionUrl(e.target.value)}
-              placeholder="https://..."
+              placeholder="/yuna-portrait.png or https://..."
               className="w-full bg-[#13101c] border border-[#2a2040] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#c84b9e]"
             />
             {companionUrl && (
-              <img src={companionUrl} alt="companion" className="mt-2 w-20 h-20 rounded-lg object-cover" />
+              <button
+                type="button"
+                onClick={() => setPreviewUrl(companionUrl)}
+                className="mt-2 cursor-pointer hover:opacity-80 transition-opacity"
+                title="Click to view full size"
+              >
+                <img src={companionUrl} alt="companion" className="w-20 h-20 rounded-lg object-cover" />
+              </button>
             )}
           </div>
         </div>
@@ -392,6 +442,27 @@ export function AdminImageBenchPage() {
           })}
         </div>
       </div>
+
+      {previewUrl && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/85 cursor-zoom-out"
+          onClick={() => setPreviewUrl(null)}
+        >
+          <img
+            src={previewUrl}
+            alt="full preview"
+            className="max-w-full max-h-full rounded-lg shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+          <button
+            onClick={() => setPreviewUrl(null)}
+            className="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center text-white cursor-pointer"
+            aria-label="Close preview"
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </div>
   )
 }
