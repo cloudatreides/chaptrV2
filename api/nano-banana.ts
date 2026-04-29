@@ -42,8 +42,10 @@ async function fetchAsBase64(url: string): Promise<{ data: string; mimeType: str
 }
 
 async function callGemini(model: string, prompt: string, refs: { data: string; mimeType: string }[], apiKey: string) {
-  const parts: Array<{ text?: string; inline_data?: { mime_type: string; data: string } }> = [{ text: prompt }]
-  for (const ref of refs) parts.push({ inline_data: { mime_type: ref.mimeType, data: ref.data } })
+  // Gemini REST API expects camelCase (inlineData / mimeType). Snake_case was
+  // accepted by older models but the 3.x image models reject it.
+  const parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> = [{ text: prompt }]
+  for (const ref of refs) parts.push({ inlineData: { mimeType: ref.mimeType, data: ref.data } })
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`
   return fetch(url, {

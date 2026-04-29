@@ -21,6 +21,17 @@ const MODEL_LABELS: Record<ModelId, string> = {
   'nano-banana': 'Nano Banana (Gemini 2.5)',
 }
 
+// Public per-image pricing in USD as of Apr 2026. Approximate; useful for
+// rough cost-at-scale comparison, not billing.
+const MODEL_COST_USD: Record<ModelId, number> = {
+  'flux2': 0.04,
+  'kontext': 0.03,
+  'schnell': 0.0027,
+  'nano-banana-2': 0.039,
+  'nano-banana-pro': 0.039,
+  'nano-banana': 0.039,
+}
+
 const NANO_MODEL_IDS: Partial<Record<ModelId, string>> = {
   'nano-banana-2': 'gemini-3.1-flash-image-preview',
   'nano-banana-pro': 'gemini-3-pro-image-preview',
@@ -215,24 +226,38 @@ export function AdminImageBenchPage() {
           {(Object.keys(MODEL_LABELS) as ModelId[]).map((id) => {
             const r = results[id]
             const isRunning = running[id]
+            const cost = MODEL_COST_USD[id]
             return (
               <div key={id} className="rounded-xl overflow-hidden border border-[#2a2040] bg-[#13101c]">
-                <div className="aspect-[4/3] flex items-center justify-center bg-[#0a0810]">
+                <div className="aspect-[4/3] flex items-center justify-center bg-[#0a0810] overflow-hidden">
                   {isRunning ? (
                     <Loader2 size={28} className="animate-spin text-white/40" />
                   ) : r?.url ? (
                     <img src={r.url} alt={id} className="w-full h-full object-cover" />
                   ) : r?.error ? (
-                    <p className="text-red-400/70 text-xs px-4 text-center">{r.error}</p>
+                    <div className="p-3 max-h-full overflow-y-auto w-full">
+                      <p className="text-red-400/80 text-[11px] font-mono whitespace-pre-wrap break-words leading-relaxed">{r.error}</p>
+                    </div>
                   ) : (
                     <ImageIcon size={28} className="text-white/15" />
                   )}
                 </div>
+                <div className="px-3 py-2 border-b border-[#2a2040]/50 flex items-center justify-between text-[11px]">
+                  <span className="text-white/40">Latency</span>
+                  <span className="text-white/80 font-mono">{r?.elapsedMs ? `${(r.elapsedMs / 1000).toFixed(1)}s` : '—'}</span>
+                </div>
+                <div className="px-3 py-2 border-b border-[#2a2040]/50 flex items-center justify-between text-[11px]">
+                  <span className="text-white/40">Cost / image</span>
+                  <span className="text-white/80 font-mono">${cost.toFixed(4)}</span>
+                </div>
+                <div className="px-3 py-2 border-b border-[#2a2040]/50 flex items-center justify-between text-[11px]">
+                  <span className="text-white/40">@ 1k images</span>
+                  <span className="text-white/80 font-mono">${(cost * 1000).toFixed(0)}</span>
+                </div>
                 <div className="px-3 py-2 flex items-center justify-between">
                   <p className="text-white/80 text-xs font-semibold">{MODEL_LABELS[id]}</p>
-                  {r?.elapsedMs && (
-                    <p className="text-white/30 text-[10px]">{(r.elapsedMs / 1000).toFixed(1)}s</p>
-                  )}
+                  {r?.url && <span className="text-emerald-400/60 text-[10px]">OK</span>}
+                  {r?.error && <span className="text-red-400/70 text-[10px]">ERR</span>}
                 </div>
               </div>
             )
