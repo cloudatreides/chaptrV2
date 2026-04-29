@@ -117,6 +117,10 @@ export function CreateCharacterPage() {
   const uploadIdRef = useRef(crypto.randomUUID())
   const [dragging, setDragging] = useState(false)
   const [selectedDefault, setSelectedDefault] = useState<string | null>(isDefaultAvatar ? existingSelfie : null)
+  // Tracks whether the user actually touched the photo during this edit.
+  // If they only changed name/bio/gender, leave selfieUrl alone — otherwise
+  // we'd risk nulling a still-valid URL that was flagged as ephemeral.
+  const [photoTouched, setPhotoTouched] = useState(false)
 
   const onCropComplete = useCallback((_: Area, croppedPixels: Area) => {
     setCroppedAreaPixels(croppedPixels)
@@ -143,6 +147,7 @@ export function CreateCharacterPage() {
       setStylizeFailed(false)
       setUploadedSelfieUrl(null)
       uploadIdRef.current = crypto.randomUUID()
+      setPhotoTouched(true)
     }
     reader.readAsDataURL(file)
   }
@@ -190,12 +195,16 @@ export function CreateCharacterPage() {
     const candidate = uploadedSelfieUrl ?? finalPhoto ?? selectedDefault ?? null
     const selfieUrl = isEphemeralUrl(candidate) ? null : candidate
     if (isEditMode) {
-      updateCharacter(editId!, {
+      // Only overwrite selfieUrl when the user actually touched the photo.
+      // Otherwise leave it alone — name/bio/gender edits should never wipe
+      // a stored selfie just because its URL passes the ephemeral heuristic.
+      const updates: Partial<{ name: string; gender: 'male' | 'female'; selfieUrl: string | null; bio: string | null }> = {
         name: name.trim(),
         gender: gender!,
-        selfieUrl,
         bio: bio || null,
-      })
+      }
+      if (photoTouched) updates.selfieUrl = selfieUrl
+      updateCharacter(editId!, updates)
       trackEvent('character_updated', { gender, hasPhoto: !!finalPhoto, hasDefault: !!selectedDefault, hasBio: !!bio })
     } else {
       createCharacter({
@@ -415,7 +424,7 @@ export function CreateCharacterPage() {
                       background: selectedDefault === opt.id ? 'rgba(200,75,158,0.15)' : '#13101c',
                       border: selectedDefault === opt.id ? '2px solid #c84b9e' : '2px solid #2a2040',
                     }}
-                    onClick={() => setSelectedDefault(selectedDefault === opt.id ? null : opt.id)}
+                    onClick={() => { setSelectedDefault(selectedDefault === opt.id ? null : opt.id); setPhotoTouched(true) }}
                   >
                     <div className="w-16 h-16 rounded-full overflow-hidden">
                       <img src={opt.id} alt={opt.label} className="w-full h-full object-cover" />
