@@ -1,10 +1,20 @@
 import { MessageSquarePlus } from 'lucide-react'
+import { useLocation } from 'react-router-dom'
 
 interface FeedbackFabProps {
   onClick: () => void
 }
 
+const HIDDEN_PATHS = ['/story', '/travel/trip', '/free-chat', '/reveal', '/quest', '/login', '/terms', '/privacy', '/characters', '/create-character', '/edit-character']
+
 export function FeedbackFab({ onClick }: FeedbackFabProps) {
+  const { pathname } = useLocation()
+  const hidden = pathname === '/' ||
+    HIDDEN_PATHS.some((p) => pathname.startsWith(p)) ||
+    pathname.startsWith('/cast/')
+
+  if (hidden) return null
+
   return (
     <button
       onClick={onClick}
