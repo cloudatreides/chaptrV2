@@ -19,7 +19,7 @@ import type { ChatMessage, TripScene } from '../store/useStore'
 import { SelfieImg } from '../components/SelfieImg'
 import { StreamedText } from '../components/StreamedText'
 import { TypingIndicator } from '../components/TypingIndicator'
-import { lofiPlayer } from '../lib/lofiPlayer'
+import { ambientPlayer } from '../lib/ambientPlayer'
 import { ambientAudio } from '../lib/ambientAudio'
 
 type ViewMode = 'chat' | 'scene' | 'transition' | 'day-start' | 'day-end' | 'complete' | 'departure'
@@ -149,8 +149,13 @@ export function TravelReaderPage() {
   const companion = trip ? getTravelCompanion(trip.companionId) : null
   const companionName = trip?.companionRemix?.name ?? companion?.character.name ?? ''
   const companionPortrait = trip?.companionRemix?.imageUrl ?? companion?.character.staticPortrait
-  const companionVisualDesc = trip?.companionRemix?.personalityTraits?.length
-    ? trip.companionRemix.personalityTraits.join(', ')
+  // Visual description for image prompts. Remixed companions get an empty
+  // string here — their personality traits are NOT visual cues, and the
+  // user-uploaded portrait (companionPortrait above) carries the actual
+  // appearance. Feeding personality words into image prompts produced
+  // characters that looked nothing like the reference.
+  const companionVisualDesc = trip?.companionRemix
+    ? ''
     : companion?.character.portraitPrompt ?? ''
   const activeChar = characters.find((c) => c.id === activeCharacterId)
 
@@ -178,11 +183,15 @@ export function TravelReaderPage() {
       const compGender = companion?.character.gender
       const protagNoun = protagGender === 'female' ? 'young woman' : 'young man'
       const compNoun = compGender === 'male' ? 'young man' : compGender === 'female' ? 'young woman' : 'young person'
-      const fullCompDesc = companion?.character.portraitPrompt ?? companionVisualDesc
+      // Use remix-aware description (empty for remixed companions — their
+      // appearance comes from the reference portrait, not the base character).
+      const fullCompDesc = companionVisualDesc
       const compShort = fullCompDesc
-        .split(',').slice(0, 4).join(',')
-        .replace(/^(anime style|dark|cyberpunk[^,]*|fantasy[^,]*|thriller[^,]*|sci-fi[^,]*)\s*(portrait|illustration|concept art)\s*(portrait\s*)?of\s*/i, '')
-        .trim()
+        ? fullCompDesc
+            .split(',').slice(0, 4).join(',')
+            .replace(/^(anime style|dark|cyberpunk[^,]*|fantasy[^,]*|thriller[^,]*|sci-fi[^,]*)\s*(portrait|illustration|concept art)\s*(portrait\s*)?of\s*/i, '')
+            .trim()
+        : ''
       // Model-agnostic prompt — see DepartureScreen.tsx for rationale.
       const baseScene = hasBothRefs
         ? `Anime illustration, two people in the foreground, posing for a photo together at an airport gate: a ${protagNoun} on the left and a ${compNoun}${compShort ? ` (${compShort})` : ''} on the right, both smiling at the camera, both wearing backpacks, excited to travel to ${destination.city}. Behind them, large terminal windows show a plane on the tarmac in warm golden hour light. No text, no signs, no departure boards`
@@ -209,7 +218,7 @@ export function TravelReaderPage() {
   const [localSliders, setLocalSliders] = useState<{ chattiness: number; planningStyle: number; vibe: number } | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [showActions, setShowActions] = useState(false)
-  const [lofiPlaying, setLofiPlaying] = useState(lofiPlayer.isPlaying)
+  const [ambientPlaying, setAmbientPlaying] = useState(ambientPlayer.isEnabled)
   const chatEndRef = useRef<HTMLDivElement>(null)
   const abortRef = useRef<AbortController | null>(null)
   const engagementRef = useRef<number>(Date.now())
@@ -677,12 +686,16 @@ export function TravelReaderPage() {
     const locationContext = currentScene ? `${currentScene.location}, ${destination.city}` : destination.city
     const companionDesc = companionVisualDesc.split(',').slice(0, 4).join(',')
     const playerGender = activeChar?.gender === 'male' ? 'a young man' : 'a young woman'
+    const compGenderNoun = companion?.character.gender === 'male' ? 'a young man' : 'a young woman'
+    // Fall back to gender-only when there's no visual description (eg. remixed
+    // companion — their portrait reference image carries the appearance).
+    const compPhrase = companionDesc ? companionDesc : compGenderNoun
 
     const recentMessages = (isPlanning ? trip.planningChatHistory : (trip.dayChatHistories[trip.currentDay] ?? [])).slice(-4)
     const conversationHint = recentMessages.map((m) => m.content).join(' ').slice(0, 200)
     const activityHint = currentScene?.activity ?? conversationHint
 
-    const scenePrompt = `anime illustration, cel-shaded, selfie taken by ${playerGender}, close-up selfie with ${companionDesc}, both smiling at camera, peace signs, in ${locationContext}, ${activityHint}. Phone camera perspective, slight wide-angle distortion, warm natural lighting, candid happy energy, vibrant anime art`
+    const scenePrompt = `anime illustration, cel-shaded, selfie taken by ${playerGender}, close-up selfie with ${compPhrase}, both smiling at camera, peace signs, in ${locationContext}, ${activityHint}. Phone camera perspective, slight wide-angle distortion, warm natural lighting, candid happy energy, vibrant anime art`
 
     try {
       const [imageUrl, replyStream] = await Promise.all([
@@ -1275,7 +1288,7 @@ export function TravelReaderPage() {
                 countryEmoji={destination.countryEmoji}
                 companionName={companionName}
                 companionPortrait={companionPortrait}
-                companionDescription={companion?.character.portraitPrompt ?? companionVisualDesc}
+                companionDescription={companionVisualDesc}
                 twinSelfieUrl={activeChar?.selfieUrl}
                 twinGender={activeChar?.gender ?? 'male'}
                 companionGender={companion?.character.gender}
