@@ -4,10 +4,15 @@ export const config = { runtime: 'edge' }
 
 const MAX_REQUESTS_PER_MINUTE = 20
 
-// Gemini 3 Pro Image Preview ("Nano Banana 2"). Falls back to 2.5 Flash Image
-// ("Nano Banana") if the 3.x preview isn't available on the project's tier.
-const PRIMARY_MODEL = 'gemini-3-pro-image-preview'
-const FALLBACK_MODEL = 'gemini-2.5-flash-image-preview'
+// Try these model names in order. Different keys / regions / waitlists expose
+// different IDs — the API returns 404 if a name isn't available to the key.
+const PRIMARY_CHAIN = [
+  'gemini-3-pro-image-preview',     // Nano Banana 2 / Pro (Gemini 3 image)
+  'gemini-3-pro-image',
+  'gemini-2.5-flash-image-preview', // Nano Banana original (Gemini 2.5 image)
+  'gemini-2.5-flash-image',
+  'gemini-2.0-flash-exp-image-generation',
+]
 
 interface RequestBody {
   prompt: string
@@ -52,11 +57,7 @@ async function callGemini(model: string, prompt: string, refs: { data: string; m
 }
 
 export default async function handler(req: Request) {
-  if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 })
-
-  const ip = getClientIp(req)
-  if (!rateLimit(ip, MAX_REQUESTS_PER_MINUTE)) return rateLimitResponse()
-
+  const url = new URL(req.url)
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) {
     return new Response(JSON.stringify({ error: 'GEMINI_API_KEY not configured' }), {
@@ -64,6 +65,21 @@ export default async function handler(req: Request) {
       headers: { 'content-type': 'application/json' },
     })
   }
+
+  // Debug: GET /api/nano-banana?action=list lists all models the key can see
+  if (req.method === 'GET' && url.searchParams.get('action') === 'list') {
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`)
+    const text = await r.text()
+    return new Response(text, {
+      status: r.status,
+      headers: { 'content-type': 'application/json' },
+    })
+  }
+
+  if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 })
+
+  const ip = getClientIp(req)
+  if (!rateLimit(ip, MAX_REQUESTS_PER_MINUTE)) return rateLimitResponse()
 
   try {
     const body = (await req.json()) as RequestBody
@@ -78,34 +94,44 @@ export default async function handler(req: Request) {
     const refs = (await Promise.all(referenceImageUrls.map((u) => fetchAsBase64(u))))
       .filter((r): r is { data: string; mimeType: string } => r !== null)
 
-    let modelUsed = model || PRIMARY_MODEL
-    let response = await callGemini(modelUsed, prompt, refs, apiKey)
+    const chain = model ? [model] : PRIMARY_CHAIN
+    const errors: { model: string; status: number; message: string }[] = []
+    let lastResponse: Response | null = null
+    let modelUsed = ''
 
-    if (!response.ok && !model) {
-      const errText = await response.text().catch(() => '')
-      // Auto-fallback if the primary model is gated
-      if (response.status === 404 || response.status === 403 || errText.includes('not found')) {
-        modelUsed = FALLBACK_MODEL
-        response = await callGemini(modelUsed, prompt, refs, apiKey)
+    for (const m of chain) {
+      const r = await callGemini(m, prompt, refs, apiKey)
+      if (r.ok) {
+        lastResponse = r
+        modelUsed = m
+        break
+      }
+      const errText = await r.text().catch(() => '')
+      errors.push({ model: m, status: r.status, message: errText.slice(0, 200) })
+      // Only walk the chain on 404/403/400 (model unavailable). On 5xx or rate limit, fail fast.
+      if (r.status >= 500 || r.status === 429) {
+        return new Response(JSON.stringify({ error: 'Gemini upstream error', status: r.status, attempted: errors }), {
+          status: r.status,
+          headers: { 'content-type': 'application/json' },
+        })
       }
     }
 
-    if (!response.ok) {
-      const errText = await response.text().catch(() => '')
-      return new Response(JSON.stringify({ error: 'Gemini error', status: response.status, details: errText.slice(0, 500), modelUsed }), {
-        status: response.status,
+    if (!lastResponse) {
+      return new Response(JSON.stringify({ error: 'No model in chain accepted the request', attempted: errors }), {
+        status: 404,
         headers: { 'content-type': 'application/json' },
       })
     }
 
-    const json = await response.json()
+    const json = await lastResponse.json()
     const parts = json?.candidates?.[0]?.content?.parts ?? []
-    const imagePart = parts.find((p: { inline_data?: { data?: string } }) => p?.inline_data?.data)
-    const data: string | undefined = imagePart?.inline_data?.data
-    const mime: string = imagePart?.inline_data?.mime_type ?? 'image/png'
+    const imagePart = parts.find((p: { inline_data?: { data?: string }; inlineData?: { data?: string } }) => p?.inline_data?.data || p?.inlineData?.data)
+    const data: string | undefined = imagePart?.inline_data?.data ?? imagePart?.inlineData?.data
+    const mime: string = imagePart?.inline_data?.mime_type ?? imagePart?.inlineData?.mimeType ?? 'image/png'
 
     if (!data) {
-      return new Response(JSON.stringify({ error: 'No image in response', modelUsed, raw: JSON.stringify(json).slice(0, 500) }), {
+      return new Response(JSON.stringify({ error: 'No image in response', modelUsed, raw: JSON.stringify(json).slice(0, 800) }), {
         status: 502,
         headers: { 'content-type': 'application/json' },
       })

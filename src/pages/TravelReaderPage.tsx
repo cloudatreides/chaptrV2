@@ -19,6 +19,7 @@ import type { ChatMessage, TripScene } from '../store/useStore'
 import { SelfieImg } from '../components/SelfieImg'
 import { StreamedText } from '../components/StreamedText'
 import { TypingIndicator } from '../components/TypingIndicator'
+import { highlightName } from '../lib/highlightName'
 import { ambientPlayer } from '../lib/ambientPlayer'
 import { ambientAudio } from '../lib/ambientAudio'
 
@@ -1593,6 +1594,7 @@ export function TravelReaderPage() {
                           text={seg.text}
                           className="text-white text-[15px] leading-[1.8]"
                           style={{ fontFamily: "'Source Serif 4', Georgia, serif" }}
+                          highlightWord={activeChar?.name}
                         />
                       ) : (
                         <p
@@ -1600,7 +1602,7 @@ export function TravelReaderPage() {
                           className="text-white text-[15px] leading-[1.8] whitespace-pre-wrap"
                           style={{ fontFamily: "'Source Serif 4', Georgia, serif" }}
                         >
-                          {seg.text}
+                          {highlightName(seg.text, activeChar?.name)}
                         </p>
                       )
                     )}
@@ -1725,7 +1727,7 @@ export function TravelReaderPage() {
                                   seg.type === 'action' ? <ActionBeat key={j} text={seg.text} /> : (
                                     <div key={j} className="flex justify-start">
                                       <div className="max-w-[80%] rounded-2xl px-4 py-2.5 break-words" style={{ background: 'rgba(255,255,255,0.06)', borderBottomLeftRadius: 4 }}>
-                                        <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{seg.text}</p>
+                                        <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{highlightName(seg.text, activeChar?.name)}</p>
                                       </div>
                                     </div>
                                   )
@@ -1936,7 +1938,7 @@ export function TravelReaderPage() {
                           <div key={j} className="flex justify-start">
                             <div className="max-w-[80%] rounded-2xl px-4 py-2.5 break-words" style={{ background: 'rgba(255,255,255,0.06)', borderBottomLeftRadius: 4 }}>
                               <p className="text-[14px] leading-relaxed whitespace-pre-wrap text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                                {seg.text}
+                                {highlightName(seg.text, activeChar?.name)}
                               </p>
                             </div>
                           </div>
@@ -1966,6 +1968,7 @@ export function TravelReaderPage() {
                                 text={seg.text}
                                 className="text-[14px] leading-relaxed text-white"
                                 style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                                highlightWord={activeChar?.name}
                               />
                             </div>
                           </div>
