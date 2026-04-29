@@ -56,13 +56,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (data.session) {
         const prevUserId = localStorage.getItem('chaptr-v2-uid')
         if (prevUserId && prevUserId !== data.session.user.id) {
-          // Different user signed in — clear previous user's local data
+          // Different user is signing in. localStorage clear isn't enough —
+          // the Zustand store was already hydrated from previous user's data
+          // at module load, so the in-memory state still has the old user's
+          // twins. Force a hard reload after clearing so the page rebuilds
+          // from scratch with the new user's cloud state.
           localStorage.removeItem('chaptr-v2-story')
+          localStorage.setItem('chaptr-v2-uid', data.session.user.id)
+          window.location.reload()
+          return
         }
         localStorage.setItem('chaptr-v2-uid', data.session.user.id)
-        // Load cloud state for this user
         await hydrateFromCloud(data.session.user.id)
-        // Enable master mode for admin account
         useStore.getState().setMasterMode(data.session.user.email === MASTER_EMAIL)
       }
       setSession(data.session)

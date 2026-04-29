@@ -68,46 +68,118 @@ export function AdminImageBenchPage() {
   const { user } = useAuth()
   const [isResetting, setIsResetting] = useState(false)
 
-  // One-click factory reset: wipes BOTH local store and cloud user_game_state.
+  // Build the canonical "freshly-installed" state that gets written to cloud
+  // and rebuilt locally on reset. Each call site decides which fields to
+  // override (eg twins-only reset preserves trips/stories/moments).
+  function buildEmptyState(overrides: Record<string, unknown> = {}) {
+    return {
+      characters: [],
+      activeCharacterId: null,
+      selectedUniverse: null,
+      storyProgress: {},
+      gemBalance: 50,
+      globalAffinities: {},
+      playthroughHistory: [],
+      ambientPings: [],
+      lastSessionTimestamp: Date.now(),
+      castChatThreads: {},
+      unlockedCastIds: ['sora', 'jiwon', 'yuna'],
+      groupCastThreads: {},
+      favoriteCastIds: [],
+      storyMoments: [],
+      customCompanions: [],
+      travelTrips: {},
+      activeTripId: null,
+      ...overrides,
+    }
+  }
+
+  // Twins-only reset: wipes just the character array + active id. Keeps
+  // trips, stories, moments, gems, etc. so you don't lose play history
+  // just to fix a corrupted character record. The trips/stories that
+  // referenced the wiped twins will become orphaned (their character_id
+  // keys won't match anything), which is harmless — they just won't
+  // appear in any character-scoped list. You can clean them up later
+  // or leave them.
+  async function resetTwinsOnly() {
+    if (!user) {
+      alert('Not signed in.')
+      return
+    }
+    const ok = confirm(
+      'RESET TWINS ONLY\n\n' +
+      'Wipes the character records (the broken Nicks). Keeps your trips, stories, ' +
+      'moments, gems, and affinities — but those that referenced the deleted twins ' +
+      'will be orphaned (still in the data, just no longer linked to any twin).\n\n' +
+      'Continue?'
+    )
+    if (!ok) return
+    setIsResetting(true)
+    try {
+      const current = useStore.getState()
+      const partial = {
+        characters: current.characters,            // we'll override below
+        activeCharacterId: current.activeCharacterId, // override below
+        selectedUniverse: current.selectedUniverse,
+        storyProgress: current.storyProgress,
+        gemBalance: current.gemBalance,
+        globalAffinities: current.globalAffinities,
+        playthroughHistory: current.playthroughHistory,
+        ambientPings: current.ambientPings,
+        lastSessionTimestamp: Date.now(),
+        castChatThreads: current.castChatThreads,
+        unlockedCastIds: current.unlockedCastIds,
+        groupCastThreads: current.groupCastThreads,
+        favoriteCastIds: current.favoriteCastIds,
+        storyMoments: current.storyMoments,
+        customCompanions: current.customCompanions,
+        travelTrips: current.travelTrips,
+        activeTripId: current.activeTripId,
+        characters_override: [] as never[],
+      }
+      // Build the cloud upsert with characters wiped
+      const cloudState = { ...partial, characters: [], activeCharacterId: null }
+      delete (cloudState as Record<string, unknown>).characters_override
+      const { error } = await supabase
+        .from('user_game_state')
+        .upsert(
+          { user_id: user.id, state: cloudState, updated_at: new Date().toISOString() },
+          { onConflict: 'user_id' }
+        )
+      if (error) {
+        alert('Reset failed: ' + (error.message ?? 'unknown'))
+        setIsResetting(false)
+        return
+      }
+      // Wipe in-memory characters too so the redirect doesn't briefly flash old state
+      useStore.setState({ characters: [], activeCharacterId: null })
+      try { localStorage.removeItem('chaptr-image-bench-inputs') } catch { /* ITP */ }
+      window.location.href = '/home'
+    } catch (e) {
+      alert('Reset failed: ' + String(e))
+      setIsResetting(false)
+    }
+  }
+
+  // Full factory reset: wipes BOTH local store and cloud user_game_state.
   // Builds an explicit empty-state row in cloud so any other tab still in
   // memory that hydrates next will get empty too — breaks the multi-tab
   // re-population loop without needing the user to close all browsers.
   async function factoryReset() {
     const ok = confirm(
       'FACTORY RESET\n\n' +
-      'This wipes ALL twins, trips, stories, moments — both locally AND in your Supabase save game.\n\n' +
+      'Wipes ALL twins, trips, stories, moments — both locally AND in your Supabase save game.\n\n' +
+      'Your code-defined content (countries, story definitions, NPC characters) is in /src/data and is NOT affected.\n\n' +
       'Cannot be undone. Continue?'
     )
     if (!ok) return
     setIsResetting(true)
     try {
-      // 1. Wipe cloud first — write an empty canonical state so any other tab
-      //    that hydrates next gets empty too. We use upsert (allowed by RLS)
-      //    rather than delete (which may not have a policy).
       if (user) {
-        const emptyState = {
-          characters: [],
-          activeCharacterId: null,
-          selectedUniverse: null,
-          storyProgress: {},
-          gemBalance: 50,
-          globalAffinities: {},
-          playthroughHistory: [],
-          ambientPings: [],
-          lastSessionTimestamp: Date.now(),
-          castChatThreads: {},
-          unlockedCastIds: ['sora', 'jiwon', 'yuna'],
-          groupCastThreads: {},
-          favoriteCastIds: [],
-          storyMoments: [],
-          customCompanions: [],
-          travelTrips: {},
-          activeTripId: null,
-        }
         const { error } = await supabase
           .from('user_game_state')
           .upsert(
-            { user_id: user.id, state: emptyState, updated_at: new Date().toISOString() },
+            { user_id: user.id, state: buildEmptyState(), updated_at: new Date().toISOString() },
             { onConflict: 'user_id' }
           )
         if (error) {
@@ -117,14 +189,10 @@ export function AdminImageBenchPage() {
         }
       }
 
-      // 2. Wipe local. removeItem is more compatible than clear() on Safari ITP
-      //    contexts. Try-catch each call so a SecurityError doesn't abort.
       try { localStorage.removeItem('chaptr-v2-story') } catch { /* Safari ITP */ }
       try { localStorage.removeItem('chaptr-v2-uid') } catch { /* Safari ITP */ }
       try { localStorage.removeItem('chaptr-image-bench-inputs') } catch { /* Safari ITP */ }
 
-      // 3. Hard reload from server. This kills any in-tab Zustand subscriber
-      //    that might otherwise re-save the old in-memory state to cloud.
       window.location.href = '/home'
     } catch (e) {
       alert('Reset failed: ' + String(e))
@@ -295,16 +363,28 @@ export function AdminImageBenchPage() {
               Same prompt, same references, every available model. Compare identity match, style, and latency.
             </p>
           </div>
-          <button
-            onClick={factoryReset}
-            disabled={isResetting}
-            className="cursor-pointer flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
-            style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)', color: '#fca5a5' }}
-            title="Wipe all twins, trips, stories — both local and cloud. Used to recover from corrupted state."
-          >
-            {isResetting ? <Loader2 size={14} className="animate-spin" /> : <RefreshCcw size={14} />}
-            {isResetting ? 'Resetting...' : 'Factory reset'}
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={resetTwinsOnly}
+              disabled={isResetting}
+              className="cursor-pointer flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.3)', color: '#c4b5fd' }}
+              title="Wipe just the broken twin records. Keeps trips, stories, moments, gems."
+            >
+              {isResetting ? <Loader2 size={14} className="animate-spin" /> : <RefreshCcw size={14} />}
+              Reset twins only
+            </button>
+            <button
+              onClick={factoryReset}
+              disabled={isResetting}
+              className="cursor-pointer flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)', color: '#fca5a5' }}
+              title="Wipe everything — twins, trips, stories, moments. Cannot be undone."
+            >
+              {isResetting ? <Loader2 size={14} className="animate-spin" /> : <RefreshCcw size={14} />}
+              Factory reset
+            </button>
+          </div>
         </div>
 
         {twinUrlIsEphemeral && (
