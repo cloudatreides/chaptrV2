@@ -135,9 +135,14 @@ export function TravelCityPage() {
   function handleSaveRemix() {
     if (!remixTarget) return
     const name = remixName.trim() || remixTarget.character.name
+    // Defensive: if editing and the user didn't intentionally remove the photo
+    // (remixPhoto is null but the original had one), preserve the original.
+    // Prevents accidental photo loss from interrupted re-upload flows.
+    const existing = editingCustomId ? customCompanions.find((c) => c.id === editingCustomId) : null
+    const finalImageUrl = remixPhoto ?? existing?.remix.imageUrl ?? undefined
     const remixData: CompanionRemix = {
       name,
-      imageUrl: remixPhoto ?? undefined,
+      imageUrl: finalImageUrl,
       personalityTraits: remixTraits,
       travelStyle: remixStyles,
     }
@@ -178,7 +183,10 @@ export function TravelCityPage() {
       setCrop({ x: 0, y: 0 })
       setZoom(1)
       setCroppedAreaPixels(null)
-      setRemixPhoto(null)
+      // DO NOT clear remixPhoto here — the cropper UI hides the thumbnail
+      // because rawImage is set. If the user cancels the cropper, the
+      // existing photo must survive. handleCropConfirm overwrites remixPhoto
+      // on a successful crop.
       uploadIdRef.current = crypto.randomUUID()
     }
     reader.readAsDataURL(file)
