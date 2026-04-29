@@ -4,7 +4,7 @@ import { ChevronLeft, Loader2, Image as ImageIcon, AlertTriangle, Trash2 } from 
 import { useStore } from '../store/useStore'
 import { generateSceneImage } from '../lib/togetherAi'
 import { generateNanoBananaImage } from '../lib/nanoBanana'
-import { getTravelCompanion } from '../data/travel/companions'
+import { getTravelCompanion, TRAVEL_COMPANIONS } from '../data/travel/companions'
 
 const BENCH_STORAGE_KEY = 'chaptr-image-bench-inputs'
 
@@ -16,13 +16,11 @@ const SG = "'Space Grotesk', sans-serif"
 
 const DEFAULT_PROMPT = `Anime illustration, two people in the foreground, posing for a photo together at an airport gate: a young man on the left and a young woman on the right, both smiling at the camera, both wearing backpacks, excited to travel to Bangkok. Behind them, large terminal windows show a plane on the tarmac in warm golden hour light. No text, no signs, no departure boards`
 
-// All companion portraits in /public. Add new ones here when you add files to /public.
-const COMPANION_PORTRAIT_NAMES = [
-  'alex','aria','bramble','camille','cog','dex','dohyun','ellis','ghost','hajin',
-  'host','jieun','jiwon','jordan','kael','kai','kira','lucien','mae','mei',
-  'mira','nari','noor','novak','orion','ren','rivera','rowan','sable','sora',
-  'soyeon','sunwoo','taehyun','tanaka','thorne','voss','wren','yejin','yuna','zara',
-] as const
+// Travel-mode companions only. Derived from TRAVEL_COMPANIONS so this stays in
+// sync as new travel companions are added — no manual maintenance.
+const TRAVEL_COMPANION_OPTIONS = TRAVEL_COMPANIONS
+  .filter((c) => !!c.character.staticPortrait)
+  .map((c) => ({ name: c.character.name, url: c.character.staticPortrait! }))
 
 type ModelId = 'flux2' | 'kontext' | 'schnell' | 'nano-banana-2' | 'nano-banana-pro' | 'nano-banana'
 
@@ -328,20 +326,17 @@ export function AdminImageBenchPage() {
             <label className="text-white/50 text-xs uppercase tracking-widest mb-1 block">Companion portrait URL</label>
             <div className="flex gap-2 mb-2">
               <select
-                value={(() => {
-                  const match = COMPANION_PORTRAIT_NAMES.find((n) => companionUrl === `/${n}-portrait.png`)
-                  return match ?? '__custom__'
-                })()}
+                value={TRAVEL_COMPANION_OPTIONS.find((o) => o.url === companionUrl)?.url ?? '__custom__'}
                 onChange={(e) => {
                   const v = e.target.value
-                  if (v !== '__custom__') setCompanionUrl(`/${v}-portrait.png`)
+                  if (v !== '__custom__') setCompanionUrl(v)
                 }}
                 className="flex-1 bg-[#13101c] border border-[#2a2040] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#c84b9e] cursor-pointer"
                 style={{ fontFamily: SG }}
               >
                 <option value="__custom__">— pick a companion —</option>
-                {COMPANION_PORTRAIT_NAMES.map((n) => (
-                  <option key={n} value={n}>{n.charAt(0).toUpperCase() + n.slice(1)}</option>
+                {TRAVEL_COMPANION_OPTIONS.map((o) => (
+                  <option key={o.url} value={o.url}>{o.name}</option>
                 ))}
               </select>
             </div>
