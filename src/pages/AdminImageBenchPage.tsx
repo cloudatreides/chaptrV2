@@ -40,9 +40,9 @@ const MODEL_LABELS: Record<ModelId, string> = {
 // (1024x1024) tier — bench renders at 768x576 which falls into the same
 // or lower bracket. Source: ai.google.dev/gemini-api/docs/pricing
 const MODEL_COST_USD: Record<ModelId, number> = {
-  'flux2': 0.04,
-  'kontext': 0.03,
-  'schnell': 0.0027,
+  'flux2': 0.03,             // FLUX.2 [pro] via together.ai/pricing
+  'kontext': 0.04,           // FLUX.1 Kontext [pro] via together.ai/pricing
+  'schnell': 0.0027,         // FLUX.1 [schnell] via together.ai/pricing
   'nano-banana': 0.039,      // Gemini 2.5 Flash Image — original Nano Banana
   'nano-banana-2': 0.067,    // Gemini 3.1 Flash Image Preview — newer Flash tier
   'nano-banana-pro': 0.134,  // Gemini 3 Pro Image — premium
