@@ -206,6 +206,54 @@ export function AdminImageBenchPage() {
           </div>
         )}
 
+        {/* Debug panel: lists every twin in the store + URL classification.
+            Diagnoses "wrong twin is active" vs "active twin's URL is dead" instantly. */}
+        {characters.length > 0 && (
+          <div className="mb-6 p-4 rounded-xl" style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.15)' }}>
+            <p className="text-white/60 text-[11px] uppercase tracking-widest mb-3">Debug — your twins</p>
+            <div className="flex flex-col gap-2">
+              {characters.map((c) => {
+                const isActive = c.id === activeCharId
+                const url = c.selfieUrl ?? ''
+                const kind = !url
+                  ? { label: 'NO SELFIE', color: '#6b7280' }
+                  : isEphemeralLike(url)
+                    ? { label: 'DEAD (Together AI)', color: '#ef4444' }
+                    : url.startsWith('data:')
+                      ? { label: 'DATA URL (durable)', color: '#f59e0b' }
+                      : url.includes('supabase.co')
+                        ? { label: 'SUPABASE (good)', color: '#10b981' }
+                        : { label: 'OTHER', color: '#6b7280' }
+                return (
+                  <div key={c.id} className="flex items-center gap-3 text-xs">
+                    {url && !isEphemeralLike(url) ? (
+                      <img src={url} alt={c.name} className="w-10 h-10 rounded-lg object-cover shrink-0" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-lg shrink-0" style={{ background: '#1a1525' }} />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-white font-semibold">{c.name}</span>
+                        {isActive && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ background: '#c84b9e', color: '#fff' }}>ACTIVE</span>}
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ background: kind.color + '22', color: kind.color }}>{kind.label}</span>
+                      </div>
+                      <p className="text-white/40 font-mono text-[10px] truncate">{url || '(none)'}</p>
+                    </div>
+                    {url && (
+                      <button
+                        onClick={() => setTwinUrl(url)}
+                        className="cursor-pointer text-[10px] uppercase tracking-widest text-[#c84b9e] hover:text-[#e060b8] shrink-0"
+                      >
+                        Use
+                      </button>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Inputs */}
         <div className="grid md:grid-cols-2 gap-4 mb-4">
           <div>
