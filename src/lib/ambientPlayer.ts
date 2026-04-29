@@ -45,7 +45,7 @@ const VIBE_FILES: Record<Vibe, string> = {
   'nordic': '/audio/ambient/nordic.mp3',
 }
 
-const FALLBACK_SRC = '/audio/lofi-japan.mp3'
+const FALLBACK_SRC = '/audio/ambient/fallback.mp3'
 
 class AmbientPlayer {
   private audio: HTMLAudioElement | null = null
