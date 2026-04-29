@@ -38,6 +38,13 @@ function genderNoun(g: 'male' | 'female' | 'non-binary' | 'unknown' | undefined,
   return `young ${fallback}`
 }
 
+function shortenCompanionDesc(desc: string): string {
+  return desc
+    .split(',').slice(0, 4).join(',')
+    .replace(/^(anime style|dark|cyberpunk[^,]*|fantasy[^,]*|thriller[^,]*|sci-fi[^,]*)\s*(portrait|illustration|concept art)\s*(portrait\s*)?of\s*/i, '')
+    .trim()
+}
+
 export function DepartureScreen({
   cityName,
   countryEmoji,
@@ -65,9 +72,14 @@ export function DepartureScreen({
     const hasBothRefs = !!(twinSelfieUrl && companionPortrait)
     const protagNoun = genderNoun(twinGender, 'man')
     const compNoun = genderNoun(companionGender, 'woman')
-    const prompt = hasBothRefs
-      ? `A ${protagNoun} (the protagonist, from image 1) and a ${compNoun} (their travel companion, from image 2) standing side by side at an airport gate, both with backpacks, excited to travel to ${cityName}. A plane visible through the window behind them. Warm golden hour light streaming through large terminal windows, no text, no signs, no departure boards`
+    const compShort = shortenCompanionDesc(companionDescription)
+    const compPhrase = compShort ? `a ${compNoun} (their travel companion, from image 2 — ${compShort})` : `a ${compNoun} (their travel companion, from image 2)`
+    const baseScene = hasBothRefs
+      ? `A ${protagNoun} (the protagonist, from image 1) and ${compPhrase} standing side by side at an airport gate, both with backpacks, excited to travel to ${cityName}. A plane visible through the window behind them. Warm golden hour light streaming through large terminal windows, no text, no signs, no departure boards`
       : `Cinematic wide shot of ${cityName} skyline at golden hour, seen through an airport terminal window. A plane on the tarmac ready for departure. Warm sunlight, atmospheric, no people, no text, no signs`
+    const prompt = hasBothRefs && compShort
+      ? `${baseScene}. The travel companion in this scene is ${companionName}: ${compShort}`
+      : baseScene
 
     generateSceneImage({
       prompt,

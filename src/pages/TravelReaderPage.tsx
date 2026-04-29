@@ -176,16 +176,25 @@ export function TravelReaderPage() {
       const compGender = companion?.character.gender
       const protagNoun = protagGender === 'female' ? 'young woman' : 'young man'
       const compNoun = compGender === 'male' ? 'young man' : compGender === 'female' ? 'young woman' : 'young person'
-      const prompt = hasBothRefs
-        ? `A ${protagNoun} (the protagonist, from image 1) and a ${compNoun} (their travel companion, from image 2) standing side by side at an airport gate, both with backpacks, excited to travel to ${destination.city}. A plane visible through the window behind them. Warm golden hour light streaming through large terminal windows, no text, no signs, no departure boards`
+      const fullCompDesc = companion?.character.portraitPrompt ?? companionVisualDesc
+      const compShort = fullCompDesc
+        .split(',').slice(0, 4).join(',')
+        .replace(/^(anime style|dark|cyberpunk[^,]*|fantasy[^,]*|thriller[^,]*|sci-fi[^,]*)\s*(portrait|illustration|concept art)\s*(portrait\s*)?of\s*/i, '')
+        .trim()
+      const compPhrase = compShort ? `a ${compNoun} (their travel companion, from image 2 — ${compShort})` : `a ${compNoun} (their travel companion, from image 2)`
+      const baseScene = hasBothRefs
+        ? `A ${protagNoun} (the protagonist, from image 1) and ${compPhrase} standing side by side at an airport gate, both with backpacks, excited to travel to ${destination.city}. A plane visible through the window behind them. Warm golden hour light streaming through large terminal windows, no text, no signs, no departure boards`
         : `Cinematic wide shot of ${destination.city} skyline at golden hour, seen through an airport terminal window. A plane on the tarmac ready for departure. Warm sunlight, atmospheric, no people, no text, no signs`
+      const prompt = hasBothRefs && compShort
+        ? `${baseScene}. The travel companion in this scene is ${companionName}: ${compShort}`
+        : baseScene
       const url = await generateImage({
         prompt,
         width: 768,
         height: 576,
         referenceImageUrl: activeChar?.selfieUrl || undefined,
         companionReferenceUrl: companionPortrait || undefined,
-        companionDescription: companion?.character.portraitPrompt ?? companionVisualDesc,
+        companionDescription: fullCompDesc,
         includesProtagonist: hasBothRefs,
         protagonistGender: protagGender,
         companionGender: compGender,
