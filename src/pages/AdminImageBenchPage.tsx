@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, Loader2, Image as ImageIcon, AlertTriangle } from 'lucide-react'
+import { ChevronLeft, Loader2, Image as ImageIcon, AlertTriangle, Trash2 } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { generateSceneImage } from '../lib/togetherAi'
 import { generateNanoBananaImage } from '../lib/nanoBanana'
@@ -54,6 +54,7 @@ export function AdminImageBenchPage() {
   const navigate = useNavigate()
   const characters = useStore((s) => s.characters)
   const activeCharId = useStore((s) => s.activeCharacterId)
+  const deleteCharacter = useStore((s) => s.deleteCharacter)
   const activeChar = characters.find((c) => c.id === activeCharId) ?? characters[0]
 
   // Initial values: prefer localStorage so refresh keeps your test URLs.
@@ -247,10 +248,24 @@ export function AdminImageBenchPage() {
                         Use
                       </button>
                     )}
+                    <button
+                      onClick={() => {
+                        if (confirm(`Delete twin "${c.name}"? This removes the twin and all its trips/stories. Cannot be undone.`)) {
+                          deleteCharacter(c.id)
+                        }
+                      }}
+                      className="cursor-pointer p-1 rounded text-red-400/60 hover:text-red-400 hover:bg-red-400/10 shrink-0"
+                      title="Delete this twin"
+                    >
+                      <Trash2 size={12} />
+                    </button>
                   </div>
                 )
               })}
             </div>
+            <p className="text-white/30 text-[10px] mt-3 leading-relaxed">
+              Tip: if all your twins show DEAD or NO SELFIE, delete them all and create a fresh one at <span className="font-mono text-white/50">/home</span>. The current upload flow stores selfies on Supabase storage and persists them across sessions.
+            </p>
           </div>
         )}
 
