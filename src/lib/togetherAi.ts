@@ -63,8 +63,22 @@ function enforceAnimeStyle(prompt: string): string {
 }
 
 
+/** Together AI's image-gen models fetch reference images server-side and
+ *  reject relative paths or data: URLs. Static portraits in this app live at
+ *  paths like /yuna-portrait.png — convert those to absolute URLs at the call
+ *  boundary so FLUX.2/Kontext can actually load them. */
+function toAbsoluteImageUrl(url: string | null | undefined): string | undefined {
+  if (!url) return undefined
+  if (url.startsWith('http://') || url.startsWith('https://')) return url
+  if (url.startsWith('data:')) return undefined // models can't fetch data URLs as refs
+  if (typeof window !== 'undefined' && url.startsWith('/')) return `${window.location.origin}${url}`
+  return undefined
+}
+
 export async function generateSceneImage(params: GenerateSceneParams): Promise<string | null> {
-  const { prompt, width = 768, height = 576, referenceImageUrl, companionReferenceUrl, companionDescription, protagonistGender, companionGender, includesProtagonist = true, moodContext } = params
+  const { prompt, width = 768, height = 576, companionDescription, protagonistGender, companionGender, includesProtagonist = true, moodContext } = params
+  const referenceImageUrl = toAbsoluteImageUrl(params.referenceImageUrl)
+  const companionReferenceUrl = toAbsoluteImageUrl(params.companionReferenceUrl)
 
   // Tier selection: both refs → FLUX.2 Pro, single ref → Kontext Pro, none → Schnell
   const useFlux2 = !!referenceImageUrl && !!companionReferenceUrl && includesProtagonist

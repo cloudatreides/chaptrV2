@@ -155,7 +155,10 @@ export function AdminImageBenchPage() {
     setBusy(model, true)
     updateResult(model, {})
     const t0 = performance.now()
-    const refs = [twinUrl, companionUrl].filter(Boolean)
+    // Resolve relative paths (eg /yuna-portrait.png) to absolute URLs so the
+    // Edge proxy can actually fetch them.
+    const toAbs = (u: string) => u.startsWith('http') ? u : `${window.location.origin}${u}`
+    const refs = [twinUrl, companionUrl].filter(Boolean).map(toAbs)
     const result = await generateNanoBananaImage({
       prompt,
       referenceImageUrls: refs,
