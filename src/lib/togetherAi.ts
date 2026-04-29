@@ -247,7 +247,9 @@ export async function generateCharacterPortrait(prompt: string): Promise<string 
   }
 }
 
-/** Stylize a selfie into an anime-style portrait using FLUX.1 Kontext (img2img) */
+/** Stylize a selfie into an anime-style portrait using FLUX.1 Kontext (img2img).
+ *  Returns a durable data: URL (base64 PNG) — never an ephemeral CDN URL.
+ *  Together AI's url responses expire in ~1h, so we always pull bytes locally. */
 export async function stylizeSelfie(selfieDataUrl: string): Promise<string | null> {
   try {
     const response = await fetch('/api/together', {
@@ -261,7 +263,7 @@ export async function stylizeSelfie(selfieDataUrl: string): Promise<string | nul
         height: 768,
         steps: 20,
         n: 1,
-        response_format: 'url',
+        response_format: 'b64_json',
       }),
     })
 
@@ -271,10 +273,24 @@ export async function stylizeSelfie(selfieDataUrl: string): Promise<string | nul
     }
 
     const data = await response.json()
-    const url = data.data?.[0]?.url
-    if (url) return url
     const b64 = data.data?.[0]?.b64_json
     if (b64) return `data:image/png;base64,${b64}`
+    // Defensive fallback: if upstream still returned a url, fetch it now while it's alive
+    const url = data.data?.[0]?.url
+    if (url) {
+      try {
+        const res = await fetch(url)
+        const blob = await res.blob()
+        return await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onloadend = () => resolve(reader.result as string)
+          reader.onerror = reject
+          reader.readAsDataURL(blob)
+        })
+      } catch {
+        return null
+      }
+    }
     return null
   } catch (e) {
     console.error('Selfie stylization failed:', e)

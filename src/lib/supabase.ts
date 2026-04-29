@@ -93,6 +93,15 @@ export async function uploadImageToStorage(imageUrl: string, path: string): Prom
   }
 }
 
+/** Returns true if the URL is an ephemeral CDN URL that will expire (Together AI shrt URLs).
+ *  Use to guard against persisting URLs that won't survive past ~1 hour. */
+export function isEphemeralUrl(url: string | null | undefined): boolean {
+  if (!url) return false
+  return url.includes('api.together.ai/shrt')
+       || url.includes('api.together.xyz/shrt')
+       || url.includes('together.ai/imgproxy')
+}
+
 /** Upload a styled selfie (data URL) to Supabase Storage and return a public URL.
  *  Used so FLUX.1 Kontext Pro receives a real URL instead of a base64 payload. */
 export async function uploadSelfieToStorage(dataUrl: string, id: string): Promise<string | null> {
@@ -104,7 +113,7 @@ export async function uploadSelfieToStorage(dataUrl: string, id: string): Promis
       .from('profile-avatars')
       .upload(path, blob, { contentType: 'image/png', upsert: true })
     if (error) {
-      console.error('Selfie upload failed:', error)
+      console.error('Selfie upload failed:', error.message, error)
       return null
     }
     const { data } = supabase.storage.from('profile-avatars').getPublicUrl(path)

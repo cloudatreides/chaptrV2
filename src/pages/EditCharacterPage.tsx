@@ -7,7 +7,7 @@ import type { Area } from 'react-easy-crop'
 import { useStore } from '../store/useStore'
 import { stylizeSelfie } from '../lib/togetherAi'
 import { getCroppedImg } from '../lib/cropImage'
-import { trackEvent, uploadSelfieToStorage } from '../lib/supabase'
+import { trackEvent, uploadSelfieToStorage, isEphemeralUrl } from '../lib/supabase'
 
 const ARCHETYPES = [
   {
@@ -163,7 +163,8 @@ export function EditCharacterPage() {
       bio: bio || null,
     }
     if (selfieChanged) {
-      updates.selfieUrl = uploadedSelfieUrl ?? finalPhoto ?? null
+      const candidate = uploadedSelfieUrl ?? finalPhoto ?? null
+      updates.selfieUrl = isEphemeralUrl(candidate) ? null : candidate
     }
     updateCharacter(character.id, updates)
     trackEvent('character_edited', { gender, hasPhoto: !!(updates.selfieUrl ?? existingSelfie), hasBio: !!bio })

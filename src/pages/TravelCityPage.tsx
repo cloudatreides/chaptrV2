@@ -11,7 +11,7 @@ import { getDestination } from '../data/travel/destinations'
 import { TRAVEL_COMPANIONS, DEFAULT_SLIDERS, getCompanionIntro, type CompanionSliders, type CompanionRemix, type TravelCompanion } from '../data/travel/companions'
 import { stylizeSelfie } from '../lib/togetherAi'
 import { getCroppedImg } from '../lib/cropImage'
-import { uploadSelfieToStorage } from '../lib/supabase'
+import { uploadSelfieToStorage, isEphemeralUrl } from '../lib/supabase'
 import { ambientAudio } from '../lib/ambientAudio'
 
 export function TravelCityPage() {
@@ -193,7 +193,9 @@ export function TravelCityPage() {
     setIsStylizing(false)
     if (result) {
       const url = await uploadSelfieToStorage(result, uploadIdRef.current)
-      setRemixPhoto(url ?? result)
+      // Never persist an ephemeral Together URL — fall back to the durable base64 data URL
+      const safe = url && !isEphemeralUrl(url) ? url : (!isEphemeralUrl(result) ? result : null)
+      setRemixPhoto(safe ?? cropped)
     } else {
       setRemixPhoto(cropped)
     }

@@ -7,7 +7,7 @@ import type { Area } from 'react-easy-crop'
 import { useStore } from '../store/useStore'
 import { stylizeSelfie } from '../lib/togetherAi'
 import { getCroppedImg } from '../lib/cropImage'
-import { trackEvent, uploadSelfieToStorage } from '../lib/supabase'
+import { trackEvent, uploadSelfieToStorage, isEphemeralUrl } from '../lib/supabase'
 
 const ALL_ARCHETYPES = [
   { id: 'quiet', label: 'The Quiet One', bio: "I'm usually the last to speak up in a group, but people end up telling me everything. Good listener, bad at faking interest." },
@@ -186,7 +186,9 @@ export function CreateCharacterPage() {
 
   const handleSave = () => {
     if (!canCreate) return
-    const selfieUrl = uploadedSelfieUrl ?? finalPhoto ?? selectedDefault ?? null
+    // Prefer Supabase URL → durable data: URL → never an ephemeral CDN URL
+    const candidate = uploadedSelfieUrl ?? finalPhoto ?? selectedDefault ?? null
+    const selfieUrl = isEphemeralUrl(candidate) ? null : candidate
     if (isEditMode) {
       updateCharacter(editId!, {
         name: name.trim(),
