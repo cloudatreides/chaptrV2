@@ -730,6 +730,12 @@ export function HomePage() {
 
   const hasCharacters = characters.length > 0
   const activeCharacter = characters.find((c) => c.id === activeCharacterId) ?? characters[0]
+  // Prefer to render a twin that actually has a selfie. If the active twin
+  // doesn't have one but a sibling does, show the sibling so we never fall
+  // back to the "Upload a selfie" hero when twins already exist.
+  const characterToShow = activeCharacter?.selfieUrl
+    ? activeCharacter
+    : (characters.find((c) => c.selfieUrl) ?? activeCharacter)
 
   // ─── Ambient pings ───
   useEffect(() => {
@@ -831,7 +837,7 @@ export function HomePage() {
     <div className="bg-bg min-h-screen min-h-dvh">
       {/* ═══ MOBILE ═══ */}
       <div className="md:hidden">
-        <div className="overflow-y-auto px-5 pt-6 pb-28 flex flex-col gap-5">
+        <div className="overflow-y-auto px-5 pt-6 flex flex-col gap-5" style={{ paddingBottom: 'calc(96px + env(safe-area-inset-bottom))' }}>
           {/* Header */}
           <div className="flex items-center justify-between">
             <h1 className="text-white font-bold text-[22px]" style={{ fontFamily: SG }}>chaptr</h1>
@@ -839,8 +845,8 @@ export function HomePage() {
           </div>
 
           {/* Twin Hero or Upload CTA */}
-          {hasCharacters && activeCharacter?.selfieUrl ? (
-            <TwinHero character={activeCharacter} allCharacters={characters} onEdit={() => navigate('/characters')} onSwitch={(id) => setActiveCharacter(id)} onCreateNew={() => navigate('/create-character')} onSetDefault={(id) => setDefaultCharacter(id)} />
+          {hasCharacters && characterToShow?.selfieUrl ? (
+            <TwinHero character={characterToShow} allCharacters={characters} onEdit={() => navigate('/characters')} onSwitch={(id) => setActiveCharacter(id)} onCreateNew={() => navigate('/create-character')} onSetDefault={(id) => setDefaultCharacter(id)} />
           ) : (
             <UploadHero onClick={() => navigate('/create-character')} />
           )}
