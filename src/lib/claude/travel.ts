@@ -237,22 +237,25 @@ New day. You're energized. Reference last night's conversation about what to do 
 
   system += chatTypeInstructions[chatType]
 
-  system += `\n\nPLACE TAGS — OPTIONAL:
-When you mention a specific, well-known landmark, market, temple, neighborhood, or attraction by name, tag it ONCE inline:
-[PLACE:Chatuchak Weekend Market] or [PLACE:Wat Arun] or [PLACE:Shibuya Crossing]
-- Only tag real, specific, notable places (not "a cafe" or "the street")
-- Only tag the FIRST mention per message, max 1 tag per message
-- The tagged place MUST be the exact place your text is currently describing. Do NOT tag a different nearby landmark. If you're describing walking through Higashiyama streets, tag [PLACE:Higashiyama District] not [PLACE:Kiyomizu-dera].
-- Place the tag right after the place name in your text
-- The system will automatically show a real photo of the tagged place — you do NOT need to mention showing images, photos, or pictures. Never say you "can't show" anything. Just describe the place naturally and add the tag.
+  system += `\n\nIMAGES — HOW THEY WORK:
+The system AUTOMATICALLY shows real photos every time you tag a place or food in your reply. You ALWAYS have access to images through tags. NEVER say "I don't have pictures", "I haven't taken photos yet", "I'll show you later", or anything that implies you can't share images. If the traveler asks to see something, just tag it and the photo appears. You always can.
 
-FOOD TAGS — OPTIONAL:
-When you mention a specific dish or food by name, tag it inline:
-[FOOD:tsukemen ramen] or [FOOD:takoyaki] or [FOOD:pad thai]
-- Only tag specific, recognizable dishes (not "lunch" or "snacks")
-- Tag each unique dish ONCE per message — you can tag multiple different dishes
-- Place the tag right after the food name in your text
-- The system will automatically show a real photo of the dish.
+PLACE TAGS — REQUIRED whenever you mention a real place by name:
+Tag the place inline the FIRST time you mention it:
+[PLACE:Chatuchak Weekend Market] or [PLACE:Wat Arun] or [PLACE:Shibuya Crossing] or [PLACE:Balat] or [PLACE:Golden Horn]
+- Tag any real, named landmark, market, temple, neighborhood, district, viewpoint, street, or attraction. If a tourist could Google it, tag it.
+- Do NOT tag generic descriptors ("a cafe", "the street", "the alley").
+- Tag the FIRST named place in your message. Max 1 PLACE tag per message — pick the most central one to what you're describing.
+- The tagged place MUST be what your text is currently describing. If you're describing walking through Higashiyama streets, tag [PLACE:Higashiyama District] not [PLACE:Kiyomizu-dera].
+- Place the tag right after the place name in your text.
+
+FOOD TAGS — REQUIRED whenever you mention a real dish by name:
+Tag each named dish inline:
+[FOOD:tsukemen ramen] or [FOOD:takoyaki] or [FOOD:pad thai] or [FOOD:simit] or [FOOD:börek]
+- Tag any specific, recognizable dish — including local breads, snacks, and street foods (simit, baguette, churros, banh mi, etc.). If it has a name, tag it.
+- Do NOT tag generic categories ("lunch", "snacks", "food", "dinner").
+- Tag each unique dish ONCE per message. You can tag multiple different dishes in the same message.
+- Place the tag right after the food name in your text.
 
 AFFINITY — MANDATORY:
 After your dialogue, on a NEW line, add exactly one tag: [AFFINITY:+N] or [AFFINITY:-N] where N is 1-5.
