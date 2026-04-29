@@ -131,6 +131,124 @@ function SaveToAlbumBtn({ imageUrl, label, destinationId, companionId }: { image
   )
 }
 
+function PlaceFoodCard({ kind, msg, destinationId, companionId }: {
+  kind: 'place' | 'food'
+  msg: ChatMessage
+  destinationId: string
+  companionId: string
+}) {
+  const urls = msg.imageUrls && msg.imageUrls.length > 0
+    ? msg.imageUrls
+    : (msg.imageUrl ? [msg.imageUrl] : [])
+  const labels = msg.imageLabels && msg.imageLabels.length > 0
+    ? msg.imageLabels
+    : [msg.content.replace(/^[📍🍽️]\s*/, '')]
+
+  const [activeIndex, setActiveIndex] = useState(0)
+  if (urls.length === 0) return null
+
+  const activeLabel = labels[activeIndex] ?? labels[0]
+  const activeUrl = urls[activeIndex] ?? urls[0]
+  const emoji = kind === 'place' ? '📍' : '🍽️'
+
+  return (
+    <div className="flex justify-start my-1">
+      <div
+        className="rounded-xl overflow-hidden relative w-full"
+        style={{ maxWidth: 320, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}
+      >
+        <CarouselWithIndex
+          urls={urls}
+          labels={labels}
+          onIndexChange={setActiveIndex}
+        />
+        <div className="px-3 py-2 flex items-center gap-1.5">
+          {kind === 'place' && <MapPin size={10} className="text-purple-400/60 shrink-0" />}
+          <p className="text-white/50 text-xs" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            {urls.length > 1 ? `${emoji} ${activeLabel}` : msg.content}
+          </p>
+        </div>
+        <SaveToAlbumBtn
+          imageUrl={activeUrl}
+          label={activeLabel}
+          destinationId={destinationId}
+          companionId={companionId}
+        />
+      </div>
+    </div>
+  )
+}
+
+function CarouselWithIndex({ urls, labels, onIndexChange }: {
+  urls: string[]
+  labels: string[]
+  onIndexChange: (i: number) => void
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [activeIndex, setActiveIndex] = useState(0)
+
+  useEffect(() => {
+    onIndexChange(activeIndex)
+  }, [activeIndex, onIndexChange])
+
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    let raf = 0
+    const onScroll = () => {
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(() => {
+        const slideWidth = el.clientWidth
+        if (slideWidth === 0) return
+        const idx = Math.round(el.scrollLeft / slideWidth)
+        setActiveIndex(Math.max(0, Math.min(urls.length - 1, idx)))
+      })
+    }
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      el.removeEventListener('scroll', onScroll)
+      cancelAnimationFrame(raf)
+    }
+  }, [urls.length])
+
+  return (
+    <div className="relative">
+      <div
+        ref={scrollRef}
+        className="flex overflow-x-auto snap-x snap-mandatory"
+        style={{ scrollbarWidth: 'none' }}
+      >
+        {urls.map((url, i) => (
+          <div key={i} className="relative shrink-0 w-full snap-start" style={{ aspectRatio: '4/3' }}>
+            <img
+              src={url}
+              alt={labels[i] ?? ''}
+              className="w-full h-full object-cover"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+            />
+          </div>
+        ))}
+      </div>
+      {urls.length > 1 && (
+        <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
+          {urls.map((_, i) => (
+            <span
+              key={i}
+              className="rounded-full transition-all"
+              style={{
+                width: i === activeIndex ? 16 : 6,
+                height: 6,
+                background: i === activeIndex ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.5)',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.4)',
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function TravelReaderPage() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -464,21 +582,44 @@ export function TravelReaderPage() {
       updateTravelAffinity(parsed.delta)
       if (parsed.suggestions) setSuggestions(parsed.suggestions)
 
-      // Fetch place + food images in parallel, then add in consistent order (place first, then foods)
+      // Fetch place + food images in parallel and bundle into carousels (up to 3 each)
       if ((places.length > 0 || foods.length > 0) && destination) {
         const addImageMsg = isPlanning ? addTravelPlanningMessage : (msg: ChatMessage) => addTravelDayChatMessage(trip.currentDay, msg)
+        const placesToFetch = places.slice(0, 3)
+        const foodsToFetch = foods.slice(0, 3)
         ;(async () => {
-          const [placeResult, ...foodResults] = await Promise.all([
-            places.length > 0 ? fetchPlaceImage(places[0], destination.city).catch(() => null) : Promise.resolve(null),
-            ...foods.map((food) => fetchFoodImage(food, destination.city).catch(() => null)),
+          const [placeResults, foodResults] = await Promise.all([
+            Promise.all(placesToFetch.map((p) => fetchPlaceImage(p, destination.city).catch(() => null))),
+            Promise.all(foodsToFetch.map((f) => fetchFoodImage(f, destination.city).catch(() => null))),
           ])
 
-          if (placeResult) {
-            addImageMsg({ role: 'character', content: `📍 ${places[0]}`, characterId: trip.companionId, timestamp: Date.now(), imageUrl: placeResult })
+          const validPlaces = placeResults
+            .map((url, i) => ({ url, label: placesToFetch[i] }))
+            .filter((x): x is { url: string; label: string } => !!x.url)
+          if (validPlaces.length > 0) {
+            addImageMsg({
+              role: 'character',
+              content: `📍 ${validPlaces.map((p) => p.label).join(' · ')}`,
+              characterId: trip.companionId,
+              timestamp: Date.now(),
+              imageUrls: validPlaces.map((p) => p.url),
+              imageLabels: validPlaces.map((p) => p.label),
+            })
           }
-          foodResults.forEach((url, i) => {
-            if (url) addImageMsg({ role: 'character', content: `🍽️ ${foods[i]}`, characterId: trip.companionId, timestamp: Date.now(), imageUrl: url })
-          })
+
+          const validFoods = foodResults
+            .map((url, i) => ({ url, label: foodsToFetch[i] }))
+            .filter((x): x is { url: string; label: string } => !!x.url)
+          if (validFoods.length > 0) {
+            addImageMsg({
+              role: 'character',
+              content: `🍽️ ${validFoods.map((f) => f.label).join(' · ')}`,
+              characterId: trip.companionId,
+              timestamp: Date.now(),
+              imageUrls: validFoods.map((f) => f.url),
+              imageLabels: validFoods.map((f) => f.label),
+            })
+          }
         })()
       }
 
@@ -1540,31 +1681,26 @@ export function TravelReaderPage() {
                                 </div>
                               )
                             }
-                            if (msg.content.startsWith('📍') && msg.imageUrl) {
+                            if (msg.content.startsWith('📍') && (msg.imageUrls?.length || msg.imageUrl)) {
                               return (
-                                <div key={i} className="flex justify-start my-1">
-                                  <div className="rounded-xl overflow-hidden relative" style={{ maxWidth: 320, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                                    <img src={msg.imageUrl} alt="" className="w-full" style={{ aspectRatio: '4/3', objectFit: 'cover' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
-                                    <div className="px-3 py-2 flex items-center gap-1.5">
-                                      <MapPin size={10} className="text-purple-400/60 shrink-0" />
-                                      <p className="text-white/50 text-xs" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{msg.content.replace('📍 ', '')}</p>
-                                    </div>
-                                    <SaveToAlbumBtn imageUrl={msg.imageUrl} label={msg.content.replace('📍 ', '')} destinationId={trip.destinationId} companionId={trip.companionId} />
-                                  </div>
-                                </div>
+                                <PlaceFoodCard
+                                  key={i}
+                                  kind="place"
+                                  msg={msg}
+                                  destinationId={trip.destinationId}
+                                  companionId={trip.companionId}
+                                />
                               )
                             }
-                            if (msg.content.startsWith('🍽️') && msg.imageUrl) {
+                            if (msg.content.startsWith('🍽️') && (msg.imageUrls?.length || msg.imageUrl)) {
                               return (
-                                <div key={i} className="flex justify-start my-1">
-                                  <div className="rounded-xl overflow-hidden relative" style={{ maxWidth: 320, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                                    <img src={msg.imageUrl} alt="" className="w-full" style={{ aspectRatio: '4/3', objectFit: 'cover' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
-                                    <div className="px-3 py-2">
-                                      <p className="text-white/50 text-xs" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{msg.content.replace('🍽️ ', '')}</p>
-                                    </div>
-                                    <SaveToAlbumBtn imageUrl={msg.imageUrl} label={msg.content.replace('🍽️ ', '')} destinationId={trip.destinationId} companionId={trip.companionId} />
-                                  </div>
-                                </div>
+                                <PlaceFoodCard
+                                  key={i}
+                                  kind="food"
+                                  msg={msg}
+                                  destinationId={trip.destinationId}
+                                  companionId={trip.companionId}
+                                />
                               )
                             }
                             if (msg.role === 'user') {

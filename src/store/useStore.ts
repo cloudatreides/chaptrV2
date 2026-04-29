@@ -10,6 +10,8 @@ export interface ChatMessage {
   characterId: string
   timestamp: number
   imageUrl?: string
+  imageUrls?: string[]
+  imageLabels?: string[]
 }
 
 export interface CharacterState {
