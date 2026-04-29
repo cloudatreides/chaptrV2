@@ -8,6 +8,7 @@ import { useStore } from '../store/useStore'
 import { stylizeSelfie } from '../lib/togetherAi'
 import { getCroppedImg } from '../lib/cropImage'
 import { trackEvent, uploadSelfieToStorage, isEphemeralUrl } from '../lib/supabase'
+import { AlertTriangle } from 'lucide-react'
 
 const ALL_ARCHETYPES = [
   { id: 'quiet', label: 'The Quiet One', bio: "I'm usually the last to speak up in a group, but people end up telling me everything. Good listener, bad at faking interest." },
@@ -74,6 +75,7 @@ export function CreateCharacterPage() {
   const editId = searchParams.get('edit')
   const createCharacter = useStore((s) => s.createCharacter)
   const updateCharacter = useStore((s) => s.updateCharacter)
+  const setActiveCharacter = useStore((s) => s.setActiveCharacter)
   const characters = useStore((s) => s.characters)
   const editingChar = editId ? characters.find((c) => c.id === editId) : null
   const isEditMode = !!editingChar
@@ -108,12 +110,18 @@ export function CreateCharacterPage() {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
   const existingSelfie = editingChar?.selfieUrl ?? null
   const isDefaultAvatar = existingSelfie?.startsWith('/default-')
-  const [originalPhoto, setOriginalPhoto] = useState<string | null>(existingSelfie && !isDefaultAvatar ? existingSelfie : null)
+  // If the existing selfie URL is ephemeral (Together AI shrt URL that has
+  // already expired), treat it as if the twin has no photo. The page would
+  // otherwise show a broken image and the user would have no signal that
+  // they need to re-upload.
+  const existingSelfieIsDead = !!existingSelfie && isEphemeralUrl(existingSelfie)
+  const usableExisting = existingSelfie && !isDefaultAvatar && !existingSelfieIsDead ? existingSelfie : null
+  const [originalPhoto, setOriginalPhoto] = useState<string | null>(usableExisting)
   const [styledPhoto, setStyledPhoto] = useState<string | null>(null)
   const [isStylizing, setIsStylizing] = useState(false)
   const [stylizeFailed, setStylizeFailed] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
-  const [uploadedSelfieUrl, setUploadedSelfieUrl] = useState<string | null>(existingSelfie && !isDefaultAvatar ? existingSelfie : null)
+  const [uploadedSelfieUrl, setUploadedSelfieUrl] = useState<string | null>(usableExisting)
   const uploadIdRef = useRef(crypto.randomUUID())
   const [dragging, setDragging] = useState(false)
   const [selectedDefault, setSelectedDefault] = useState<string | null>(isDefaultAvatar ? existingSelfie : null)
@@ -205,6 +213,10 @@ export function CreateCharacterPage() {
       }
       if (photoTouched) updates.selfieUrl = selfieUrl
       updateCharacter(editId!, updates)
+      // Auto-switch active to the edited twin — otherwise users with multiple
+      // twins can edit a non-active one and the rest of the app keeps using
+      // the still-broken active twin (caused dead-URL ghosting in image bench).
+      setActiveCharacter(editId!)
       trackEvent('character_updated', { gender, hasPhoto: !!finalPhoto, hasDefault: !!selectedDefault, hasBio: !!bio })
     } else {
       createCharacter({
@@ -341,6 +353,18 @@ export function CreateCharacterPage() {
         {/* ── Section 3: Selfie (optional) ── */}
         <motion.div className="mb-6" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
           <label className="text-textMuted text-xs uppercase tracking-widest mb-2 block">Photo</label>
+
+          {existingSelfieIsDead && !hasPhoto && !selectedDefault && (
+            <div className="mb-3 p-3 rounded-xl flex gap-2 items-start" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
+              <AlertTriangle size={14} className="text-red-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-red-300 text-xs font-semibold mb-0.5">Your photo expired</p>
+                <p className="text-red-300/70 text-[11px] leading-relaxed">
+                  This twin's previous selfie was stored on a temporary URL that has since expired. Upload a new photo and we'll save it permanently this time.
+                </p>
+              </div>
+            </div>
+          )}
 
           {isCropping ? (
             <div className="mb-3">
