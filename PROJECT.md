@@ -6,7 +6,7 @@ AI-powered interactive story app where you upload a selfie and become the main c
 V2 — Live at chaptr-v2.vercel.app. 15 universes across 6 genres, 29 cast characters with AI portraits, cast chat system, ambient audio, social sharing.
 
 ## Stack
-React + Vite + TypeScript + Tailwind v3 + Zustand (persist v2, multi-character) + Framer Motion + Vaul + Anthropic Haiku (via Vercel Edge proxy) + Together AI FLUX (scenes/portraits/selfie stylization) + Supabase (analytics, playthroughs, share URLs, per-user game state sync)
+React + Vite + TypeScript + Tailwind v3 + Zustand (persist v9, multi-character) + Framer Motion + Vaul + Anthropic Haiku (via Vercel Edge proxy) + Together AI FLUX (scenes/portraits/selfie stylization) + Google Gemini (Nano Banana 2 / Pro / 2.5 — under evaluation) + Supabase (analytics, playthroughs, share URLs, per-user game state sync, sync-error telemetry, image cache)
 
 ## Core Loop
 Choose universe → Create character (name, gender, personality, optional selfie) → Read AI-generated story → Make choices that affect narrative and trust → Chat with characters → Gem-gated scene reveals → Share result.
@@ -38,25 +38,35 @@ Characters remember personal facts the protagonist reveals. `extractMemories()` 
 Unified message thread where multiple characters talk simultaneously. `GroupChatScene.tsx` component — round-robin character rotation per exchange, 30% chance of a brief AI-to-AI reaction from a second character (`generateGroupReaction()`). Activated by setting `groupChat: true` on any scene step in storyData. Memory extraction wired in.
 
 ## Key Files
-- `src/store/useStore.ts` — Multi-character Zustand store v7, progress keyed by `characterId:universeId`
-- `src/lib/gameStateSync.ts` — Per-user game state sync to Supabase (debounced auto-save + cloud hydration)
+- `src/store/useStore.ts` — Multi-character Zustand store v9, progress keyed by `characterId:universeId`
+- `src/lib/gameStateSync.ts` — Per-user game state sync with retry, error classification, and telemetry
 - `src/hooks/useActiveStory.ts` — Derived state hook (THE way to read character+progress)
 - `src/lib/claudeStream.ts` — Streaming prose + chat + memory extraction + group reactions
-- `src/lib/togetherAi.ts` — Scene generation with prompt-hash caching, includesProtagonist routing, aspect_ratio
+- `src/lib/togetherAi.ts` — Scene generation with prompt-hash caching, includesProtagonist routing, absolute-URL coercion for refs
+- `src/lib/nanoBanana.ts` — Gemini image-gen client wrapper (under evaluation vs FLUX)
+- `src/lib/supabase.ts` — Supabase client + `uploadImageToStorage` (returns durable or null, never ephemeral)
 - `src/lib/affinity.ts` — Tier definitions + growth formula
 - `src/lib/ambientAudio.ts` — Web Audio API ambient pads (mood-based: story/chat/choice/reveal)
+- `src/contexts/AuthContext.tsx` — Auth + cloud hydrate (prefers local on hydrate; force-reload on user mismatch)
 - `src/data/storyData.ts` — Story steps, universe registry, `includesProtagonist` flag
 - `src/data/stories/*.ts` — 14 universe-specific story files
 - `src/data/castRoster.ts` — 11-character roster with bios, unlock hints
+- `src/data/chatActions.ts` — Chat action definitions + reaction prompt builder
 - `src/pages/StoryReaderPage.tsx` — Main reader (beats, choices, chat, scene images, pings, quest toasts)
 - `src/pages/AccountPage.tsx` — My Account with editable name, stats
 - `src/pages/UniverseDetailPage.tsx` — Universe detail view
-- `src/pages/HomePage.tsx` — Home with FTUE, universe cards, cast section
+- `src/pages/HomePage.tsx` — Home with FTUE, universe cards, cast section, sync indicator
 - `src/pages/CastPage.tsx` — Full cast browser with group chats + favorites
 - `src/pages/LandingPage.tsx` — Public landing page
+- `src/pages/AdminImageBenchPage.tsx` — Image bench + image-gen actions audit (admin)
+- `src/pages/CreateCharacterPage.tsx` — Twin create + edit; "Photo expired" banner; auto-set-active on save
 - `src/components/AppSidebar.tsx` — Desktop nav with favorites, stacked avatars, account link
-- `api/claude.ts` + `api/together.ts` — Vercel Edge API proxies
+- `src/components/SyncIndicator.tsx` — Top-right sync status pill on home
+- `src/components/travel/DepartureScreen.tsx` — Travel start; reliable two-character scene with ref-image binding
+- `api/claude.ts` + `api/together.ts` + `api/nano-banana.ts` — Vercel Edge API proxies
+- `api/log-sync-error.ts` — Server-side sync error telemetry (uses service-role key)
 - `api/og.tsx` + `api/share.ts` — OG image + share HTML
+- `supabase/migrations/004_sync_errors.sql` — Sync error telemetry table
 
 ## Differentiators vs Simmy
 - Web-based (Simmy is iOS only)
@@ -94,8 +104,34 @@ Full store state (chat threads, affinities, gems, progress, unlocks) synced to S
 ### F9 — Genre-Aware Story Moments
 Selfie capture moments adapt per genre. Romance = "Album" with selfie photo style. Thriller = "Dossier" with surveillance aesthetic. Horror = "Evidence" with polaroid style. Mystery = "Case Files", Fantasy = "Memories", Adventure = "Journal". Config in `getMomentConfig()` drives all copy: capture spinner, save prompt, button text, album title, empty state, note placeholders, image generation style.
 
+### F10 — Image Bench (Admin Tool)
+Internal A/B testing tool at `/admin/image-bench` (ProtectedRoute, master-mode only). Two tabs:
+
+- **Bench**: side-by-side comparison of 6 image-gen models (FLUX.2 Pro, Kontext Pro, Schnell, Nano Banana 2/Pro/regular). Same prompt + references run through every model. Per-tile latency + cost-per-image + projected $ at 1k images. Twin-debug panel lists every twin with URL classification (SUPABASE / DATA URL / DEAD / NO SELFIE). "Reset twins only" recovery button.
+- **Audit (16 entries)**: source-of-truth doc for every image-gen call site. Categorized by Twin / Travel / Story / Chat reaction / Cast. Each entry shows feature + trigger + file:line + model tier + reference requirements + verbatim prompt + notes. "Load into bench" button drops a prompt into the bench tab for one-click cross-model testing.
+
+### F11 — Sync Resilience (3 Layers)
+After cross-session twin loss bug. Now hardened:
+
+1. **Visible sync indicator** (`SyncIndicator.tsx`) — top-right pill showing `Saving...` / `Saved` / `Save failed` in real time. Click red pill to expand actual error. No more silent data loss.
+2. **Auto-retry with exponential backoff** — 4 attempts at 2s/5s/15s/60s. `classifyError()` splits transient (auth, network, timeouts) from permanent (RLS, schema, payload-too-large) failures.
+3. **Server-side telemetry** — `/api/log-sync-error` Edge endpoint uses `SUPABASE_SERVICE_ROLE_KEY` to write to `sync_errors` table (RLS-bypassing, since the point is to capture errors RLS itself might cause). Aggregated SQL queries for failure rate, top error codes, payload size distribution baked into the migration as comments.
+
+Also fixed in this layer:
+- `hydrateFromCloud` — drop timestamp comparison, prefer local whenever local has data (cloud only wins on truly fresh device). Old logic silently overwrote local with stale cloud state on every refresh.
+- Sync debounce 5s → 1.5s. `beforeunload` + `pagehide` flush handlers for tab close.
+- `travelTrips` and `activeTripId` added to cloud sync (were silently localStorage-only, lost on every logout).
+- Cross-email contamination fix — `getSession` force-reloads on user mismatch (matching `onAuthStateChange`).
+- `uploadImageToStorage` no longer falls back to ephemeral URLs on failure — returns `null` or a `data:` URL instead. Stops dead URLs from leaking into persistent storage (`storyMoments`, `travelTrips.sceneImages`, `chaptr_image_cache`).
+
 ## Open Issues / Next Priorities
-1. Test full playthrough on newer universes (scene images, branching, cast unlocks)
-2. Cost modeling before scaling — coffee/serenade scene images use Kontext ($0.20/image)
-3. Mobile polish on universe detail pages
-4. Playtest all genre-aware content (memes, dares, moments) across non-romance genres
+1. **Decide FLUX vs Gemini for prod image gen** — bench at `/admin/image-bench` set up. Run audit-tab entries (selfie, hold-hands, gift) through all 6 models. Gemini 3.1 Flash visibly winning identity match in early tests. Decision blocks GTM image-quality story.
+2. Mobile polish on universe detail pages
+3. Playtest all genre-aware content (memes, dares, moments) across non-romance genres
+4. **Multi-device sync conflict resolution** (post-GTM) — current strategy is prefer-local, can clobber a Device-A change if Device-B opens with stale state. Acceptable for solo testing, needs proper merge logic before launch with multi-device users.
+
+## Required Env Vars (Vercel)
+- `TOGETHER_API_KEY` — image gen
+- `ANTHROPIC_API_KEY` — Claude
+- `GEMINI_API_KEY` — Nano Banana / Gemini image gen
+- `SUPABASE_SERVICE_ROLE_KEY` — server-side telemetry (`/api/log-sync-error`)
