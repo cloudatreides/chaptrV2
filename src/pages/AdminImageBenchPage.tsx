@@ -66,9 +66,14 @@ export function AdminImageBenchPage() {
 
   // Remixed companions you created — only the ones with a custom photo are
   // useful here, since the bench needs an image URL to feed the model.
-  const remixOptions = customCompanions
-    .filter((c) => !!c.remix.imageUrl)
+  // Skip ephemeral Together AI URLs that have expired — they'd 404.
+  const allRemixesWithPhoto = customCompanions.filter((c) => !!c.remix.imageUrl)
+  const remixOptions = allRemixesWithPhoto
+    .filter((c) => !isEphemeralLike(c.remix.imageUrl!))
     .map((c) => ({ name: c.remix.name, url: c.remix.imageUrl! }))
+  const deadRemixNames = allRemixesWithPhoto
+    .filter((c) => isEphemeralLike(c.remix.imageUrl!))
+    .map((c) => c.remix.name)
 
   // Initial values: prefer localStorage so refresh keeps your test URLs.
   // BUT: if the saved twin URL is ephemeral (dead Together AI) OR the active
@@ -113,6 +118,7 @@ export function AdminImageBenchPage() {
   }, [twinUrl, companionUrl, prompt])
 
   const twinUrlIsEphemeral = !!twinUrl && isEphemeralLike(twinUrl)
+  const companionUrlIsEphemeral = !!companionUrl && isEphemeralLike(companionUrl)
   const canResetToActive = !!liveTwinUrl && twinUrl !== liveTwinUrl
 
   const updateResult = (id: ModelId, r: Result) => setResults((prev) => ({ ...prev, [id]: r }))
@@ -360,6 +366,11 @@ export function AdminImageBenchPage() {
                 )}
               </select>
             </div>
+            {deadRemixNames.length > 0 && (
+              <p className="text-amber-300/70 text-[11px] mb-2" style={{ fontFamily: SG }}>
+                Hidden ({deadRemixNames.length}): {deadRemixNames.join(', ')} — photo URL expired. Re-upload in /travel.
+              </p>
+            )}
             <input
               type="text"
               value={companionUrl}
@@ -367,6 +378,11 @@ export function AdminImageBenchPage() {
               placeholder="/yuna-portrait.png or https://..."
               className="w-full bg-[#13101c] border border-[#2a2040] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#c84b9e]"
             />
+            {companionUrlIsEphemeral && (
+              <p className="text-red-400/80 text-[11px] mt-1" style={{ fontFamily: SG }}>
+                Companion URL is dead (Together AI ephemeral). Re-upload the companion photo, then come back here.
+              </p>
+            )}
             {companionUrl && (
               <button
                 type="button"
@@ -374,7 +390,12 @@ export function AdminImageBenchPage() {
                 className="mt-2 cursor-pointer hover:opacity-80 transition-opacity"
                 title="Click to view full size"
               >
-                <img src={companionUrl} alt="companion" className="w-20 h-20 rounded-lg object-cover" />
+                <img
+                  src={companionUrl}
+                  alt="companion"
+                  className="w-20 h-20 rounded-lg object-cover"
+                  onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0.3' }}
+                />
               </button>
             )}
           </div>
