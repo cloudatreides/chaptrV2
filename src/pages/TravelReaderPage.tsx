@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Send, Loader2, MapPin, ChevronRight, Lock, Check, Play, ChevronDown, Plus, X, Volume2, VolumeX, ImagePlus, RefreshCw } from 'lucide-react'
+import { ArrowLeft, Send, Loader2, MapPin, ChevronRight, Lock, Check, Play, ChevronDown, ChevronUp, Plus, X, Volume2, VolumeX, ImagePlus, RefreshCw, Map } from 'lucide-react'
+import { Drawer } from 'vaul'
 import { useStore } from '../store/useStore'
 import { getDestination } from '../data/travel/destinations'
 import { getTravelCompanion } from '../data/travel/companions'
@@ -204,6 +205,7 @@ export function TravelReaderPage() {
 
   const [showLofiLabel, setShowLofiLabel] = useState(true)
   const [showPortraitModal, setShowPortraitModal] = useState(false)
+  const [showProgressSheet, setShowProgressSheet] = useState(false)
 
   // Show departure screen for fresh trips (handles Zustand hydration race —
   // useState initializer may fire before store rehydrates from localStorage)
@@ -1066,6 +1068,131 @@ export function TravelReaderPage() {
     },
   ]
 
+  // Mobile pill summary: count completed days + total days
+  const totalTripDays = destination.tripDays + (trip.extensions ?? 0) * 2
+  const completedDays = trip.itinerary.days.filter((d) => d.completed).length
+  const progressLabel =
+    trip.phase === 'planning' ? 'Planning' :
+    trip.phase === 'complete' ? 'Trip complete' :
+    `Day ${trip.currentDay} of ${totalTripDays}`
+
+  const renderArcSegments = () => (
+    <div className="space-y-1">
+      {arcSegments.map((seg, i) => {
+        const isReady = seg.status === 'ready'
+        const isActive = seg.status === 'active'
+        const isDone = seg.status === 'done'
+        const isLocked = seg.status === 'locked'
+
+        const lockHint = isLocked
+          ? seg.id === 'start-exploring'
+            ? 'Chat with your companion to plan your trip first'
+            : seg.id === 'complete'
+              ? 'Complete all days to finish your trip'
+              : seg.id.startsWith('day-')
+                ? 'Start exploring to unlock days'
+                : undefined
+          : undefined
+
+        return (
+          <div key={seg.id}>
+            <div className="relative group">
+              <motion.button
+                onClick={
+                  isReady && 'action' in seg && seg.action
+                    ? () => { (seg.action as () => void)(); setShowProgressSheet(false) }
+                    : (isDone || isActive) && seg.id.startsWith('day-')
+                      ? () => { document.getElementById(`day-chat-${seg.id.replace('day-', '')}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); setShowProgressSheet(false) }
+                      : undefined
+                }
+                disabled={!isReady && !isDone && !isActive}
+                animate={isReady ? { boxShadow: ['0 0 0px rgba(124,58,237,0)', '0 0 12px rgba(124,58,237,0.3)', '0 0 0px rgba(124,58,237,0)'] } : {}}
+                transition={isReady ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } : {}}
+                className={`w-full flex items-center gap-2.5 py-2 px-2.5 rounded-lg text-left transition-all ${
+                  isReady || ((isDone || isActive) && seg.id.startsWith('day-')) ? 'cursor-pointer hover:bg-purple-500/10' : 'cursor-default'
+                }`}
+                style={{
+                  background: isActive ? 'rgba(124,58,237,0.1)' : isReady ? 'rgba(124,58,237,0.05)' : 'transparent',
+                  border: isActive ? '1px solid rgba(124,58,237,0.2)' : isReady ? '1px solid rgba(124,58,237,0.2)' : '1px solid transparent',
+                }}
+              >
+                <div
+                  className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center"
+                  style={{
+                    background: isDone ? '#7C3AED' : isActive ? 'rgba(124,58,237,0.3)' : isReady ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.06)',
+                    border: isActive ? '2px solid #7C3AED' : undefined,
+                  }}
+                >
+                  {isDone && <Check size={10} className="text-white" />}
+                  {isActive && <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />}
+                  {isReady && <Play size={8} className="text-purple-400 ml-0.5" />}
+                  {isLocked && <Lock size={8} className="text-white/20" />}
+                </div>
+                <span
+                  className="text-xs leading-tight"
+                  style={{
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    color: isDone ? 'rgba(255,255,255,0.5)' : isActive ? '#fff' : isReady ? 'rgba(200,180,255,0.9)' : 'rgba(255,255,255,0.2)',
+                    fontWeight: isActive || isReady ? 600 : 400,
+                  }}
+                >
+                  {seg.label}
+                </span>
+              </motion.button>
+              {lockHint && (
+                <div
+                  className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1.5 px-2.5 py-1.5 rounded-lg text-[10px] leading-tight whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10"
+                  style={{ fontFamily: "'Space Grotesk', sans-serif", background: '#1E1A2E', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(124,58,237,0.2)' }}
+                >
+                  {lockHint}
+                </div>
+              )}
+              {isReady && seg.id === 'start-exploring' && (
+                <p
+                  className="text-[10px] ml-10 -mt-0.5 mb-1"
+                  style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'rgba(167,139,250,0.5)' }}
+                >
+                  Ready when you are
+                </p>
+              )}
+            </div>
+
+            {'scenes' in seg && seg.scenes && (isActive || isDone) && (
+              <div className="ml-5 pl-3 space-y-0.5 mb-1" style={{ borderLeft: '1px solid rgba(124,58,237,0.15)' }}>
+                {seg.scenes.map((sc, si) => (
+                  <div key={si} className="flex items-center gap-2 py-1">
+                    <div
+                      className="shrink-0 w-1.5 h-1.5 rounded-full"
+                      style={{
+                        background: sc.done ? '#7C3AED' : sc.active ? '#A78BFA' : 'rgba(255,255,255,0.1)',
+                        boxShadow: sc.active ? '0 0 6px rgba(167,139,250,0.5)' : undefined,
+                      }}
+                    />
+                    <span
+                      className="text-[11px] truncate"
+                      style={{
+                        fontFamily: "'Space Grotesk', sans-serif",
+                        color: sc.done ? 'rgba(255,255,255,0.4)' : sc.active ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.15)',
+                      }}
+                    >
+                      {sc.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {i < arcSegments.length - 1 && (
+              <div className="flex justify-start ml-[19px]">
+                <div className="w-px h-2" style={{ background: isDone ? 'rgba(124,58,237,0.4)' : 'rgba(255,255,255,0.06)' }} />
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+
   return (
     <div className="flex h-dvh" style={{ background: '#0A0810' }}>
       <div className="flex-1 flex flex-col h-full overflow-hidden">
@@ -1094,6 +1221,19 @@ export function TravelReaderPage() {
               {destination.countryEmoji} {destination.city} — {trip.phase === 'planning' ? 'Planning' : `Day ${trip.currentDay}`}
             </p>
           </div>
+          {/* Mobile-only trip progress pill */}
+          <button
+            onClick={() => setShowProgressSheet(true)}
+            className="lg:hidden shrink-0 h-8 rounded-full flex items-center gap-1.5 px-2.5 cursor-pointer transition-colors hover:bg-white/5"
+            style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.2)' }}
+            aria-label="Open trip progress"
+          >
+            <Map size={12} className="text-purple-400" />
+            <span className="text-[11px] text-purple-200 font-medium" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              {progressLabel}
+            </span>
+            <ChevronUp size={10} className="text-purple-300/60" />
+          </button>
           <motion.button
             onClick={() => {
               const playing = lofiPlayer.toggle()
@@ -1841,123 +1981,7 @@ export function TravelReaderPage() {
         >
           Trip Progress
         </p>
-        <div className="space-y-1">
-          {arcSegments.map((seg, i) => {
-            const isReady = seg.status === 'ready'
-            const isActive = seg.status === 'active'
-            const isDone = seg.status === 'done'
-            const isLocked = seg.status === 'locked'
-
-            // Tooltip text for locked segments
-            const lockHint = isLocked
-              ? seg.id === 'start-exploring'
-                ? 'Chat with your companion to plan your trip first'
-                : seg.id === 'complete'
-                  ? 'Complete all days to finish your trip'
-                  : seg.id.startsWith('day-')
-                    ? 'Start exploring to unlock days'
-                    : undefined
-              : undefined
-
-            return (
-              <div key={seg.id}>
-                <div className="relative group">
-                  <motion.button
-                    onClick={
-                      isReady && 'action' in seg && seg.action
-                        ? seg.action
-                        : (isDone || isActive) && seg.id.startsWith('day-')
-                          ? () => { document.getElementById(`day-chat-${seg.id.replace('day-', '')}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }
-                          : undefined
-                    }
-                    disabled={!isReady && !isDone && !isActive}
-                    animate={isReady ? { boxShadow: ['0 0 0px rgba(124,58,237,0)', '0 0 12px rgba(124,58,237,0.3)', '0 0 0px rgba(124,58,237,0)'] } : {}}
-                    transition={isReady ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } : {}}
-                    className={`w-full flex items-center gap-2.5 py-2 px-2.5 rounded-lg text-left transition-all ${
-                      isReady || ((isDone || isActive) && seg.id.startsWith('day-')) ? 'cursor-pointer hover:bg-purple-500/10' : 'cursor-default'
-                    }`}
-                    style={{
-                      background: isActive ? 'rgba(124,58,237,0.1)' : isReady ? 'rgba(124,58,237,0.05)' : 'transparent',
-                      border: isActive ? '1px solid rgba(124,58,237,0.2)' : isReady ? '1px solid rgba(124,58,237,0.2)' : '1px solid transparent',
-                    }}
-                  >
-                    <div
-                      className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center"
-                      style={{
-                        background: isDone ? '#7C3AED' : isActive ? 'rgba(124,58,237,0.3)' : isReady ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.06)',
-                        border: isActive ? '2px solid #7C3AED' : undefined,
-                      }}
-                    >
-                      {isDone && <Check size={10} className="text-white" />}
-                      {isActive && <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />}
-                      {isReady && <Play size={8} className="text-purple-400 ml-0.5" />}
-                      {isLocked && <Lock size={8} className="text-white/20" />}
-                    </div>
-                    <span
-                      className="text-xs leading-tight"
-                      style={{
-                        fontFamily: "'Space Grotesk', sans-serif",
-                        color: isDone ? 'rgba(255,255,255,0.5)' : isActive ? '#fff' : isReady ? 'rgba(200,180,255,0.9)' : 'rgba(255,255,255,0.2)',
-                        fontWeight: isActive || isReady ? 600 : 400,
-                      }}
-                    >
-                      {seg.label}
-                    </span>
-                  </motion.button>
-                  {lockHint && (
-                    <div
-                      className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1.5 px-2.5 py-1.5 rounded-lg text-[10px] leading-tight whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10"
-                      style={{ fontFamily: "'Space Grotesk', sans-serif", background: '#1E1A2E', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(124,58,237,0.2)' }}
-                    >
-                      {lockHint}
-                    </div>
-                  )}
-                  {isReady && seg.id === 'start-exploring' && (
-                    <p
-                      className="text-[10px] ml-10 -mt-0.5 mb-1"
-                      style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'rgba(167,139,250,0.5)' }}
-                    >
-                      Ready when you are
-                    </p>
-                  )}
-                </div>
-
-                {/* Scene sub-items for active/done days */}
-                {'scenes' in seg && seg.scenes && (isActive || isDone) && (
-                  <div className="ml-5 pl-3 space-y-0.5 mb-1" style={{ borderLeft: '1px solid rgba(124,58,237,0.15)' }}>
-                    {seg.scenes.map((sc, si) => (
-                      <div key={si} className="flex items-center gap-2 py-1">
-                        <div
-                          className="shrink-0 w-1.5 h-1.5 rounded-full"
-                          style={{
-                            background: sc.done ? '#7C3AED' : sc.active ? '#A78BFA' : 'rgba(255,255,255,0.1)',
-                            boxShadow: sc.active ? '0 0 6px rgba(167,139,250,0.5)' : undefined,
-                          }}
-                        />
-                        <span
-                          className="text-[11px] truncate"
-                          style={{
-                            fontFamily: "'Space Grotesk', sans-serif",
-                            color: sc.done ? 'rgba(255,255,255,0.4)' : sc.active ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.15)',
-                          }}
-                        >
-                          {sc.label}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Connector line between segments */}
-                {i < arcSegments.length - 1 && (
-                  <div className="flex justify-start ml-[19px]">
-                    <div className="w-px h-2" style={{ background: isDone ? 'rgba(124,58,237,0.4)' : 'rgba(255,255,255,0.06)' }} />
-                  </div>
-                )}
-              </div>
-            )
-          })}
-        </div>
+        {renderArcSegments()}
 
         {/* Companion Settings */}
         <div className="mt-auto pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
@@ -2097,6 +2121,38 @@ export function TravelReaderPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Mobile Trip Progress drawer */}
+      <Drawer.Root open={showProgressSheet} onOpenChange={(v) => !v && setShowProgressSheet(false)} snapPoints={[0.6, 0.95]}>
+        <Drawer.Portal>
+          <Drawer.Overlay className="fixed inset-0 bg-black/60 z-40" />
+          <Drawer.Content
+            className="fixed bottom-0 left-0 right-0 z-50 flex flex-col rounded-t-2xl overflow-hidden"
+            style={{ background: '#0C0A14', border: '1px solid rgba(124,58,237,0.2)', borderBottom: 'none' }}
+          >
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="w-10 h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.15)' }} />
+            </div>
+            <div className="flex items-center justify-between px-5 py-3">
+              <div className="flex items-center gap-2">
+                <Map size={14} className="text-purple-400" />
+                <h2 className="text-white font-semibold text-base" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                  Trip Progress
+                </h2>
+                <span className="text-white/40 text-xs" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                  · {completedDays}/{totalTripDays} days
+                </span>
+              </div>
+              <button onClick={() => setShowProgressSheet(false)} className="text-white/40 hover:text-white/70 cursor-pointer">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-5 pb-8">
+              {renderArcSegments()}
+            </div>
+          </Drawer.Content>
+        </Drawer.Portal>
+      </Drawer.Root>
     </div>
   )
 }
