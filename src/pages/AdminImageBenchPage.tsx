@@ -61,7 +61,14 @@ export function AdminImageBenchPage() {
   const characters = useStore((s) => s.characters)
   const activeCharId = useStore((s) => s.activeCharacterId)
   const deleteCharacter = useStore((s) => s.deleteCharacter)
+  const customCompanions = useStore((s) => s.customCompanions)
   const activeChar = characters.find((c) => c.id === activeCharId) ?? characters[0]
+
+  // Remixed companions you created — only the ones with a custom photo are
+  // useful here, since the bench needs an image URL to feed the model.
+  const remixOptions = customCompanions
+    .filter((c) => !!c.remix.imageUrl)
+    .map((c) => ({ name: c.remix.name, url: c.remix.imageUrl! }))
 
   // Initial values: prefer localStorage so refresh keeps your test URLs.
   // BUT: if the saved twin URL is ephemeral (dead Together AI) OR the active
@@ -326,7 +333,11 @@ export function AdminImageBenchPage() {
             <label className="text-white/50 text-xs uppercase tracking-widest mb-1 block">Companion portrait URL</label>
             <div className="flex gap-2 mb-2">
               <select
-                value={TRAVEL_COMPANION_OPTIONS.find((o) => o.url === companionUrl)?.url ?? '__custom__'}
+                value={
+                  TRAVEL_COMPANION_OPTIONS.find((o) => o.url === companionUrl)?.url ??
+                  remixOptions.find((o) => o.url === companionUrl)?.url ??
+                  '__custom__'
+                }
                 onChange={(e) => {
                   const v = e.target.value
                   if (v !== '__custom__') setCompanionUrl(v)
@@ -335,9 +346,18 @@ export function AdminImageBenchPage() {
                 style={{ fontFamily: SG }}
               >
                 <option value="__custom__">— pick a companion —</option>
-                {TRAVEL_COMPANION_OPTIONS.map((o) => (
-                  <option key={o.url} value={o.url}>{o.name}</option>
-                ))}
+                <optgroup label="Travel companions">
+                  {TRAVEL_COMPANION_OPTIONS.map((o) => (
+                    <option key={o.url} value={o.url}>{o.name}</option>
+                  ))}
+                </optgroup>
+                {remixOptions.length > 0 && (
+                  <optgroup label="Your remixes">
+                    {remixOptions.map((o) => (
+                      <option key={o.url} value={o.url}>{o.name}</option>
+                    ))}
+                  </optgroup>
+                )}
               </select>
             </div>
             <input
