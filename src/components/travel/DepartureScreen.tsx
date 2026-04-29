@@ -73,9 +73,11 @@ export function DepartureScreen({
     const protagNoun = genderNoun(twinGender, 'man')
     const compNoun = genderNoun(companionGender, 'woman')
     const compShort = shortenCompanionDesc(companionDescription)
-    const compPhrase = compShort ? `a ${compNoun} (their travel companion, from image 2 — ${compShort})` : `a ${compNoun} (their travel companion, from image 2)`
+    // Model-agnostic prompt: works for FLUX.2/Kontext (with refs) AND for the
+    // Schnell fallback (no refs). Reference-position language ("from image 1")
+    // belongs in the togetherAi.ts wrapper, not in the scene description.
     const baseScene = hasBothRefs
-      ? `A ${protagNoun} (the protagonist, from image 1) and ${compPhrase} standing side by side at an airport gate, both with backpacks, excited to travel to ${cityName}. A plane visible through the window behind them. Warm golden hour light streaming through large terminal windows, no text, no signs, no departure boards`
+      ? `Anime illustration, two people in the foreground, posing for a photo together at an airport gate: a ${protagNoun} on the left and a ${compNoun}${compShort ? ` (${compShort})` : ''} on the right, both smiling at the camera, both wearing backpacks, excited to travel to ${cityName}. Behind them, large terminal windows show a plane on the tarmac in warm golden hour light. No text, no signs, no departure boards`
       : `Cinematic wide shot of ${cityName} skyline at golden hour, seen through an airport terminal window. A plane on the tarmac ready for departure. Warm sunlight, atmospheric, no people, no text, no signs`
     const prompt = hasBothRefs && compShort
       ? `${baseScene}. The travel companion in this scene is ${companionName}: ${compShort}`

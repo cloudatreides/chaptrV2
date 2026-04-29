@@ -183,9 +183,9 @@ export function TravelReaderPage() {
         .split(',').slice(0, 4).join(',')
         .replace(/^(anime style|dark|cyberpunk[^,]*|fantasy[^,]*|thriller[^,]*|sci-fi[^,]*)\s*(portrait|illustration|concept art)\s*(portrait\s*)?of\s*/i, '')
         .trim()
-      const compPhrase = compShort ? `a ${compNoun} (their travel companion, from image 2 — ${compShort})` : `a ${compNoun} (their travel companion, from image 2)`
+      // Model-agnostic prompt — see DepartureScreen.tsx for rationale.
       const baseScene = hasBothRefs
-        ? `A ${protagNoun} (the protagonist, from image 1) and ${compPhrase} standing side by side at an airport gate, both with backpacks, excited to travel to ${destination.city}. A plane visible through the window behind them. Warm golden hour light streaming through large terminal windows, no text, no signs, no departure boards`
+        ? `Anime illustration, two people in the foreground, posing for a photo together at an airport gate: a ${protagNoun} on the left and a ${compNoun}${compShort ? ` (${compShort})` : ''} on the right, both smiling at the camera, both wearing backpacks, excited to travel to ${destination.city}. Behind them, large terminal windows show a plane on the tarmac in warm golden hour light. No text, no signs, no departure boards`
         : `Cinematic wide shot of ${destination.city} skyline at golden hour, seen through an airport terminal window. A plane on the tarmac ready for departure. Warm sunlight, atmospheric, no people, no text, no signs`
       const prompt = hasBothRefs && compShort
         ? `${baseScene}. The travel companion in this scene is ${companionName}: ${compShort}`
