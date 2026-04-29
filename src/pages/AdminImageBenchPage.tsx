@@ -36,14 +36,16 @@ const MODEL_LABELS: Record<ModelId, string> = {
 }
 
 // Public per-image pricing in USD as of Apr 2026. Approximate; useful for
-// rough cost-at-scale comparison, not billing.
+// rough cost-at-scale comparison, not billing. Gemini prices are 1K
+// (1024x1024) tier — bench renders at 768x576 which falls into the same
+// or lower bracket. Source: ai.google.dev/gemini-api/docs/pricing
 const MODEL_COST_USD: Record<ModelId, number> = {
   'flux2': 0.04,
   'kontext': 0.03,
   'schnell': 0.0027,
-  'nano-banana-2': 0.039,
-  'nano-banana-pro': 0.039,
-  'nano-banana': 0.039,
+  'nano-banana': 0.039,      // Gemini 2.5 Flash Image — original Nano Banana
+  'nano-banana-2': 0.067,    // Gemini 3.1 Flash Image Preview — newer Flash tier
+  'nano-banana-pro': 0.134,  // Gemini 3 Pro Image — premium
 }
 
 const NANO_MODEL_IDS: Partial<Record<ModelId, string>> = {
