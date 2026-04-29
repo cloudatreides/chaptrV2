@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plane } from 'lucide-react'
-import { generateSceneImage } from '../../lib/togetherAi'
+import { generateNanoBananaImage } from '../../lib/nanoBanana'
 import { ambientAudio } from '../../lib/ambientAudio'
 import { SelfieImg } from '../SelfieImg'
 
@@ -83,18 +83,24 @@ export function DepartureScreen({
       ? `${baseScene}. The travel companion in this scene is ${companionName}: ${compShort}`
       : baseScene
 
-    generateSceneImage({
+    // Nano Banana (Gemini 2.5 Flash Image) accepts multiple reference images
+    // contextually — no "from image 1/2" wrapper needed. Resolve relative
+    // paths to absolute so the Edge proxy can fetch them.
+    const toAbs = (u: string) => u.startsWith('http') ? u : `${window.location.origin}${u}`
+    const refs = [twinSelfieUrl, companionPortrait]
+      .filter((u): u is string => !!u)
+      .map(toAbs)
+
+    generateNanoBananaImage({
       prompt,
-      width: 768,
-      height: 576,
-      referenceImageUrl: twinSelfieUrl || undefined,
-      companionReferenceUrl: companionPortrait || undefined,
-      companionDescription,
-      includesProtagonist: hasBothRefs,
-      protagonistGender: twinGender,
-      companionGender,
-    }).then((url) => {
-      if (url) onImageGenerated(url)
+      referenceImageUrls: refs,
+      model: 'gemini-2.5-flash-image',
+    }).then((result) => {
+      if ('imageDataUrl' in result) {
+        onImageGenerated(result.imageDataUrl)
+      } else {
+        console.warn('[DepartureScreen] Nano Banana failed:', result.error)
+      }
       setImageReady(true)
     })
   }, [])

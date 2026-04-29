@@ -11,6 +11,7 @@ import { parseAffinityDelta } from '../lib/claude/affinity'
 import { parsePlaceTags, parseFoodTags, fetchPlaceImage, fetchFoodImage } from '../lib/imageSearch'
 import { extractMemories } from '../lib/claude/memory'
 import { generateSceneImage as generateImage, generateCharacterPortrait } from '../lib/togetherAi'
+import { generateNanoBananaImage } from '../lib/nanoBanana'
 import { buildReactionImagePrompt } from '../data/chatActions'
 import { DayTransition } from '../components/travel/DayTransition'
 import { DepartureScreen } from '../components/travel/DepartureScreen'
@@ -318,18 +319,22 @@ export function TravelReaderPage() {
       const prompt = hasBothRefs && compShort
         ? `${baseScene}. The travel companion in this scene is ${companionName}: ${compShort}`
         : baseScene
-      const url = await generateImage({
+      // Nano Banana (Gemini 2.5 Flash Image) accepts multi-image refs
+      // contextually. Resolve relative paths to absolute for the proxy.
+      const toAbs = (u: string) => u.startsWith('http') ? u : `${window.location.origin}${u}`
+      const refs = [activeChar?.selfieUrl, companionPortrait]
+        .filter((u): u is string => !!u)
+        .map(toAbs)
+      const result = await generateNanoBananaImage({
         prompt,
-        width: 768,
-        height: 576,
-        referenceImageUrl: activeChar?.selfieUrl || undefined,
-        companionReferenceUrl: companionPortrait || undefined,
-        companionDescription: fullCompDesc,
-        includesProtagonist: hasBothRefs,
-        protagonistGender: protagGender,
-        companionGender: compGender,
+        referenceImageUrls: refs,
+        model: 'gemini-2.5-flash-image',
       })
-      if (url) setDepartureImage(url)
+      if ('imageDataUrl' in result) {
+        setDepartureImage(result.imageDataUrl)
+      } else {
+        console.warn('[Departure regenerate] Nano Banana failed:', result.error)
+      }
     } finally {
       setIsRegeneratingDeparture(false)
     }
