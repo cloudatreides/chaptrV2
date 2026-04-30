@@ -905,6 +905,8 @@ export function AdminImageBenchPage() {
  *  reference requirements, and the prompt template. "Load into bench"
  *  drops the prompt into the bench page for testing across models. */
 function ImageGenAuditView({ onLoadIntoBench }: { onLoadIntoBench: (action: ImageGenAction) => void }) {
+  const [categoryFilter, setCategoryFilter] = useState<ImageGenAction['category'] | 'all'>('all')
+
   const grouped = IMAGE_GEN_AUDIT.reduce((acc, action) => {
     if (!acc[action.category]) acc[action.category] = []
     acc[action.category].push(action)
@@ -913,6 +915,14 @@ function ImageGenAuditView({ onLoadIntoBench }: { onLoadIntoBench: (action: Imag
 
   const categoryOrder: ImageGenAction['category'][] = ['Twin', 'Travel', 'Story', 'Chat reaction', 'Cast']
 
+  const categoryColors: Record<ImageGenAction['category'], string> = {
+    'Twin': '#c4b5fd',
+    'Travel': '#60a5fa',
+    'Story': '#fbbf24',
+    'Chat reaction': '#f472b6',
+    'Cast': '#34d399',
+  }
+
   const refColors: Record<ImageGenAction['references'], string> = {
     'twin + companion': '#a78bfa',
     'twin only': '#60a5fa',
@@ -920,28 +930,69 @@ function ImageGenAuditView({ onLoadIntoBench }: { onLoadIntoBench: (action: Imag
     'none': '#6b7280',
   }
 
+  const visibleCategories = categoryFilter === 'all'
+    ? categoryOrder
+    : categoryOrder.filter((c) => c === categoryFilter)
+
   return (
     <div className="flex flex-col gap-6">
       <div className="text-white/50 text-sm leading-relaxed">
         Every place in the app that calls an image-generation model — what triggers it, which model tier runs in production, and the prompt template. Many prompts are built dynamically at runtime (Claude generates them per scene), so where the template is just a description, a representative <span className="text-[#c84b9e]">sample prompt</span> is shown — that's what gets loaded into the bench. Click "Load into bench" to test the prompt across all models.
       </div>
 
-      {categoryOrder.map((cat) => {
+      {/* Category filter chips */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-white/40 text-[10px] uppercase tracking-widest mr-1">Filter</span>
+        {(['all', ...categoryOrder] as const).map((cat) => {
+          const active = categoryFilter === cat
+          const count = cat === 'all' ? IMAGE_GEN_AUDIT.length : (grouped[cat]?.length ?? 0)
+          const color = cat === 'all' ? '#c84b9e' : categoryColors[cat as ImageGenAction['category']]
+          return (
+            <button
+              key={cat}
+              onClick={() => setCategoryFilter(cat)}
+              className="cursor-pointer text-[11px] font-semibold px-3 py-1.5 rounded-full transition-colors"
+              style={{
+                background: active ? color + '22' : 'transparent',
+                border: `1px solid ${active ? color : 'rgba(255,255,255,0.12)'}`,
+                color: active ? color : 'rgba(255,255,255,0.55)',
+              }}
+            >
+              {cat === 'all' ? 'All' : cat} <span className="opacity-60">({count})</span>
+            </button>
+          )
+        })}
+      </div>
+
+      {visibleCategories.map((cat) => {
         const items = grouped[cat]
         if (!items || items.length === 0) return null
         return (
           <div key={cat}>
-            <h2 className="text-white/80 text-sm font-bold uppercase tracking-widest mb-3">{cat} ({items.length})</h2>
+            <h2
+              className="text-sm font-bold uppercase tracking-widest mb-3"
+              style={{ color: categoryColors[cat] }}
+            >
+              {cat} ({items.length})
+            </h2>
             <div className="flex flex-col gap-3">
               {items.map((action, i) => (
                 <div
                   key={`${cat}-${i}`}
                   className="rounded-xl p-4"
-                  style={{ background: '#13101c', border: '1px solid #2a2040' }}
+                  style={{ background: '#13101c', border: `1px solid ${categoryColors[action.category]}33` }}
                 >
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-white text-sm font-semibold mb-0.5">{action.feature}</h3>
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span
+                          className="text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider"
+                          style={{ background: categoryColors[action.category] + '22', color: categoryColors[action.category] }}
+                        >
+                          {action.category}
+                        </span>
+                        <h3 className="text-white text-sm font-semibold">{action.feature}</h3>
+                      </div>
                       <p className="text-white/40 text-xs">{action.trigger}</p>
                     </div>
                     <button
