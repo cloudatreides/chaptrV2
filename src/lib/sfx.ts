@@ -40,16 +40,20 @@ export function startWind(volume = 0.08, fadeMs = 1500) {
     if (c.state === 'suspended') c.resume()
     if (spaceNodes.length) return
 
+    // Airy high-pad ambient. Earlier version sat at 55–165Hz with a 300Hz
+    // lowpass — it read as "heavy" sub-bass drone. Lifted up to 330Hz–880Hz
+    // (mostly triangle waves) with a 1.5kHz lowpass so some shimmer cuts
+    // through. Master gain dropped to ~half so it sits as background air.
     const gain = c.createGain()
     gain.gain.setValueAtTime(0, c.currentTime)
-    gain.gain.linearRampToValueAtTime(volume, c.currentTime + fadeMs / 1000)
+    gain.gain.linearRampToValueAtTime(volume * 0.5, c.currentTime + fadeMs / 1000)
     gain.connect(c.destination)
 
     const tones = [
-      { freq: 55, type: 'sine' as OscillatorType, vol: 0.4 },
-      { freq: 82.5, type: 'sine' as OscillatorType, vol: 0.25 },
-      { freq: 110, type: 'sine' as OscillatorType, vol: 0.15 },
-      { freq: 165, type: 'triangle' as OscillatorType, vol: 0.08 },
+      { freq: 330, type: 'triangle' as OscillatorType, vol: 0.18 },
+      { freq: 440, type: 'sine' as OscillatorType, vol: 0.14 },
+      { freq: 660, type: 'triangle' as OscillatorType, vol: 0.08 },
+      { freq: 880, type: 'sine' as OscillatorType, vol: 0.04 },
     ]
 
     for (const t of tones) {
@@ -59,9 +63,9 @@ export function startWind(volume = 0.08, fadeMs = 1500) {
 
       const lfo = c.createOscillator()
       lfo.type = 'sine'
-      lfo.frequency.value = 0.05 + Math.random() * 0.1
+      lfo.frequency.value = 0.07 + Math.random() * 0.12
       const lfoGain = c.createGain()
-      lfoGain.gain.value = t.freq * 0.008
+      lfoGain.gain.value = t.freq * 0.004
       lfo.connect(lfoGain).connect(osc.frequency)
       lfo.start()
 
@@ -70,8 +74,8 @@ export function startWind(volume = 0.08, fadeMs = 1500) {
 
       const lp = c.createBiquadFilter()
       lp.type = 'lowpass'
-      lp.frequency.value = 300
-      lp.Q.value = 0.7
+      lp.frequency.value = 1500
+      lp.Q.value = 0.5
 
       osc.connect(oscGain).connect(lp).connect(gain)
       osc.start()
