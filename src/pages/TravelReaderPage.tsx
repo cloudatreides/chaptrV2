@@ -1510,6 +1510,38 @@ export function TravelReaderPage() {
             </span>
             <ChevronUp size={10} className="text-purple-300/60" />
           </button>
+          {trip.phase === 'planning' && (() => {
+            const userMsgCount = trip.planningChatHistory.filter((m) => m.role === 'user').length
+            const ready = planningReady && !isStreaming && !isGeneratingItinerary
+            const remaining = Math.max(0, 3 - userMsgCount)
+            const tooltip = isGeneratingItinerary
+              ? 'Building your itinerary…'
+              : isStreaming
+                ? 'Wait until the reply finishes'
+                : !planningReady
+                  ? `Chat ${remaining} more time${remaining === 1 ? '' : 's'} to start exploring`
+                  : `Start exploring ${destination.city}`
+            return (
+              <button
+                onClick={ready ? handleStartExploring : undefined}
+                disabled={!ready}
+                className="shrink-0 h-8 rounded-full flex items-center gap-1.5 px-3 transition-colors enabled:cursor-pointer disabled:cursor-not-allowed"
+                style={{
+                  background: ready ? 'linear-gradient(135deg, #7C3AED, #c84b9e)' : 'rgba(124,58,237,0.1)',
+                  border: ready ? 'none' : '1px solid rgba(124,58,237,0.25)',
+                  opacity: ready ? 1 : 0.55,
+                }}
+                title={tooltip}
+                aria-label={`Start exploring ${destination.city}`}
+              >
+                <Play size={11} className={ready ? 'text-white' : 'text-purple-300/70'} fill={ready ? 'currentColor' : 'none'} />
+                <span className={`text-[11px] font-medium ${ready ? 'text-white' : 'text-purple-200/80'}`} style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                  <span className="hidden sm:inline">Start exploring</span>
+                  <span className="sm:hidden">Explore</span>
+                </span>
+              </button>
+            )
+          })()}
           {trip.phase === 'day' && currentScene?.prose && (() => {
             const dayChatMessages = trip.dayChatHistories[trip.currentDay] ?? []
             const userMsgCount = dayChatMessages.filter((m) => m.role === 'user').length
