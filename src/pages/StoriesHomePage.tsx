@@ -190,16 +190,17 @@ export function StoriesHomePage() {
               <h2 className="text-white/40 text-xs font-semibold tracking-[2px] uppercase mb-4" style={{ fontFamily: SG }}>Coming Soon</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                 {comingSoonStories.map((u, i) => (
-                  <motion.div
+                  <motion.button
                     key={u.id}
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.04 }}
-                    className="rounded-xl overflow-hidden cursor-default"
+                    onClick={() => navigate(`/universes/${u.id}`)}
+                    className="cursor-pointer rounded-xl overflow-hidden group text-left"
                     style={{ background: '#13101c', border: '1px solid rgba(255,255,255,0.06)' }}
                   >
                     <div className="relative aspect-[4/3] overflow-hidden">
-                      <img src={u.image} alt={u.title} className="w-full h-full object-cover" />
+                      <img src={u.image} alt={u.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,8,16,0.95) 0%, rgba(10,8,16,0.5) 40%, transparent 70%)' }} />
                       <div className="absolute inset-0 flex items-center justify-center" style={{ backdropFilter: 'blur(2px)', background: 'rgba(10,8,16,0.3)' }}>
                         <span className="text-[11px] font-bold tracking-[1.5px] uppercase px-3 py-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', fontFamily: SG }}>Coming Soon</span>
@@ -209,7 +210,7 @@ export function StoriesHomePage() {
                         <p className="text-white/50 text-sm font-semibold mt-1" style={{ fontFamily: SG }}>{u.title}</p>
                       </div>
                     </div>
-                  </motion.div>
+                  </motion.button>
                 ))}
               </div>
             </div>
