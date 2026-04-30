@@ -1205,21 +1205,39 @@ export const useStore = create<StoreState>()(
           // (much older) cloud snapshot, losing trips they'd just started
           // or deleted. Setters now also reject data: URLs at the boundary,
           // so this is a last-ditch cleanup for state that already has them.
+          let cleaned = false
           if (persisted.travelTrips && typeof persisted.travelTrips === 'object') {
             for (const trip of Object.values(persisted.travelTrips as Record<string, any>)) {
               if (!trip) continue
               if (typeof trip.departureImageUrl === 'string' && trip.departureImageUrl.startsWith('data:')) {
                 trip.departureImageUrl = undefined
+                cleaned = true
               }
               if (trip.sceneImages && typeof trip.sceneImages === 'object') {
                 for (const k of Object.keys(trip.sceneImages)) {
                   const v = trip.sceneImages[k]
                   if (typeof v === 'string' && v.startsWith('data:')) {
                     delete trip.sceneImages[k]
+                    cleaned = true
                   }
                 }
               }
             }
+          }
+          // CRITICAL: if we actually cleaned anything, mark this hydrate as
+          // newer than whatever's in cloud. Without this, hydrateFromCloud
+          // would see lastLocalSave still pointing at the pre-bloat snapshot
+          // (because every save since the bloat started was failing) and
+          // pull stale cloud state in over our just-cleaned local — wiping
+          // any trips the user created during the bloat window. Also flag
+          // for useGameStateSync to do a one-shot push so the cleaned state
+          // actually reaches cloud and the row stops being stale.
+          if (cleaned) {
+            try {
+              localStorage.setItem('chaptr-v2-last-local-save', String(Date.now()))
+              localStorage.setItem('chaptr-v2-cleanup-pushed-pending', '1')
+              console.warn('[migration v12] cleaned data: URL bloat from travelTrips — cloud will be force-pushed on auth')
+            } catch {}
           }
         }
         if (version < 11 && persisted) {
