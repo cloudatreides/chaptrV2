@@ -1909,17 +1909,7 @@ export function TravelReaderPage() {
                         className="absolute inset-0"
                         style={{ background: 'linear-gradient(180deg, rgba(10,8,16,0) 60%, rgba(10,8,16,1) 100%)' }}
                       />
-                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                        <Loader2 size={28} className="animate-spin text-purple-300/80" />
-                        <div className="text-center">
-                          <p className="text-white/80 text-sm font-medium" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                            Painting {currentScene.location}…
-                          </p>
-                          <p className="text-white/40 text-[11px] mt-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                            Usually takes 5–15 seconds
-                          </p>
-                        </div>
-                      </div>
+                      <SceneImageProgress label={`Painting ${currentScene.location}…`} />
                     </>
                   )}
 
@@ -2294,10 +2284,11 @@ export function TravelReaderPage() {
                     )
                   })}
 
-                  {/* Image loading shimmer */}
+                  {/* Image loading shimmer with fake-progress bar */}
                   {isGeneratingChatImage && (
-                    <div className="w-full max-w-[360px] rounded-xl overflow-hidden">
+                    <div className="w-full max-w-[360px] rounded-xl overflow-hidden relative">
                       <div className="w-full aspect-[16/9] scene-image-shimmer rounded-xl" />
+                      <SceneImageProgress compact />
                     </div>
                   )}
 
