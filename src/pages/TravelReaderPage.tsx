@@ -436,15 +436,19 @@ export function TravelReaderPage() {
   const [showAmbientLabel, setShowAmbientLabel] = useState(true)
   const [showPortraitModal, setShowPortraitModal] = useState(false)
   const [showProgressSheet, setShowProgressSheet] = useState(false)
-  const [cuddleImageUrl, setCuddleImageUrl] = useState<string | null>(null)
-  const [isGeneratingCuddle, setIsGeneratingCuddle] = useState(false)
-  const [showCuddleModal, setShowCuddleModal] = useState(false)
-  const [closerImageUrl, setCloserImageUrl] = useState<string | null>(null)
-  const [isGeneratingCloser, setIsGeneratingCloser] = useState(false)
-  const [showCloserModal, setShowCloserModal] = useState(false)
-  const [savedCuddleId, setSavedCuddleId] = useState<string | null>(null)
-  const [savedCloserId, setSavedCloserId] = useState<string | null>(null)
-  const [closerVariantLabel, setCloserVariantLabel] = useState<string>('')
+
+  // Unified state for all wind-down moments (cuddle, closer, bath, undress).
+  // Each moment shows in the same modal — single state replaces 6+ separate
+  // vars from before, and adding a new wind-down action is a one-liner now.
+  type WindDownKind = 'cuddle' | 'closer' | 'bath' | 'undress'
+  interface WindDownMoment {
+    kind: WindDownKind
+    label: string
+    imageUrl: string | null
+    loading: boolean
+    savedId: string | null
+  }
+  const [windDownMoment, setWindDownMoment] = useState<WindDownMoment | null>(null)
 
   // Show departure screen for fresh trips (handles Zustand hydration race —
   // useState initializer may fire before store rehydrates from localStorage)
@@ -1012,161 +1016,120 @@ export function TravelReaderPage() {
     }
   }
 
-  // Day-end "Cuddle" CTA. Generates a tasteful anime cuddle scene using the
-  // twin + companion refs and shows it in a modal. Free for now; the
-  // strikethrough gem cost in the button advertises the future paid tier.
-  async function handleCuddle() {
-    if (!trip || !companion || !destination || isGeneratingCuddle) return
-    setIsGeneratingCuddle(true)
-    setCuddleImageUrl(null)
-    setSavedCuddleId(null)
-    setShowCuddleModal(true)
-
+  // Wind-down chat actions. Available only when trip.phase === 'recap', i.e.
+  // after the day's scenes are done. Each kind has a label, prompt builder,
+  // and affinity bump. Adding a new wind-down action = one entry here.
+  function buildWindDownConfig(kind: WindDownKind) {
+    if (!destination) return null
     const companionDesc = companionVisualDesc
       .split(',').slice(0, 4).join(',')
       .replace(/^(anime style|dark|cyberpunk[^,]*|fantasy[^,]*|thriller[^,]*|sci-fi[^,]*)\s*(portrait|illustration|concept art)\s*(portrait\s*)?of\s*/i, '')
       .trim()
     const playerGender = activeChar?.gender === 'male' ? 'a young man' : 'a young woman'
-    const cuddlePrompt = `anime illustration, cel-shaded, romantic close-up of two people cuddling tenderly under a soft white duvet in a cozy hotel bed in ${destination.city}. ${playerGender} and ${companionDesc}. Bare shoulders just visible above the sheets — the duvet pulled high across both of their chests so only their faces, hair, and shoulders are showing, everything below the collarbones tastefully hidden under the bedding. Foreheads touching, eyes closed peacefully, gentle content smiles, soft warm bedside lamplight, intimate post-romance tenderness, vibrant anime art, ONLY these two people in the image, modest tasteful framing, no exposed skin below the shoulders`
+    const city = destination.city
 
-    try {
-      const url = await generateTravelImage(cuddlePrompt, activeChar?.selfieUrl)
-      if (url) {
-        setCuddleImageUrl(url)
-        // Soft affinity bump for the romantic beat — same magnitude as Kiss.
-        updateTravelAffinity(5)
-      } else {
-        setToastMessage('Couldn\'t generate the cuddle image — try again')
-        setTimeout(() => setToastMessage(null), 3000)
-        setShowCuddleModal(false)
+    if (kind === 'cuddle') {
+      return {
+        label: 'Cuddle',
+        affinityBump: 5,
+        prompt: `anime illustration, cel-shaded, romantic close-up of two people cuddling tenderly under a soft white duvet in a cozy hotel bed in ${city}. ${playerGender} and ${companionDesc}. Bare shoulders just visible above the sheets — the duvet pulled high across both of their chests so only their faces, hair, and shoulders are showing, everything below the collarbones tastefully hidden under the bedding. Foreheads touching, eyes closed peacefully, gentle content smiles, soft warm bedside lamplight, intimate post-romance tenderness, vibrant anime art, ONLY these two people in the image, modest tasteful framing, no exposed skin below the shoulders`,
       }
-    } catch (e) {
-      console.error('Cuddle image error:', e)
-      setShowCuddleModal(false)
-    } finally {
-      setIsGeneratingCuddle(false)
+    }
+
+    if (kind === 'closer') {
+      // Randomized variant pool — same prompts as the previous Get Closer
+      // action so every tap reads as a distinct moment, not "another bed".
+      const variants: { label: string; build: () => string }[] = [
+        {
+          label: 'Hand on shoulder',
+          build: () => `anime illustration, cel-shaded, intimate close-up of two people lying face to face under a soft white duvet in a hotel bed in ${city}, both undressed underneath the sheet. ${playerGender} and ${companionDesc}. Their fingers are intertwined above the sheet between them, the second person's free hand resting tenderly on the first's bare shoulder. Sheet draped low across their chests — for the woman in the pair: slight cleavage and bare collarbones visible above the sheet; for the man in the pair: bare upper chest and a hint of abs visible where the sheet sits at his ribcage. Both with soft lingering smiles, eyes half-lidded and looking into each other. Warm bedside lamplight, golden glow on bare skin, modest tasteful framing — the sheet still fully covers everything below the lower ribs, no nudity, slow-burning romantic tension, vibrant anime art, ONLY these two people in the image`,
+        },
+        {
+          label: 'Deep kiss, tangled sheets',
+          build: () => `anime illustration, cel-shaded, intimate close-up of two people sharing a deep slow kiss in a hotel bed in ${city}, both undressed beneath the tangled sheets. ${playerGender} and ${companionDesc}. One leans over the other, dark hair falling forward to brush their cheek, sheets bunched around their lower bodies — for the woman in the pair: slight cleavage and a bare back visible from this angle; for the man in the pair: bare upper torso and a hint of side abs visible where the sheet has slipped. The second person's hand cupping the first's jaw. Eyes closed, lost in the moment, soft flushed cheeks, warm bedside lamplight on bare skin, modest tasteful framing — the sheet still covers everything below the waist, no nudity, intense romantic tenderness, vibrant anime art, ONLY these two people in the image`,
+        },
+        {
+          label: 'Pinned against the door',
+          build: () => `anime illustration, cel-shaded, intimate close-up of two people making out against the inside of a hotel suite door in ${city}, just stumbled in from outside. ${playerGender} and ${companionDesc}. One has the other gently pinned to the door, both hands cradling their face, deep open-mouthed kiss, eyes closed, brows slightly drawn together with intensity. The pinned one's hands gripping the other's shirt at the waist, jackets and bags dropped on the floor beside them. Warm hallway lamplight bleeding past the doorway, soft cinematic shadows, fully clothed but with clothing slightly disheveled, urgent romantic hunger after a long evening out, vibrant anime art, ONLY these two people in the image`,
+        },
+        {
+          label: 'Dawn embrace',
+          build: () => `anime illustration, cel-shaded, intimate close-up of two people sleeping wrapped in each other's arms at dawn in a hotel bed in ${city}, both undressed beneath the sheets. ${playerGender} and ${companionDesc}. The first lies on their side, the second curled around them from behind with one arm draped softly across their bare shoulder, fingers tracing along the first person's collarbone. Sheet draped to mid-chest — for the woman in the pair: bare shoulder blade and slight cleavage visible above the sheet; for the man in the pair: bare upper back and a hint of side abs visible. Both peacefully asleep with content half-smiles, pale blue and pink dawn light filtering through curtains glowing on bare skin, modest tasteful framing — the sheet still covers everything below the lower ribs, no nudity, quiet morning intimacy, vibrant anime art, ONLY these two people in the image`,
+        },
+        {
+          label: 'Fingers intertwined',
+          build: () => `anime illustration, cel-shaded, intimate overhead shot of two people lying side by side under a soft duvet in a hotel bed in ${city}, both undressed beneath the sheet. ${playerGender} and ${companionDesc}. Their fingers laced together resting between them on the pillow, faces turned toward each other, eyes locked in a soft unspoken conversation, lips slightly parted. Sheet draped to mid-chest — for the woman in the pair: slight cleavage and bare collarbones visible above the sheet; for the man in the pair: bare upper chest and a hint of abs visible at the edge of the sheet. Dim warm bedside lamplight casting soft shadows across their faces and bare skin, modest tasteful framing — the sheet still covers everything below the lower ribs, no nudity, quiet romantic vulnerability, vibrant anime art, ONLY these two people in the image`,
+        },
+      ]
+      const variant = variants[Math.floor(Math.random() * variants.length)]
+      return { label: variant.label, affinityBump: 8, prompt: variant.build() }
+    }
+
+    if (kind === 'bath') {
+      return {
+        label: 'Run a bath together',
+        affinityBump: 7,
+        prompt: `anime illustration, cel-shaded, intimate scene of two young adults relaxing together in a luxurious hotel bubble bath in ${city}. ${playerGender} and ${companionDesc}. Both visible from the shoulders up only, lots of frothy white bubbles covering everything below their collarbones, candles flickering on the tub edge, glasses of wine within reach. Foreheads close together, soft smiles, eyes half-lidded with contentment, steam rising softly. Warm amber candlelight, dim bathroom lamplight, marble tile, eucalyptus on the side. Modest tasteful framing — bubbles fully cover the water surface, only shoulders, necks, faces, and damp hair visible, no nudity, quiet sensual intimacy, vibrant anime art, ONLY these two people in the image`,
+      }
+    }
+
+    // undress
+    return {
+      label: 'Undress',
+      affinityBump: 9,
+      prompt: `anime illustration, cel-shaded, intimate close-up of two young adult lovers in a dimly lit hotel suite in ${city}, slowly undressing each other. ${playerGender} and ${companionDesc}. One stands behind the other, hands sliding the strap of a satin slip dress / open buttoned shirt off the partner's shoulder, mouth pressed softly against the side of their neck. The other's eyes closed, head tilted back against their partner's shoulder, hand reaching back to thread fingers in their hair. The slip dress / shirt slipping low to expose collarbones and the top of one bare shoulder, but still covering chest fully. Warm amber bedside lamplight, soft shadows, slow burning anticipation. Modest tasteful framing — clothing still covers everything below the collarbones, no nudity, sensual slow undressing, vibrant anime art, ONLY these two people in the image`,
     }
   }
 
-  // Day-end "Let's get closer" CTA. Sensual upgrade to Cuddle — randomized
-  // across 5 framings each time, all anime-tasteful (deeper kiss, hand on
-  // bare shoulder, slipping robe, dawn embrace, fingers intertwined). Bumps
-  // affinity +8. Free during pre-monetization but advertises a 120-gem
-  // future cost via strike-through. Different gem tier from Cuddle so the
-  // upgrade feels like a step up rather than a sidegrade.
-  async function handleGetCloser() {
-    if (!trip || !companion || !destination || isGeneratingCloser) return
-    setIsGeneratingCloser(true)
-    setCloserImageUrl(null)
-    setSavedCloserId(null)
-    setShowCloserModal(true)
+  // Single dispatcher for every wind-down action. Generates the image,
+  // shows it in the unified modal, bumps affinity. Replaces the previous
+  // separate handleCuddle / handleGetCloser flows.
+  async function runWindDownAction(kind: WindDownKind) {
+    if (!trip || !companion || !destination) return
+    if (windDownMoment?.loading) return
+    const config = buildWindDownConfig(kind)
+    if (!config) return
 
-    const companionDesc = companionVisualDesc
-      .split(',').slice(0, 4).join(',')
-      .replace(/^(anime style|dark|cyberpunk[^,]*|fantasy[^,]*|thriller[^,]*|sci-fi[^,]*)\s*(portrait|illustration|concept art)\s*(portrait\s*)?of\s*/i, '')
-      .trim()
-    const playerGender = activeChar?.gender === 'male' ? 'a young man' : 'a young woman'
-
-    // Variant pool. Each entry is { label, build }. Label shown to user as
-    // a caption on the modal so the moment feels distinct, not generic.
-    // Builds receive city + descriptions so each variant can frame its
-    // setting (bedside lamp vs dawn light vs onsen steam, etc.).
-    const variants: { label: string; build: () => string }[] = [
-      {
-        label: 'Hand on shoulder',
-        build: () => `anime illustration, cel-shaded, intimate close-up of two people lying face to face under a soft white duvet in a hotel bed in ${destination.city}, both undressed underneath the sheet. ${playerGender} and ${companionDesc}. Their fingers are intertwined above the sheet between them, the second person's free hand resting tenderly on the first's bare shoulder. Sheet draped low across their chests — for the woman in the pair: slight cleavage and bare collarbones visible above the sheet; for the man in the pair: bare upper chest and a hint of abs visible where the sheet sits at his ribcage. Both with soft lingering smiles, eyes half-lidded and looking into each other. Warm bedside lamplight, golden glow on bare skin, modest tasteful framing — the sheet still fully covers everything below the lower ribs, no nudity, slow-burning romantic tension, vibrant anime art, ONLY these two people in the image`,
-      },
-      {
-        label: 'Deep kiss, tangled sheets',
-        build: () => `anime illustration, cel-shaded, intimate close-up of two people sharing a deep slow kiss in a hotel bed in ${destination.city}, both undressed beneath the tangled sheets. ${playerGender} and ${companionDesc}. One leans over the other, dark hair falling forward to brush their cheek, sheets bunched around their lower bodies — for the woman in the pair: slight cleavage and a bare back visible from this angle; for the man in the pair: bare upper torso and a hint of side abs visible where the sheet has slipped. The second person's hand cupping the first's jaw. Eyes closed, lost in the moment, soft flushed cheeks, warm bedside lamplight on bare skin, modest tasteful framing — the sheet still covers everything below the waist, no nudity, intense romantic tenderness, vibrant anime art, ONLY these two people in the image`,
-      },
-      {
-        label: 'After the shower, making out',
-        build: () => `anime illustration, cel-shaded, intimate close-up of two people in soft white bathrobes making out passionately in a hotel suite in ${destination.city}, just out of the shower. ${playerGender} and ${companionDesc}. Mid-kiss with eyes closed, lost in each other, the second person's hand on the first's jaw drawing them in, the first's hand at the second's waist pulling them closer. Robes slightly damp, slipped off one bare shoulder of each, hair still wet at the tips. Steam drifting in from the bathroom door, warm amber lamplight, soft mist in the air, modest tasteful framing — robes covering everything important, hot urgent tenderness, vibrant anime art, ONLY these two people in the image`,
-      },
-      {
-        label: 'Pinned against the door',
-        build: () => `anime illustration, cel-shaded, intimate close-up of two people making out against the inside of a hotel suite door in ${destination.city}, just stumbled in from outside. ${playerGender} and ${companionDesc}. One has the other gently pinned to the door, both hands cradling their face, deep open-mouthed kiss, eyes closed, brows slightly drawn together with intensity. The pinned one's hands gripping the other's shirt at the waist, jackets and bags dropped on the floor beside them. Warm hallway lamplight bleeding past the doorway, soft cinematic shadows, fully clothed but with clothing slightly disheveled, urgent romantic hunger after a long evening out, vibrant anime art, ONLY these two people in the image`,
-      },
-      {
-        label: 'Dawn embrace',
-        build: () => `anime illustration, cel-shaded, intimate close-up of two people sleeping wrapped in each other's arms at dawn in a hotel bed in ${destination.city}, both undressed beneath the sheets. ${playerGender} and ${companionDesc}. The first lies on their side, the second curled around them from behind with one arm draped softly across their bare shoulder, fingers tracing along the first person's collarbone. Sheet draped to mid-chest — for the woman in the pair: bare shoulder blade and slight cleavage visible above the sheet; for the man in the pair: bare upper back and a hint of side abs visible. Both peacefully asleep with content half-smiles, pale blue and pink dawn light filtering through curtains glowing on bare skin, modest tasteful framing — the sheet still covers everything below the lower ribs, no nudity, quiet morning intimacy, vibrant anime art, ONLY these two people in the image`,
-      },
-      {
-        label: 'Fingers intertwined',
-        build: () => `anime illustration, cel-shaded, intimate overhead shot of two people lying side by side under a soft duvet in a hotel bed in ${destination.city}, both undressed beneath the sheet. ${playerGender} and ${companionDesc}. Their fingers laced together resting between them on the pillow, faces turned toward each other, eyes locked in a soft unspoken conversation, lips slightly parted. Sheet draped to mid-chest — for the woman in the pair: slight cleavage and bare collarbones visible above the sheet; for the man in the pair: bare upper chest and a hint of abs visible at the edge of the sheet. Dim warm bedside lamplight casting soft shadows across their faces and bare skin, modest tasteful framing — the sheet still covers everything below the lower ribs, no nudity, quiet romantic vulnerability, vibrant anime art, ONLY these two people in the image`,
-      },
-    ]
-
-    const variant = variants[Math.floor(Math.random() * variants.length)]
-    setCloserVariantLabel(variant.label)
-    const closerPrompt = variant.build()
+    setWindDownMoment({ kind, label: config.label, imageUrl: null, loading: true, savedId: null })
 
     try {
-      const url = await generateTravelImage(closerPrompt, activeChar?.selfieUrl)
+      const url = await generateTravelImage(config.prompt, activeChar?.selfieUrl)
       if (url) {
-        setCloserImageUrl(url)
-        // Stronger affinity bump than Cuddle (+5) since this is a deeper
-        // intimacy beat — keeps the upgrade meaningful in-game too.
-        updateTravelAffinity(8)
+        setWindDownMoment((prev) => prev ? { ...prev, imageUrl: url, loading: false } : null)
+        updateTravelAffinity(config.affinityBump)
       } else {
-        setToastMessage('Couldn\'t generate the moment — try again')
+        setToastMessage(`Couldn't generate the ${config.label.toLowerCase()} image — try again`)
         setTimeout(() => setToastMessage(null), 3000)
-        setShowCloserModal(false)
+        setWindDownMoment(null)
       }
     } catch (e) {
-      console.error('Get closer image error:', e)
-      setShowCloserModal(false)
-    } finally {
-      setIsGeneratingCloser(false)
+      console.error(`[WindDown ${kind}] image error:`, e)
+      setWindDownMoment(null)
     }
   }
 
-  // Modal actions for cuddle / closer. Save persists the moment to the
-  // trip's intimateMoments array (review later in trip recap). Continue
-  // closes the modal AND advances past the wind-down screen straight into
-  // chat — without this, dismissing the modal dropped users back onto the
-  // wind-down view and they had to tap Wind down a second time.
-  function handleSaveCuddle() {
-    if (!cuddleImageUrl || !trip || !destination) return
+  function handleSaveWindDownMoment() {
+    if (!windDownMoment?.imageUrl || !trip || !destination) return
     const moment = {
-      id: `cuddle-${Date.now()}`,
-      kind: 'cuddle' as const,
-      label: 'Cuddle',
-      imageUrl: cuddleImageUrl,
+      id: `${windDownMoment.kind}-${Date.now()}`,
+      // The store's IntimateMoment.kind is currently typed 'cuddle' | 'closer'.
+      // Map bath/undress onto 'closer' for storage so we don't break the
+      // existing schema — the label preserves the actual variant.
+      kind: (windDownMoment.kind === 'cuddle' ? 'cuddle' : 'closer') as 'cuddle' | 'closer',
+      label: windDownMoment.label,
+      imageUrl: windDownMoment.imageUrl,
       day: trip.currentDay,
       city: destination.city,
       createdAt: Date.now(),
     }
     saveIntimateMoment(moment)
-    setSavedCuddleId(moment.id)
+    setWindDownMoment((prev) => prev ? { ...prev, savedId: moment.id } : null)
     setToastMessage('Saved to memories')
     setTimeout(() => setToastMessage(null), 2000)
   }
 
-  function handleSaveCloser() {
-    if (!closerImageUrl || !trip || !destination) return
-    const moment = {
-      id: `closer-${Date.now()}`,
-      kind: 'closer' as const,
-      label: closerVariantLabel || 'A moment',
-      imageUrl: closerImageUrl,
-      day: trip.currentDay,
-      city: destination.city,
-      createdAt: Date.now(),
-    }
-    saveIntimateMoment(moment)
-    setSavedCloserId(moment.id)
-    setToastMessage('Saved to memories')
-    setTimeout(() => setToastMessage(null), 2000)
-  }
-
-  function handleContinueFromIntimate(which: 'cuddle' | 'closer') {
-    if (which === 'cuddle') setShowCuddleModal(false)
-    else setShowCloserModal(false)
-    // Skip the wind-down screen on continue. User explicitly chose to move
-    // on — don't make them tap Wind down a second time.
-    setViewMode('chat')
+  function handleCloseWindDownMoment() {
+    setWindDownMoment(null)
   }
 
   async function handleSelfie() {
@@ -1977,12 +1940,6 @@ export function TravelReaderPage() {
                 onContinue={() => setViewMode('chat')}
                 scenes={trip.itinerary.days.find((d) => d.dayNumber === trip.currentDay)?.scenes}
                 sceneImages={trip.sceneImages}
-                onCuddle={handleCuddle}
-                cuddleCost={50}
-                cuddleLoading={isGeneratingCuddle}
-                onGetCloser={handleGetCloser}
-                closerCost={120}
-                closerLoading={isGeneratingCloser}
               />
             )}
 
@@ -2524,7 +2481,10 @@ export function TravelReaderPage() {
               </div>
             )}
 
-            {/* Actions Panel */}
+            {/* Actions Panel — phase-aware. Day phase: regular travel actions
+                (selfie, gift, kiss, etc.). Recap phase: wind-down only —
+                cuddle / closer / bath / undress. So wind-down actions are
+                gated to actually wind-down time. */}
             <AnimatePresence>
               {showActions && (
                 <motion.div
@@ -2534,34 +2494,50 @@ export function TravelReaderPage() {
                   transition={{ duration: 0.15 }}
                   className="mb-2"
                 >
-                  <div
-                    className="grid grid-cols-5 gap-1 p-1.5 rounded-xl"
-                    style={{ width: 500, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
-                  >
-                    {[
+                  {(() => {
+                    const isRecap = trip.phase === 'recap'
+                    const actions = isRecap ? [
+                      { id: 'cuddle', emoji: '🤍', label: 'Cuddle', desc: 'Soft, tender', cost: 50, handler: () => runWindDownAction('cuddle') },
+                      { id: 'closer', emoji: '💞', label: "Let's get closer", desc: 'Sensual moment', cost: 120, handler: () => runWindDownAction('closer') },
+                      { id: 'bath', emoji: '🛁', label: 'Run a bath', desc: 'Bubbles, candles', cost: 100, handler: () => runWindDownAction('bath') },
+                      { id: 'undress', emoji: '👗', label: 'Undress', desc: 'Slow, intimate', cost: 150, handler: () => runWindDownAction('undress') },
+                    ] : [
                       { id: 'show-me', emoji: '📸', label: 'Show me', desc: 'Visualize the scene', cost: 2, handler: handleShowMe },
                       { id: 'selfie', emoji: '🤳', label: 'Selfie', desc: 'Snap a pic together', cost: 3, handler: handleSelfie },
-                      { id: 'buy-gift', emoji: '🎁', label: 'Buy a gift', desc: 'They\'ll love it', cost: 5, handler: handleBuyGift },
+                      { id: 'buy-gift', emoji: '🎁', label: 'Buy a gift', desc: "They'll love it", cost: 5, handler: handleBuyGift },
                       { id: 'hold-hands', emoji: '💕', label: 'Hold hands', desc: 'A little closer', cost: 4, handler: handleHoldHands },
                       { id: 'get-kiss', emoji: '💋', label: 'Get a kiss', desc: 'Lean in slowly', cost: 8, handler: handleGetKiss },
-                    ].map((action) => (
-                      <button
-                        key={action.id}
-                        onClick={() => { setShowActions(false); action.handler() }}
-                        disabled={isGeneratingChatImage}
-                        className="flex flex-col items-center gap-0.5 py-2.5 px-4 rounded-lg cursor-pointer transition-colors hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed"
-                        style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                    ]
+                    const cols = actions.length === 4 ? 'grid-cols-4' : 'grid-cols-5'
+                    return (
+                      <div
+                        className={`grid ${cols} gap-1 p-1.5 rounded-xl`}
+                        style={{
+                          width: actions.length === 4 ? 420 : 500,
+                          background: isRecap ? 'rgba(244,63,94,0.06)' : 'rgba(255,255,255,0.04)',
+                          border: `1px solid ${isRecap ? 'rgba(244,63,94,0.2)' : 'rgba(255,255,255,0.08)'}`,
+                        }}
                       >
-                        <span className="text-lg">{action.emoji}</span>
-                        <span className="text-white/80 text-[11px] font-medium">{action.label}</span>
-                        <span className="text-white/30 text-[9px]">{action.desc}</span>
-                        <span className="flex items-center gap-1 text-[9px] mt-0.5">
-                          <span className="line-through text-white/65">{action.cost} 💎</span>
-                          <span className="font-semibold" style={{ color: '#22c55e' }}>Free</span>
-                        </span>
-                      </button>
-                    ))}
-                  </div>
+                        {actions.map((action) => (
+                          <button
+                            key={action.id}
+                            onClick={() => { setShowActions(false); action.handler() }}
+                            disabled={isGeneratingChatImage || (windDownMoment?.loading ?? false)}
+                            className="flex flex-col items-center gap-0.5 py-2.5 px-4 rounded-lg cursor-pointer transition-colors hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed"
+                            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                          >
+                            <span className="text-lg">{action.emoji}</span>
+                            <span className="text-white/80 text-[11px] font-medium">{action.label}</span>
+                            <span className="text-white/30 text-[9px]">{action.desc}</span>
+                            <span className="flex items-center gap-1 text-[9px] mt-0.5">
+                              <span className="line-through text-white/65">{action.cost} 💎</span>
+                              <span className="font-semibold" style={{ color: '#22c55e' }}>Free</span>
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    )
+                  })()}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -2734,222 +2710,133 @@ export function TravelReaderPage() {
         )}
       </AnimatePresence>
 
-      {/* Cuddle moment modal — shows the generated cuddle scene full-bleed
-          with a soft glow. While loading we keep the modal open so the user
-          can see something is happening; the placeholder mirrors the scene-
-          image loading style for visual consistency. */}
+      {/* Wind-down moment modal — single modal serving cuddle / closer / bath
+          / undress. Each kind has its own border tint and label kicker so
+          variants read distinctly even though the chrome is identical. */}
       <AnimatePresence>
-        {showCuddleModal && (
-          <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center px-5"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => !isGeneratingCuddle && setShowCuddleModal(false)}
-          >
-            <div className="absolute inset-0 bg-black/85" />
+        {windDownMoment && (() => {
+          const m = windDownMoment
+          const tint = m.kind === 'cuddle'
+            ? { border: 'rgba(236,72,153,0.35)', loaderColor: 'text-pink-300/80', kickerColor: 'text-pink-100', saveBg: 'rgba(236,72,153,0.12)', saveBorder: 'rgba(236,72,153,0.35)', saveColor: '#FBCFE8', continueBg: 'linear-gradient(135deg, #7C3AED, #A78BFA)', glow: '' }
+            : m.kind === 'bath'
+            ? { border: 'rgba(56,189,248,0.4)', loaderColor: 'text-sky-300/85', kickerColor: 'text-sky-100', saveBg: 'rgba(56,189,248,0.12)', saveBorder: 'rgba(56,189,248,0.4)', saveColor: '#BAE6FD', continueBg: 'linear-gradient(135deg, #0369a1, #38bdf8)', glow: '0 0 60px rgba(56,189,248,0.18)' }
+            : m.kind === 'undress'
+            ? { border: 'rgba(217,70,239,0.45)', loaderColor: 'text-fuchsia-300/85', kickerColor: 'text-fuchsia-100', saveBg: 'rgba(217,70,239,0.14)', saveBorder: 'rgba(217,70,239,0.45)', saveColor: '#F0ABFC', continueBg: 'linear-gradient(135deg, #a21caf, #d946ef)', glow: '0 0 60px rgba(217,70,239,0.2)' }
+            : { border: 'rgba(244,63,94,0.4)', loaderColor: 'text-rose-300/85', kickerColor: 'text-rose-100', saveBg: 'rgba(244,63,94,0.14)', saveBorder: 'rgba(244,63,94,0.4)', saveColor: '#FECACA', continueBg: 'linear-gradient(135deg, #be185d, #f43f5e)', glow: '0 0 60px rgba(244,63,94,0.18)' }
+
+          const titleVerb = m.kind === 'cuddle' ? `Cuddling with ${companionName}`
+            : m.kind === 'bath' ? `A bath with ${companionName}`
+            : m.kind === 'undress' ? `Undressing with ${companionName}`
+            : `A moment with ${companionName}`
+
+          const loadingLabel = m.kind === 'cuddle' ? 'Painting your cuddle moment…'
+            : m.kind === 'bath' ? 'Drawing the bath…'
+            : m.kind === 'undress' ? 'Painting the moment…'
+            : 'Painting the moment…'
+
+          return (
             <motion.div
-              className="relative max-w-md w-full rounded-2xl overflow-hidden flex flex-col"
-              initial={{ scale: 0.92, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.92, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              style={{ border: '1px solid rgba(236,72,153,0.35)', background: '#13101c' }}
+              className="fixed inset-0 z-50 flex items-center justify-center px-5"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !m.loading && handleCloseWindDownMoment()}
             >
-              <div className="relative">
-                {cuddleImageUrl ? (
-                  <img
-                    src={cuddleImageUrl}
-                    alt={`Cuddling with ${companionName}`}
-                    className="w-full aspect-[4/5] object-cover"
-                  />
-                ) : (
-                  <div className="w-full aspect-[4/5] relative overflow-hidden">
-                    <div className="absolute inset-0 scene-image-shimmer" />
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                      <Loader2 size={28} className="animate-spin text-pink-300/80" />
-                      <div className="text-center">
-                        <p className="text-white/85 text-sm font-medium" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                          Painting your cuddle moment…
-                        </p>
-                        <p className="text-white/45 text-[11px] mt-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                          Usually takes 5–15 seconds
-                        </p>
+              <div className="absolute inset-0 bg-black/85" />
+              <motion.div
+                className="relative max-w-md w-full rounded-2xl overflow-hidden flex flex-col"
+                initial={{ scale: 0.92, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.92, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+                style={{ border: `1px solid ${tint.border}`, boxShadow: tint.glow, background: '#13101c' }}
+              >
+                <div className="relative">
+                  {m.imageUrl ? (
+                    <img
+                      src={m.imageUrl}
+                      alt={titleVerb}
+                      className="w-full aspect-[4/5] object-cover"
+                    />
+                  ) : (
+                    <div className="w-full aspect-[4/5] relative overflow-hidden">
+                      <div className="absolute inset-0 scene-image-shimmer" />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                        <Loader2 size={28} className={`animate-spin ${tint.loaderColor}`} />
+                        <div className="text-center">
+                          <p className="text-white/85 text-sm font-medium" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                            {loadingLabel}
+                          </p>
+                          <p className="text-white/45 text-[11px] mt-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                            Usually takes 5–15 seconds
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-                <div className="absolute bottom-0 left-0 right-0 p-4" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.85), transparent)' }}>
-                  <p className="text-pink-100 text-[10px] uppercase tracking-[2px] mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                    Day {trip.currentDay} · {destination.city}
-                  </p>
-                  <p className="text-white font-bold text-lg" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                    Cuddling with {companionName}
-                  </p>
-                </div>
-                <button
-                  onClick={() => setShowCuddleModal(false)}
-                  disabled={isGeneratingCuddle}
-                  className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center bg-black/45 hover:bg-black/60 transition-colors disabled:opacity-40 disabled:cursor-wait enabled:cursor-pointer"
-                  title="Close (return to wind-down)"
-                >
-                  <X size={16} className="text-white" />
-                </button>
-              </div>
-
-              {/* Action bar — Save persists the moment to memories,
-                  Continue dismisses + advances past wind-down into chat. */}
-              <div className="flex gap-2 p-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                <button
-                  onClick={handleSaveCuddle}
-                  disabled={!cuddleImageUrl || isGeneratingCuddle || savedCuddleId !== null}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-medium transition-colors disabled:cursor-not-allowed enabled:cursor-pointer"
-                  style={{
-                    fontFamily: "'Space Grotesk', sans-serif",
-                    background: savedCuddleId ? 'rgba(34,197,94,0.12)' : 'rgba(236,72,153,0.12)',
-                    border: `1px solid ${savedCuddleId ? 'rgba(34,197,94,0.4)' : 'rgba(236,72,153,0.35)'}`,
-                    color: savedCuddleId ? '#86efac' : '#FBCFE8',
-                    opacity: !cuddleImageUrl || isGeneratingCuddle ? 0.4 : 1,
-                  }}
-                >
-                  {savedCuddleId ? (
-                    <>
-                      <Check size={13} />
-                      <span>Saved</span>
-                    </>
-                  ) : (
-                    <>
-                      <Bookmark size={13} />
-                      <span>Save</span>
-                    </>
                   )}
-                </button>
-                <button
-                  onClick={() => handleContinueFromIntimate('cuddle')}
-                  disabled={isGeneratingCuddle}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-semibold transition-opacity disabled:cursor-wait enabled:cursor-pointer"
-                  style={{
-                    fontFamily: "'Space Grotesk', sans-serif",
-                    background: 'linear-gradient(135deg, #7C3AED, #A78BFA)',
-                    color: '#fff',
-                    opacity: isGeneratingCuddle ? 0.4 : 1,
-                  }}
-                >
-                  <span>Continue</span>
-                  <ChevronRight size={13} />
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Let's get closer modal — same shape as cuddle but with rose accent
-          and the variant label as a kicker, so each randomized framing reads
-          as a distinct moment instead of "another bed picture". */}
-      <AnimatePresence>
-        {showCloserModal && (
-          <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center px-5"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => !isGeneratingCloser && setShowCloserModal(false)}
-          >
-            <div className="absolute inset-0 bg-black/85" />
-            <motion.div
-              className="relative max-w-md w-full rounded-2xl overflow-hidden flex flex-col"
-              initial={{ scale: 0.92, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.92, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              style={{ border: '1px solid rgba(244,63,94,0.4)', boxShadow: '0 0 60px rgba(244,63,94,0.18)', background: '#13101c' }}
-            >
-              <div className="relative">
-                {closerImageUrl ? (
-                  <img
-                    src={closerImageUrl}
-                    alt={`A moment with ${companionName}`}
-                    className="w-full aspect-[4/5] object-cover"
-                  />
-                ) : (
-                  <div className="w-full aspect-[4/5] relative overflow-hidden">
-                    <div className="absolute inset-0 scene-image-shimmer" />
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                      <Loader2 size={28} className="animate-spin text-rose-300/85" />
-                      <div className="text-center">
-                        <p className="text-white/85 text-sm font-medium" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                          Painting the moment…
-                        </p>
-                        <p className="text-white/45 text-[11px] mt-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                          Usually takes 5–15 seconds
-                        </p>
-                      </div>
-                    </div>
+                  <div className="absolute bottom-0 left-0 right-0 p-4" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.9), transparent)' }}>
+                    <p className={`${tint.kickerColor} text-[10px] uppercase tracking-[2px] mb-1`} style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                      Day {trip.currentDay} · {destination.city}
+                      {m.kind === 'closer' && m.label && <span className="opacity-70"> · {m.label}</span>}
+                    </p>
+                    <p className="text-white font-bold text-lg" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                      {titleVerb}
+                    </p>
                   </div>
-                )}
-                <div className="absolute bottom-0 left-0 right-0 p-4" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.9), transparent)' }}>
-                  <p className="text-rose-100 text-[10px] uppercase tracking-[2px] mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                    Day {trip.currentDay} · {destination.city}
-                    {closerVariantLabel && <span className="text-rose-200/70"> · {closerVariantLabel}</span>}
-                  </p>
-                  <p className="text-white font-bold text-lg" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                    A moment with {companionName}
-                  </p>
+                  <button
+                    onClick={handleCloseWindDownMoment}
+                    disabled={m.loading}
+                    className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center bg-black/45 hover:bg-black/60 transition-colors disabled:opacity-40 disabled:cursor-wait enabled:cursor-pointer"
+                    title="Close"
+                  >
+                    <X size={16} className="text-white" />
+                  </button>
                 </div>
-                <button
-                  onClick={() => setShowCloserModal(false)}
-                  disabled={isGeneratingCloser}
-                  className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center bg-black/45 hover:bg-black/60 transition-colors disabled:opacity-40 disabled:cursor-wait enabled:cursor-pointer"
-                  title="Close (return to wind-down)"
-                >
-                  <X size={16} className="text-white" />
-                </button>
-              </div>
 
-              <div className="flex gap-2 p-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                <button
-                  onClick={handleSaveCloser}
-                  disabled={!closerImageUrl || isGeneratingCloser || savedCloserId !== null}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-medium transition-colors disabled:cursor-not-allowed enabled:cursor-pointer"
-                  style={{
-                    fontFamily: "'Space Grotesk', sans-serif",
-                    background: savedCloserId ? 'rgba(34,197,94,0.12)' : 'rgba(244,63,94,0.14)',
-                    border: `1px solid ${savedCloserId ? 'rgba(34,197,94,0.4)' : 'rgba(244,63,94,0.4)'}`,
-                    color: savedCloserId ? '#86efac' : '#FECACA',
-                    opacity: !closerImageUrl || isGeneratingCloser ? 0.4 : 1,
-                  }}
-                >
-                  {savedCloserId ? (
-                    <>
-                      <Check size={13} />
-                      <span>Saved</span>
-                    </>
-                  ) : (
-                    <>
-                      <Bookmark size={13} />
-                      <span>Save</span>
-                    </>
-                  )}
-                </button>
-                <button
-                  onClick={() => handleContinueFromIntimate('closer')}
-                  disabled={isGeneratingCloser}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-semibold transition-opacity disabled:cursor-wait enabled:cursor-pointer"
-                  style={{
-                    fontFamily: "'Space Grotesk', sans-serif",
-                    background: 'linear-gradient(135deg, #be185d, #f43f5e)',
-                    color: '#fff',
-                    opacity: isGeneratingCloser ? 0.4 : 1,
-                  }}
-                >
-                  <span>Continue</span>
-                  <ChevronRight size={13} />
-                </button>
-              </div>
+                <div className="flex gap-2 p-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                  <button
+                    onClick={handleSaveWindDownMoment}
+                    disabled={!m.imageUrl || m.loading || m.savedId !== null}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-medium transition-colors disabled:cursor-not-allowed enabled:cursor-pointer"
+                    style={{
+                      fontFamily: "'Space Grotesk', sans-serif",
+                      background: m.savedId ? 'rgba(34,197,94,0.12)' : tint.saveBg,
+                      border: `1px solid ${m.savedId ? 'rgba(34,197,94,0.4)' : tint.saveBorder}`,
+                      color: m.savedId ? '#86efac' : tint.saveColor,
+                      opacity: !m.imageUrl || m.loading ? 0.4 : 1,
+                    }}
+                  >
+                    {m.savedId ? (
+                      <>
+                        <Check size={13} />
+                        <span>Saved</span>
+                      </>
+                    ) : (
+                      <>
+                        <Bookmark size={13} />
+                        <span>Save</span>
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={handleCloseWindDownMoment}
+                    disabled={m.loading}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-semibold transition-opacity disabled:cursor-wait enabled:cursor-pointer"
+                    style={{
+                      fontFamily: "'Space Grotesk', sans-serif",
+                      background: tint.continueBg,
+                      color: '#fff',
+                      opacity: m.loading ? 0.4 : 1,
+                    }}
+                  >
+                    <span>Back to chat</span>
+                    <ChevronRight size={13} />
+                  </button>
+                </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
+          )
+        })()}
       </AnimatePresence>
 
       {/* Companion portrait modal */}

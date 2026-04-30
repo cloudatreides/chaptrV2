@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Sun, Moon, Sunrise, MapPin, Gem, Heart, Loader2 } from 'lucide-react'
+import { Sun, Moon, Sunrise, MapPin } from 'lucide-react'
 import { useMemo } from 'react'
 
 interface SceneRecap {
@@ -18,18 +18,6 @@ interface DayTransitionProps {
   onContinue: () => void
   scenes?: SceneRecap[]
   sceneImages?: Record<string, string>
-  // End-of-day "Cuddle" affordance: when provided, shows a romantic CTA
-  // beneath Wind down. cuddleCost is rendered with a strikethrough (paid in
-  // future, free for now). cuddleLoading suppresses re-clicks while the
-  // image is generating.
-  onCuddle?: () => void
-  cuddleCost?: number
-  cuddleLoading?: boolean
-  // Same shape, deeper intimacy tier. Sits below Cuddle. Higher gem cost
-  // signals it as the upgrade option — still strikethrough Free for now.
-  onGetCloser?: () => void
-  closerCost?: number
-  closerLoading?: boolean
 }
 
 function Stars() {
@@ -59,7 +47,7 @@ function Stars() {
   )
 }
 
-export function DayTransition({ dayNumber, theme, cityName, type, heroImage, onContinue, scenes, sceneImages, onCuddle, cuddleCost, cuddleLoading, onGetCloser, closerCost, closerLoading }: DayTransitionProps) {
+export function DayTransition({ dayNumber, theme, cityName, type, heroImage, onContinue, scenes, sceneImages }: DayTransitionProps) {
   const isStart = type === 'start'
   const Icon = isStart ? (dayNumber === 1 ? Sunrise : Sun) : Moon
 
@@ -258,7 +246,7 @@ export function DayTransition({ dayNumber, theme, cityName, type, heroImage, onC
         )}
 
         {/* Buttons */}
-        <div className={`flex flex-col items-center ${!isStart && onCuddle ? 'gap-3' : ''}`}>
+        <div className="flex flex-col items-center">
           <motion.button
             initial={{ y: 10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -283,88 +271,12 @@ export function DayTransition({ dayNumber, theme, cityName, type, heroImage, onC
           >
             {isStart ? "Let's go" : 'Wind down'}
           </motion.button>
-
-          {/* Cuddle CTA (end-of-day only). Free during pre-monetization, but
-              the UI already advertises the future gem cost with a strike-through
-              so the upgrade isn't a surprise when we flip the switch. */}
-          {!isStart && onCuddle && (
-            <motion.button
-              initial={{ y: 10, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: scenes && scenes.length > 0 ? 1.0 + scenes.length * 0.1 : 0.9 }}
-              whileHover={cuddleLoading ? undefined : { scale: 1.03 }}
-              whileTap={cuddleLoading ? undefined : { scale: 0.97 }}
-              onClick={cuddleLoading ? undefined : onCuddle}
-              disabled={cuddleLoading}
-              className="px-7 py-3 rounded-full text-sm font-medium flex items-center gap-2.5 disabled:cursor-wait enabled:cursor-pointer"
-              style={{
-                fontFamily: "'Space Grotesk', sans-serif",
-                background: 'linear-gradient(135deg, rgba(200,75,158,0.18), rgba(236,72,153,0.18))',
-                border: '1px solid rgba(236,72,153,0.45)',
-                color: '#FBCFE8',
-              }}
-            >
-              {cuddleLoading ? (
-                <>
-                  <Loader2 size={14} className="animate-spin" />
-                  <span>Painting cuddle…</span>
-                </>
-              ) : (
-                <>
-                  <Heart size={14} className="fill-pink-300" style={{ color: '#FBCFE8' }} />
-                  <span>Cuddle</span>
-                  {typeof cuddleCost === 'number' && (
-                    <span className="flex items-center gap-1 ml-0.5">
-                      <Gem size={11} className="text-pink-200/60" />
-                      <span className="text-pink-200/55 line-through text-[12px]">{cuddleCost}</span>
-                      <span className="text-pink-100 text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: 'rgba(236,72,153,0.25)', border: '1px solid rgba(236,72,153,0.5)' }}>Free</span>
-                    </span>
-                  )}
-                </>
-              )}
-            </motion.button>
+          {!isStart && (
+            <p className="mt-3 text-white/40 text-[11px] text-center max-w-[280px]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              Tap + in chat for cuddle, get closer, run a bath, or undress moments.
+            </p>
           )}
 
-          {/* Let's get closer — sensual upgrade tier. Sits beneath Cuddle.
-              Deeper rose gradient + ember accents to signal it's a step up. */}
-          {!isStart && onGetCloser && (
-            <motion.button
-              initial={{ y: 10, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: scenes && scenes.length > 0 ? 1.1 + scenes.length * 0.1 : 1.0 }}
-              whileHover={closerLoading ? undefined : { scale: 1.03 }}
-              whileTap={closerLoading ? undefined : { scale: 0.97 }}
-              onClick={closerLoading ? undefined : onGetCloser}
-              disabled={closerLoading}
-              className="px-7 py-3 rounded-full text-sm font-medium flex items-center gap-2.5 disabled:cursor-wait enabled:cursor-pointer"
-              style={{
-                fontFamily: "'Space Grotesk', sans-serif",
-                background: 'linear-gradient(135deg, rgba(190,24,93,0.28), rgba(244,63,94,0.22))',
-                border: '1px solid rgba(244,63,94,0.55)',
-                color: '#FECACA',
-                boxShadow: '0 0 24px rgba(244,63,94,0.15)',
-              }}
-            >
-              {closerLoading ? (
-                <>
-                  <Loader2 size={14} className="animate-spin" />
-                  <span>Painting the moment…</span>
-                </>
-              ) : (
-                <>
-                  <Heart size={14} className="fill-rose-300" style={{ color: '#FECACA' }} />
-                  <span>Let&apos;s get closer</span>
-                  {typeof closerCost === 'number' && (
-                    <span className="flex items-center gap-1 ml-0.5">
-                      <Gem size={11} className="text-rose-200/70" />
-                      <span className="text-rose-200/55 line-through text-[12px]">{closerCost}</span>
-                      <span className="text-rose-100 text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: 'rgba(244,63,94,0.3)', border: '1px solid rgba(244,63,94,0.55)' }}>Free</span>
-                    </span>
-                  )}
-                </>
-              )}
-            </motion.button>
-          )}
         </div>
       </div>
     </motion.div>
