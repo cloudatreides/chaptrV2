@@ -235,7 +235,7 @@ export function TravelCityPage() {
   }
 
   // ── Start trip ──
-  function handleStartTrip() {
+  async function handleStartTrip() {
     if (!selectedId) return
     if (!activeChar) {
       // Travel mode needs a real twin (name + selfie) to render the protagonist
@@ -252,10 +252,12 @@ export function TravelCityPage() {
     } else if (selectedBase) {
       startTrip(destination!.id, selectedBase.characterId, sliders, undefined, relationship)
     }
-    // Flush the new trip to cloud immediately. Without this the save sits in
-    // the 500ms debounce queue, and a refresh on /travel/trip can let stale
-    // cloud state (which doesn't know about this trip) win the hydrate race.
-    flushPendingSave()
+    // Await the cloud flush so the new trip is persisted BEFORE we navigate.
+    // Earlier non-awaited version was vulnerable to a fast refresh after
+    // landing on /travel/trip — the in-flight fetch would get cancelled and
+    // hydrate would later pull stale cloud state with no record of the trip.
+    // Worth the extra ~200ms latency on the click to avoid silent trip loss.
+    try { await flushPendingSave() } catch {}
     navigate('/travel/trip')
   }
 
