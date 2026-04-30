@@ -1077,8 +1077,12 @@ export function TravelReaderPage() {
         build: () => `anime illustration, cel-shaded, intimate close-up of two people sharing a deep slow kiss in a hotel bed in ${destination.city}. ${playerGender} and ${companionDesc}. One leans over the other, dark hair falling forward to brush their cheek, sheets tangled and bunched at their waists, the second person's hand cupping the first's jaw. Eyes closed, lost in the moment, soft flushed cheeks, warm bedside lamplight, modest tasteful framing covering everything below the waist, intense romantic tenderness, vibrant anime art, ONLY these two people in the image`,
       },
       {
-        label: 'After the shower',
-        build: () => `anime illustration, cel-shaded, intimate close-up of two people in soft white bathrobes in a hotel suite in ${destination.city}, sitting close together on the edge of the bed after a shower. ${playerGender} and ${companionDesc}. The robes have slipped slightly off one bare shoulder of each, hair still damp, foreheads touching, the second person's hand resting on the first's collarbone. Steam still drifting in from the bathroom door, warm amber lamplight, soft mist in the air, modest tasteful framing — robes covering everything important, intimate quiet anticipation, vibrant anime art, ONLY these two people in the image`,
+        label: 'After the shower, making out',
+        build: () => `anime illustration, cel-shaded, intimate close-up of two people in soft white bathrobes making out passionately in a hotel suite in ${destination.city}, just out of the shower. ${playerGender} and ${companionDesc}. Mid-kiss with eyes closed, lost in each other, the second person's hand on the first's jaw drawing them in, the first's hand at the second's waist pulling them closer. Robes slightly damp, slipped off one bare shoulder of each, hair still wet at the tips. Steam drifting in from the bathroom door, warm amber lamplight, soft mist in the air, modest tasteful framing — robes covering everything important, hot urgent tenderness, vibrant anime art, ONLY these two people in the image`,
+      },
+      {
+        label: 'Pinned against the door',
+        build: () => `anime illustration, cel-shaded, intimate close-up of two people making out against the inside of a hotel suite door in ${destination.city}, just stumbled in from outside. ${playerGender} and ${companionDesc}. One has the other gently pinned to the door, both hands cradling their face, deep open-mouthed kiss, eyes closed, brows slightly drawn together with intensity. The pinned one's hands gripping the other's shirt at the waist, jackets and bags dropped on the floor beside them. Warm hallway lamplight bleeding past the doorway, soft cinematic shadows, fully clothed but with clothing slightly disheveled, urgent romantic hunger after a long evening out, vibrant anime art, ONLY these two people in the image`,
       },
       {
         label: 'Dawn embrace',
