@@ -1020,7 +1020,7 @@ export function TravelReaderPage() {
       .replace(/^(anime style|dark|cyberpunk[^,]*|fantasy[^,]*|thriller[^,]*|sci-fi[^,]*)\s*(portrait|illustration|concept art)\s*(portrait\s*)?of\s*/i, '')
       .trim()
     const playerGender = activeChar?.gender === 'male' ? 'a young man' : 'a young woman'
-    const cuddlePrompt = `anime illustration, cel-shaded, romantic close-up of two people cuddling under soft warm sheets in a cozy hotel bed in ${destination.city}. ${playerGender} and ${companionDesc}. Foreheads touching, eyes closed peacefully, gentle smiles, soft warm lamplight, intimate emotional moment, vibrant anime art, ONLY these two people in the image, fully covered, tasteful and tender`
+    const cuddlePrompt = `anime illustration, cel-shaded, romantic close-up of two people cuddling tenderly under a soft white duvet in a cozy hotel bed in ${destination.city}. ${playerGender} and ${companionDesc}. Bare shoulders just visible above the sheets — the duvet pulled high across both of their chests so only their faces, hair, and shoulders are showing, everything below the collarbones tastefully hidden under the bedding. Foreheads touching, eyes closed peacefully, gentle content smiles, soft warm bedside lamplight, intimate post-romance tenderness, vibrant anime art, ONLY these two people in the image, modest tasteful framing, no exposed skin below the shoulders`
 
     try {
       const url = await generateTravelImage(cuddlePrompt, activeChar?.selfieUrl)
