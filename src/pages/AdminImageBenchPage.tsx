@@ -104,8 +104,15 @@ const IMAGE_GEN_AUDIT: ImageGenAction[] = [
     model: 'Nano Banana (gemini-2.5-flash-image)',
     references: 'twin + companion',
     promptTemplate: 'Built inline at TravelReaderPage.tsx:1027 from scene.timeOfDay, scene.location, destination.city, and the first ~300 chars of the streamed scene prose: `anime illustration, cel-shaded, cinematic wide shot, {timeOfDay} atmosphere in {location}, {city}. {proseSnippet}. Detailed background, atmospheric lighting, vibrant anime art`',
-    samplePrompt: 'anime illustration, cel-shaded, cinematic wide shot, golden hour atmosphere in Wat Pho temple grounds, Bangkok. They walk slowly between weathered stone columns as monks chant somewhere out of sight, sunlight cutting through drifting incense smoke, the gold leaf on a reclining Buddha glowing behind them. Detailed background, atmospheric lighting, vibrant anime art',
-    notes: 'Routes through generateSceneImage → /api/nano-banana. Companion ref dropped when scene.protagonistVisible is false.',
+    samplePrompts: [
+      'anime illustration, cel-shaded, cinematic wide shot, golden hour atmosphere in Wat Pho temple grounds, Bangkok. They walk slowly between weathered stone columns as monks chant somewhere out of sight, sunlight cutting through drifting incense smoke, the gold leaf on a reclining Buddha glowing behind them. Detailed background, atmospheric lighting, vibrant anime art',
+      'anime illustration, cel-shaded, cinematic wide shot, late night atmosphere on a Shibuya rooftop bar, Tokyo. The crossing pulses red and electric blue far below them, neon signage reflecting on rain-slick streets, a cold beer sweating on the railing as the city hums. Detailed background, atmospheric lighting, vibrant anime art',
+      'anime illustration, cel-shaded, cinematic wide shot, early morning atmosphere in the Arashiyama bamboo grove, Kyoto. Mist clings low to the path between impossibly tall green stalks, the only sound the soft creak of bamboo in the wind and their footsteps on packed earth. Detailed background, atmospheric lighting, vibrant anime art',
+      'anime illustration, cel-shaded, cinematic wide shot, dusk atmosphere along the Seine riverside, Paris. Bouquinistes are closing their green stalls as the lamps flicker on along the quay, Notre-Dame silhouetted against a lavender sky, the river catching the last of the light. Detailed background, atmospheric lighting, vibrant anime art',
+      'anime illustration, cel-shaded, cinematic wide shot, midday atmosphere on the Tegalalang rice terrace path, Bali. Emerald paddies cascade down the valley in stepped curves, a farmer in a conical hat tending a row in the distance, the air thick with humidity and the smell of wet earth. Detailed background, atmospheric lighting, vibrant anime art',
+      'anime illustration, cel-shaded, cinematic wide shot, twilight atmosphere at the Sky Lagoon geothermal pool, Reykjavík. Steam coils off the dark mineral water as the sky stripes pink and pale green with the start of an aurora, the cliff edge dropping away to the North Atlantic just beyond the infinity edge. Detailed background, atmospheric lighting, vibrant anime art',
+    ],
+    notes: 'Routes through generateSceneImage → /api/nano-banana. Companion ref dropped when scene.protagonistVisible is false. 6 sample variants spanning cities/times of day for shuffle testing.',
   },
   {
     feature: '"Show me" chat action',
@@ -115,7 +122,13 @@ const IMAGE_GEN_AUDIT: ImageGenAction[] = [
     model: 'Nano Banana (gemini-2.5-flash-image)',
     references: 'twin + companion',
     promptTemplate: 'anime illustration, cel-shaded, cinematic scene: {lastCompanionMsgSnippet}. Setting: {locationContext}. Atmospheric lighting, detailed background, vibrant anime art',
-    samplePrompt: 'anime illustration, cel-shaded, cinematic scene: The market is unreal — vendors yelling, food smoking, fairy lights everywhere. I think you should try the pad thai from the corner stall. Setting: Chatuchak Weekend Market, Bangkok. Atmospheric lighting, detailed background, vibrant anime art',
+    samplePrompts: [
+      'anime illustration, cel-shaded, cinematic scene: The market is unreal — vendors yelling, food smoking, fairy lights everywhere. I think you should try the pad thai from the corner stall. Setting: Chatuchak Weekend Market, Bangkok. Atmospheric lighting, detailed background, vibrant anime art',
+      'anime illustration, cel-shaded, cinematic scene: This place is hidden behind a noodle shop, but inside it is glowing with paper lanterns and the bartender is pouring something on fire. You have to see this. Setting: a speakeasy in Shimokitazawa, Tokyo. Atmospheric lighting, detailed background, vibrant anime art',
+      'anime illustration, cel-shaded, cinematic scene: Look at the steam rising off the spring — and the moss on the rocks is electric green. Slip in slowly, the mineral water is hotter than it looks. Setting: a mountain onsen in Hakone, Japan. Atmospheric lighting, detailed background, vibrant anime art',
+      'anime illustration, cel-shaded, cinematic scene: I told you the canals get magical at night. The boats are strung with lights and someone is playing a lute on the bridge. Setting: a quiet canal in Cannaregio, Venice. Atmospheric lighting, detailed background, vibrant anime art',
+      'anime illustration, cel-shaded, cinematic scene: This is the rooftop I was telling you about. The whole city is below us — and that flame on the horizon is from the night fire ceremony at the temple. Setting: a guesthouse rooftop in Ubud, Bali. Atmospheric lighting, detailed background, vibrant anime art',
+    ],
     notes: 'Routes through generateTravelImage → generateSceneImage → /api/nano-banana. Visualizes the last companion message — pulled live from chat history.',
   },
   {
@@ -146,7 +159,12 @@ const IMAGE_GEN_AUDIT: ImageGenAction[] = [
     model: 'Nano Banana (gemini-2.5-flash-image)',
     references: 'twin + companion',
     promptTemplate: 'anime illustration, cel-shaded, two people walking together holding hands from behind on a beautiful street in {locationContext}. {playerGender} and {companionDesc}. Close-up on their intertwined hands, warm golden hour lighting, soft bokeh, romantic moment, vibrant anime art',
-    samplePrompt: 'anime illustration, cel-shaded, two people walking together holding hands from behind on a beautiful street in Asakusa, Tokyo. a young man and 22-year-old Japanese woman with long dark hair, gentle smile. Close-up on their intertwined hands, warm golden hour lighting, soft bokeh, romantic moment, vibrant anime art',
+    samplePrompts: [
+      'anime illustration, cel-shaded, two people walking together holding hands from behind on a beautiful street in Asakusa, Tokyo. a young man and 22-year-old Japanese woman with long dark hair, gentle smile. Close-up on their intertwined hands, warm golden hour lighting, soft bokeh, romantic moment, vibrant anime art',
+      'anime illustration, cel-shaded, two people walking together holding hands from behind on a cobbled lane in Montmartre, Paris. a young man and 21-year-old French woman with chestnut waves, soft amused expression. Close-up on their intertwined hands, warm golden hour lighting, soft bokeh, romantic moment, vibrant anime art',
+      'anime illustration, cel-shaded, two people walking together holding hands from behind on a beachfront promenade in Seminyak, Bali. a young man and 23-year-old Indonesian woman with sun-kissed skin, soft smile. Close-up on their intertwined hands, warm golden hour lighting, soft bokeh, romantic moment, vibrant anime art',
+      'anime illustration, cel-shaded, two people walking together holding hands from behind on a snow-dusted side street in Sapporo, Hokkaido. a young man and 22-year-old Japanese woman with long dark hair tucked into a wool scarf. Close-up on their intertwined hands, warm golden hour lighting, soft bokeh, romantic moment, vibrant anime art',
+    ],
     notes: 'Routes through generateTravelImage → generateSceneImage → /api/nano-banana.',
   },
   {
@@ -177,7 +195,7 @@ const IMAGE_GEN_AUDIT: ImageGenAction[] = [
     model: 'Nano Banana (gemini-2.5-flash-image)',
     references: 'twin only',
     promptTemplate: 'currentStep.sceneImagePrompt (defined per step in src/data/stories/<id>.ts)',
-    samplePrompt: 'Anime style, a handsome Korean male idol with dark messy hair dancing intensely in a practice room with mirror walls, warm spotlight, focused expression, sweat on his brow, Seoul skyline through windows at dusk, other dancers in background',
+    samplePrompts: ['Anime style, a handsome Korean male idol with dark messy hair dancing intensely in a practice room with mirror walls, warm spotlight, focused expression, sweat on his brow, Seoul skyline through windows at dusk, other dancers in background'],
     notes: 'Routes through generateSceneImage → /api/nano-banana. Player only — companions described in text. Sample = SCENE_PROMPTS.rehearsal from storyData.ts.',
   },
   {
@@ -188,7 +206,7 @@ const IMAGE_GEN_AUDIT: ImageGenAction[] = [
     model: 'Nano Banana (gemini-2.5-flash-image)',
     references: 'twin only',
     promptTemplate: 'opt.imagePrompt (per choice option in story data)',
-    samplePrompt: 'Anime style, two young people facing each other on a rooftop at night, one with dark messy hair looking intense, wind blowing, city lights sprawling behind them, emotional confrontation, K-drama climax',
+    samplePrompts: ['Anime style, two young people facing each other on a rooftop at night, one with dark messy hair looking intense, wind blowing, city lights sprawling behind them, emotional confrontation, K-drama climax'],
   },
   {
     feature: 'Reveal scene',
@@ -198,7 +216,7 @@ const IMAGE_GEN_AUDIT: ImageGenAction[] = [
     model: 'Nano Banana (gemini-2.5-flash-image)',
     references: 'twin only',
     promptTemplate: 'Reveal-specific prompt built from playthrough state (RevealPage.tsx:50)',
-    samplePrompt: 'Anime style, ethereal dream-like scene, two silhouettes connected by glowing threads of light, abstract Seoul cityscape in background, cosmic purple and pink tones, emotional, beautiful',
+    samplePrompts: ['Anime style, ethereal dream-like scene, two silhouettes connected by glowing threads of light, abstract Seoul cityscape in background, cosmic purple and pink tones, emotional, beautiful'],
   },
   {
     feature: 'NPC character portrait (AI-generated)',
@@ -208,7 +226,7 @@ const IMAGE_GEN_AUDIT: ImageGenAction[] = [
     model: 'Schnell (FLUX.1-schnell)',
     references: 'none',
     promptTemplate: 'character.portraitPrompt (defined per character in src/data/characters.ts)',
-    samplePrompt: 'Anime style portrait of a handsome 22 year old Korean male, warm bright smile showing teeth, slightly tousled dark brown hair with subtle highlights, friendly expressive brown eyes, wearing a casual denim jacket over a white t-shirt, one small silver hoop earring, soft studio lighting, clean dark background, high quality anime art style, detailed face, K-drama aesthetic, approachable and fun energy',
+    samplePrompts: ['Anime style portrait of a handsome 22 year old Korean male, warm bright smile showing teeth, slightly tousled dark brown hair with subtle highlights, friendly expressive brown eyes, wearing a casual denim jacket over a white t-shirt, one small silver hoop earring, soft studio lighting, clean dark background, high quality anime art style, detailed face, K-drama aesthetic, approachable and fun energy'],
     notes: 'Most main characters have staticPortrait — this path only runs for characters without one. Sample = Min-jun portraitPrompt.',
   },
   {
@@ -264,7 +282,7 @@ const IMAGE_GEN_AUDIT: ImageGenAction[] = [
     model: 'Nano Banana (gemini-2.5-flash-image)',
     references: 'twin only',
     promptTemplate: 'result.sceneImagePrompt (returned by Claude during chat action; built in src/hooks/useChatActions.ts)',
-    samplePrompt: 'Anime illustration, cel-shaded, two people at a cozy café: a young person handing a warm coffee to a handsome 22-year-old Korean man with messy dark hair and warm brown eyes, warm smiles, gentle steam rising from the cup, soft warm café lighting, intimate casual moment, vibrant anime art, ONLY these two people in the image',
+    samplePrompts: ['Anime illustration, cel-shaded, two people at a cozy café: a young person handing a warm coffee to a handsome 22-year-old Korean man with messy dark hair and warm brown eyes, warm smiles, gentle steam rising from the cup, soft warm café lighting, intimate casual moment, vibrant anime art, ONLY these two people in the image'],
   },
   {
     feature: 'Cast chat gift / reaction',
@@ -274,7 +292,7 @@ const IMAGE_GEN_AUDIT: ImageGenAction[] = [
     model: 'Schnell',
     references: 'none',
     promptTemplate: 'result.giftImagePrompt or result.reactionImagePrompt (from Claude tool call)',
-    samplePrompt: 'Anime style, close-up of hands holding a fresh bouquet of colorful flowers wrapped in craft paper, soft warm lighting, romantic atmosphere, high quality illustration, no face visible, gift-giving moment',
+    samplePrompts: ['Anime style, close-up of hands holding a fresh bouquet of colorful flowers wrapped in craft paper, soft warm lighting, romantic atmosphere, high quality illustration, no face visible, gift-giving moment'],
   },
   {
     feature: 'Cast group chat reaction',
@@ -284,7 +302,7 @@ const IMAGE_GEN_AUDIT: ImageGenAction[] = [
     model: 'Schnell',
     references: 'none',
     promptTemplate: 'result.reactionImagePrompt',
-    samplePrompt: 'Anime style portrait of a beautiful 22 year old Korean female K-pop idol, blushing deeply with hands clasped near her face, eyes sparkling with joyful disbelief, genuinely overwhelmed happy smile, soft warm golden lighting, emotionally touched and flustered, clean dark background, high quality anime art style',
+    samplePrompts: ['Anime style portrait of a beautiful 22 year old Korean female K-pop idol, blushing deeply with hands clasped near her face, eyes sparkling with joyful disbelief, genuinely overwhelmed happy smile, soft warm golden lighting, emotionally touched and flustered, clean dark background, high quality anime art style'],
   },
 ]
 
@@ -608,7 +626,11 @@ export function AdminImageBenchPage() {
         {view === 'audit' && (
           <ImageGenAuditView
             onLoadIntoBench={(action) => {
-              setPrompt(action.samplePrompt ?? action.promptTemplate)
+              const samples = action.samplePrompts ?? []
+              const initial = samples.length > 0
+                ? samples[Math.floor(Math.random() * samples.length)]
+                : action.promptTemplate
+              setPrompt(initial)
               setLoadedAction(action)
               // Stylize takes a RAW selfie as input — the active twin URL
               // is the already-stylized output. Clear it so user uploads a real photo.
@@ -629,9 +651,9 @@ export function AdminImageBenchPage() {
                 {loadedAction.category} · {loadedAction.trigger} · prod model: <span className="font-mono">{loadedAction.model}</span> · refs: {loadedAction.references}
               </p>
               <p className="text-white/30 text-[11px] font-mono mt-1">{loadedAction.source}</p>
-              {loadedAction.samplePrompt && (
+              {loadedAction.samplePrompts && loadedAction.samplePrompts.length > 0 && (
                 <p className="mt-2 text-amber-300/90 text-[12px] leading-relaxed">
-                  ℹ️ This action's prod prompt is <strong>built dynamically at runtime</strong>. Loaded a representative <strong>sample prompt</strong> for benching — edit below if you want to test with a real prompt from a logged session.
+                  ℹ️ This action's prod prompt is <strong>built dynamically at runtime</strong>. Loaded a representative <strong>sample prompt</strong> ({loadedAction.samplePrompts.length} variant{loadedAction.samplePrompts.length === 1 ? '' : 's'} available) — edit below or shuffle to a different sample.
                 </p>
               )}
               {loadedAction.feature === 'Stylize twin selfie' && (
@@ -640,13 +662,35 @@ export function AdminImageBenchPage() {
                 </p>
               )}
             </div>
-            <button
-              onClick={() => setLoadedAction(null)}
-              className="cursor-pointer text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-md text-white/50 hover:text-white hover:bg-white/5 shrink-0"
-              style={{ border: '1px solid rgba(255,255,255,0.15)' }}
-            >
-              Clear
-            </button>
+            <div className="flex flex-col gap-2 shrink-0">
+              {loadedAction.samplePrompts && loadedAction.samplePrompts.length > 1 && (
+                <button
+                  onClick={() => {
+                    const samples = loadedAction.samplePrompts ?? []
+                    // Pick any sample that isn't the current one. Falls through
+                    // to a random pick if every sample happens to match (eg.
+                    // the user edited the prompt back to one of them).
+                    const others = samples.filter((s) => s !== prompt)
+                    const next = others.length > 0
+                      ? others[Math.floor(Math.random() * others.length)]
+                      : samples[Math.floor(Math.random() * samples.length)]
+                    setPrompt(next)
+                  }}
+                  className="cursor-pointer text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-md text-[#c84b9e] hover:bg-[rgba(200,75,158,0.12)]"
+                  style={{ border: '1px solid rgba(200,75,158,0.4)' }}
+                  title={`Shuffle to a different sample (${loadedAction.samplePrompts.length} available)`}
+                >
+                  🎲 Shuffle sample
+                </button>
+              )}
+              <button
+                onClick={() => setLoadedAction(null)}
+                className="cursor-pointer text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-md text-white/50 hover:text-white hover:bg-white/5"
+                style={{ border: '1px solid rgba(255,255,255,0.15)' }}
+              >
+                Clear
+              </button>
+            </div>
           </div>
         )}
 
@@ -1082,14 +1126,27 @@ function ImageGenAuditView({ onLoadIntoBench }: { onLoadIntoBench: (action: Imag
                     </p>
                   </div>
 
-                  {action.samplePrompt && (
+                  {action.samplePrompts && action.samplePrompts.length > 0 && (
                     <div className="mt-2">
                       <p className="text-[#c84b9e]/80 text-[10px] uppercase tracking-widest mb-1">
-                        Sample prompt (loaded into bench)
+                        {action.samplePrompts.length === 1
+                          ? 'Sample prompt (loaded into bench)'
+                          : `Sample prompts — ${action.samplePrompts.length} variants (random one loaded; shuffle in bench)`}
                       </p>
-                      <p className="text-white/70 text-xs leading-relaxed font-mono whitespace-pre-wrap" style={{ background: '#0a0810', padding: '8px 10px', borderRadius: 6, border: '1px solid rgba(200,75,158,0.3)' }}>
-                        {action.samplePrompt}
-                      </p>
+                      <div className="flex flex-col gap-1.5">
+                        {action.samplePrompts.map((sp, spi) => (
+                          <p
+                            key={spi}
+                            className="text-white/70 text-xs leading-relaxed font-mono whitespace-pre-wrap"
+                            style={{ background: '#0a0810', padding: '8px 10px', borderRadius: 6, border: '1px solid rgba(200,75,158,0.3)' }}
+                          >
+                            {action.samplePrompts!.length > 1 && (
+                              <span className="text-[#c84b9e]/60 mr-2">{spi + 1}.</span>
+                            )}
+                            {sp}
+                          </p>
+                        ))}
+                      </div>
                     </div>
                   )}
 
