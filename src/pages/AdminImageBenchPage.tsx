@@ -177,6 +177,22 @@ const IMAGE_GEN_AUDIT: ImageGenAction[] = [
     notes: 'Routes through generateTravelImage → generateSceneImage → /api/nano-banana.',
   },
   {
+    feature: '"Get a kiss" chat action',
+    category: 'Travel',
+    trigger: 'User taps 💋 Get a kiss button in trip chat',
+    source: 'src/pages/TravelReaderPage.tsx:836 (handleGetKiss)',
+    model: 'Nano Banana (gemini-2.5-flash-image)',
+    references: 'twin + companion',
+    promptTemplate: 'anime illustration, cel-shaded, romantic close-up of two people sharing a soft tender kiss in {locationContext}. {playerGender} and {companionDesc}. Eyes closed, gentle expressions, hands on cheeks, warm golden hour lighting, soft cinematic bokeh, intimate emotional moment, vibrant anime art, ONLY these two people in the image',
+    samplePrompts: [
+      'anime illustration, cel-shaded, romantic close-up of two people sharing a soft tender kiss on a quiet alley in Asakusa, Tokyo. a young man and 22-year-old Japanese woman with long dark hair, gentle expression. Eyes closed, gentle expressions, hands on cheeks, warm golden hour lighting, soft cinematic bokeh, intimate emotional moment, vibrant anime art, ONLY these two people in the image',
+      'anime illustration, cel-shaded, romantic close-up of two people sharing a soft tender kiss on a footbridge over the Seine, Paris. a young man and 21-year-old French woman with chestnut waves, soft amused expression. Eyes closed, gentle expressions, hands on cheeks, warm golden hour lighting, soft cinematic bokeh, intimate emotional moment, vibrant anime art, ONLY these two people in the image',
+      'anime illustration, cel-shaded, romantic close-up of two people sharing a soft tender kiss on a torchlit beach in Seminyak, Bali. a young man and 23-year-old Indonesian woman with sun-kissed skin, soft smile. Eyes closed, gentle expressions, hands on cheeks, warm golden hour lighting, soft cinematic bokeh, intimate emotional moment, vibrant anime art, ONLY these two people in the image',
+      'anime illustration, cel-shaded, romantic close-up of two people sharing a soft tender kiss under falling snow in Otaru, Hokkaido. a young man and 22-year-old Japanese woman with long dark hair tucked into a wool scarf. Eyes closed, gentle expressions, hands on cheeks, warm golden hour lighting, soft cinematic bokeh, intimate emotional moment, vibrant anime art, ONLY these two people in the image',
+    ],
+    notes: 'Routes through generateTravelImage → generateSceneImage → /api/nano-banana. Affinity bumped by min 5 (vs 3 for Hold hands) since it\'s a stronger romantic beat.',
+  },
+  {
     feature: 'Day-start transition (no AI gen)',
     category: 'Travel',
     trigger: 'New day begins (handlePlayScene → setViewMode("day-start"))',

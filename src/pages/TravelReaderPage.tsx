@@ -833,6 +833,77 @@ export function TravelReaderPage() {
     }
   }
 
+  async function handleGetKiss() {
+    if (!trip || !companion || !destination || isGeneratingChatImage || isStreaming) return
+
+    setIsGeneratingChatImage(true)
+    const isPlanning = trip.phase === 'planning'
+    const addMsg = isPlanning ? addTravelPlanningMessage : (msg: ChatMessage) => addTravelDayChatMessage(trip.currentDay, msg)
+
+    addMsg({ role: 'user', content: `💋 Leaning in slowly to kiss ${companionName}...`, characterId: 'player', timestamp: Date.now() })
+
+    const currentScene = getCurrentScene()
+    const locationContext = currentScene ? `${currentScene.location}, ${destination.city}` : destination.city
+    const companionDesc = companionVisualDesc
+      .split(',').slice(0, 4).join(',')
+      .replace(/^(anime style|dark|cyberpunk[^,]*|fantasy[^,]*|thriller[^,]*|sci-fi[^,]*)\s*(portrait|illustration|concept art)\s*(portrait\s*)?of\s*/i, '')
+      .trim()
+    const playerGender = activeChar?.gender === 'male' ? 'a young man' : 'a young woman'
+    const scenePrompt = `anime illustration, cel-shaded, romantic close-up of two people sharing a soft tender kiss in ${locationContext}. ${playerGender} and ${companionDesc}. Eyes closed, gentle expressions, hands on cheeks, warm golden hour lighting, soft cinematic bokeh, intimate emotional moment, vibrant anime art, ONLY these two people in the image`
+
+    try {
+      const [imageUrl, replyStream] = await Promise.all([
+        generateTravelImage(scenePrompt, activeChar?.selfieUrl),
+        streamTravelChatReply({
+          companionId: trip.companionId,
+          companionSliders: trip.companionSliders,
+          companionRemix: trip.companionRemix,
+          destinationId: trip.destinationId,
+          messages: [...(isPlanning ? trip.planningChatHistory : (trip.dayChatHistories[trip.currentDay] ?? [])),
+            { role: 'user' as const, content: 'I just leaned in and kissed you softly. React in the moment — surprise turning into warmth, a quiet breath against my lips, then a flirtatious whisper afterward. Keep it tender, not crude.', characterId: 'player', timestamp: Date.now() }],
+          chatType: 'freeform',
+          tripContext: buildTripContext(),
+          companionMemories: trip.companionMemories,
+          travelAffinityScore: trip.travelAffinityScore,
+          bio: activeChar?.bio ?? null,
+          playerName: activeChar?.name ?? null,
+        }),
+      ])
+
+      setIsStreaming(true)
+      let full = ''
+      for await (const chunk of replyStream) {
+        full += chunk
+        setStreamedText(stripMetaTags(full))
+      }
+      setIsStreaming(false)
+      setStreamedText('')
+
+      const { cleanText: kissClean, places: kissPlaces } = parsePlaceTags(full)
+      const parsed = parseAffinityDelta(kissClean)
+      if (imageUrl) {
+        addMsg({ role: 'character', content: parsed.content, characterId: trip.companionId, timestamp: Date.now(), imageUrl })
+      } else {
+        addMsg({ role: 'character', content: parsed.content, characterId: trip.companionId, timestamp: Date.now() })
+        setToastMessage('Image couldn\'t be generated')
+        setTimeout(() => setToastMessage(null), 3000)
+      }
+      updateTravelAffinity(Math.max(parsed.delta, 5))
+      if (parsed.suggestions) setSuggestions(parsed.suggestions)
+      if (kissPlaces.length > 0 && destination) {
+        fetchPlaceImage(kissPlaces[0], destination.city).then((placeUrl) => {
+          if (placeUrl) addMsg({ role: 'character', content: `📍 ${kissPlaces[0]}`, characterId: trip.companionId, timestamp: Date.now(), imageUrl: placeUrl })
+        }).catch(() => {})
+      }
+    } catch (e) {
+      console.error('Get a kiss error:', e)
+      setIsStreaming(false)
+      setStreamedText('')
+    } finally {
+      setIsGeneratingChatImage(false)
+    }
+  }
+
   async function handleSelfie() {
     if (!trip || !companion || !destination || isGeneratingChatImage || isStreaming) return
 
@@ -2073,14 +2144,15 @@ export function TravelReaderPage() {
                   className="mb-2"
                 >
                   <div
-                    className="grid grid-cols-4 gap-1 p-1.5 rounded-xl"
-                    style={{ width: 400, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+                    className="grid grid-cols-5 gap-1 p-1.5 rounded-xl"
+                    style={{ width: 500, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
                   >
                     {[
                       { id: 'show-me', emoji: '📸', label: 'Show me', desc: 'Visualize the scene', handler: handleShowMe },
                       { id: 'selfie', emoji: '🤳', label: 'Selfie', desc: 'Snap a pic together', handler: handleSelfie },
                       { id: 'buy-gift', emoji: '🎁', label: 'Buy a gift', desc: 'They\'ll love it', handler: handleBuyGift },
                       { id: 'hold-hands', emoji: '💕', label: 'Hold hands', desc: 'A little closer', handler: handleHoldHands },
+                      { id: 'get-kiss', emoji: '💋', label: 'Get a kiss', desc: 'Lean in slowly', handler: handleGetKiss },
                     ].map((action) => (
                       <button
                         key={action.id}
