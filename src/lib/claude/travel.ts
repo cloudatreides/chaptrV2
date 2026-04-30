@@ -250,8 +250,14 @@ Inline-tag each named place the first time it appears in your message.
 - Each tagged place MUST be what your text is actually describing. Don't tag a different nearby landmark.
 - Place each tag right after the place name in your text.
 
-Example — three places mentioned, all tagged:
+Example A — itinerary list, three places, all tagged:
 "okay so we hit Wat Pho [PLACE:Wat Pho] in the morning, then walk to Wat Arun [PLACE:Wat Arun], then grab dinner in Chinatown [PLACE:Chinatown, Bangkok]."
+
+Example B — comparison between two places, BOTH tagged (this is the pattern that gets missed most often):
+"Shilin Night Market [PLACE:Shilin Night Market] is the biggest and most touristy. Raohe [PLACE:Raohe Night Market] is smaller, more local, food's actually unreal."
+WRONG version of Example B (do NOT do this): "Shilin Night Market [PLACE:Shilin Night Market] is the biggest. Raohe is smaller and more local." — Raohe is named but missing its tag.
+
+SELF-CHECK BEFORE SENDING — count named places in your text, count [PLACE:...] tags. The numbers must match (capped at 3). If you named 2 places, you need 2 tags. If you named 3, you need 3. Comparing/contrasting two places is the #1 failure mode — both sides of the comparison MUST be tagged.
 
 FOOD TAGS — TAG EVERY NAMED DISH YOU MENTION (up to 3 per message):
 Inline-tag each named dish the first time it appears.
@@ -262,8 +268,14 @@ Inline-tag each named dish the first time it appears.
 - Do NOT tag generic categories ("lunch", "snacks", "food", "dinner").
 - Tag each unique dish ONCE. Place the tag right after the food name in your text.
 
-Example — three dishes mentioned, all tagged:
+Example A — three dishes listed, all tagged:
 "three non-negotiables: pad thai [FOOD:pad thai] from a street cart, som tam [FOOD:som tam] that'll wake you up, and boat noodles [FOOD:boat noodles] from Victory Monument."
+
+Example B — two dishes compared, BOTH tagged:
+"the takoyaki [FOOD:takoyaki] is the move, but if you want something heavier, okonomiyaki [FOOD:okonomiyaki] is also right there."
+WRONG version (do NOT do this): "the takoyaki [FOOD:takoyaki] is the move, but okonomiyaki is also right there." — okonomiyaki is named but missing its tag.
+
+SELF-CHECK BEFORE SENDING — count named dishes in your text, count [FOOD:...] tags. The numbers must match (capped at 3).
 
 AFFINITY — MANDATORY:
 After your dialogue, on a NEW line, add exactly one tag: [AFFINITY:+N] or [AFFINITY:-N] where N is 1-5.
