@@ -10,7 +10,7 @@ import { generateDayItinerary, streamTravelScene, streamTravelChatReply, generat
 import { parseAffinityDelta } from '../lib/claude/affinity'
 import { parsePlaceTags, parseFoodTags, fetchPlaceImage, fetchFoodImage } from '../lib/imageSearch'
 import { extractMemories } from '../lib/claude/memory'
-import { generateSceneImage as generateImage, generateCharacterPortrait } from '../lib/togetherAi'
+import { generateSceneImage as generateImage, generateCharacterPortrait, persistImage } from '../lib/togetherAi'
 import { generateNanoBananaImage } from '../lib/nanoBanana'
 import { buildReactionImagePrompt } from '../data/chatActions'
 import { DayTransition } from '../components/travel/DayTransition'
@@ -23,6 +23,9 @@ import { TypingIndicator } from '../components/TypingIndicator'
 import { highlightName } from '../lib/highlightName'
 import { ambientPlayer } from '../lib/ambientPlayer'
 import { ambientAudio } from '../lib/ambientAudio'
+import { ImageLightbox } from '../components/ImageLightbox'
+
+interface LightboxState { imageUrl: string; label: string }
 
 type ViewMode = 'chat' | 'scene' | 'transition' | 'day-start' | 'day-end' | 'complete' | 'departure'
 
@@ -133,11 +136,12 @@ function SaveToAlbumBtn({ imageUrl, label, destinationId, companionId }: { image
   )
 }
 
-function PlaceFoodCard({ kind, msg, destinationId, companionId }: {
+function PlaceFoodCard({ kind, msg, destinationId, companionId, onImageClick }: {
   kind: 'place' | 'food'
   msg: ChatMessage
   destinationId: string
   companionId: string
+  onImageClick: (state: LightboxState) => void
 }) {
   const urls = msg.imageUrls && msg.imageUrls.length > 0
     ? msg.imageUrls
@@ -163,6 +167,7 @@ function PlaceFoodCard({ kind, msg, destinationId, companionId }: {
           urls={urls}
           labels={labels}
           onIndexChange={setActiveIndex}
+          onImageClick={(i) => onImageClick({ imageUrl: urls[i], label: labels[i] ?? labels[0] ?? '' })}
         />
         <div className="px-3 py-2 flex items-center gap-1.5">
           {kind === 'place' && <MapPin size={10} className="text-purple-400/60 shrink-0" />}
@@ -181,10 +186,11 @@ function PlaceFoodCard({ kind, msg, destinationId, companionId }: {
   )
 }
 
-function CarouselWithIndex({ urls, labels, onIndexChange }: {
+function CarouselWithIndex({ urls, labels, onIndexChange, onImageClick }: {
   urls: string[]
   labels: string[]
   onIndexChange: (i: number) => void
+  onImageClick?: (i: number) => void
 }) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [activeIndex, setActiveIndex] = useState(0)
@@ -225,7 +231,8 @@ function CarouselWithIndex({ urls, labels, onIndexChange }: {
             <img
               src={url}
               alt={labels[i] ?? ''}
-              className="w-full h-full object-cover"
+              className={`w-full h-full object-cover ${onImageClick ? 'cursor-zoom-in' : ''}`}
+              onClick={() => onImageClick?.(i)}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
             />
           </div>
@@ -292,6 +299,7 @@ export function TravelReaderPage() {
   const [showCompanionSettings, setShowCompanionSettings] = useState(false)
   const [imageLoadingSceneId, setImageLoadingSceneId] = useState<string | null>(null)
   const [isGeneratingChatImage, setIsGeneratingChatImage] = useState(false)
+  const [lightbox, setLightbox] = useState<LightboxState | null>(null)
   const [isRegeneratingDeparture, setIsRegeneratingDeparture] = useState(false)
 
   const regenerateDepartureImage = async () => {
@@ -325,13 +333,26 @@ export function TravelReaderPage() {
       const refs = [activeChar?.selfieUrl, companionPortrait]
         .filter((u): u is string => !!u)
         .map(toAbs)
-      const result = await generateNanoBananaImage({
-        prompt,
-        referenceImageUrls: refs,
-        model: 'gemini-2.5-flash-image',
-      })
+      const timeout = new Promise<{ error: string }>((resolve) =>
+        setTimeout(() => resolve({ error: 'timeout after 45s' }), 45000)
+      )
+      const result = await Promise.race([
+        generateNanoBananaImage({
+          prompt,
+          referenceImageUrls: refs,
+          model: 'gemini-2.5-flash-image',
+        }),
+        timeout,
+      ])
       if ('imageDataUrl' in result) {
-        setDepartureImage(result.imageDataUrl)
+        // Persist before storing — see DepartureScreen.tsx for rationale.
+        const persistKey = `departure|${prompt}|${refs.join('|')}`
+        const persisted = await persistImage(result.imageDataUrl, persistKey, 'departures')
+        if (persisted) {
+          setDepartureImage(persisted)
+        } else {
+          console.warn('[Departure regenerate] Persist failed — skipping to protect state')
+        }
       } else {
         console.warn('[Departure regenerate] Nano Banana failed:', result.error)
       }
@@ -1801,7 +1822,7 @@ export function TravelReaderPage() {
                               return (
                                 <div key={i} className="flex justify-center my-2">
                                   <div className="rounded-xl overflow-hidden relative" style={{ maxWidth: 360, background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.12)' }}>
-                                    {msg.imageUrl && <img src={msg.imageUrl} alt="" className="w-full" style={{ aspectRatio: '16/9', objectFit: 'cover' }} />}
+                                    {msg.imageUrl && <img src={msg.imageUrl} alt="" className="w-full cursor-zoom-in" style={{ aspectRatio: '16/9', objectFit: 'cover' }} onClick={() => setLightbox({ imageUrl: msg.imageUrl!, label: msg.content })} />}
                                     <div className="px-3 py-2">
                                       <p className="text-white/50 text-xs" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{msg.content}</p>
                                     </div>
@@ -1818,6 +1839,7 @@ export function TravelReaderPage() {
                                   msg={msg}
                                   destinationId={trip.destinationId}
                                   companionId={trip.companionId}
+                                  onImageClick={setLightbox}
                                 />
                               )
                             }
@@ -1829,6 +1851,7 @@ export function TravelReaderPage() {
                                   msg={msg}
                                   destinationId={trip.destinationId}
                                   companionId={trip.companionId}
+                                  onImageClick={setLightbox}
                                 />
                               )
                             }
@@ -1846,7 +1869,7 @@ export function TravelReaderPage() {
                               <div key={i} className="flex flex-col gap-1.5">
                                 {msg.imageUrl && (
                                   <div className="rounded-xl overflow-hidden relative" style={{ maxWidth: 360, border: '1px solid rgba(255,255,255,0.08)' }}>
-                                    <img src={msg.imageUrl} alt="" className="w-full" style={{ aspectRatio: '16/9', objectFit: 'cover' }} />
+                                    <img src={msg.imageUrl} alt="" className="w-full cursor-zoom-in" style={{ aspectRatio: '16/9', objectFit: 'cover' }} onClick={() => setLightbox({ imageUrl: msg.imageUrl!, label: `${companionName} moment` })} />
                                     <SaveToAlbumBtn imageUrl={msg.imageUrl} label={`${companionName} moment`} destinationId={trip.destinationId} companionId={trip.companionId} />
                                   </div>
                                 )}
@@ -1945,8 +1968,9 @@ export function TravelReaderPage() {
                               <img
                                 src={msg.imageUrl}
                                 alt=""
-                                className="w-full"
+                                className="w-full cursor-zoom-in"
                                 style={{ aspectRatio: '16/9', objectFit: 'cover' }}
+                                onClick={() => setLightbox({ imageUrl: msg.imageUrl!, label: msg.content })}
                               />
                             )}
                             <div className="px-3 py-2">
@@ -1972,6 +1996,7 @@ export function TravelReaderPage() {
                           msg={msg}
                           destinationId={trip.destinationId}
                           companionId={trip.companionId}
+                          onImageClick={setLightbox}
                         />
                       )
                     }
@@ -1984,6 +2009,7 @@ export function TravelReaderPage() {
                           msg={msg}
                           destinationId={trip.destinationId}
                           companionId={trip.companionId}
+                          onImageClick={setLightbox}
                         />
                       )
                     }
@@ -2011,7 +2037,7 @@ export function TravelReaderPage() {
                           className="rounded-xl overflow-hidden relative"
                           style={{ maxWidth: 360, border: '1px solid rgba(255,255,255,0.08)' }}
                         >
-                          <img src={msg.imageUrl} alt="" className="w-full" style={{ aspectRatio: '16/9', objectFit: 'cover' }} />
+                          <img src={msg.imageUrl} alt="" className="w-full cursor-zoom-in" style={{ aspectRatio: '16/9', objectFit: 'cover' }} onClick={() => setLightbox({ imageUrl: msg.imageUrl!, label: `${companionName} moment` })} />
                           <SaveToAlbumBtn imageUrl={msg.imageUrl} label={`${companionName} moment`} destinationId={trip.destinationId} companionId={trip.companionId} />
                         </motion.div>
                       )}
@@ -2408,6 +2434,13 @@ export function TravelReaderPage() {
           </Drawer.Content>
         </Drawer.Portal>
       </Drawer.Root>
+      <ImageLightbox
+        imageUrl={lightbox?.imageUrl ?? null}
+        label={lightbox?.label ?? ''}
+        destinationId={trip?.destinationId ?? ''}
+        companionId={trip?.companionId ?? ''}
+        onClose={() => setLightbox(null)}
+      />
     </div>
   )
 }
