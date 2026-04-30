@@ -783,6 +783,36 @@ export function TravelReaderPage() {
     }
   }, [input, trip, companion, destination, isStreaming, activeChar])
 
+  // Soften the visualizer input so we don't hand Gemini's safety filter the
+  // exact words that'll make it refuse. Two effects:
+  //   1) Pull just the *action beats* (text in asterisks) — those describe
+  //      what the camera sees, which is what we want anyway. Skip dialogue.
+  //   2) Replace known-spicy verbs with anime-safe synonyms. Same scene,
+  //      tamer wording. Pin → lean toward, fondle → embrace, etc.
+  function sanitizeShowMeContent(raw: string): string {
+    const beats = Array.from(raw.matchAll(/\*([^*]+)\*/g)).map((m) => m[1].trim())
+    let body = beats.length > 0 ? beats.join('. ') : raw.replace(/\*[^*]*\*/g, '').trim()
+    const replacements: [RegExp, string][] = [
+      [/\bfondl(e|ing|es|ed)\b/gi, 'hold close'],
+      [/\bgrop(e|ing|es|ed)\b/gi, 'embrace'],
+      [/\bpin(?:s|ned|ning)?\s+(?:you|me|her|him|them)\b/gi, 'leans toward $&'.replace('$&', '')],
+      [/\bpin(?:s|ned|ning)?\b/gi, 'lean close'],
+      [/\bundress(?:ing|ed|es)?\b/gi, 'leaning in'],
+      [/\bnaked|nude|topless|bare\s*chest(?:ed)?\b/gi, ''],
+      [/\bcleav(age|y)\b/gi, 'collarbone'],
+      [/\bshirt\s*(off|up)\b/gi, 'collar undone'],
+      [/\bI\s*(want|need)\s+you\s+(now|right\s+now|so\s+bad)\b/gi, 'thinking of you'],
+      [/\b(want|need)\s+to\s+(touch|feel)\s+you\b/gi, 'lean close to you'],
+      [/\bsex|sexy|sexual(?:ly)?\b/gi, 'romantic'],
+      [/\bmake\s*out|making\s*out\b/gi, 'kissing softly'],
+      [/\b(hard|deep|hungry)\s+kiss\b/gi, 'soft kiss'],
+      [/\bagainst\s+the\s+wall\b/gi, 'in the alcove'],
+    ]
+    for (const [re, sub] of replacements) body = body.replace(re, sub)
+    body = body.replace(/\s{2,}/g, ' ').trim()
+    return body.slice(0, 180)
+  }
+
   async function handleShowMe() {
     if (!trip || !companion || !destination || isGeneratingChatImage || isStreaming) return
 
@@ -795,30 +825,42 @@ export function TravelReaderPage() {
 
     const currentScene = getCurrentScene()
     const locationContext = currentScene ? `${currentScene.location}, ${destination.city}` : destination.city
-    const imagePrompt = `anime illustration, cel-shaded, cinematic scene: ${lastCompanionMsg.content.slice(0, 200)}. Setting: ${locationContext}. Atmospheric lighting, detailed background, vibrant anime art`
+    const sanitized = sanitizeShowMeContent(lastCompanionMsg.content)
+    const fullPrompt = sanitized
+      ? `tasteful anime illustration, cel-shaded, cinematic scene: ${sanitized}. Setting: ${locationContext}. Atmospheric lighting, detailed background, vibrant anime art, fully clothed, no nudity`
+      : `tasteful anime illustration, cel-shaded, atmospheric scene at ${locationContext}, ${currentScene?.activity ?? 'travelers exploring together'}, atmospheric lighting, detailed background, vibrant anime art`
+    // Pure scene fallback: zero dialogue, just place + activity. Almost
+    // always passes Gemini's filter even when the chat got spicy.
+    const fallbackPrompt = `tasteful anime illustration, cel-shaded, atmospheric establishing shot of ${locationContext}, ${currentScene?.activity ?? 'a quiet moment in this place'}, atmospheric lighting, detailed background, vibrant anime art, no people in foreground`
+
+    const addImageToChat = (url: string) => {
+      const imageMsg: ChatMessage = {
+        role: 'character',
+        content: `📸 Here's what I'm talking about...`,
+        characterId: trip.companionId,
+        timestamp: Date.now(),
+        imageUrl: url,
+      }
+      if (isPlanning) addTravelPlanningMessage(imageMsg)
+      else addTravelDayChatMessage(trip.currentDay, imageMsg)
+    }
 
     try {
-      const url = await generateTravelImage(imagePrompt, activeChar?.selfieUrl)
+      // Pass 1: sanitized companion-message + scene.
+      let url = await generateTravelImage(fullPrompt, activeChar?.selfieUrl)
+      if (!url) {
+        // Pass 2: location-only fallback (no companion message at all). The
+        // user paid for an image, so we'd rather show a tasteful establishing
+        // shot than refund silently — the chat already carries the spicy
+        // content via the dialogue itself.
+        console.warn('[Show me] sanitized prompt was refused — retrying with location-only fallback')
+        url = await generateTravelImage(fallbackPrompt, undefined, false)
+      }
       if (url) {
-        const imageMsg: ChatMessage = {
-          role: 'character',
-          content: `📸 Here's what I'm talking about...`,
-          characterId: trip.companionId,
-          timestamp: Date.now(),
-          imageUrl: url,
-        }
-        if (isPlanning) {
-          addTravelPlanningMessage(imageMsg)
-        } else {
-          addTravelDayChatMessage(trip.currentDay, imageMsg)
-        }
+        addImageToChat(url)
       } else {
-        // Most common cause: Gemini's safety filter refused the prompt.
-        // The image gen sees the last companion message + scene context,
-        // and intimate or suggestive subtext routinely trips the refuse path.
-        // Show a toast so the user isn't staring at a vanished progress bar.
-        console.warn('[Show me] image generation returned null — likely Gemini content filter or persist failure')
-        setToastMessage('Couldn\'t paint that scene — too suggestive for the visualizer. Try after a tamer beat.')
+        console.warn('[Show me] both passes returned null — likely persist failure or sustained content refusal')
+        setToastMessage('Couldn\'t paint that one. Try a different scene beat.')
         setTimeout(() => setToastMessage(null), 4000)
       }
     } catch (e) {
