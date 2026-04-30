@@ -35,6 +35,7 @@ export function TravelCityPage() {
 
   // Profile modal
   const [modalCompanion, setModalCompanion] = useState<TravelCompanion | null>(null)
+  const [customDetailId, setCustomDetailId] = useState<string | null>(null)
   const [modalSliders, setModalSliders] = useState<CompanionSliders>({ ...DEFAULT_SLIDERS })
 
   // Remix modal
@@ -79,6 +80,16 @@ export function TravelCityPage() {
       setSelectedId(id)
       setSliders(cc.sliders)
     }
+  }
+
+  function handleOpenCustomDetail(id: string) {
+    setCustomDetailId(id)
+  }
+
+  function handleSelectFromCustomDetail() {
+    if (!customDetailId) return
+    handleSelectCustom(customDetailId)
+    setCustomDetailId(null)
   }
 
   function handleOpenProfile(comp: TravelCompanion) {
@@ -408,7 +419,7 @@ export function TravelCityPage() {
                     style={{
                       border: isSelected ? '2px solid rgba(124,58,237,0.5)' : '1px solid rgba(255,255,255,0.06)',
                     }}
-                    onClick={() => handleSelectCustom(cc.id)}
+                    onClick={() => handleOpenCustomDetail(cc.id)}
                   >
                     <div className="relative aspect-[3/4] overflow-hidden">
                       {portraitSrc ? (
@@ -662,6 +673,129 @@ export function TravelCityPage() {
             </motion.div>
           </motion.div>
         )}
+      </AnimatePresence>
+
+      {/* ═══════════════ Custom (remixed) Companion Detail Modal ═══════════════ */}
+      <AnimatePresence>
+        {customDetailId && (() => {
+          const cc = customCompanions.find((c) => c.id === customDetailId)
+          const base = cc ? TRAVEL_COMPANIONS.find((c) => c.characterId === cc.baseId) : null
+          if (!cc || !base) return null
+          const portraitSrc = cc.remix.imageUrl ?? base.character.staticPortrait
+          return (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
+              onClick={() => setCustomDetailId(null)}
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                transition={{ type: 'spring', duration: 0.3 }}
+                className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl p-6"
+                style={{ background: '#161222', border: '1px solid rgba(124,58,237,0.2)' }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button onClick={() => setCustomDetailId(null)} className="absolute top-4 right-4 text-white/30 hover:text-white/60 cursor-pointer z-10">
+                  <X size={18} />
+                </button>
+
+                <div className="flex flex-col items-center mb-6">
+                  {portraitSrc ? (
+                    <SelfieImg
+                      src={portraitSrc}
+                      alt={cc.remix.name}
+                      className="w-24 h-24 rounded-full object-cover mb-3"
+                      fallback={
+                        <div className="w-24 h-24 rounded-full flex items-center justify-center text-4xl mb-3" style={{ background: '#2D2538', border: '2px solid rgba(124,58,237,0.3)' }}>
+                          {base.character.avatar}
+                        </div>
+                      }
+                    />
+                  ) : (
+                    <div className="w-24 h-24 rounded-full flex items-center justify-center text-4xl mb-3" style={{ background: '#2D2538', border: '2px solid rgba(124,58,237,0.3)' }}>
+                      {base.character.avatar}
+                    </div>
+                  )}
+                  <h3 className="text-white text-xl font-bold" style={{ fontFamily: "'Syne', sans-serif" }}>
+                    {cc.remix.name}
+                  </h3>
+                  <p className="text-white/40 text-xs mt-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                    {cc.sliders.chattiness > 50 ? 'Chatty' : 'Quiet'} · {cc.sliders.planningStyle > 50 ? 'Planner' : 'Spontaneous'} · {cc.sliders.vibe > 50 ? 'Thoughtful' : 'Playful'} · <span className="text-purple-300/70">Remix of {base.character.name}</span>
+                  </p>
+                </div>
+
+                {cc.remix.personalityTraits.length > 0 && (
+                  <div className="mb-5">
+                    <h4 className="text-white/40 text-[11px] uppercase tracking-[1.5px] mb-2.5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Personality</h4>
+                    <ul className="space-y-1.5">
+                      {cc.remix.personalityTraits.map((trait, i) => (
+                        <li key={i} className="text-white/50 text-xs leading-relaxed flex items-start gap-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                          <span className="text-purple-400/50 mt-0.5">·</span>{trait}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {cc.remix.travelStyle.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="text-white/40 text-[11px] uppercase tracking-[1.5px] mb-2.5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Travel style</h4>
+                    <ul className="space-y-1.5">
+                      {cc.remix.travelStyle.map((style, i) => (
+                        <li key={i} className="text-white/50 text-xs leading-relaxed flex items-start gap-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                          <span className="text-purple-400/50 mt-0.5">·</span>{style}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <div className="border-t border-white/[0.06] pt-5 mb-5">
+                  <h4 className="text-white/40 text-[11px] uppercase tracking-[1.5px] mb-3" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>How are you traveling together?</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {(['romantic', 'friend'] as const).map((rel) => {
+                      const active = relationship === rel
+                      return (
+                        <button
+                          key={rel}
+                          onClick={() => setRelationship(rel)}
+                          className="cursor-pointer px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors"
+                          style={{
+                            background: active ? 'linear-gradient(135deg, #7C3AED, #c84b9e)' : 'rgba(255,255,255,0.04)',
+                            color: active ? '#fff' : 'rgba(255,255,255,0.5)',
+                            border: active ? '1px solid transparent' : '1px solid rgba(255,255,255,0.06)',
+                            fontFamily: "'Space Grotesk', sans-serif",
+                          }}
+                        >
+                          {rel === 'romantic' ? '💞 Romantic partners' : '🤝 Just friends'}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  <p className="text-white/30 text-[11px] mt-2 leading-relaxed" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                    {relationship === 'romantic'
+                      ? `${cc.remix.name} will travel as your partner — flirty, intimate, affectionate.`
+                      : `${cc.remix.name} will travel as a close friend — fun, easy, no romantic subtext.`}
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-2.5">
+                  <button onClick={handleSelectFromCustomDetail} className="w-full py-3 rounded-xl text-white font-medium text-sm cursor-pointer" style={{ fontFamily: "'Space Grotesk', sans-serif", background: 'linear-gradient(135deg, #7C3AED, #c84b9e)' }}>
+                    Select {cc.remix.name}
+                  </button>
+                  <button onClick={() => { setCustomDetailId(null); openRemixModal(base, cc.id) }} className="w-full py-3 rounded-xl text-white/60 font-medium text-sm cursor-pointer flex items-center justify-center gap-2" style={{ fontFamily: "'Space Grotesk', sans-serif", background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <Shuffle size={14} /> Edit remix
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )
+        })()}
       </AnimatePresence>
 
       {/* ═══════════════ Remix Modal ═══════════════ */}
