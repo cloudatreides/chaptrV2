@@ -112,6 +112,19 @@ export interface TripProgress {
   totalEngagementMs: number
   extensions?: number
   departureImageUrl?: string
+  // Saved romantic moments (cuddle / let's get closer). Optional —
+  // defaults to [] for trips that predate the field.
+  intimateMoments?: IntimateMoment[]
+}
+
+export interface IntimateMoment {
+  id: string
+  kind: 'cuddle' | 'closer'
+  label: string  // variant label or 'Cuddle'
+  imageUrl: string
+  day: number
+  city: string
+  createdAt: number
 }
 
 export interface CustomCompanion {
@@ -284,6 +297,7 @@ interface StoreState {
   addCompanionMemory: (memory: string) => void
   addTravelEngagementTime: (ms: number) => void
   setDepartureImage: (url: string) => void
+  saveIntimateMoment: (moment: IntimateMoment) => void
   completeTrip: () => void
   extendTrip: () => void
   resetTrip: () => void
@@ -902,6 +916,19 @@ export const useStore = create<StoreState>()(
           travelTrips: {
             ...s.travelTrips,
             [id]: { ...s.travelTrips[id], departureImageUrl: url },
+          },
+        }
+      }),
+
+      saveIntimateMoment: (moment) => set((s) => {
+        const id = s.activeTripId
+        if (!id || !s.travelTrips[id]) return {}
+        const trip = s.travelTrips[id]
+        const existing = trip.intimateMoments ?? []
+        return {
+          travelTrips: {
+            ...s.travelTrips,
+            [id]: { ...trip, intimateMoments: [...existing, moment] },
           },
         }
       }),
