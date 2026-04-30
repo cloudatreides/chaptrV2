@@ -1,5 +1,5 @@
 import { makeClaudeRequest, streamSSE, stripMarkdown } from './core'
-import { buildTravelSystemPrompt, getTravelCompanion, getCompanionIntro, type CompanionSliders, type CompanionRemix } from '../../data/travel/companions'
+import { buildTravelSystemPrompt, getTravelCompanion, getCompanionIntro, type CompanionSliders, type CompanionRemix, type TripRelationship } from '../../data/travel/companions'
 import { getDestination, type Destination } from '../../data/travel/destinations'
 import type { ChatMessage, TripDay, TripScene } from '../../store/useStore'
 
@@ -10,16 +10,20 @@ export async function generateDayItinerary(params: {
   companionId: string
   companionSliders: CompanionSliders
   companionRemix?: CompanionRemix
+  relationship?: TripRelationship
   planningHistory: ChatMessage[]
   dayNumber: number
   previousDays: TripDay[]
   companionMemories: string[]
 }): Promise<TripDay> {
-  const { destinationId, companionId, companionRemix, planningHistory, dayNumber, previousDays, companionMemories } = params
+  const { destinationId, companionId, companionRemix, relationship, planningHistory, dayNumber, previousDays, companionMemories } = params
   const destination = getDestination(destinationId)
   const companion = getTravelCompanion(companionId)
   if (!destination || !companion) throw new Error(`Missing destination or companion: ${destinationId}, ${companionId}`)
   const companionName = companionRemix?.name ?? companion.character.name
+  const relHint = (relationship ?? 'romantic') === 'romantic'
+    ? `\n\nRELATIONSHIP CONTEXT: ${companionName} is the traveler's romantic partner. Lean toward intimate, sensory experiences — sunset rooftops, quiet cafes, evening walks, places to share food. Mix in a few non-romantic activities so it doesn't feel like a honeymoon checklist.`
+    : `\n\nRELATIONSHIP CONTEXT: ${companionName} is the traveler's close friend. Lean toward fun, social, exploratory activities — markets, group experiences, photo spots, food tours. No "couples vibe" places.`
 
   const previousSummary = previousDays.length > 0
     ? `\n\nPREVIOUS DAYS:\n${previousDays.map((d) => `Day ${d.dayNumber} (${d.theme}): ${d.scenes.map((s) => `${s.location} — ${s.activity}`).join(', ')}`).join('\n')}\nDo NOT repeat locations or activities from previous days.`
@@ -35,7 +39,7 @@ export async function generateDayItinerary(params: {
 
   const system = `You are a travel itinerary generator for ${destination.city}, ${destination.country}. You create specific, opinionated day plans grounded in real places.
 
-${destination.locationKnowledge}${previousSummary}${chatContext}${memoryContext}
+${destination.locationKnowledge}${relHint}${previousSummary}${chatContext}${memoryContext}
 
 Generate Day ${dayNumber} of a ${destination.tripDays}-day trip. Base the plan on what the traveler said they want during the planning conversation. Be specific — real neighborhoods, real types of food, real experiences.
 
@@ -122,13 +126,14 @@ export async function* streamTravelScene(params: {
   companionId: string
   companionSliders: CompanionSliders
   companionRemix?: CompanionRemix
+  relationship?: TripRelationship
   tripContext: string
   recentChat: ChatMessage[]
   playerName: string | null
   bio: string | null
   signal?: AbortSignal
 }): AsyncGenerator<string> {
-  const { scene, destination, companionId, companionSliders, companionRemix, tripContext, recentChat, playerName, bio, signal } = params
+  const { scene, destination, companionId, companionSliders, companionRemix, relationship, tripContext, recentChat, playerName, bio, signal } = params
   const companion = getTravelCompanion(companionId)
   if (!companion) throw new Error(`Unknown companion: ${companionId}`)
   const companionName = companionRemix?.name ?? companion.character.name
@@ -141,9 +146,15 @@ export async function* streamTravelScene(params: {
     ? `\nCHARACTER IDENTITY: ${companionName}.${companionRemix.personalityTraits.length > 0 ? ` Personality: ${companionRemix.personalityTraits.join('. ')}.` : ''}${companionRemix.travelStyle.length > 0 ? ` Travel style: ${companionRemix.travelStyle.join('. ')}.` : ''}`
     : ''
 
+  const relFraming = (relationship ?? 'romantic') === 'romantic'
+    ? `RELATIONSHIP: ${companionName} is the protagonist's romantic partner. Render their presence with affection — a hand brushing, a look, a kiss on the temple. Sensual and intimate where natural, never graphic.`
+    : `RELATIONSHIP: ${companionName} is the protagonist's close friend. Warm, easy, platonic — no romantic subtext.`
+
   const system = `You are writing immersive travel scene prose for a virtual trip to ${destination.city}, ${destination.country}.
 
 COMPANION: ${companionName} is traveling with the protagonist. Their energy: ${companionSliders.vibe < 40 ? 'playful and light' : companionSliders.vibe > 60 ? 'thoughtful and present' : 'balanced'}.${remixContext}
+
+${relFraming}
 
 TRIP CONTEXT: ${tripContext}${recentChatText}
 ${bio ? `\nTRAVELER PERSONALITY: "${bio}"` : ''}${playerName ? `\nTRAVELER NAME: ${playerName}. Use occasionally in narration.` : ''}
@@ -182,6 +193,7 @@ export async function* streamTravelChatReply(params: {
   companionId: string
   companionSliders: CompanionSliders
   companionRemix?: CompanionRemix
+  relationship?: TripRelationship
   destinationId: string
   messages: ChatMessage[]
   chatType: 'planning' | 'reaction' | 'freeform' | 'recap' | 'surprise' | 'morning'
@@ -193,12 +205,12 @@ export async function* streamTravelChatReply(params: {
   playerName: string | null
   signal?: AbortSignal
 }): AsyncGenerator<string> {
-  const { companionId, companionSliders, companionRemix, destinationId, messages, chatType, sceneContext, tripContext, companionMemories, travelAffinityScore, bio, playerName, signal } = params
+  const { companionId, companionSliders, companionRemix, relationship, destinationId, messages, chatType, sceneContext, tripContext, companionMemories, travelAffinityScore, bio, playerName, signal } = params
   const companion = getTravelCompanion(companionId)
   const destination = getDestination(destinationId)
   if (!companion || !destination) throw new Error(`Missing companion or destination`)
 
-  let system = buildTravelSystemPrompt(companion, companionSliders, destination.locationKnowledge, companionRemix)
+  let system = buildTravelSystemPrompt(companion, companionSliders, destination.locationKnowledge, companionRemix, relationship)
 
   if (bio) system += `\nTraveler personality: "${bio}"`
   if (playerName) {
@@ -329,6 +341,7 @@ export async function generateTravelOpeningMessage(params: {
   companionId: string
   companionSliders: CompanionSliders
   companionRemix?: CompanionRemix
+  relationship?: TripRelationship
   destinationId: string
   chatType: 'planning' | 'reaction' | 'freeform' | 'recap' | 'surprise' | 'morning'
   sceneContext?: string
@@ -336,7 +349,7 @@ export async function generateTravelOpeningMessage(params: {
   bio: string | null
   playerName: string | null
 }): Promise<{ content: string; suggestions?: string[] }> {
-  const { companionId, companionSliders, companionRemix, destinationId, chatType, sceneContext, tripContext, bio, playerName } = params
+  const { companionId, companionSliders, companionRemix, relationship, destinationId, chatType, sceneContext, tripContext, bio, playerName } = params
   const companion = getTravelCompanion(companionId)
   const destination = getDestination(destinationId)
   if (!companion || !destination) return { content: '...' }
@@ -345,7 +358,7 @@ export async function generateTravelOpeningMessage(params: {
     return { content: getCompanionIntro(companion, destinationId, playerName) }
   }
 
-  let system = buildTravelSystemPrompt(companion, companionSliders, destination.locationKnowledge, companionRemix)
+  let system = buildTravelSystemPrompt(companion, companionSliders, destination.locationKnowledge, companionRemix, relationship)
   if (bio) system += `\nTraveler personality: "${bio}"`
   if (tripContext) system += `\n\nTRIP SO FAR: ${tripContext}`
   if (playerName) {

@@ -89,11 +89,16 @@ export interface TripItinerary {
   days: TripDay[]
 }
 
+export type TripRelationship = 'romantic' | 'friend'
+
 export interface TripProgress {
   destinationId: string
   companionId: string
   companionSliders: { chattiness: number; planningStyle: number; vibe: number }
   companionRemix?: { name: string; imageUrl?: string; personalityTraits: string[]; travelStyle: string[] }
+  // Drives system-prompt framing. Defaults to 'romantic' on trips that
+  // predate this field (see persist migration v12).
+  relationship?: TripRelationship
   currentDay: number
   currentSceneIndex: number
   phase: 'planning' | 'day' | 'recap' | 'complete'
@@ -265,7 +270,7 @@ interface StoreState {
   travelTrips: Record<string, TripProgress>
   activeTripId: string | null
   setActiveTripId: (id: string) => void
-  startTrip: (destinationId: string, companionId: string, sliders: { chattiness: number; planningStyle: number; vibe: number }, remix?: { name: string; imageUrl?: string; personalityTraits: string[]; travelStyle: string[] }) => void
+  startTrip: (destinationId: string, companionId: string, sliders: { chattiness: number; planningStyle: number; vibe: number }, remix?: { name: string; imageUrl?: string; personalityTraits: string[]; travelStyle: string[] }, relationship?: TripRelationship) => void
   addTravelPlanningMessage: (msg: ChatMessage) => void
   addTravelDayChatMessage: (day: number, msg: ChatMessage) => void
   updateTripItinerary: (day: TripDay) => void
@@ -669,7 +674,7 @@ export const useStore = create<StoreState>()(
 
       setActiveTripId: (id) => set({ activeTripId: id }),
 
-      startTrip: (destinationId, companionId, sliders, remix) => {
+      startTrip: (destinationId, companionId, sliders, remix, relationship = 'romantic') => {
         const charId = get().activeCharacterId
         if (!charId) return
         const tripId = `${charId}:${destinationId}`
@@ -681,6 +686,7 @@ export const useStore = create<StoreState>()(
               companionId,
               companionSliders: sliders,
               ...(remix ? { companionRemix: remix } : {}),
+              relationship,
               currentDay: 1,
               currentSceneIndex: 0,
               phase: 'planning',

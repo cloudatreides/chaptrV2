@@ -193,6 +193,22 @@ const IMAGE_GEN_AUDIT: ImageGenAction[] = [
     notes: 'Routes through generateTravelImage → generateSceneImage → /api/nano-banana. Affinity bumped by min 5 (vs 3 for Hold hands) since it\'s a stronger romantic beat.',
   },
   {
+    feature: '"Cuddle" day-end action',
+    category: 'Travel',
+    trigger: 'User taps 💗 Cuddle button on the wind-down screen (end of day)',
+    source: 'src/pages/TravelReaderPage.tsx (handleCuddle)',
+    model: 'Nano Banana (gemini-2.5-flash-image)',
+    references: 'twin + companion',
+    promptTemplate: 'anime illustration, cel-shaded, romantic close-up of two people cuddling under soft warm sheets in a cozy hotel bed in {destination.city}. {playerGender} and {companionDesc}. Foreheads touching, eyes closed peacefully, gentle smiles, soft warm lamplight, intimate emotional moment, vibrant anime art, ONLY these two people in the image, fully covered, tasteful and tender',
+    samplePrompts: [
+      'anime illustration, cel-shaded, romantic close-up of two people cuddling under soft warm sheets in a cozy hotel bed in Tokyo. a young man and 22-year-old Japanese woman with long dark hair, gentle expression. Foreheads touching, eyes closed peacefully, gentle smiles, soft warm lamplight, intimate emotional moment, vibrant anime art, ONLY these two people in the image, fully covered, tasteful and tender',
+      'anime illustration, cel-shaded, romantic close-up of two people cuddling under soft warm sheets in a cozy ryokan futon in Kyoto. a young man and 22-year-old Japanese woman with shoulder-length wavy hair, soft smile. Foreheads touching, eyes closed peacefully, gentle smiles, paper lantern lamplight, intimate emotional moment, vibrant anime art, ONLY these two people in the image, fully covered, tasteful and tender',
+      'anime illustration, cel-shaded, romantic close-up of two people cuddling under soft warm sheets in a cozy boutique hotel bed in Paris. a young man and 21-year-old French woman with chestnut waves, soft amused expression. Foreheads touching, eyes closed peacefully, gentle smiles, soft Parisian lamplight, intimate emotional moment, vibrant anime art, ONLY these two people in the image, fully covered, tasteful and tender',
+      'anime illustration, cel-shaded, romantic close-up of two people cuddling under soft warm sheets in a cozy beachfront villa bed in Seminyak, Bali. a young man and 23-year-old Indonesian woman with sun-kissed skin, soft smile. Foreheads touching, eyes closed peacefully, gentle smiles, soft warm lamplight with rattan shadows on the wall, intimate emotional moment, vibrant anime art, ONLY these two people in the image, fully covered, tasteful and tender',
+    ],
+    notes: 'Free for now; UI shows a strikethrough 50-gem cost as the future paid tier. Bumps affinity +5. Result lives in a modal — not persisted on the trip yet, so it\'s lost on dismiss until Save-to-memories ships.',
+  },
+  {
     feature: 'Day-start transition (no AI gen)',
     category: 'Travel',
     trigger: 'New day begins (handlePlayScene → setViewMode("day-start"))',

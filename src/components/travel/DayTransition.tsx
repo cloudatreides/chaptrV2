@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Sun, Moon, Sunrise, MapPin } from 'lucide-react'
+import { Sun, Moon, Sunrise, MapPin, Gem, Heart, Loader2 } from 'lucide-react'
 import { useMemo } from 'react'
 
 interface SceneRecap {
@@ -18,6 +18,13 @@ interface DayTransitionProps {
   onContinue: () => void
   scenes?: SceneRecap[]
   sceneImages?: Record<string, string>
+  // End-of-day "Cuddle" affordance: when provided, shows a romantic CTA
+  // beneath Wind down. cuddleCost is rendered with a strikethrough (paid in
+  // future, free for now). cuddleLoading suppresses re-clicks while the
+  // image is generating.
+  onCuddle?: () => void
+  cuddleCost?: number
+  cuddleLoading?: boolean
 }
 
 function Stars() {
@@ -47,7 +54,7 @@ function Stars() {
   )
 }
 
-export function DayTransition({ dayNumber, theme, cityName, type, heroImage, onContinue, scenes, sceneImages }: DayTransitionProps) {
+export function DayTransition({ dayNumber, theme, cityName, type, heroImage, onContinue, scenes, sceneImages, onCuddle, cuddleCost, cuddleLoading }: DayTransitionProps) {
   const isStart = type === 'start'
   const Icon = isStart ? (dayNumber === 1 ? Sunrise : Sun) : Moon
 
@@ -245,31 +252,74 @@ export function DayTransition({ dayNumber, theme, cityName, type, heroImage, onC
           </motion.div>
         )}
 
-        {/* Button */}
-        <motion.button
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: !isStart && scenes && scenes.length > 0 ? 0.9 + scenes.length * 0.1 : 0.8 }}
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-          onClick={onContinue}
-          className="mt-10 px-10 py-3.5 rounded-full text-sm font-medium cursor-pointer"
-          style={{
-            fontFamily: "'Space Grotesk', sans-serif",
-            ...(isStart
-              ? {
-                  background: 'linear-gradient(135deg, #7C3AED, #A78BFA)',
-                  color: '#FFFFFF',
-                }
-              : {
-                  background: 'rgba(139,92,246,0.15)',
-                  border: '1px solid rgba(139,92,246,0.5)',
-                  color: '#DDD6FE',
-                }),
-          }}
-        >
-          {isStart ? "Let's go" : 'Wind down'}
-        </motion.button>
+        {/* Buttons */}
+        <div className={`flex flex-col items-center ${!isStart && onCuddle ? 'gap-3' : ''}`}>
+          <motion.button
+            initial={{ y: 10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: !isStart && scenes && scenes.length > 0 ? 0.9 + scenes.length * 0.1 : 0.8 }}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={onContinue}
+            className="mt-10 px-10 py-3.5 rounded-full text-sm font-medium cursor-pointer"
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              ...(isStart
+                ? {
+                    background: 'linear-gradient(135deg, #7C3AED, #A78BFA)',
+                    color: '#FFFFFF',
+                  }
+                : {
+                    background: 'rgba(139,92,246,0.15)',
+                    border: '1px solid rgba(139,92,246,0.5)',
+                    color: '#DDD6FE',
+                  }),
+            }}
+          >
+            {isStart ? "Let's go" : 'Wind down'}
+          </motion.button>
+
+          {/* Cuddle CTA (end-of-day only). Free during pre-monetization, but
+              the UI already advertises the future gem cost with a strike-through
+              so the upgrade isn't a surprise when we flip the switch. */}
+          {!isStart && onCuddle && (
+            <motion.button
+              initial={{ y: 10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: scenes && scenes.length > 0 ? 1.0 + scenes.length * 0.1 : 0.9 }}
+              whileHover={cuddleLoading ? undefined : { scale: 1.03 }}
+              whileTap={cuddleLoading ? undefined : { scale: 0.97 }}
+              onClick={cuddleLoading ? undefined : onCuddle}
+              disabled={cuddleLoading}
+              className="px-7 py-3 rounded-full text-sm font-medium flex items-center gap-2.5 disabled:cursor-wait enabled:cursor-pointer"
+              style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                background: 'linear-gradient(135deg, rgba(200,75,158,0.18), rgba(236,72,153,0.18))',
+                border: '1px solid rgba(236,72,153,0.45)',
+                color: '#FBCFE8',
+              }}
+            >
+              {cuddleLoading ? (
+                <>
+                  <Loader2 size={14} className="animate-spin" />
+                  <span>Painting cuddle…</span>
+                </>
+              ) : (
+                <>
+                  <Heart size={14} className="fill-pink-300" style={{ color: '#FBCFE8' }} />
+                  <span>Cuddle</span>
+                  {typeof cuddleCost === 'number' && (
+                    <span className="flex items-center gap-1 ml-0.5">
+                      <Gem size={11} className="text-pink-200/60" />
+                      <span className="text-pink-200/55 line-through text-[12px]">{cuddleCost}</span>
+                      <span className="text-pink-100 text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: 'rgba(236,72,153,0.25)', border: '1px solid rgba(236,72,153,0.5)' }}>Free</span>
+                    </span>
+                  )}
+                </>
+              )}
+            </motion.button>
+          )}
+        </div>
       </div>
     </motion.div>
   )

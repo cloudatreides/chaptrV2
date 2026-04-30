@@ -371,6 +371,9 @@ export function TravelReaderPage() {
   const [showAmbientLabel, setShowAmbientLabel] = useState(true)
   const [showPortraitModal, setShowPortraitModal] = useState(false)
   const [showProgressSheet, setShowProgressSheet] = useState(false)
+  const [cuddleImageUrl, setCuddleImageUrl] = useState<string | null>(null)
+  const [isGeneratingCuddle, setIsGeneratingCuddle] = useState(false)
+  const [showCuddleModal, setShowCuddleModal] = useState(false)
 
   // Show departure screen for fresh trips (handles Zustand hydration race —
   // useState initializer may fire before store rehydrates from localStorage)
@@ -493,6 +496,7 @@ export function TravelReaderPage() {
         companionId: trip.companionId,
         companionSliders: trip.companionSliders,
         companionRemix: trip.companionRemix,
+        relationship: trip.relationship,
         destinationId: trip.destinationId,
         chatType,
         sceneContext: currentScene ? `${currentScene.location} — ${currentScene.activity}` : undefined,
@@ -572,6 +576,7 @@ export function TravelReaderPage() {
         companionId: trip.companionId,
         companionSliders: trip.companionSliders,
         companionRemix: trip.companionRemix,
+        relationship: trip.relationship,
         destinationId: trip.destinationId,
         messages,
         chatType: isPlanning ? 'planning' : getChatType(),
@@ -736,6 +741,7 @@ export function TravelReaderPage() {
           companionId: trip.companionId,
           companionSliders: trip.companionSliders,
           companionRemix: trip.companionRemix,
+        relationship: trip.relationship,
           destinationId: trip.destinationId,
           messages: [...(isPlanning ? trip.planningChatHistory : (trip.dayChatHistories[trip.currentDay] ?? [])),
             { role: 'user' as const, content: 'I just bought you a gift while we were walking around. React with surprise and genuine happiness. Be flattered and a little flustered.', characterId: 'player', timestamp: Date.now() }],
@@ -816,6 +822,7 @@ export function TravelReaderPage() {
           companionId: trip.companionId,
           companionSliders: trip.companionSliders,
           companionRemix: trip.companionRemix,
+        relationship: trip.relationship,
           destinationId: trip.destinationId,
           messages: [...(isPlanning ? trip.planningChatHistory : (trip.dayChatHistories[trip.currentDay] ?? [])),
             { role: 'user' as const, content: 'I just reached over and held your hand while we were walking. React with surprise, then warmth. Be flirtatious about it.', characterId: 'player', timestamp: Date.now() }],
@@ -887,6 +894,7 @@ export function TravelReaderPage() {
           companionId: trip.companionId,
           companionSliders: trip.companionSliders,
           companionRemix: trip.companionRemix,
+        relationship: trip.relationship,
           destinationId: trip.destinationId,
           messages: [...(isPlanning ? trip.planningChatHistory : (trip.dayChatHistories[trip.currentDay] ?? [])),
             { role: 'user' as const, content: 'I just leaned in and kissed you softly. React in the moment — surprise turning into warmth, a quiet breath against my lips, then a flirtatious whisper afterward. Keep it tender, not crude.', characterId: 'player', timestamp: Date.now() }],
@@ -933,6 +941,41 @@ export function TravelReaderPage() {
     }
   }
 
+  // Day-end "Cuddle" CTA. Generates a tasteful anime cuddle scene using the
+  // twin + companion refs and shows it in a modal. Free for now; the
+  // strikethrough gem cost in the button advertises the future paid tier.
+  async function handleCuddle() {
+    if (!trip || !companion || !destination || isGeneratingCuddle) return
+    setIsGeneratingCuddle(true)
+    setCuddleImageUrl(null)
+    setShowCuddleModal(true)
+
+    const companionDesc = companionVisualDesc
+      .split(',').slice(0, 4).join(',')
+      .replace(/^(anime style|dark|cyberpunk[^,]*|fantasy[^,]*|thriller[^,]*|sci-fi[^,]*)\s*(portrait|illustration|concept art)\s*(portrait\s*)?of\s*/i, '')
+      .trim()
+    const playerGender = activeChar?.gender === 'male' ? 'a young man' : 'a young woman'
+    const cuddlePrompt = `anime illustration, cel-shaded, romantic close-up of two people cuddling under soft warm sheets in a cozy hotel bed in ${destination.city}. ${playerGender} and ${companionDesc}. Foreheads touching, eyes closed peacefully, gentle smiles, soft warm lamplight, intimate emotional moment, vibrant anime art, ONLY these two people in the image, fully covered, tasteful and tender`
+
+    try {
+      const url = await generateTravelImage(cuddlePrompt, activeChar?.selfieUrl)
+      if (url) {
+        setCuddleImageUrl(url)
+        // Soft affinity bump for the romantic beat — same magnitude as Kiss.
+        updateTravelAffinity(5)
+      } else {
+        setToastMessage('Couldn\'t generate the cuddle image — try again')
+        setTimeout(() => setToastMessage(null), 3000)
+        setShowCuddleModal(false)
+      }
+    } catch (e) {
+      console.error('Cuddle image error:', e)
+      setShowCuddleModal(false)
+    } finally {
+      setIsGeneratingCuddle(false)
+    }
+  }
+
   async function handleSelfie() {
     if (!trip || !companion || !destination || isGeneratingChatImage || isStreaming) return
 
@@ -964,6 +1007,7 @@ export function TravelReaderPage() {
           companionId: trip.companionId,
           companionSliders: trip.companionSliders,
           companionRemix: trip.companionRemix,
+        relationship: trip.relationship,
           destinationId: trip.destinationId,
           messages: [...(isPlanning ? trip.planningChatHistory : (trip.dayChatHistories[trip.currentDay] ?? [])),
             { role: 'user' as const, content: `I just pulled you in for a selfie together here at ${locationContext}! React naturally — comment on the photo, whether you look good, suggest posting it, or joke about it.`, characterId: 'player', timestamp: Date.now() }],
@@ -1021,6 +1065,7 @@ export function TravelReaderPage() {
         companionId: trip.companionId,
         companionSliders: trip.companionSliders,
         companionRemix: trip.companionRemix,
+        relationship: trip.relationship,
         planningHistory: trip.planningChatHistory,
         dayNumber: 1,
         previousDays: [],
@@ -1059,6 +1104,7 @@ export function TravelReaderPage() {
         companionId: trip.companionId,
         companionSliders: trip.companionSliders,
         companionRemix: trip.companionRemix,
+        relationship: trip.relationship,
         planningHistory: trip.dayChatHistories[trip.currentDay] ?? [],
         dayNumber: nextDayNum,
         previousDays: trip.itinerary.days,
@@ -1121,6 +1167,7 @@ export function TravelReaderPage() {
         companionId: currentTrip.companionId,
         companionSliders: currentTrip.companionSliders,
         companionRemix: currentTrip.companionRemix,
+        relationship: currentTrip.relationship,
         tripContext: buildTripContext(),
         recentChat: currentTrip.dayChatHistories[currentTrip.currentDay] ?? [],
         playerName: activeChar?.name ?? null,
@@ -1180,6 +1227,7 @@ export function TravelReaderPage() {
         companionId: trip.companionId,
         companionSliders: trip.companionSliders,
         companionRemix: trip.companionRemix,
+        relationship: trip.relationship,
         destinationId: trip.destinationId,
         chatType: getChatType(),
         sceneContext: `${scene.location} — ${scene.activity}`,
@@ -1233,6 +1281,7 @@ export function TravelReaderPage() {
         companionId: trip.companionId,
         companionSliders: trip.companionSliders,
         companionRemix: trip.companionRemix,
+        relationship: trip.relationship,
         planningHistory: trip.dayChatHistories[trip.currentDay] ?? [],
         dayNumber: nextDayNum,
         previousDays: trip.itinerary.days,
@@ -1729,6 +1778,9 @@ export function TravelReaderPage() {
                 onContinue={() => setViewMode('chat')}
                 scenes={trip.itinerary.days.find((d) => d.dayNumber === trip.currentDay)?.scenes}
                 sceneImages={trip.sceneImages}
+                onCuddle={handleCuddle}
+                cuddleCost={50}
+                cuddleLoading={isGeneratingCuddle}
               />
             )}
 
@@ -2293,11 +2345,11 @@ export function TravelReaderPage() {
                     style={{ width: 500, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
                   >
                     {[
-                      { id: 'show-me', emoji: '📸', label: 'Show me', desc: 'Visualize the scene', handler: handleShowMe },
-                      { id: 'selfie', emoji: '🤳', label: 'Selfie', desc: 'Snap a pic together', handler: handleSelfie },
-                      { id: 'buy-gift', emoji: '🎁', label: 'Buy a gift', desc: 'They\'ll love it', handler: handleBuyGift },
-                      { id: 'hold-hands', emoji: '💕', label: 'Hold hands', desc: 'A little closer', handler: handleHoldHands },
-                      { id: 'get-kiss', emoji: '💋', label: 'Get a kiss', desc: 'Lean in slowly', handler: handleGetKiss },
+                      { id: 'show-me', emoji: '📸', label: 'Show me', desc: 'Visualize the scene', cost: 2, handler: handleShowMe },
+                      { id: 'selfie', emoji: '🤳', label: 'Selfie', desc: 'Snap a pic together', cost: 3, handler: handleSelfie },
+                      { id: 'buy-gift', emoji: '🎁', label: 'Buy a gift', desc: 'They\'ll love it', cost: 5, handler: handleBuyGift },
+                      { id: 'hold-hands', emoji: '💕', label: 'Hold hands', desc: 'A little closer', cost: 4, handler: handleHoldHands },
+                      { id: 'get-kiss', emoji: '💋', label: 'Get a kiss', desc: 'Lean in slowly', cost: 8, handler: handleGetKiss },
                     ].map((action) => (
                       <button
                         key={action.id}
@@ -2309,6 +2361,10 @@ export function TravelReaderPage() {
                         <span className="text-lg">{action.emoji}</span>
                         <span className="text-white/80 text-[11px] font-medium">{action.label}</span>
                         <span className="text-white/30 text-[9px]">{action.desc}</span>
+                        <span className="flex items-center gap-1 text-[9px] mt-0.5">
+                          <span className="line-through text-white/30">{action.cost} 💎</span>
+                          <span className="font-semibold" style={{ color: '#22c55e' }}>Free</span>
+                        </span>
                       </button>
                     ))}
                   </div>
@@ -2480,6 +2536,70 @@ export function TravelReaderPage() {
             style={{ fontFamily: "'Space Grotesk', sans-serif", background: '#1E1A2E', border: '1px solid rgba(124,58,237,0.3)', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
           >
             {toastMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Cuddle moment modal — shows the generated cuddle scene full-bleed
+          with a soft glow. While loading we keep the modal open so the user
+          can see something is happening; the placeholder mirrors the scene-
+          image loading style for visual consistency. */}
+      <AnimatePresence>
+        {showCuddleModal && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center px-5"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => !isGeneratingCuddle && setShowCuddleModal(false)}
+          >
+            <div className="absolute inset-0 bg-black/85" />
+            <motion.div
+              className="relative max-w-md w-full rounded-2xl overflow-hidden"
+              initial={{ scale: 0.92, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.92, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{ border: '1px solid rgba(236,72,153,0.35)' }}
+            >
+              {cuddleImageUrl ? (
+                <img
+                  src={cuddleImageUrl}
+                  alt={`Cuddling with ${companionName}`}
+                  className="w-full aspect-[4/5] object-cover"
+                />
+              ) : (
+                <div className="w-full aspect-[4/5] relative overflow-hidden">
+                  <div className="absolute inset-0 scene-image-shimmer" />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                    <Loader2 size={28} className="animate-spin text-pink-300/80" />
+                    <div className="text-center">
+                      <p className="text-white/85 text-sm font-medium" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                        Painting your cuddle moment…
+                      </p>
+                      <p className="text-white/45 text-[11px] mt-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                        Usually takes 5–15 seconds
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div className="absolute bottom-0 left-0 right-0 p-4" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.85), transparent)' }}>
+                <p className="text-pink-100 text-[10px] uppercase tracking-[2px] mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                  Day {trip.currentDay} · {destination.city}
+                </p>
+                <p className="text-white font-bold text-lg" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                  Cuddling with {companionName}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowCuddleModal(false)}
+                disabled={isGeneratingCuddle}
+                className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center bg-black/45 hover:bg-black/60 transition-colors disabled:opacity-40 disabled:cursor-wait enabled:cursor-pointer"
+              >
+                <X size={16} className="text-white" />
+              </button>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

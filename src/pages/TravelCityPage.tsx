@@ -31,6 +31,7 @@ export function TravelCityPage() {
   // Selection: either a base companion id (e.g. "kai") or a custom companion id (e.g. "custom-abc123")
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [sliders, setSliders] = useState<CompanionSliders>({ ...DEFAULT_SLIDERS })
+  const [relationship, setRelationship] = useState<'romantic' | 'friend'>('romantic')
 
   // Profile modal
   const [modalCompanion, setModalCompanion] = useState<TravelCompanion | null>(null)
@@ -235,9 +236,9 @@ export function TravelCityPage() {
     ambientAudio.unlock()
 
     if (selectedCustom && selectedBase) {
-      startTrip(destination!.id, selectedCustom.baseId, selectedCustom.sliders, selectedCustom.remix)
+      startTrip(destination!.id, selectedCustom.baseId, selectedCustom.sliders, selectedCustom.remix, relationship)
     } else if (selectedBase) {
-      startTrip(destination!.id, selectedBase.characterId, sliders)
+      startTrip(destination!.id, selectedBase.characterId, sliders, undefined, relationship)
     }
     navigate('/travel/trip')
   }
@@ -467,6 +468,39 @@ export function TravelCityPage() {
               })}
             </div>
           </div>
+
+          {/* Relationship type — sets the companion's tone for the trip */}
+          {selectedId && (
+            <div className="mb-4">
+              <p className="text-white/40 text-[10px] font-bold tracking-[1.5px] uppercase mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                How are you traveling with {displayName}?
+              </p>
+              <div className="inline-flex gap-1 p-1 rounded-xl" style={{ background: '#13101c', border: '1px solid #2a2040' }}>
+                {(['romantic', 'friend'] as const).map((rel) => {
+                  const active = relationship === rel
+                  return (
+                    <button
+                      key={rel}
+                      onClick={() => setRelationship(rel)}
+                      className="cursor-pointer px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+                      style={{
+                        background: active ? 'linear-gradient(135deg, #7C3AED, #c84b9e)' : 'transparent',
+                        color: active ? '#fff' : 'rgba(255,255,255,0.5)',
+                        fontFamily: "'Space Grotesk', sans-serif",
+                      }}
+                    >
+                      {rel === 'romantic' ? '💞 Romantic partners' : '🤝 Just friends'}
+                    </button>
+                  )
+                })}
+              </div>
+              <p className="text-white/30 text-[11px] mt-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                {relationship === 'romantic'
+                  ? `${displayName} will travel with you as your partner — flirty, intimate, affectionate.`
+                  : `${displayName} will travel with you as a close friend — fun, easy, no romantic subtext.`}
+              </p>
+            </div>
+          )}
 
           {/* Start Trip CTA */}
           {selectedId && !activeChar && (
