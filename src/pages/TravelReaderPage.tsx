@@ -1480,18 +1480,43 @@ export function TravelReaderPage() {
           <button onClick={() => navigate('/travel')} className="text-white/40 hover:text-white/60 cursor-pointer">
             <ArrowLeft size={18} />
           </button>
-          <button onClick={() => companionPortrait && setShowPortraitModal(true)} className={`shrink-0 ${companionPortrait ? 'cursor-pointer' : ''}`}>
-            {companionPortrait ? (
-              <SelfieImg src={companionPortrait} alt="" className="w-8 h-8 rounded-full object-cover" fallback={<div className="w-8 h-8 rounded-full flex items-center justify-center text-sm" style={{ background: '#2D2538' }}>{companion.character.avatar}</div>} />
-            ) : (
-              <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm" style={{ background: '#2D2538' }}>
-                {companion.character.avatar}
+          {/* Twin + companion paired avatars — twin sits slightly behind so the
+              user always sees themselves alongside the companion they're
+              traveling with. */}
+          <div className="shrink-0 flex items-center">
+            {activeChar && (
+              <div
+                className="w-8 h-8 rounded-full overflow-hidden"
+                style={{ border: '2px solid #0A0810', marginRight: -10 }}
+                title={`Traveling as ${activeChar.name}`}
+                aria-label={`Traveling as ${activeChar.name}`}
+              >
+                {activeChar.selfieUrl ? (
+                  <SelfieImg src={activeChar.selfieUrl} alt="" className="w-full h-full object-cover" fallback={<div className="w-full h-full flex items-center justify-center text-xs font-semibold" style={{ background: 'rgba(124,58,237,0.2)', color: '#A78BFA' }}>{activeChar.name[0]}</div>} />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-xs font-semibold" style={{ background: 'rgba(124,58,237,0.2)', color: '#A78BFA' }}>
+                    {activeChar.name[0]}
+                  </div>
+                )}
               </div>
             )}
-          </button>
+            <button
+              onClick={() => companionPortrait && setShowPortraitModal(true)}
+              className={`relative ${companionPortrait ? 'cursor-pointer' : ''}`}
+              style={{ border: activeChar ? '2px solid #0A0810' : 'none', borderRadius: 9999 }}
+            >
+              {companionPortrait ? (
+                <SelfieImg src={companionPortrait} alt="" className="w-8 h-8 rounded-full object-cover" fallback={<div className="w-8 h-8 rounded-full flex items-center justify-center text-sm" style={{ background: '#2D2538' }}>{companion.character.avatar}</div>} />
+              ) : (
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm" style={{ background: '#2D2538' }}>
+                  {companion.character.avatar}
+                </div>
+              )}
+            </button>
+          </div>
           <div className="flex-1 min-w-0">
             <p className="text-white text-sm font-semibold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              {companionName}
+              {activeChar ? `${activeChar.name} & ${companionName}` : companionName}
             </p>
             <p className="text-white/40 text-xs" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               {destination.countryEmoji} {destination.city} — {trip.phase === 'planning' ? 'Planning' : `Day ${trip.currentDay}`}
