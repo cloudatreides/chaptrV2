@@ -96,17 +96,19 @@ export async function saveGameState(userId: string, state: Record<string, unknow
   }
 }
 
-/** Load game state from Supabase for a given user */
-export async function loadGameState(userId: string): Promise<Record<string, unknown> | null> {
+/** Load game state from Supabase for a given user, including the row's
+ *  updated_at timestamp so callers can compare freshness against local. */
+export async function loadGameState(userId: string): Promise<{ state: Record<string, unknown>; updatedAt: number } | null> {
   try {
     const { data, error } = await supabase
       .from(TABLE)
-      .select('state')
+      .select('state, updated_at')
       .eq('user_id', userId)
       .single()
 
     if (error || !data) return null
-    return data.state as Record<string, unknown>
+    const updatedAt = data.updated_at ? new Date(data.updated_at).getTime() : 0
+    return { state: data.state as Record<string, unknown>, updatedAt }
   } catch (e) {
     console.error('Game state load error:', e)
     return null
@@ -154,10 +156,13 @@ function scheduleRetry() {
   }, delay)
 }
 
-/** Queue a debounced save */
+/** Queue a debounced save. Stamps `lastSessionTimestamp` on the outgoing
+ *  payload so the cloud row's `updated_at` and the persisted local
+ *  `lastSessionTimestamp` always advance together — that's what
+ *  hydrateFromCloud uses to decide who wins on the next session. */
 export function queueSave(userId: string, state: Record<string, unknown>) {
   pendingUserId = userId
-  pendingState = state
+  pendingState = { ...state, lastSessionTimestamp: Date.now() }
   // Cancel any in-flight retry — the new state supersedes whatever we were
   // going to retry. Reset the attempt counter so the new save gets a fresh
   // budget if it also fails.

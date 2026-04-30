@@ -19,23 +19,25 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 
 /** Hydrate the Zustand store from Supabase saved state.
  *
- *  Pre-GTM strategy: prefer local whenever local has data. Cloud only wins
- *  when localStorage is empty (genuinely-fresh device or post-signOut). The
- *  old timestamp comparison was unreliable because:
- *   - lastSessionTimestamp only updated on home-page mount, not on character
- *     mutations. A user could create a twin and refresh within the cloud
- *     sync's 5s debounce window — local would have the new twin but a stale
- *     timestamp, cloud would have the old state with a fresher (sync-time)
- *     timestamp, and hydrate would silently overwrite the local twin with
- *     pre-twin cloud state. Exactly what was happening.
+ *  Strategy: cloud wins when its `updated_at` is meaningfully newer than the
+ *  local `lastSessionTimestamp`. This self-heals cross-browser drift (you
+ *  wipe twins on Chrome, the integrated VS Code browser still has stale
+ *  localStorage — next page load, cloud's newer `updated_at` overrides).
  *
- *  Trade-off: multi-device same-user conflicts now favor whichever device the
- *  user is on. Acceptable for single-builder testing pre-GTM. Post-launch we
- *  need proper per-entity merge logic. */
-async function hydrateFromCloud(userId: string) {
-  const cloudState = await loadGameState(userId)
-  if (!cloudState) return
+ *  Local wins when there's no cloud row yet, when timestamps are roughly
+ *  equal (same browser between sessions), or when local is newer than cloud
+ *  (offline edits or in-flight changes that haven't synced yet).
+ *
+ *  This depends on `queueSave` stamping `lastSessionTimestamp` into every
+ *  outgoing payload, so the cloud row's `updated_at` and the local
+ *  timestamp advance together on every save. */
+const CLOUD_WINS_THRESHOLD_MS = 30_000  // cloud must be ≥30s newer to override
 
+async function hydrateFromCloud(userId: string) {
+  const result = await loadGameState(userId)
+  if (!result) return
+
+  const { state: cloudState, updatedAt: cloudUpdatedAt } = result
   const local = useStore.getState()
   const hasLocalData =
     (local.characters?.length ?? 0) > 0 ||
@@ -43,6 +45,12 @@ async function hydrateFromCloud(userId: string) {
     Object.keys(local.travelTrips ?? {}).length > 0
 
   if (!hasLocalData) {
+    useStore.setState(cloudState as Partial<typeof local>)
+    return
+  }
+
+  const localTs = local.lastSessionTimestamp ?? 0
+  if (cloudUpdatedAt - localTs > CLOUD_WINS_THRESHOLD_MS) {
     useStore.setState(cloudState as Partial<typeof local>)
   }
 }
