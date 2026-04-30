@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Catches TS / Vite build errors before they hit Vercel.
+# Skip with: git push --no-verify (use sparingly).
+
+set -e
+
+# Skip when pushing tags or deletions (no need to build)
+read local_ref local_sha remote_ref remote_sha
+if [ -z "$local_sha" ] || [ "$local_sha" = "0000000000000000000000000000000000000000" ]; then
+  exit 0
+fi
+
+echo "[pre-push] Running npm run build to catch tsc errors before Vercel..."
+cd "$(git rev-parse --show-toplevel)"
+if npm run build > /tmp/chaptr-prepush.log 2>&1; then
+  echo "[pre-push] ✓ build clean"
+  exit 0
+else
+  echo ""
+  echo "[pre-push] ✗ build failed — push aborted."
+  echo "[pre-push] Last 30 lines of build output:"
+  echo "----------------------------------------"
+  tail -30 /tmp/chaptr-prepush.log
+  echo "----------------------------------------"
+  echo "[pre-push] Full log: /tmp/chaptr-prepush.log"
+  echo "[pre-push] Override with: git push --no-verify"
+  exit 1
+fi
