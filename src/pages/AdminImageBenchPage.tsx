@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, Loader2, Image as ImageIcon, AlertTriangle, Trash2, RefreshCcw, Upload } from 'lucide-react'
+import { ChevronLeft, Loader2, Image as ImageIcon, AlertTriangle, Trash2, RefreshCcw, Upload, Pencil, Check, X, RotateCcw } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase, uploadImageToStorage } from '../lib/supabase'
 import { useStore } from '../store/useStore'
@@ -9,6 +9,27 @@ import { generateNanoBananaImage } from '../lib/nanoBanana'
 import { getTravelCompanion, TRAVEL_COMPANIONS } from '../data/travel/companions'
 
 const BENCH_STORAGE_KEY = 'chaptr-image-bench-inputs'
+const PROMPT_OVERRIDE_KEY = 'chaptr-image-bench-prompt-overrides'
+
+/** Per-feature prompt template overrides, persisted in localStorage. Lets
+ *  admins iterate on prompt copy in the audit page without touching source.
+ *  Override applies to both the displayed template and the value that gets
+ *  pushed into the bench via "Load into bench". A reset button restores the
+ *  original from IMAGE_GEN_AUDIT. */
+function loadPromptOverrides(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem(PROMPT_OVERRIDE_KEY)
+    return raw ? JSON.parse(raw) : {}
+  } catch {
+    return {}
+  }
+}
+
+function savePromptOverrides(overrides: Record<string, string>) {
+  try {
+    localStorage.setItem(PROMPT_OVERRIDE_KEY, JSON.stringify(overrides))
+  } catch {}
+}
 
 function isEphemeralLike(u: string): boolean {
   return u.includes('api.together.ai/shrt') || u.includes('api.together.xyz/shrt') || u.includes('together.ai/imgproxy')
@@ -1134,6 +1155,42 @@ function GoogleGIcon({ size = 14 }: { size?: number }) {
  *  drops the prompt into the bench page for testing across models. */
 function ImageGenAuditView({ onLoadIntoBench }: { onLoadIntoBench: (action: ImageGenAction) => void }) {
   const [categoryFilter, setCategoryFilter] = useState<ImageGenAction['category'] | 'all'>('all')
+  const [overrides, setOverrides] = useState<Record<string, string>>(() => loadPromptOverrides())
+  const [editingFeature, setEditingFeature] = useState<string | null>(null)
+  const [draft, setDraft] = useState('')
+
+  function startEdit(action: ImageGenAction) {
+    setEditingFeature(action.feature)
+    setDraft(overrides[action.feature] ?? action.promptTemplate)
+  }
+
+  function cancelEdit() {
+    setEditingFeature(null)
+    setDraft('')
+  }
+
+  function saveEdit(action: ImageGenAction) {
+    const trimmed = draft.trim()
+    const next = { ...overrides }
+    if (!trimmed || trimmed === action.promptTemplate) {
+      delete next[action.feature]
+    } else {
+      next[action.feature] = trimmed
+    }
+    setOverrides(next)
+    savePromptOverrides(next)
+    setEditingFeature(null)
+    setDraft('')
+  }
+
+  function resetEdit(action: ImageGenAction) {
+    const next = { ...overrides }
+    delete next[action.feature]
+    setOverrides(next)
+    savePromptOverrides(next)
+    setEditingFeature(null)
+    setDraft('')
+  }
 
   const grouped = IMAGE_GEN_AUDIT.reduce((acc, action) => {
     if (!acc[action.category]) acc[action.category] = []
@@ -1224,7 +1281,11 @@ function ImageGenAuditView({ onLoadIntoBench }: { onLoadIntoBench: (action: Imag
                       <p className="text-white/40 text-xs">{action.trigger}</p>
                     </div>
                     <button
-                      onClick={() => onLoadIntoBench(action)}
+                      onClick={() => onLoadIntoBench(
+                        overrides[action.feature]
+                          ? { ...action, promptTemplate: overrides[action.feature] }
+                          : action
+                      )}
                       className="cursor-pointer text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-md text-[#c84b9e] hover:bg-[rgba(200,75,158,0.1)] shrink-0"
                       style={{ border: '1px solid rgba(200,75,158,0.3)' }}
                     >
@@ -1253,10 +1314,70 @@ function ImageGenAuditView({ onLoadIntoBench }: { onLoadIntoBench: (action: Imag
                   </div>
 
                   <div>
-                    <p className="text-white/30 text-[10px] uppercase tracking-widest mb-1">Prompt template</p>
-                    <p className="text-white/70 text-xs leading-relaxed font-mono whitespace-pre-wrap" style={{ background: '#0a0810', padding: '8px 10px', borderRadius: 6, border: '1px solid #2a2040' }}>
-                      {action.promptTemplate}
-                    </p>
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-white/30 text-[10px] uppercase tracking-widest flex items-center gap-1.5">
+                        Prompt template
+                        {overrides[action.feature] && (
+                          <span className="text-[#c84b9e] text-[9px] font-bold normal-case tracking-normal px-1.5 py-0.5 rounded" style={{ background: 'rgba(200,75,158,0.12)', border: '1px solid rgba(200,75,158,0.3)' }}>
+                            edited
+                          </span>
+                        )}
+                      </p>
+                      {editingFeature !== action.feature ? (
+                        <button
+                          onClick={() => startEdit(action)}
+                          className="cursor-pointer text-white/40 hover:text-white/80 transition-colors flex items-center gap-1 text-[10px] uppercase tracking-widest"
+                          aria-label={`Edit prompt template for ${action.feature}`}
+                        >
+                          <Pencil size={11} />
+                          Edit
+                        </button>
+                      ) : (
+                        <div className="flex items-center gap-1">
+                          {overrides[action.feature] && (
+                            <button
+                              onClick={() => resetEdit(action)}
+                              className="cursor-pointer text-white/40 hover:text-yellow-300 transition-colors flex items-center gap-1 text-[10px] uppercase tracking-widest"
+                              aria-label="Reset to source default"
+                              title="Reset to source default"
+                            >
+                              <RotateCcw size={11} />
+                              Reset
+                            </button>
+                          )}
+                          <button
+                            onClick={cancelEdit}
+                            className="cursor-pointer text-white/40 hover:text-red-300 transition-colors flex items-center gap-1 text-[10px] uppercase tracking-widest"
+                            aria-label="Cancel edit"
+                          >
+                            <X size={11} />
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => saveEdit(action)}
+                            className="cursor-pointer text-[#c84b9e] hover:text-pink-300 transition-colors flex items-center gap-1 text-[10px] uppercase tracking-widest"
+                            aria-label="Save prompt override"
+                          >
+                            <Check size={11} />
+                            Save
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    {editingFeature === action.feature ? (
+                      <textarea
+                        value={draft}
+                        onChange={(e) => setDraft(e.target.value)}
+                        autoFocus
+                        rows={Math.min(12, Math.max(4, draft.split('\n').length + 2))}
+                        className="w-full text-white/90 text-xs leading-relaxed font-mono focus:outline-none resize-y"
+                        style={{ background: '#0a0810', padding: '8px 10px', borderRadius: 6, border: '1px solid rgba(200,75,158,0.4)' }}
+                      />
+                    ) : (
+                      <p className="text-white/70 text-xs leading-relaxed font-mono whitespace-pre-wrap" style={{ background: '#0a0810', padding: '8px 10px', borderRadius: 6, border: '1px solid #2a2040' }}>
+                        {overrides[action.feature] ?? action.promptTemplate}
+                      </p>
+                    )}
                   </div>
 
                   {action.samplePrompts && action.samplePrompts.length > 0 && (
