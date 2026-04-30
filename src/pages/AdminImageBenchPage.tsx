@@ -488,17 +488,37 @@ export function AdminImageBenchPage() {
   const updateResult = (id: ModelId, r: Result) => setResults((prev) => ({ ...prev, [id]: r }))
   const setBusy = (id: ModelId, b: boolean) => setRunning((prev) => ({ ...prev, [id]: b }))
 
+  // Production accuracy: prod handlers send a specific ref combo (eg. Buy a
+  // gift sends companion only, Hold hands sends twin + companion). Always
+  // sending both refs in the bench misleads admins — Gemini 2.5 in particular
+  // tends to anchor on the first ref it sees, so giving it twin + companion
+  // when prod only sends companion produces a wrong-character result that
+  // doesn't reflect real behavior. resolveRefs honors the loaded action's
+  // references field; without a loaded action it falls through to whatever
+  // refs the user has set so free-form testing still works.
+  function resolveRefs(): { twinRef: string; companionRef: string } {
+    if (!loadedAction) return { twinRef: twinUrl, companionRef: companionUrl }
+    switch (loadedAction.references) {
+      case 'twin only': return { twinRef: twinUrl, companionRef: '' }
+      case 'companion only': return { twinRef: '', companionRef: companionUrl }
+      case 'none': return { twinRef: '', companionRef: '' }
+      case 'twin + companion':
+      default: return { twinRef: twinUrl, companionRef: companionUrl }
+    }
+  }
+
   async function runFlux2() {
     setBusy('flux2', true)
     updateResult('flux2', {})
     const t0 = performance.now()
+    const { twinRef, companionRef } = resolveRefs()
     const url = await generateSceneImage({
       prompt,
       width: 768,
       height: 576,
-      referenceImageUrl: twinUrl || undefined,
-      companionReferenceUrl: companionUrl || undefined,
-      includesProtagonist: !!twinUrl && !!companionUrl,
+      referenceImageUrl: twinRef || undefined,
+      companionReferenceUrl: companionRef || undefined,
+      includesProtagonist: !!twinRef && !!companionRef,
       protagonistGender: activeChar?.gender,
     })
     const elapsed = performance.now() - t0
@@ -550,7 +570,8 @@ export function AdminImageBenchPage() {
     // Resolve relative paths (eg /yuna-portrait.png) to absolute URLs so the
     // Edge proxy can actually fetch them.
     const toAbs = (u: string) => u.startsWith('http') ? u : `${window.location.origin}${u}`
-    const refs = [twinUrl, companionUrl].filter(Boolean).map(toAbs)
+    const { twinRef, companionRef } = resolveRefs()
+    const refs = [twinRef, companionRef].filter(Boolean).map(toAbs)
     const result = await generateNanoBananaImage({
       prompt,
       referenceImageUrls: refs,
@@ -685,6 +706,11 @@ export function AdminImageBenchPage() {
                 {loadedAction.category} · {loadedAction.trigger} · prod model: <span className="font-mono">{loadedAction.model}</span> · refs: {loadedAction.references}
               </p>
               <p className="text-white/30 text-[11px] font-mono mt-1">{loadedAction.source}</p>
+              {loadedAction.references !== 'twin + companion' && (
+                <p className="mt-2 text-emerald-300/90 text-[12px] leading-relaxed">
+                  🎯 Bench is sending <strong>{loadedAction.references}</strong> to FLUX.2 and Nano Banana models — matching what prod actually sends. The twin/companion fields below stay populated, but unused refs are dropped before the API call so identity match reflects real production behavior.
+                </p>
+              )}
               {loadedAction.samplePrompts && loadedAction.samplePrompts.length > 0 && (
                 <p className="mt-2 text-amber-300/90 text-[12px] leading-relaxed">
                   ℹ️ This action's prod prompt is <strong>built dynamically at runtime</strong>. Loaded a representative <strong>sample prompt</strong> ({loadedAction.samplePrompts.length} variant{loadedAction.samplePrompts.length === 1 ? '' : 's'} available) — edit below or shuffle to a different sample.
