@@ -698,8 +698,19 @@ export function TravelReaderPage() {
         'mystery-box',
         'gift',
       )
-      const [imageUrl, replyStream] = await Promise.all([
-        generateCharacterPortrait(portraitPrompt),
+      const giftRefs: string[] = []
+      if (companionPortrait) {
+        const abs = companionPortrait.startsWith('http') ? companionPortrait : `${window.location.origin}${companionPortrait}`
+        giftRefs.push(abs)
+      }
+      const [giftImageResult, replyStream] = await Promise.all([
+        generateNanoBananaImage({
+          prompt: companionPortrait
+            ? `Anime-style portrait illustration. The reference image shows the travel companion — render them with the same face, hair, and gender. ${portraitPrompt}`
+            : portraitPrompt,
+          referenceImageUrls: giftRefs,
+          model: 'gemini-2.5-flash-image',
+        }),
         streamTravelChatReply({
           companionId: trip.companionId,
           companionSliders: trip.companionSliders,
@@ -715,6 +726,7 @@ export function TravelReaderPage() {
           playerName: activeChar?.name ?? null,
         }),
       ])
+      const imageUrl = 'imageDataUrl' in giftImageResult ? giftImageResult.imageDataUrl : null
 
       setIsStreaming(true)
       let full = ''
