@@ -297,9 +297,32 @@ export function DayTransition({ dayNumber, theme, cityName, type, heroImage, onC
             {isStart ? "Let's go" : 'Wind down'}
           </motion.button>
           {!isStart && (
-            <p className="mt-3 text-white/40 text-[11px] text-center max-w-[280px]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Tap + in chat for cuddle, get closer, run a bath, or undress moments.
-            </p>
+            <motion.div
+              initial={{ y: 8, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.85, duration: 0.4 }}
+              className="mt-5 flex flex-col items-center gap-2 px-4 py-3 rounded-xl max-w-[340px]"
+              style={{
+                background: 'rgba(244,63,94,0.08)',
+                border: '1px solid rgba(244,63,94,0.22)',
+              }}
+            >
+              <p className="text-rose-200/80 text-[10px] uppercase tracking-[2px] font-semibold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                Wind-down moments unlocked
+              </p>
+              <p className="text-white/65 text-xs text-center leading-relaxed" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                Tap <span className="text-rose-200 font-semibold">+</span> in chat for:
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[11px]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                <span className="text-white/80">💕 Cuddle</span>
+                <span className="text-white/30">·</span>
+                <span className="text-white/80">💗 Get closer</span>
+                <span className="text-white/30">·</span>
+                <span className="text-white/80">🛁 Run a bath</span>
+                <span className="text-white/30">·</span>
+                <span className="text-white/80">👗 Undress</span>
+              </div>
+            </motion.div>
           )}
 
         </div>

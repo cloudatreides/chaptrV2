@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Send, Loader2, MapPin, ChevronRight, Lock, Check, Play, ChevronDown, ChevronUp, Plus, X, Volume2, VolumeX, ImagePlus, RefreshCw, Map, SkipBack, SkipForward, Bookmark } from 'lucide-react'
+import { ArrowLeft, Send, Loader2, MapPin, ChevronRight, Lock, Check, Play, ChevronDown, ChevronUp, Plus, X, Volume2, VolumeX, ImagePlus, RefreshCw, Map, SkipBack, SkipForward } from 'lucide-react'
 import { Drawer } from 'vaul'
 import { useStore } from '../store/useStore'
 import { getDestination } from '../data/travel/destinations'
@@ -440,18 +440,13 @@ export function TravelReaderPage() {
   const [showPortraitModal, setShowPortraitModal] = useState(false)
   const [showProgressSheet, setShowProgressSheet] = useState(false)
 
-  // Unified state for all wind-down moments (cuddle, closer, bath, undress).
-  // Each moment shows in the same modal — single state replaces 6+ separate
-  // vars from before, and adding a new wind-down action is a one-liner now.
+  // Wind-down chat actions (cuddle, closer, bath, undress) match the inline
+  // pattern of the day-phase actions (Show me / Selfie / Hold hands / etc.):
+  // user taps → user message lands in chat → image generates → character
+  // message with image lands in chat. No modal. Each moment is auto-saved
+  // to trip.intimateMoments since these are premium beats users will want
+  // to revisit later.
   type WindDownKind = 'cuddle' | 'closer' | 'bath' | 'undress'
-  interface WindDownMoment {
-    kind: WindDownKind
-    label: string
-    imageUrl: string | null
-    loading: boolean
-    savedId: string | null
-  }
-  const [windDownMoment, setWindDownMoment] = useState<WindDownMoment | null>(null)
 
   // Show departure screen for fresh trips (handles Zustand hydration race —
   // useState initializer may fire before store rehydrates from localStorage)
@@ -1191,55 +1186,63 @@ export function TravelReaderPage() {
     }
   }
 
-  // Single dispatcher for every wind-down action. Generates the image,
-  // shows it in the unified modal, bumps affinity. Replaces the previous
-  // separate handleCuddle / handleGetCloser flows.
+  // Single dispatcher for every wind-down action. Renders inline in chat —
+  // user message + character message with image, same shape as Hold hands /
+  // Get a kiss / etc. Auto-saves to intimateMoments since these are premium
+  // beats users will want to revisit. Replaces the previous modal flow.
   async function runWindDownAction(kind: WindDownKind) {
     if (!trip || !companion || !destination) return
-    if (windDownMoment?.loading) return
+    if (isGeneratingChatImage || isStreaming) return
     const config = buildWindDownConfig(kind)
     if (!config) return
 
-    setWindDownMoment({ kind, label: config.label, imageUrl: null, loading: true, savedId: null })
+    setIsGeneratingChatImage(true)
+    const isPlanning = trip.phase === 'planning'
+    const addMsg = isPlanning ? addTravelPlanningMessage : (msg: ChatMessage) => addTravelDayChatMessage(trip.currentDay, msg)
+
+    const userMsgContent = {
+      cuddle: `💕 Cuddling with ${companionName}...`,
+      closer: `💗 Getting closer with ${companionName}...`,
+      bath: `🛁 Drawing a bath with ${companionName}...`,
+      undress: `👗 Undressing with ${companionName}...`,
+    }[kind]
+    addMsg({ role: 'user', content: userMsgContent, characterId: 'player', timestamp: Date.now() })
 
     try {
       const url = await generateTravelImage(config.prompt, activeChar?.selfieUrl)
       if (url) {
-        setWindDownMoment((prev) => prev ? { ...prev, imageUrl: url, loading: false } : null)
+        const captionLabel = `Day ${trip.currentDay} · ${destination.city} · ${config.label}`
+        addMsg({
+          role: 'character',
+          content: '',
+          characterId: trip.companionId,
+          timestamp: Date.now(),
+          imageUrl: url,
+          imageLabels: [captionLabel],
+        })
         updateTravelAffinity(config.affinityBump)
+        // Auto-save the moment so users can revisit it later. Map bath/undress
+        // onto the 'closer' kind in storage since the schema is currently
+        // typed 'cuddle' | 'closer' — the captionLabel preserves the actual
+        // variant.
+        saveIntimateMoment({
+          id: `${kind}-${Date.now()}`,
+          kind: (kind === 'cuddle' ? 'cuddle' : 'closer'),
+          label: captionLabel,
+          imageUrl: url,
+          day: trip.currentDay,
+          city: destination.city,
+          createdAt: Date.now(),
+        })
       } else {
         setToastMessage(`Couldn't generate the ${config.label.toLowerCase()} image — try again`)
         setTimeout(() => setToastMessage(null), 3000)
-        setWindDownMoment(null)
       }
     } catch (e) {
       console.error(`[WindDown ${kind}] image error:`, e)
-      setWindDownMoment(null)
+    } finally {
+      setIsGeneratingChatImage(false)
     }
-  }
-
-  function handleSaveWindDownMoment() {
-    if (!windDownMoment?.imageUrl || !trip || !destination) return
-    const moment = {
-      id: `${windDownMoment.kind}-${Date.now()}`,
-      // The store's IntimateMoment.kind is currently typed 'cuddle' | 'closer'.
-      // Map bath/undress onto 'closer' for storage so we don't break the
-      // existing schema — the label preserves the actual variant.
-      kind: (windDownMoment.kind === 'cuddle' ? 'cuddle' : 'closer') as 'cuddle' | 'closer',
-      label: windDownMoment.label,
-      imageUrl: windDownMoment.imageUrl,
-      day: trip.currentDay,
-      city: destination.city,
-      createdAt: Date.now(),
-    }
-    saveIntimateMoment(moment)
-    setWindDownMoment((prev) => prev ? { ...prev, savedId: moment.id } : null)
-    setToastMessage('Saved to memories')
-    setTimeout(() => setToastMessage(null), 2000)
-  }
-
-  function handleCloseWindDownMoment() {
-    setWindDownMoment(null)
   }
 
   async function handleSelfie() {
@@ -2737,7 +2740,7 @@ export function TravelReaderPage() {
                       >
                         {actions.map((action) => {
                           const phaseLocked = action.phase !== currentPhase
-                          const busyDisabled = isGeneratingChatImage || (windDownMoment?.loading ?? false)
+                          const busyDisabled = isGeneratingChatImage
                           const disabled = phaseLocked || busyDisabled
                           const tooltip = phaseLocked ? lockedHint(action.phase) : action.desc
                           return (
@@ -2938,135 +2941,6 @@ export function TravelReaderPage() {
             {toastMessage}
           </motion.div>
         )}
-      </AnimatePresence>
-
-      {/* Wind-down moment modal — single modal serving cuddle / closer / bath
-          / undress. Each kind has its own border tint and label kicker so
-          variants read distinctly even though the chrome is identical. */}
-      <AnimatePresence>
-        {windDownMoment && (() => {
-          const m = windDownMoment
-          const tint = m.kind === 'cuddle'
-            ? { border: 'rgba(236,72,153,0.35)', loaderColor: 'text-pink-300/80', kickerColor: 'text-pink-100', saveBg: 'rgba(236,72,153,0.12)', saveBorder: 'rgba(236,72,153,0.35)', saveColor: '#FBCFE8', continueBg: 'linear-gradient(135deg, #7C3AED, #A78BFA)', glow: '' }
-            : m.kind === 'bath'
-            ? { border: 'rgba(56,189,248,0.4)', loaderColor: 'text-sky-300/85', kickerColor: 'text-sky-100', saveBg: 'rgba(56,189,248,0.12)', saveBorder: 'rgba(56,189,248,0.4)', saveColor: '#BAE6FD', continueBg: 'linear-gradient(135deg, #0369a1, #38bdf8)', glow: '0 0 60px rgba(56,189,248,0.18)' }
-            : m.kind === 'undress'
-            ? { border: 'rgba(217,70,239,0.45)', loaderColor: 'text-fuchsia-300/85', kickerColor: 'text-fuchsia-100', saveBg: 'rgba(217,70,239,0.14)', saveBorder: 'rgba(217,70,239,0.45)', saveColor: '#F0ABFC', continueBg: 'linear-gradient(135deg, #a21caf, #d946ef)', glow: '0 0 60px rgba(217,70,239,0.2)' }
-            : { border: 'rgba(244,63,94,0.4)', loaderColor: 'text-rose-300/85', kickerColor: 'text-rose-100', saveBg: 'rgba(244,63,94,0.14)', saveBorder: 'rgba(244,63,94,0.4)', saveColor: '#FECACA', continueBg: 'linear-gradient(135deg, #be185d, #f43f5e)', glow: '0 0 60px rgba(244,63,94,0.18)' }
-
-          const titleVerb = m.kind === 'cuddle' ? `Cuddling with ${companionName}`
-            : m.kind === 'bath' ? `A bath with ${companionName}`
-            : m.kind === 'undress' ? `Undressing with ${companionName}`
-            : `A moment with ${companionName}`
-
-          const loadingLabel = m.kind === 'cuddle' ? 'Painting your cuddle moment…'
-            : m.kind === 'bath' ? 'Drawing the bath…'
-            : m.kind === 'undress' ? 'Painting the moment…'
-            : 'Painting the moment…'
-
-          return (
-            <motion.div
-              className="fixed inset-0 z-50 flex items-center justify-center px-5"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => !m.loading && handleCloseWindDownMoment()}
-            >
-              <div className="absolute inset-0 bg-black/85" />
-              <motion.div
-                className="relative max-w-md w-full rounded-2xl overflow-hidden flex flex-col"
-                initial={{ scale: 0.92, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.92, opacity: 0 }}
-                onClick={(e) => e.stopPropagation()}
-                style={{ border: `1px solid ${tint.border}`, boxShadow: tint.glow, background: '#13101c' }}
-              >
-                <div className="relative">
-                  {m.imageUrl ? (
-                    <img
-                      src={m.imageUrl}
-                      alt={titleVerb}
-                      className="w-full aspect-[4/5] object-cover"
-                    />
-                  ) : (
-                    <div className="w-full aspect-[4/5] relative overflow-hidden">
-                      <div className="absolute inset-0 scene-image-shimmer" />
-                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                        <Loader2 size={28} className={`animate-spin ${tint.loaderColor}`} />
-                        <div className="text-center">
-                          <p className="text-white/85 text-sm font-medium" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                            {loadingLabel}
-                          </p>
-                          <p className="text-white/45 text-[11px] mt-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                            Usually takes 5–15 seconds
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  <div className="absolute bottom-0 left-0 right-0 p-4" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.9), transparent)' }}>
-                    <p className={`${tint.kickerColor} text-[10px] uppercase tracking-[2px] mb-1`} style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                      Day {trip.currentDay} · {destination.city}
-                      {m.kind === 'closer' && m.label && <span className="opacity-70"> · {m.label}</span>}
-                    </p>
-                    <p className="text-white font-bold text-lg" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                      {titleVerb}
-                    </p>
-                  </div>
-                  <button
-                    onClick={handleCloseWindDownMoment}
-                    disabled={m.loading}
-                    className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center bg-black/45 hover:bg-black/60 transition-colors disabled:opacity-40 disabled:cursor-wait enabled:cursor-pointer"
-                    title="Close"
-                  >
-                    <X size={16} className="text-white" />
-                  </button>
-                </div>
-
-                <div className="flex gap-2 p-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                  <button
-                    onClick={handleSaveWindDownMoment}
-                    disabled={!m.imageUrl || m.loading || m.savedId !== null}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-medium transition-colors disabled:cursor-not-allowed enabled:cursor-pointer"
-                    style={{
-                      fontFamily: "'Space Grotesk', sans-serif",
-                      background: m.savedId ? 'rgba(34,197,94,0.12)' : tint.saveBg,
-                      border: `1px solid ${m.savedId ? 'rgba(34,197,94,0.4)' : tint.saveBorder}`,
-                      color: m.savedId ? '#86efac' : tint.saveColor,
-                      opacity: !m.imageUrl || m.loading ? 0.4 : 1,
-                    }}
-                  >
-                    {m.savedId ? (
-                      <>
-                        <Check size={13} />
-                        <span>Saved</span>
-                      </>
-                    ) : (
-                      <>
-                        <Bookmark size={13} />
-                        <span>Save</span>
-                      </>
-                    )}
-                  </button>
-                  <button
-                    onClick={handleCloseWindDownMoment}
-                    disabled={m.loading}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-semibold transition-opacity disabled:cursor-wait enabled:cursor-pointer"
-                    style={{
-                      fontFamily: "'Space Grotesk', sans-serif",
-                      background: tint.continueBg,
-                      color: '#fff',
-                      opacity: m.loading ? 0.4 : 1,
-                    }}
-                  >
-                    <span>Back to chat</span>
-                    <ChevronRight size={13} />
-                  </button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )
-        })()}
       </AnimatePresence>
 
       {/* Companion portrait modal */}
