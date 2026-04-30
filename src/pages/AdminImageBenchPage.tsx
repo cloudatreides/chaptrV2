@@ -350,6 +350,7 @@ export function AdminImageBenchPage() {
   const [running, setRunning] = useState<Record<ModelId, boolean>>({} as Record<ModelId, boolean>)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [view, setView] = useState<'bench' | 'audit'>('bench')
+  const [loadedAction, setLoadedAction] = useState<ImageGenAction | null>(null)
 
   // Close modal on ESC
   useEffect(() => {
@@ -512,9 +513,30 @@ export function AdminImageBenchPage() {
           <ImageGenAuditView
             onLoadIntoBench={(action) => {
               setPrompt(action.promptTemplate)
+              setLoadedAction(action)
               setView('bench')
             }}
           />
+        )}
+
+        {view === 'bench' && loadedAction && (
+          <div className="mb-6 p-4 rounded-xl flex items-start justify-between gap-3" style={{ background: 'rgba(200,75,158,0.08)', border: '1px solid rgba(200,75,158,0.3)' }}>
+            <div className="min-w-0">
+              <p className="text-[#c84b9e] text-[10px] uppercase tracking-widest font-bold mb-1">Currently testing</p>
+              <p className="text-white text-sm font-semibold mb-0.5">{loadedAction.feature}</p>
+              <p className="text-white/50 text-xs">
+                {loadedAction.category} · {loadedAction.trigger} · prod model: <span className="font-mono">{loadedAction.model}</span> · refs: {loadedAction.references}
+              </p>
+              <p className="text-white/30 text-[11px] font-mono mt-1">{loadedAction.source}</p>
+            </div>
+            <button
+              onClick={() => setLoadedAction(null)}
+              className="cursor-pointer text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-md text-white/50 hover:text-white hover:bg-white/5 shrink-0"
+              style={{ border: '1px solid rgba(255,255,255,0.15)' }}
+            >
+              Clear
+            </button>
+          </div>
         )}
 
         {view === 'bench' && twinUrlIsEphemeral && (
