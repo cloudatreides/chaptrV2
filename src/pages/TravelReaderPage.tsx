@@ -1729,14 +1729,22 @@ export function TravelReaderPage() {
                 exit={{ opacity: 0 }}
                 className="relative"
               >
-                {/* Hero image with gradient fade */}
-                <div className="relative w-full" style={{ height: sceneImg ? 440 : 200 }}>
+                {/* Hero image with gradient fade. Height stays full while
+                    loading so the image doesn't make the page jump when it
+                    finally arrives. */}
+                <div
+                  className="relative w-full overflow-hidden"
+                  style={{ height: sceneImg || imageLoadingSceneId === currentScene.id ? 440 : 200 }}
+                >
                   {sceneImg && (
                     <>
-                      <img
+                      <motion.img
                         src={sceneImg}
                         alt={currentScene.location}
                         className="absolute inset-0 w-full h-full object-cover"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.4 }}
                       />
                       <div
                         className="absolute inset-0"
@@ -1745,14 +1753,28 @@ export function TravelReaderPage() {
                     </>
                   )}
 
-                  {/* Loading placeholder while image generates */}
+                  {/* Loading state while the scene image generates. Shimmering
+                      gradient + visible status copy so users understand it's
+                      working, not stuck — typical render is 5–15s. */}
                   {!sceneImg && imageLoadingSceneId === currentScene.id && (
-                    <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'rgba(124,58,237,0.03)' }}>
-                      <div className="flex items-center gap-2 text-white/20">
-                        <Loader2 size={14} className="animate-spin" />
-                        <span className="text-xs" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Generating scene...</span>
+                    <>
+                      <div className="absolute inset-0 scene-image-shimmer" />
+                      <div
+                        className="absolute inset-0"
+                        style={{ background: 'linear-gradient(180deg, rgba(10,8,16,0) 60%, rgba(10,8,16,1) 100%)' }}
+                      />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                        <Loader2 size={28} className="animate-spin text-purple-300/80" />
+                        <div className="text-center">
+                          <p className="text-white/80 text-sm font-medium" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                            Painting {currentScene.location}…
+                          </p>
+                          <p className="text-white/40 text-[11px] mt-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                            Usually takes 5–15 seconds
+                          </p>
+                        </div>
                       </div>
-                    </div>
+                    </>
                   )}
 
                   {/* Fallback when image failed to generate */}
