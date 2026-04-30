@@ -181,12 +181,15 @@ let saveTimer: ReturnType<typeof setTimeout> | null = null
 let pendingUserId: string | null = null
 let pendingState: Record<string, unknown> | null = null
 
-// 1.5s debounce. The old 5s window was a frequent footgun: if the user
-// refreshed, navigated, or closed the tab within 5 seconds of creating a
-// twin, the save never fired and the twin was lost on next hydrate. 1.5s is
-// short enough that most realistic flows survive it, long enough to batch
-// rapid changes (eg name+gender+bio edits in quick succession).
-const DEBOUNCE_MS = 1500
+// 500ms debounce. Earlier windows (5s, then 1.5s) were footguns: if the
+// user refreshed, navigated, or closed the tab inside the window, the save
+// never fired and the local change (new twin / deleted trip / started trip)
+// was lost on next hydrate because cloud was still stale. 500ms is short
+// enough to mostly survive navigation, still long enough to batch rapid
+// edits (name+gender+bio in quick succession). For destructive trip-level
+// mutations (delete trip / start trip), call sites also call
+// flushPendingSave() to force an immediate push.
+const DEBOUNCE_MS = 500
 
 // Exponential backoff for retries on transient failures.
 // Total reach: 2 + 5 + 15 + 60 = ~82 seconds before giving up.
