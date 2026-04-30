@@ -2418,7 +2418,7 @@ export function TravelReaderPage() {
                         <span className="text-white/80 text-[11px] font-medium">{action.label}</span>
                         <span className="text-white/30 text-[9px]">{action.desc}</span>
                         <span className="flex items-center gap-1 text-[9px] mt-0.5">
-                          <span className="line-through text-white/30">{action.cost} 💎</span>
+                          <span className="line-through text-white/65">{action.cost} 💎</span>
                           <span className="font-semibold" style={{ color: '#22c55e' }}>Free</span>
                         </span>
                       </button>
