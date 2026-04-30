@@ -1,4 +1,5 @@
 import { supabase, uploadImageToStorage } from './supabase'
+import { generateNanoBananaImage } from './nanoBanana'
 
 export interface GenerateSceneParams {
   prompt: string
