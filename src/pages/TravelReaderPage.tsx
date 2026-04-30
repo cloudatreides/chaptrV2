@@ -2347,6 +2347,40 @@ export function TravelReaderPage() {
                   </div>
                 )}
 
+                {/* Recovery affordance when planning chat is missing its
+                    departure image. Happens when DepartureScreen's persist
+                    step fails (e.g., Supabase Storage outage). The image was
+                    discarded to "protect state" but that left the chat
+                    permanently without the image. This button re-runs the
+                    same gen+persist flow so users can recover without
+                    starting over. */}
+                {trip.phase === 'planning' && !trip.departureImageUrl && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-5 rounded-2xl overflow-hidden p-4 flex items-center gap-3"
+                    style={{ border: '1px dashed rgba(124,58,237,0.25)', background: 'rgba(124,58,237,0.04)' }}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white/70 text-xs font-medium" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                        Trip start image not generated
+                      </p>
+                      <p className="text-white/40 text-[11px] mt-0.5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                        The airport-gate scene with you and {companionName} couldn't save earlier. Try again now.
+                      </p>
+                    </div>
+                    <button
+                      onClick={regenerateDepartureImage}
+                      disabled={isRegeneratingDeparture}
+                      className="shrink-0 cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-medium transition-colors hover:bg-purple-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
+                      style={{ background: 'rgba(124,58,237,0.18)', color: '#DDD6FE', fontFamily: "'Space Grotesk', sans-serif", border: '1px solid rgba(124,58,237,0.4)' }}
+                    >
+                      <RefreshCw size={11} className={isRegeneratingDeparture ? 'animate-spin' : ''} />
+                      {isRegeneratingDeparture ? 'Generating…' : 'Generate'}
+                    </button>
+                  </motion.div>
+                )}
+
                 {/* Departure image */}
                 {trip.phase === 'planning' && trip.departureImageUrl && (
                   <motion.div
