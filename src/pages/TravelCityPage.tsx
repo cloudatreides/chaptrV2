@@ -622,6 +622,35 @@ export function TravelCityPage() {
                 ))}
               </div>
 
+              <div className="border-t border-white/[0.06] pt-5 mb-5">
+                <h4 className="text-white/40 text-[11px] uppercase tracking-[1.5px] mb-3" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>How are you traveling together?</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  {(['romantic', 'friend'] as const).map((rel) => {
+                    const active = relationship === rel
+                    return (
+                      <button
+                        key={rel}
+                        onClick={() => setRelationship(rel)}
+                        className="cursor-pointer px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors"
+                        style={{
+                          background: active ? 'linear-gradient(135deg, #7C3AED, #c84b9e)' : 'rgba(255,255,255,0.04)',
+                          color: active ? '#fff' : 'rgba(255,255,255,0.5)',
+                          border: active ? '1px solid transparent' : '1px solid rgba(255,255,255,0.06)',
+                          fontFamily: "'Space Grotesk', sans-serif",
+                        }}
+                      >
+                        {rel === 'romantic' ? '💞 Romantic partners' : '🤝 Just friends'}
+                      </button>
+                    )
+                  })}
+                </div>
+                <p className="text-white/30 text-[11px] mt-2 leading-relaxed" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                  {relationship === 'romantic'
+                    ? `${modalCompanion.character.name} will travel as your partner — flirty, intimate, affectionate.`
+                    : `${modalCompanion.character.name} will travel as a close friend — fun, easy, no romantic subtext.`}
+                </p>
+              </div>
+
               <div className="flex flex-col gap-2.5">
                 <button onClick={handleSelectFromProfile} className="w-full py-3 rounded-xl text-white font-medium text-sm cursor-pointer" style={{ fontFamily: "'Space Grotesk', sans-serif", background: 'linear-gradient(135deg, #7C3AED, #c84b9e)' }}>
                   Select {modalCompanion.character.name}
