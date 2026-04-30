@@ -812,9 +812,19 @@ export function TravelReaderPage() {
         } else {
           addTravelDayChatMessage(trip.currentDay, imageMsg)
         }
+      } else {
+        // Most common cause: Gemini's safety filter refused the prompt.
+        // The image gen sees the last companion message + scene context,
+        // and intimate or suggestive subtext routinely trips the refuse path.
+        // Show a toast so the user isn't staring at a vanished progress bar.
+        console.warn('[Show me] image generation returned null — likely Gemini content filter or persist failure')
+        setToastMessage('Couldn\'t paint that scene — too suggestive for the visualizer. Try after a tamer beat.')
+        setTimeout(() => setToastMessage(null), 4000)
       }
     } catch (e) {
       console.error('Show me image error:', e)
+      setToastMessage('Couldn\'t generate the image — try again')
+      setTimeout(() => setToastMessage(null), 3000)
     } finally {
       setIsGeneratingChatImage(false)
     }
