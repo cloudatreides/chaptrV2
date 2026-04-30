@@ -747,7 +747,15 @@ export function TravelReaderPage() {
           playerName: activeChar?.name ?? null,
         }),
       ])
-      const imageUrl = 'imageDataUrl' in giftImageResult ? giftImageResult.imageDataUrl : null
+      // Persist the base64 imageDataUrl to Supabase storage so we store a
+      // ~120-char URL in chat state, not a ~400KB blob. Without this, a few
+      // gift images blow the cloud-sync payload past Supabase's request
+      // size limit, saves fail silently, and the whole trip's chat history
+      // stops syncing across browsers / disappears on refresh.
+      const rawImageDataUrl = 'imageDataUrl' in giftImageResult ? giftImageResult.imageDataUrl : null
+      const imageUrl = rawImageDataUrl
+        ? await persistImage(rawImageDataUrl, `gift-${trip.companionId}-${Date.now()}`, 'scenes')
+        : null
 
       setIsStreaming(true)
       let full = ''

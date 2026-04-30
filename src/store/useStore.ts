@@ -974,7 +974,7 @@ export const useStore = create<StoreState>()(
     }),
     {
       name: 'chaptr-v2-story',
-      version: 10,
+      version: 11,
       migrate: (persisted: any, version: number) => {
         if (version < 2 && persisted) {
           // Migrate from flat store to multi-character
@@ -1078,6 +1078,38 @@ export const useStore = create<StoreState>()(
               if (trip?.sceneImages && typeof trip.sceneImages === 'object') {
                 for (const k of Object.keys(trip.sceneImages)) {
                   if (isEphemeral(trip.sceneImages[k])) delete trip.sceneImages[k]
+                }
+              }
+            }
+          }
+        }
+        if (version < 11 && persisted) {
+          // Strip base64 data: URLs from chat histories. Earlier gift-action
+          // code stored Nano Banana base64 directly in chat state, which
+          // bloated the JSON to MB-scale and caused cloud sync to silently
+          // fail (Supabase request size limit). Symptoms: chat history
+          // missing on refresh, cross-browser desync.
+          const stripDataUrls = (msgs: any[]): any[] =>
+            (msgs ?? []).map((m) => {
+              if (m?.imageUrl && typeof m.imageUrl === 'string' && m.imageUrl.startsWith('data:')) {
+                const { imageUrl: _drop, ...rest } = m
+                return rest
+              }
+              if (Array.isArray(m?.imageUrls)) {
+                const filtered = m.imageUrls.filter((u: unknown) => typeof u === 'string' && !u.startsWith('data:'))
+                return filtered.length === m.imageUrls.length ? m : { ...m, imageUrls: filtered }
+              }
+              return m
+            })
+          if (persisted.travelTrips && typeof persisted.travelTrips === 'object') {
+            for (const trip of Object.values(persisted.travelTrips as Record<string, any>)) {
+              if (!trip) continue
+              if (Array.isArray(trip.planningChatHistory)) {
+                trip.planningChatHistory = stripDataUrls(trip.planningChatHistory)
+              }
+              if (trip.dayChatHistories && typeof trip.dayChatHistories === 'object') {
+                for (const k of Object.keys(trip.dayChatHistories)) {
+                  trip.dayChatHistories[k] = stripDataUrls(trip.dayChatHistories[k])
                 }
               }
             }
