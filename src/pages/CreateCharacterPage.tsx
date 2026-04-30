@@ -228,7 +228,7 @@ export function CreateCharacterPage() {
       trackEvent('character_created', { gender, hasPhoto: !!finalPhoto, hasDefault: !!selectedDefault, hasBio: !!bio })
     }
     const next = searchParams.get('next')
-    if (!isEditMode && next) {
+    if (next) {
       navigate(next)
     } else {
       navigate(isEditMode ? '/characters' : '/home')

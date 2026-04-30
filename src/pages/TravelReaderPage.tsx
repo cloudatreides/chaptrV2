@@ -1485,11 +1485,12 @@ export function TravelReaderPage() {
               traveling with. */}
           <div className="shrink-0 flex items-center">
             {activeChar && (
-              <div
-                className="w-8 h-8 rounded-full overflow-hidden"
+              <button
+                onClick={() => navigate(`/create-character?edit=${activeChar.id}&next=/travel/trip`)}
+                className="w-8 h-8 rounded-full overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
                 style={{ border: '2px solid #0A0810', marginRight: -10 }}
-                title={`Traveling as ${activeChar.name}`}
-                aria-label={`Traveling as ${activeChar.name}`}
+                title={`Edit ${activeChar.name}`}
+                aria-label={`Edit ${activeChar.name}`}
               >
                 {activeChar.selfieUrl ? (
                   <SelfieImg src={activeChar.selfieUrl} alt="" className="w-full h-full object-cover" fallback={<div className="w-full h-full flex items-center justify-center text-xs font-semibold" style={{ background: 'rgba(124,58,237,0.2)', color: '#A78BFA' }}>{activeChar.name[0]}</div>} />
@@ -1498,7 +1499,7 @@ export function TravelReaderPage() {
                     {activeChar.name[0]}
                   </div>
                 )}
-              </div>
+              </button>
             )}
             <button
               onClick={() => companionPortrait && setShowPortraitModal(true)}
@@ -1547,24 +1548,34 @@ export function TravelReaderPage() {
                   ? `Chat ${remaining} more time${remaining === 1 ? '' : 's'} to start exploring`
                   : `Start exploring ${destination.city}`
             return (
-              <button
-                onClick={ready ? handleStartExploring : undefined}
-                disabled={!ready}
-                className="shrink-0 h-8 rounded-full flex items-center gap-1.5 px-3 transition-colors enabled:cursor-pointer disabled:cursor-not-allowed"
-                style={{
-                  background: ready ? 'linear-gradient(135deg, #7C3AED, #c84b9e)' : 'rgba(124,58,237,0.1)',
-                  border: ready ? 'none' : '1px solid rgba(124,58,237,0.25)',
-                  opacity: ready ? 1 : 0.55,
-                }}
-                title={tooltip}
-                aria-label={`Start exploring ${destination.city}`}
-              >
-                <Play size={11} className={ready ? 'text-white' : 'text-purple-300/70'} fill={ready ? 'currentColor' : 'none'} />
-                <span className={`text-[11px] font-medium ${ready ? 'text-white' : 'text-purple-200/80'}`} style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                  <span className="hidden sm:inline">Start exploring</span>
-                  <span className="sm:hidden">Explore</span>
-                </span>
-              </button>
+              <div className="relative group shrink-0">
+                <button
+                  onClick={ready ? handleStartExploring : undefined}
+                  disabled={!ready}
+                  className="h-8 rounded-full flex items-center gap-1.5 px-3 transition-colors enabled:cursor-pointer disabled:cursor-not-allowed"
+                  style={{
+                    background: ready ? 'linear-gradient(135deg, #7C3AED, #c84b9e)' : 'rgba(124,58,237,0.1)',
+                    border: ready ? 'none' : '1px solid rgba(124,58,237,0.25)',
+                    opacity: ready ? 1 : 0.55,
+                  }}
+                  aria-label={`Start exploring ${destination.city}`}
+                >
+                  <Play size={11} className={ready ? 'text-white' : 'text-purple-300/70'} fill={ready ? 'currentColor' : 'none'} />
+                  <span className={`text-[11px] font-medium ${ready ? 'text-white' : 'text-purple-200/80'}`} style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                    <span className="hidden sm:inline">Start exploring</span>
+                    <span className="sm:hidden">Explore</span>
+                  </span>
+                </button>
+                {!ready && (
+                  <div
+                    role="tooltip"
+                    className="pointer-events-none absolute top-full mt-2 right-0 px-3 py-1.5 rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 text-[11px] text-white/90"
+                    style={{ background: '#1A1525', border: '1px solid rgba(124,58,237,0.3)', fontFamily: "'Space Grotesk', sans-serif", boxShadow: '0 4px 12px rgba(0,0,0,0.4)' }}
+                  >
+                    {tooltip}
+                  </div>
+                )}
+              </div>
             )
           })()}
           {trip.phase === 'day' && currentScene?.prose && (() => {
@@ -1577,21 +1588,31 @@ export function TravelReaderPage() {
                 ? `Chat ${2 - userMsgCount} more time${userMsgCount === 1 ? '' : 's'} to unlock the next scene`
                 : 'Next scene'
             return (
-              <button
-                onClick={ready ? handleNextScene : undefined}
-                disabled={!ready}
-                className="shrink-0 h-8 rounded-full flex items-center gap-1 px-2.5 transition-colors enabled:cursor-pointer enabled:hover:bg-white/10 disabled:cursor-not-allowed"
-                style={{
-                  background: ready ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.025)',
-                  border: ready ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(255,255,255,0.06)',
-                  opacity: ready ? 1 : 0.45,
-                }}
-                title={tooltip}
-                aria-label="Next scene"
-              >
-                <span className="text-[11px] text-white/85 font-medium" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Next</span>
-                <ChevronRight size={11} className="text-white/60" />
-              </button>
+              <div className="relative group shrink-0">
+                <button
+                  onClick={ready ? handleNextScene : undefined}
+                  disabled={!ready}
+                  className="h-8 rounded-full flex items-center gap-1 px-2.5 transition-colors enabled:cursor-pointer enabled:hover:bg-white/10 disabled:cursor-not-allowed"
+                  style={{
+                    background: ready ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.025)',
+                    border: ready ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(255,255,255,0.06)',
+                    opacity: ready ? 1 : 0.45,
+                  }}
+                  aria-label="Next scene"
+                >
+                  <span className="text-[11px] text-white/85 font-medium" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Next</span>
+                  <ChevronRight size={11} className="text-white/60" />
+                </button>
+                {!ready && (
+                  <div
+                    role="tooltip"
+                    className="pointer-events-none absolute top-full mt-2 right-0 px-3 py-1.5 rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 text-[11px] text-white/90"
+                    style={{ background: '#1A1525', border: '1px solid rgba(255,255,255,0.12)', fontFamily: "'Space Grotesk', sans-serif", boxShadow: '0 4px 12px rgba(0,0,0,0.4)' }}
+                  >
+                    {tooltip}
+                  </div>
+                )}
+              </div>
             )
           })()}
           <motion.div
