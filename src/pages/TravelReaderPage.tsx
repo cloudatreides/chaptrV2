@@ -2075,6 +2075,15 @@ export function TravelReaderPage() {
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.4 }}
                         onClick={() => setLightbox({ imageUrl: sceneImg, label: `${currentScene.location} — ${currentScene.timeOfDay}` })}
+                        onError={() => {
+                          // Stale ephemeral URL (Together shortlinks expire
+                          // after ~1h) or dead Supabase path. Clear the cached
+                          // URL so the loading branch re-renders + handlePlayScene
+                          // retriggers gen on next visit. Without this the user
+                          // is stuck looking at a broken <img> with no recovery.
+                          console.warn('[scene image] failed to load, clearing cached URL:', sceneImg)
+                          setTripSceneImage(currentScene.id, '')
+                        }}
                       />
                       <div
                         className="absolute inset-0 pointer-events-none"
