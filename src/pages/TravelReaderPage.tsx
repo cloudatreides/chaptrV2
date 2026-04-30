@@ -2176,21 +2176,37 @@ export function TravelReaderPage() {
                   </div>
 
                   {/* Scene Actions */}
-                  {!isStreaming && (sceneProse || currentScene.prose) && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="flex flex-col gap-3 pb-8 max-w-[320px]"
-                    >
-                      <button
-                        onClick={handleContinueToChat}
-                        className="py-2.5 px-5 rounded-xl text-white font-medium text-sm cursor-pointer"
-                        style={{ fontFamily: "'Space Grotesk', sans-serif", background: 'linear-gradient(135deg, #7C3AED, #c84b9e)' }}
+                  {!isStreaming && (sceneProse || currentScene.prose) && (() => {
+                    const sceneImageLoading = !sceneImg && imageLoadingSceneId === currentScene.id
+                    return (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex flex-col gap-2 pb-8 max-w-[320px]"
                       >
-                        Chat with {companionName}
-                      </button>
-                    </motion.div>
-                  )}
+                        <button
+                          onClick={handleContinueToChat}
+                          disabled={sceneImageLoading}
+                          className="py-2.5 px-5 rounded-xl text-white font-medium text-sm cursor-pointer disabled:cursor-not-allowed transition-opacity"
+                          style={{
+                            fontFamily: "'Space Grotesk', sans-serif",
+                            background: sceneImageLoading ? 'rgba(255,255,255,0.06)' : 'linear-gradient(135deg, #7C3AED, #c84b9e)',
+                            color: sceneImageLoading ? 'rgba(255,255,255,0.4)' : '#fff',
+                            border: sceneImageLoading ? '1px solid rgba(255,255,255,0.08)' : 'none',
+                          }}
+                        >
+                          {sceneImageLoading ? (
+                            <span className="flex items-center justify-center gap-2">
+                              <Loader2 size={14} className="animate-spin" />
+                              Painting the scene first…
+                            </span>
+                          ) : (
+                            `Chat with ${companionName}`
+                          )}
+                        </button>
+                      </motion.div>
+                    )
+                  })()}
                 </div>
 
                 {/* Companion typing indicator during streaming */}
