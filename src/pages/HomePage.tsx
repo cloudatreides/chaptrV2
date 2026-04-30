@@ -69,7 +69,7 @@ function TwinHero({ character, allCharacters, onEdit, onSwitch, onCreateNew, onS
         </div>
         {/* Info */}
         <div className="flex-1 min-w-0 flex flex-col justify-center px-5 pb-5 -mt-8 md:mt-0 md:px-8 md:py-8 relative z-10">
-          <p className="text-[10px] md:text-[11px] font-semibold tracking-[2px] uppercase mb-2" style={{ color: '#c84b9e', fontFamily: SG }}>YOUR TWIN</p>
+          <p className="text-[10px] md:text-[11px] font-semibold tracking-[2px] uppercase mb-2" style={{ color: '#c84b9e', fontFamily: SG }}>YOUR CHARACTER</p>
           <h2 className="text-white text-2xl md:text-3xl font-bold mb-2" style={{ fontFamily: SG }}>{character.name}</h2>
           {character.bio && (
             <p className="text-white/40 text-[13px] md:text-sm leading-relaxed max-w-[420px] mb-4" style={{ fontFamily: SG }}>
@@ -82,7 +82,7 @@ function TwinHero({ character, allCharacters, onEdit, onSwitch, onCreateNew, onS
               className="cursor-pointer w-fit flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium transition-colors hover:bg-white/5"
               style={{ color: 'rgba(255,255,255,0.45)', border: '1px solid rgba(255,255,255,0.08)', fontFamily: SG }}
             >
-              <Pencil size={12} /> Edit twin
+              <Pencil size={12} /> Edit character
             </button>
             {canSetDefault && (
               <button
@@ -98,7 +98,7 @@ function TwinHero({ character, allCharacters, onEdit, onSwitch, onCreateNew, onS
                 className="w-fit flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium"
                 style={{ color: 'rgba(200,75,158,0.7)', fontFamily: SG }}
               >
-                <Star size={12} fill="currentColor" /> Default twin
+                <Star size={12} fill="currentColor" /> Default character
               </span>
             )}
           </div>
@@ -149,7 +149,7 @@ function TwinHero({ character, allCharacters, onEdit, onSwitch, onCreateNew, onS
           )}
           {allCharacters.length > 1 && (
             <span className="text-[11px] ml-1" style={{ color: 'rgba(255,255,255,0.2)', fontFamily: SG }}>
-              Switch twin
+              Switch character
             </span>
           )}
         </div>
@@ -896,7 +896,7 @@ export function HomePage() {
               <div>
                 {hasCharacters && <p className="text-[12px] mb-1" style={{ color: '#6B6275', fontFamily: SG }}>Welcome back 👋</p>}
                 <h1 className="text-white font-bold text-[36px]" style={{ fontFamily: SG }}>
-                  {hasCharacters ? 'Your world awaits' : 'Create your twin'}
+                  {hasCharacters ? 'Your world awaits' : 'Create your character'}
                 </h1>
               </div>
               <div className="flex items-center gap-3 relative">

@@ -234,7 +234,7 @@ export function CreateCharacterPage() {
     return (
       <div className="min-h-screen min-h-dvh bg-bg flex items-center justify-center px-6">
         <div className="text-center">
-          <p className="text-textSecondary text-lg mb-3">Maximum 3 twins reached</p>
+          <p className="text-textSecondary text-lg mb-3">Maximum 3 characters reached</p>
           <button onClick={() => navigate('/home')} className="text-accent text-sm hover:underline">Go back</button>
         </div>
       </div>
@@ -262,7 +262,7 @@ export function CreateCharacterPage() {
         </button>
 
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="text-textPrimary font-bold text-3xl mb-1">{isEditMode ? 'Edit Twin' : 'Create Your Twin'}</h1>
+          <h1 className="text-textPrimary font-bold text-3xl mb-1">{isEditMode ? 'Edit Character' : 'Create Your Character'}</h1>
           <p className="text-textSecondary text-base mb-6">{isEditMode ? 'Update your character details.' : "Build who you'll be in the story."}</p>
         </motion.div>
 
@@ -360,7 +360,7 @@ export function CreateCharacterPage() {
               <div>
                 <p className="text-red-300 text-xs font-semibold mb-0.5">Your photo expired</p>
                 <p className="text-red-300/70 text-[11px] leading-relaxed">
-                  This twin's previous selfie was stored on a temporary URL that has since expired. Upload a new photo and we'll save it permanently this time.
+                  This character's previous selfie was stored on a temporary URL that has since expired. Upload a new photo and we'll save it permanently this time.
                 </p>
               </div>
             </div>
@@ -478,7 +478,7 @@ export function CreateCharacterPage() {
             disabled={!canCreate}
             style={{ opacity: canCreate ? 1 : 0.5, cursor: canCreate ? 'pointer' : 'not-allowed' }}
           >
-            {isStylizing ? 'Stylizing photo...' : isUploading ? 'Uploading photo...' : isEditMode ? 'Save Changes' : 'Create Twin'}
+            {isStylizing ? 'Stylizing photo...' : isUploading ? 'Uploading photo...' : isEditMode ? 'Save Changes' : 'Create Character'}
           </button>
         </div>
       </div>

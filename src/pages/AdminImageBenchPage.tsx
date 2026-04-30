@@ -360,10 +360,10 @@ export function AdminImageBenchPage() {
       return
     }
     const ok = confirm(
-      'RESET TWINS ONLY\n\n' +
+      'RESET CHARACTERS ONLY\n\n' +
       'Wipes the character records (the broken Nicks). Keeps your trips, stories, ' +
-      'moments, gems, and affinities — but those that referenced the deleted twins ' +
-      'will be orphaned (still in the data, just no longer linked to any twin).\n\n' +
+      'moments, gems, and affinities — but those that referenced the deleted characters ' +
+      'will be orphaned (still in the data, just no longer linked to any character).\n\n' +
       'Continue?'
     )
     if (!ok) return
@@ -651,10 +651,10 @@ export function AdminImageBenchPage() {
             disabled={isResetting}
             className="cursor-pointer flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
             style={{ background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.3)', color: '#c4b5fd' }}
-            title="Wipe just the broken twin records. Keeps trips, stories, moments, gems."
+            title="Wipe just the broken character records. Keeps trips, stories, moments, gems."
           >
             {isResetting ? <Loader2 size={14} className="animate-spin" /> : <RefreshCcw size={14} />}
-            Reset twins only
+            Reset characters only
           </button>
         </div>
 
@@ -708,7 +708,7 @@ export function AdminImageBenchPage() {
               <p className="text-white/30 text-[11px] font-mono mt-1">{loadedAction.source}</p>
               {loadedAction.references !== 'twin + companion' && (
                 <p className="mt-2 text-emerald-300/90 text-[12px] leading-relaxed">
-                  🎯 Bench is sending <strong>{loadedAction.references}</strong> to FLUX.2 and Nano Banana models — matching what prod actually sends. The twin/companion fields below stay populated, but unused refs are dropped before the API call so identity match reflects real production behavior.
+                  🎯 Bench is sending <strong>{loadedAction.references}</strong> to FLUX.2 and Nano Banana models — matching what prod actually sends. The character/companion fields below stay populated, but unused refs are dropped before the API call so identity match reflects real production behavior.
                 </p>
               )}
               {loadedAction.samplePrompts && loadedAction.samplePrompts.length > 0 && (
@@ -718,7 +718,7 @@ export function AdminImageBenchPage() {
               )}
               {loadedAction.feature === 'Stylize twin selfie' && (
                 <p className="mt-2 text-amber-300/90 text-[12px] leading-relaxed">
-                  ⚠️ Upload a <strong>raw selfie photo</strong> below — this action transforms a real photo into anime style. Don't use the active twin URL (that's already stylized output).
+                  ⚠️ Upload a <strong>raw selfie photo</strong> below — this action transforms a real photo into anime style. Don't use the active character URL (that's already stylized output).
                 </p>
               )}
             </div>
@@ -758,9 +758,9 @@ export function AdminImageBenchPage() {
           <div className="mb-6 p-4 rounded-xl flex gap-3 items-start" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}>
             <AlertTriangle size={18} className="text-red-400 shrink-0 mt-0.5" />
             <div>
-              <p className="text-red-300 text-sm font-semibold mb-1">Twin URL is dead (Together AI ephemeral)</p>
+              <p className="text-red-300 text-sm font-semibold mb-1">Character URL is dead (Together AI ephemeral)</p>
               <p className="text-red-300/70 text-xs leading-relaxed">
-                The twin selfie URL is <span className="font-mono">api.together.ai/shrt/...</span> — those expire after ~1 hour. FLUX/Kontext won't have a real reference, so identity match will fail.
+                The character selfie URL is <span className="font-mono">api.together.ai/shrt/...</span> — those expire after ~1 hour. FLUX/Kontext won't have a real reference, so identity match will fail.
                 Fix: go to <span className="font-mono">/home</span> → click "Upload selfie" → upload a fresh photo. The new URL will be on Supabase storage and persist. Then come back here.
               </p>
             </div>
@@ -772,7 +772,7 @@ export function AdminImageBenchPage() {
             Diagnoses "wrong twin is active" vs "active twin's URL is dead" instantly. */}
         {characters.length > 0 && (
           <div className="mb-6 p-4 rounded-xl" style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.15)' }}>
-            <p className="text-white/60 text-[11px] uppercase tracking-widest mb-3">Debug — your twins</p>
+            <p className="text-white/60 text-[11px] uppercase tracking-widest mb-3">Debug — your characters</p>
             <div className="flex flex-col gap-2">
               {characters.map((c) => {
                 const isActive = c.id === activeCharId
@@ -811,12 +811,12 @@ export function AdminImageBenchPage() {
                     )}
                     <button
                       onClick={() => {
-                        if (confirm(`Delete twin "${c.name}"? This removes the twin and all its trips/stories. Cannot be undone.`)) {
+                        if (confirm(`Delete character "${c.name}"? This removes the character and all its trips/stories. Cannot be undone.`)) {
                           deleteCharacter(c.id)
                         }
                       }}
                       className="cursor-pointer p-1 rounded text-red-400/60 hover:text-red-400 hover:bg-red-400/10 shrink-0"
-                      title="Delete this twin"
+                      title="Delete this character"
                     >
                       <Trash2 size={12} />
                     </button>
@@ -825,7 +825,7 @@ export function AdminImageBenchPage() {
               })}
             </div>
             <p className="text-white/30 text-[10px] mt-3 leading-relaxed">
-              Tip: if all your twins show DEAD or NO SELFIE, delete them all and create a fresh one at <span className="font-mono text-white/50">/home</span>. The current upload flow stores selfies on Supabase storage and persists them across sessions.
+              Tip: if all your characters show DEAD or NO SELFIE, delete them all and create a fresh one at <span className="font-mono text-white/50">/home</span>. The current upload flow stores selfies on Supabase storage and persists them across sessions.
             </p>
           </div>
         )}

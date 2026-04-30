@@ -205,7 +205,7 @@ export function AccountPage() {
                 <p className="text-white font-bold text-xl" style={{ fontFamily: "'Syne', sans-serif" }}>
                   {stats.twins}
                 </p>
-                <p className="text-white/30 text-xs mt-0.5">Twins</p>
+                <p className="text-white/30 text-xs mt-0.5">Characters</p>
               </div>
               <div className="text-center">
                 <p className="text-white font-bold text-xl" style={{ fontFamily: "'Syne', sans-serif" }}>

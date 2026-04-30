@@ -52,8 +52,8 @@ export function CharacterSelectPage() {
         </button>
 
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="text-textPrimary font-bold text-3xl mb-1">Your Twins</h1>
-          <p className="text-textSecondary text-base mb-6">Manage your characters. The active twin stars in all stories and trips.</p>
+          <h1 className="text-textPrimary font-bold text-3xl mb-1">Your Characters</h1>
+          <p className="text-textSecondary text-base mb-6">Manage your characters. The active character stars in all stories and trips.</p>
         </motion.div>
 
         {/* Character cards */}
@@ -141,10 +141,10 @@ export function CharacterSelectPage() {
               transition={{ delay: characters.length * 0.08 }}
             >
               <Plus size={16} />
-              Create new twin
+              Create new character
             </motion.button>
           ) : (
-            <p className="text-textMuted text-xs text-center py-2">Maximum 3 twins</p>
+            <p className="text-textMuted text-xs text-center py-2">Maximum 3 characters</p>
           )}
         </div>
       </div>
@@ -166,7 +166,7 @@ export function CharacterSelectPage() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
             >
-              <p className="text-textPrimary font-semibold text-lg mb-1" style={{ fontFamily: SG }}>Delete twin?</p>
+              <p className="text-textPrimary font-semibold text-lg mb-1" style={{ fontFamily: SG }}>Delete character?</p>
               <p className="text-textSecondary text-sm mb-6">
                 This will permanently remove <span className="text-textPrimary font-medium">{characters.find((c) => c.id === deleteTarget)?.name}</span> and all their data.
               </p>
