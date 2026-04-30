@@ -115,6 +115,12 @@ export interface TripProgress {
   // Saved romantic moments (cuddle / let's get closer). Optional —
   // defaults to [] for trips that predate the field.
   intimateMoments?: IntimateMoment[]
+  // Per-day AI-generated establishing shot for the day-start screen.
+  // Day 1 stays on the static destination heroImage (intentional — there's
+  // continuity from the destination picker). Day 2+ generates once on first
+  // viewing and persists, so the user never sees the same shot twice and
+  // we never re-render a cached day. Optional for backwards compat.
+  dayStartImages?: Record<number, string>
 }
 
 export interface IntimateMoment {
@@ -298,6 +304,7 @@ interface StoreState {
   addTravelEngagementTime: (ms: number) => void
   setDepartureImage: (url: string) => void
   saveIntimateMoment: (moment: IntimateMoment) => void
+  setTripDayStartImage: (day: number, url: string) => void
   completeTrip: () => void
   extendTrip: () => void
   resetTrip: () => void
@@ -692,6 +699,26 @@ export const useStore = create<StoreState>()(
         const charId = get().activeCharacterId
         if (!charId) return
         const tripId = `${charId}:${destinationId}`
+        const existing = get().travelTrips[tripId]
+        // Guard against silent progress loss: if a trip is already in progress
+        // for this character + destination, leave it alone. The city page
+        // calls startTrip() unconditionally on the "Start your trip" button,
+        // so without this guard a stray re-click (or navigating back through
+        // city selection) would wipe currentDay / itinerary / chat history /
+        // sceneImages — and the wipe gets persisted to cloud, so refresh can
+        // never recover it. To truly start over, the user can delete the trip
+        // from the travel home page first.
+        const hasProgress = !!existing && (
+          existing.phase !== 'planning' ||
+          existing.planningChatHistory.length > 0 ||
+          existing.itinerary.days.length > 0 ||
+          Object.keys(existing.dayChatHistories).length > 0
+        )
+        if (hasProgress) {
+          // Just promote to active so navigation continues into the in-progress trip.
+          set({ activeTripId: tripId })
+          return
+        }
         set((s) => ({
           travelTrips: {
             ...s.travelTrips,
@@ -929,6 +956,21 @@ export const useStore = create<StoreState>()(
           travelTrips: {
             ...s.travelTrips,
             [id]: { ...trip, intimateMoments: [...existing, moment] },
+          },
+        }
+      }),
+
+      setTripDayStartImage: (day, url) => set((s) => {
+        const id = s.activeTripId
+        if (!id || !s.travelTrips[id]) return {}
+        const trip = s.travelTrips[id]
+        return {
+          travelTrips: {
+            ...s.travelTrips,
+            [id]: {
+              ...trip,
+              dayStartImages: { ...(trip.dayStartImages ?? {}), [day]: url },
+            },
           },
         }
       }),

@@ -18,6 +18,10 @@ interface DayTransitionProps {
   onContinue: () => void
   scenes?: SceneRecap[]
   sceneImages?: Record<string, string>
+  // Optional AI-generated per-day backdrop. When set, it cross-fades over the
+  // static heroImage. heroImage stays as the underlying fallback so a slow or
+  // failed gen never leaves a blank page.
+  dayStartImageUrl?: string
 }
 
 function Stars() {
@@ -47,7 +51,7 @@ function Stars() {
   )
 }
 
-export function DayTransition({ dayNumber, theme, cityName, type, heroImage, onContinue, scenes, sceneImages }: DayTransitionProps) {
+export function DayTransition({ dayNumber, theme, cityName, type, heroImage, onContinue, scenes, sceneImages, dayStartImageUrl }: DayTransitionProps) {
   const isStart = type === 'start'
   const Icon = isStart ? (dayNumber === 1 ? Sunrise : Sun) : Moon
 
@@ -60,7 +64,10 @@ export function DayTransition({ dayNumber, theme, cityName, type, heroImage, onC
       className="absolute inset-0 flex flex-col items-center justify-center overflow-y-auto"
       style={{ background: '#0D0B12' }}
     >
-      {/* Hero image background */}
+      {/* Hero image background — static destination heroImage as the always-on
+          backdrop. AI-generated dayStartImageUrl (when present) renders on top
+          and cross-fades in, so a slow/failed generation never leaves the page
+          looking broken. */}
       {heroImage && (
         <div className="absolute inset-0">
           <img
@@ -73,6 +80,24 @@ export function DayTransition({ dayNumber, theme, cityName, type, heroImage, onC
             }}
           />
         </div>
+      )}
+      {isStart && dayStartImageUrl && (
+        <motion.div
+          className="absolute inset-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+        >
+          <img
+            src={dayStartImageUrl}
+            alt=""
+            className="w-full h-full object-cover"
+            style={{
+              opacity: 0.55,
+              filter: 'brightness(0.85) saturate(0.85)',
+            }}
+          />
+        </motion.div>
       )}
 
       {/* Gradient overlay */}

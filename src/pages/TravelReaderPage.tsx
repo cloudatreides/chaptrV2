@@ -333,7 +333,7 @@ export function TravelReaderPage() {
     setTripScene, setTripSceneImage, advanceTravelScene, advanceTravelDay,
     setTripPhase, updateTravelAffinity, addCompanionMemory, addTravelEngagementTime,
     completeTrip, extendTrip, resetTrip, setIsStreaming, isStreaming, updateCompanionSliders,
-    setDepartureImage, saveIntimateMoment,
+    setDepartureImage, saveIntimateMoment, setTripDayStartImage,
   } = store
 
   const trip = activeTripId ? travelTrips[activeTripId] : null
@@ -555,6 +555,42 @@ export function TravelReaderPage() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [trip?.planningChatHistory.length, trip?.dayChatHistories, streamedText])
+
+  // Per-day AI day-start backdrop. Day 1 keeps the static heroImage —
+  // continuity with the destination picker. Day 2+ generates a cinematic
+  // anime establishing shot using the day's theme + first scene's
+  // location/timeOfDay + city, with twin + companion refs. Caches per day
+  // on the trip so we never re-render. heroImage stays underneath as the
+  // immediate fallback so the page is never blank during the 5–15s gen.
+  useEffect(() => {
+    if (viewMode !== 'day-start') return
+    if (!trip || !destination || !companion) return
+    if (trip.currentDay < 2) return  // Day 1 keeps static
+    if (trip.dayStartImages?.[trip.currentDay]) return  // already cached
+
+    const day = trip.itinerary.days.find((d) => d.dayNumber === trip.currentDay)
+    if (!day) return
+    const firstScene = day.scenes?.[0]
+    const sceneLocation = firstScene?.location ?? destination.city
+    const timeOfDay = firstScene?.timeOfDay ?? 'morning'
+    const dayTheme = day.theme ?? `Day ${trip.currentDay}`
+
+    const companionDesc = companionVisualDesc
+      .split(',').slice(0, 4).join(',')
+      .replace(/^(anime style|dark|cyberpunk[^,]*|fantasy[^,]*|thriller[^,]*|sci-fi[^,]*)\s*(portrait|illustration|concept art)\s*(portrait\s*)?of\s*/i, '')
+      .trim()
+    const playerGender = activeChar?.gender === 'male' ? 'a young man' : 'a young woman'
+    const prompt = `anime illustration, cel-shaded, cinematic wide establishing shot of ${sceneLocation} in ${destination.city}, Day ${trip.currentDay} ${timeOfDay} atmosphere matching the day's theme of "${dayTheme}". ${playerGender} and ${companionDesc} in the foreground walking together from behind into the scene, both small relative to the city around them. Detailed background, atmospheric lighting, vibrant anime art, no text or signage in foreign script that would distort, ONLY these two people in the foreground`
+
+    let cancelled = false
+    ;(async () => {
+      const url = await generateTravelImage(prompt, activeChar?.selfieUrl)
+      if (cancelled || !url) return
+      setTripDayStartImage(trip.currentDay, url)
+    })()
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewMode, trip?.currentDay])
 
   // Generate opening message (runs even during departure so it's ready when chat appears)
   useEffect(() => {
@@ -1926,6 +1962,7 @@ export function TravelReaderPage() {
                 heroImage={destination.heroImage}
                 type="start"
                 onContinue={() => handlePlayScene()}
+                dayStartImageUrl={trip.dayStartImages?.[trip.currentDay]}
               />
             )}
 
@@ -2481,10 +2518,12 @@ export function TravelReaderPage() {
               </div>
             )}
 
-            {/* Actions Panel — phase-aware. Day phase: regular travel actions
-                (selfie, gift, kiss, etc.). Recap phase: wind-down only —
-                cuddle / closer / bath / undress. So wind-down actions are
-                gated to actually wind-down time. */}
+            {/* Actions Panel — every action visible at all times. Each is
+                tagged with the phase it belongs to. Actions whose phase
+                doesn't match the current trip phase are greyed + disabled,
+                with a tooltip explaining when they're available. This makes
+                the full surface discoverable from day one without letting
+                users misuse out-of-context actions. */}
             <AnimatePresence>
               {showActions && (
                 <motion.div
@@ -2495,46 +2534,62 @@ export function TravelReaderPage() {
                   className="mb-2"
                 >
                   {(() => {
-                    const isRecap = trip.phase === 'recap'
-                    const actions = isRecap ? [
-                      { id: 'cuddle', emoji: '🤍', label: 'Cuddle', desc: 'Soft, tender', cost: 50, handler: () => runWindDownAction('cuddle') },
-                      { id: 'closer', emoji: '💞', label: "Let's get closer", desc: 'Sensual moment', cost: 120, handler: () => runWindDownAction('closer') },
-                      { id: 'bath', emoji: '🛁', label: 'Run a bath', desc: 'Bubbles, candles', cost: 100, handler: () => runWindDownAction('bath') },
-                      { id: 'undress', emoji: '👗', label: 'Undress', desc: 'Slow, intimate', cost: 150, handler: () => runWindDownAction('undress') },
-                    ] : [
-                      { id: 'show-me', emoji: '📸', label: 'Show me', desc: 'Visualize the scene', cost: 2, handler: handleShowMe },
-                      { id: 'selfie', emoji: '🤳', label: 'Selfie', desc: 'Snap a pic together', cost: 3, handler: handleSelfie },
-                      { id: 'buy-gift', emoji: '🎁', label: 'Buy a gift', desc: "They'll love it", cost: 5, handler: handleBuyGift },
-                      { id: 'hold-hands', emoji: '💕', label: 'Hold hands', desc: 'A little closer', cost: 4, handler: handleHoldHands },
-                      { id: 'get-kiss', emoji: '💋', label: 'Get a kiss', desc: 'Lean in slowly', cost: 8, handler: handleGetKiss },
+                    type ActionPhase = 'day' | 'recap'
+                    const currentPhase: ActionPhase = trip.phase === 'recap' ? 'recap' : 'day'
+                    const lockedHint = (p: ActionPhase) => p === 'recap'
+                      ? 'Available during wind down — finish today\'s scenes first.'
+                      : 'Used during the day — wait until tomorrow.'
+
+                    const actions: { id: string; emoji: string; label: string; desc: string; cost: number; phase: ActionPhase; handler: () => void }[] = [
+                      { id: 'show-me', emoji: '📸', label: 'Show me', desc: 'Visualize the scene', cost: 2, phase: 'day', handler: handleShowMe },
+                      { id: 'selfie', emoji: '🤳', label: 'Selfie', desc: 'Snap a pic together', cost: 3, phase: 'day', handler: handleSelfie },
+                      { id: 'buy-gift', emoji: '🎁', label: 'Buy a gift', desc: "They'll love it", cost: 5, phase: 'day', handler: handleBuyGift },
+                      { id: 'hold-hands', emoji: '💕', label: 'Hold hands', desc: 'A little closer', cost: 4, phase: 'day', handler: handleHoldHands },
+                      { id: 'get-kiss', emoji: '💋', label: 'Get a kiss', desc: 'Lean in slowly', cost: 8, phase: 'day', handler: handleGetKiss },
+                      { id: 'cuddle', emoji: '🤍', label: 'Cuddle', desc: 'Soft, tender', cost: 50, phase: 'recap', handler: () => runWindDownAction('cuddle') },
+                      { id: 'closer', emoji: '💞', label: "Let's get closer", desc: 'Sensual moment', cost: 120, phase: 'recap', handler: () => runWindDownAction('closer') },
+                      { id: 'bath', emoji: '🛁', label: 'Run a bath', desc: 'Bubbles, candles', cost: 100, phase: 'recap', handler: () => runWindDownAction('bath') },
+                      { id: 'undress', emoji: '👗', label: 'Undress', desc: 'Slow, intimate', cost: 150, phase: 'recap', handler: () => runWindDownAction('undress') },
                     ]
-                    const cols = actions.length === 4 ? 'grid-cols-4' : 'grid-cols-5'
                     return (
                       <div
-                        className={`grid ${cols} gap-1 p-1.5 rounded-xl`}
+                        className="grid grid-cols-5 gap-1 p-1.5 rounded-xl"
                         style={{
-                          width: actions.length === 4 ? 420 : 500,
-                          background: isRecap ? 'rgba(244,63,94,0.06)' : 'rgba(255,255,255,0.04)',
-                          border: `1px solid ${isRecap ? 'rgba(244,63,94,0.2)' : 'rgba(255,255,255,0.08)'}`,
+                          width: 540,
+                          background: 'rgba(255,255,255,0.04)',
+                          border: '1px solid rgba(255,255,255,0.08)',
                         }}
                       >
-                        {actions.map((action) => (
-                          <button
-                            key={action.id}
-                            onClick={() => { setShowActions(false); action.handler() }}
-                            disabled={isGeneratingChatImage || (windDownMoment?.loading ?? false)}
-                            className="flex flex-col items-center gap-0.5 py-2.5 px-4 rounded-lg cursor-pointer transition-colors hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed"
-                            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                          >
-                            <span className="text-lg">{action.emoji}</span>
-                            <span className="text-white/80 text-[11px] font-medium">{action.label}</span>
-                            <span className="text-white/30 text-[9px]">{action.desc}</span>
-                            <span className="flex items-center gap-1 text-[9px] mt-0.5">
-                              <span className="line-through text-white/65">{action.cost} 💎</span>
-                              <span className="font-semibold" style={{ color: '#22c55e' }}>Free</span>
-                            </span>
-                          </button>
-                        ))}
+                        {actions.map((action) => {
+                          const phaseLocked = action.phase !== currentPhase
+                          const busyDisabled = isGeneratingChatImage || (windDownMoment?.loading ?? false)
+                          const disabled = phaseLocked || busyDisabled
+                          const tooltip = phaseLocked ? lockedHint(action.phase) : action.desc
+                          return (
+                            <button
+                              key={action.id}
+                              onClick={() => { if (disabled) return; setShowActions(false); action.handler() }}
+                              disabled={disabled}
+                              title={tooltip}
+                              className="relative flex flex-col items-center gap-0.5 py-2.5 px-3 rounded-lg transition-colors hover:bg-white/5 disabled:cursor-not-allowed enabled:cursor-pointer"
+                              style={{
+                                fontFamily: "'Space Grotesk', sans-serif",
+                                opacity: phaseLocked ? 0.32 : busyDisabled ? 0.4 : 1,
+                              }}
+                            >
+                              <span className="text-lg">{action.emoji}</span>
+                              <span className="text-white/80 text-[11px] font-medium">{action.label}</span>
+                              <span className="text-white/30 text-[9px] text-center leading-tight">{action.desc}</span>
+                              <span className="flex items-center gap-1 text-[9px] mt-0.5">
+                                <span className="line-through text-white/65">{action.cost} 💎</span>
+                                <span className="font-semibold" style={{ color: '#22c55e' }}>Free</span>
+                              </span>
+                              {phaseLocked && (
+                                <span className="absolute top-1 right-1 text-[8px] leading-none" aria-hidden>🔒</span>
+                              )}
+                            </button>
+                          )
+                        })}
                       </div>
                     )
                   })()}
