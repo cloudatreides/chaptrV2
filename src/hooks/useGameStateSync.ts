@@ -3,12 +3,72 @@ import { useStore } from '../store/useStore'
 import { useAuth } from '../contexts/AuthContext'
 import { queueSave, flushPendingSave } from '../lib/gameStateSync'
 
+// Per-thread message cap when writing to cloud. Mirrors the existing
+// castChatThreads .slice(-100) pattern so all chat collections share one
+// rule. Local store keeps the full history (zustand persist → localStorage);
+// cloud only sees the tail. Trade-off: cross-device hydrate gives the user
+// the last 50 messages of each thread instead of all-time. That's massively
+// better than the alternative (state grows past Supabase's payload limit
+// and ALL saves silently fail, reverting trips on refresh).
+const CLOUD_CHAT_TAIL = 50
+
+function trimMessages<T>(arr: T[] | undefined): T[] | undefined {
+  if (!Array.isArray(arr)) return arr
+  return arr.length > CLOUD_CHAT_TAIL ? arr.slice(-CLOUD_CHAT_TAIL) : arr
+}
+
+/** Slim a trip for cloud sync. Strip Claude-generated scene prose +
+ *  companionReaction (regenerable from imagePrompt+location at next view).
+ *  Cap planning + per-day chat to last CLOUD_CHAT_TAIL messages. */
+function trimTripForCloud(trip: any) {
+  if (!trip) return trip
+  const trimmed: any = { ...trip }
+  if (Array.isArray(trip.planningChatHistory)) {
+    trimmed.planningChatHistory = trimMessages(trip.planningChatHistory)
+  }
+  if (trip.dayChatHistories && typeof trip.dayChatHistories === 'object') {
+    const slim: Record<number, any[]> = {}
+    for (const [k, v] of Object.entries(trip.dayChatHistories)) {
+      slim[k as unknown as number] = trimMessages(v as any[]) ?? []
+    }
+    trimmed.dayChatHistories = slim
+  }
+  if (trip.itinerary && Array.isArray(trip.itinerary.days)) {
+    trimmed.itinerary = {
+      ...trip.itinerary,
+      days: trip.itinerary.days.map((d: any) => ({
+        ...d,
+        scenes: Array.isArray(d.scenes)
+          ? d.scenes.map((s: any) => ({ ...s, prose: null, companionReaction: null }))
+          : d.scenes,
+      })),
+    }
+  }
+  return trimmed
+}
+
+function trimStoryProgressForCloud(progress: Record<string, any>): Record<string, any> {
+  const out: Record<string, any> = {}
+  for (const [k, p] of Object.entries(progress ?? {})) {
+    out[k] = p && Array.isArray(p.chatHistory)
+      ? { ...p, chatHistory: trimMessages(p.chatHistory) }
+      : p
+  }
+  return out
+}
+
 function buildPartialState(state: ReturnType<typeof useStore.getState>) {
+  // Cloud-shaped state — chat tails capped, regenerable scene prose stripped.
+  // Local store is untouched; only the payload to Supabase is slimmed.
+  const slimTrips: Record<string, any> = {}
+  for (const [id, trip] of Object.entries(state.travelTrips ?? {})) {
+    slimTrips[id] = trimTripForCloud(trip)
+  }
   return {
     characters: state.characters,
     activeCharacterId: state.activeCharacterId,
     selectedUniverse: state.selectedUniverse,
-    storyProgress: state.storyProgress,
+    storyProgress: trimStoryProgressForCloud(state.storyProgress as Record<string, any>),
     gemBalance: state.gemBalance,
     globalAffinities: state.globalAffinities,
     playthroughHistory: state.playthroughHistory,
@@ -21,7 +81,7 @@ function buildPartialState(state: ReturnType<typeof useStore.getState>) {
     storyMoments: state.storyMoments,
     customCompanions: state.customCompanions,
     // Travel state — was previously local-only and silently lost on logout.
-    travelTrips: state.travelTrips,
+    travelTrips: slimTrips,
     activeTripId: state.activeTripId,
   }
 }

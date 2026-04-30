@@ -118,10 +118,27 @@ function classifyError(code: string | undefined, message: string): 'transient' |
   return 'unknown'
 }
 
+// Hard cap on the JSONB payload we'll attempt to send. Supabase REST API
+// row size limits hover around 1–2MB depending on tier; once you cross the
+// line, every save 413s and the user silently loses ALL state changes
+// because cloud freezes at the last successful (smaller) snapshot. This
+// cap is strictly defensive: trim-on-send (useGameStateSync.ts) should
+// keep us well below it. If it ever trips, it surfaces as a "Save failed"
+// pill with a descriptive error instead of an opaque 413 buried in
+// Supabase responses.
+const MAX_PAYLOAD_BYTES = 1_500_000
+
 /** Save the full partialize state to Supabase for the current user */
 export async function saveGameState(userId: string, state: Record<string, unknown>): Promise<boolean> {
   setSync({ status: 'saving' })
   const payloadSize = JSON.stringify(state).length
+  if (payloadSize > MAX_PAYLOAD_BYTES) {
+    const msg = `Payload too large: ${(payloadSize / 1024 / 1024).toFixed(2)}MB exceeds ${(MAX_PAYLOAD_BYTES / 1024 / 1024).toFixed(2)}MB cap. Sync paused — please report this so we can find the bloat source.`
+    console.error('[GameStateSync] ' + msg)
+    setSync({ status: 'error', lastError: msg })
+    trackFailure()
+    return false
+  }
   try {
     const { error } = await supabase
       .from(TABLE)
