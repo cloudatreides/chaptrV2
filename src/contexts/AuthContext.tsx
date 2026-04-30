@@ -73,8 +73,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return
         }
         localStorage.setItem('chaptr-v2-uid', data.session.user.id)
-        await hydrateFromCloud(data.session.user.id)
         useStore.getState().setMasterMode(data.session.user.email === MASTER_EMAIL)
+        // Hydrate cloud state in the background — don't block initial render
+        // on the round-trip to Supabase. Local store hydrates synchronously
+        // from localStorage; if cloud is newer, it'll override after the
+        // fetch lands (brief re-render is much better UX than a multi-second
+        // black spinner before the page is interactive).
+        hydrateFromCloud(data.session.user.id)
       }
       setSession(data.session)
       setLoading(false)
