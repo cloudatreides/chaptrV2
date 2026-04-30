@@ -15,10 +15,10 @@ export function AppSidebar() {
   const activeChar = characters.find((c) => c.id === activeCharacterId)
   const selectedUniverse = useStore((s) => s.selectedUniverse)
   const albumLabel = getMomentConfig(getUniverseGenre(selectedUniverse)).albumTitle
-  const NAV_ITEMS = [
+  const NAV_ITEMS: { icon: typeof BookOpen; label: string; path: string; badge?: string }[] = [
     { icon: BookOpen, label: 'Home', path: '/home' },
     { icon: Sparkles, label: 'Travel Mode', path: '/travel' },
-    { icon: BookOpen, label: 'Story Mode', path: '/stories' },
+    { icon: BookOpen, label: 'Story Mode', path: '/stories', badge: 'Coming soon' },
     { icon: Users, label: 'Characters To Meet', path: '/cast' },
     { icon: Camera, label: albumLabel, path: '/album' },
   ]
@@ -95,6 +95,20 @@ export function AppSidebar() {
               >
                 {item.label}
               </span>
+              {item.badge && (
+                <span
+                  className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider"
+                  style={{
+                    background: 'rgba(251,191,36,0.12)',
+                    color: '#fbbf24',
+                    border: '1px solid rgba(251,191,36,0.3)',
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  {item.badge}
+                </span>
+              )}
             </button>
           )
         })}

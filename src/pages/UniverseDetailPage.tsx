@@ -1,16 +1,13 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ChevronLeft, BookOpen, Users, Clock, Heart } from 'lucide-react'
-import { useStore } from '../store/useStore'
 import { UNIVERSES } from '../data/storyData'
 import { STORY_REGISTRY } from '../data/stories'
 import { CAST_ROSTER, getCastCharacter } from '../data/castRoster'
-import { trackEvent } from '../lib/supabase'
 
 export function UniverseDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const setSelectedUniverse = useStore((s) => s.setSelectedUniverse)
 
   const universe = UNIVERSES.find((u) => u.id === id)
   if (!universe) {
@@ -25,12 +22,6 @@ export function UniverseDetailPage() {
   const storyCharacters = storyData ? Object.values(storyData.characters) : []
   const castMembers = CAST_ROSTER.filter((c) => c.universeId === universe.id)
   const stepCount = storyData?.steps.length ?? 0
-
-  const handleBegin = () => {
-    setSelectedUniverse(universe.id)
-    trackEvent('universe_select', { universe: universe.id })
-    navigate('/characters')
-  }
 
   return (
     <div className="min-h-screen min-h-dvh bg-bg flex flex-col">
@@ -230,14 +221,19 @@ export function UniverseDetailPage() {
             transition={{ delay: 0.3 }}
           >
             <button
-              className="btn-accent flex items-center justify-center gap-2.5 h-[52px] rounded-[14px] text-base font-bold"
-              onClick={handleBegin}
+              disabled
+              className="flex items-center justify-center gap-2.5 h-[52px] rounded-[14px] text-base font-bold cursor-not-allowed"
+              style={{
+                background: '#1a1525',
+                border: '1px solid #2a2040',
+                color: 'rgba(255,255,255,0.4)',
+              }}
             >
-              <BookOpen size={18} />
-              Begin Story
+              <Clock size={18} />
+              Coming soon
             </button>
             <p className="text-textSecondary text-[12px] text-center font-medium">
-              Step 1 of 3 — Choose your twin next
+              Story mode launches soon — Travel mode is live
             </p>
           </motion.div>
         </div>
