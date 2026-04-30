@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
-import { loadGameState, flushPendingSave, saveGameState } from '../lib/gameStateSync'
+import { loadGameState, flushPendingSave, saveGameState, getLastLocalSaveTimestamp } from '../lib/gameStateSync'
 import { useStore } from '../store/useStore'
 
 const MASTER_EMAIL = 'nicholas@zentry.com'
@@ -19,19 +19,21 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 
 /** Hydrate the Zustand store from Supabase saved state.
  *
- *  Strategy: cloud wins when its `updated_at` is meaningfully newer than the
- *  local `lastSessionTimestamp`. This self-heals cross-browser drift (you
- *  wipe twins on Chrome, the integrated VS Code browser still has stale
- *  localStorage — next page load, cloud's newer `updated_at` overrides).
+ *  Strategy: each browser tracks its own `last-local-save` timestamp in
+ *  localStorage. On hydrate, compare that against the cloud row's
+ *  `updated_at`:
+ *   - cloud meaningfully newer → another browser/device has updated since
+ *     this one last saved. Pull cloud state in. (Self-heals cross-browser
+ *     drift like wiping twins in Chrome → VS Code integrated browser still
+ *     showing the old set.)
+ *   - otherwise → this browser is up-to-date or has unsynced edits. Keep
+ *     local.
  *
- *  Local wins when there's no cloud row yet, when timestamps are roughly
- *  equal (same browser between sessions), or when local is newer than cloud
- *  (offline edits or in-flight changes that haven't synced yet).
- *
- *  This depends on `queueSave` stamping `lastSessionTimestamp` into every
- *  outgoing payload, so the cloud row's `updated_at` and the local
- *  timestamp advance together on every save. */
-const CLOUD_WINS_THRESHOLD_MS = 30_000  // cloud must be ≥30s newer to override
+ *  Per-browser localStorage key avoids the previous "local always wins"
+ *  trap where stale localStorage silently outranked cloud, AND avoids the
+ *  inverse trap where same-browser refreshes mistakenly re-pull cloud
+ *  (because we never bumped the in-store `lastSessionTimestamp` on saves). */
+const CLOUD_WINS_THRESHOLD_MS = 30_000  // cloud must be ≥30s newer than this browser's last save
 
 async function hydrateFromCloud(userId: string) {
   const result = await loadGameState(userId)
@@ -49,8 +51,8 @@ async function hydrateFromCloud(userId: string) {
     return
   }
 
-  const localTs = local.lastSessionTimestamp ?? 0
-  if (cloudUpdatedAt - localTs > CLOUD_WINS_THRESHOLD_MS) {
+  const lastLocalSave = getLastLocalSaveTimestamp()
+  if (cloudUpdatedAt - lastLocalSave > CLOUD_WINS_THRESHOLD_MS) {
     useStore.setState(cloudState as Partial<typeof local>)
   }
 }
@@ -70,6 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // twins. Force a hard reload after clearing so the page rebuilds
           // from scratch with the new user's cloud state.
           localStorage.removeItem('chaptr-v2-story')
+          localStorage.removeItem('chaptr-v2-last-local-save')
           localStorage.setItem('chaptr-v2-uid', data.session.user.id)
           window.location.reload()
           return
@@ -87,6 +90,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const prevUserId = localStorage.getItem('chaptr-v2-uid')
         if (prevUserId && prevUserId !== session.user.id) {
           localStorage.removeItem('chaptr-v2-story')
+          localStorage.removeItem('chaptr-v2-last-local-save')
           localStorage.setItem('chaptr-v2-uid', session.user.id)
           await hydrateFromCloud(session.user.id)
           useStore.getState().setMasterMode(session.user.email === MASTER_EMAIL)
@@ -146,6 +150,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     localStorage.removeItem('chaptr-v2-story')
     localStorage.removeItem('chaptr-v2-uid')
+    localStorage.removeItem('chaptr-v2-last-local-save')
     await supabase.auth.signOut()
   }
 

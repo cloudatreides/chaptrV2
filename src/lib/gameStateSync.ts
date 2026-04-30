@@ -6,6 +6,25 @@ import { supabase } from './supabase'
 
 const TABLE = 'user_game_state'
 
+// Per-browser bookkeeping: when *this* browser last successfully saved to
+// the cloud. hydrateFromCloud compares this against the cloud row's
+// updated_at — if cloud is meaningfully newer than our last save, another
+// browser/device has touched the data and we should pull cloud state in.
+const LAST_LOCAL_SAVE_KEY = 'chaptr-v2-last-local-save'
+
+export function getLastLocalSaveTimestamp(): number {
+  try {
+    const v = localStorage.getItem(LAST_LOCAL_SAVE_KEY)
+    return v ? parseInt(v, 10) : 0
+  } catch {
+    return 0
+  }
+}
+
+function recordLocalSave(ts: number) {
+  try { localStorage.setItem(LAST_LOCAL_SAVE_KEY, String(ts)) } catch { /* ignore */ }
+}
+
 // Tracks the most recent save outcome so the UI can show a sync indicator.
 // Subscribers are notified on change.
 export type SyncStatus = 'idle' | 'saving' | 'saved' | 'error'
@@ -84,7 +103,9 @@ export async function saveGameState(userId: string, state: Record<string, unknow
       logSyncError(userId, payloadSize, { code: error.code, message: error.message, details: error.details, hint: error.hint, classification })
       return false
     }
-    setSync({ status: 'saved', lastSavedAt: Date.now() })
+    const savedAt = Date.now()
+    recordLocalSave(savedAt)
+    setSync({ status: 'saved', lastSavedAt: savedAt })
     return true
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e)
@@ -156,13 +177,10 @@ function scheduleRetry() {
   }, delay)
 }
 
-/** Queue a debounced save. Stamps `lastSessionTimestamp` on the outgoing
- *  payload so the cloud row's `updated_at` and the persisted local
- *  `lastSessionTimestamp` always advance together — that's what
- *  hydrateFromCloud uses to decide who wins on the next session. */
+/** Queue a debounced save */
 export function queueSave(userId: string, state: Record<string, unknown>) {
   pendingUserId = userId
-  pendingState = { ...state, lastSessionTimestamp: Date.now() }
+  pendingState = state
   // Cancel any in-flight retry — the new state supersedes whatever we were
   // going to retry. Reset the attempt counter so the new save gets a fresh
   // budget if it also fails.
