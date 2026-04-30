@@ -196,6 +196,27 @@ function freshProgress(): StoryProgress {
   return JSON.parse(JSON.stringify(DEFAULT_PROGRESS))
 }
 
+/** Strip data: URLs from a chat message before storing. Same rationale as
+ *  setTripSceneImage: a base64 PNG in chat state will balloon the JSONB row
+ *  past Supabase's payload limit and silently break ALL future cloud saves
+ *  for the user. The image is best-effort — if persist failed, drop it. */
+function stripDataUrlsFromMessage(msg: ChatMessage): ChatMessage {
+  let safe = msg
+  if (typeof safe.imageUrl === 'string' && safe.imageUrl.startsWith('data:')) {
+    const { imageUrl: _drop, ...rest } = safe
+    safe = rest as ChatMessage
+    console.warn('[chat] stripped data: imageUrl from message — persistImage probably failed')
+  }
+  if (Array.isArray((safe as any).imageUrls)) {
+    const filtered = (safe as any).imageUrls.filter((u: unknown) => typeof u === 'string' && !u.startsWith('data:'))
+    if (filtered.length !== (safe as any).imageUrls.length) {
+      safe = { ...safe, imageUrls: filtered } as ChatMessage
+      console.warn('[chat] stripped data: imageUrls entries from message')
+    }
+  }
+  return safe
+}
+
 // ─── Store interface ───
 
 interface StoreState {
@@ -749,10 +770,11 @@ export const useStore = create<StoreState>()(
         const id = s.activeTripId
         if (!id || !s.travelTrips[id]) return {}
         const trip = s.travelTrips[id]
+        const safeMsg = stripDataUrlsFromMessage(msg)
         return {
           travelTrips: {
             ...s.travelTrips,
-            [id]: { ...trip, planningChatHistory: [...trip.planningChatHistory, msg] },
+            [id]: { ...trip, planningChatHistory: [...trip.planningChatHistory, safeMsg] },
           },
         }
       }),
@@ -762,12 +784,13 @@ export const useStore = create<StoreState>()(
         if (!id || !s.travelTrips[id]) return {}
         const trip = s.travelTrips[id]
         const dayMessages = trip.dayChatHistories[day] ?? []
+        const safeMsg = stripDataUrlsFromMessage(msg)
         return {
           travelTrips: {
             ...s.travelTrips,
             [id]: {
               ...trip,
-              dayChatHistories: { ...trip.dayChatHistories, [day]: [...dayMessages, msg] },
+              dayChatHistories: { ...trip.dayChatHistories, [day]: [...dayMessages, safeMsg] },
             },
           },
         }
@@ -808,6 +831,14 @@ export const useStore = create<StoreState>()(
       setTripSceneImage: (sceneId, url) => set((s) => {
         const id = s.activeTripId
         if (!id || !s.travelTrips[id]) return {}
+        // Reject data: URLs. Storing a 200–400KB base64 PNG per scene blows
+        // the JSONB row size and breaks cloud sync for the entire user. A
+        // missing image is recoverable (it'll regenerate); a wedged sync is
+        // not. The user sees no image and we log so it's diagnosable.
+        if (typeof url === 'string' && url.startsWith('data:')) {
+          console.warn('[setTripSceneImage] rejected data: URL — persistImage probably failed for scene', sceneId)
+          return {}
+        }
         const trip = s.travelTrips[id]
         return {
           travelTrips: {
@@ -939,6 +970,10 @@ export const useStore = create<StoreState>()(
       setDepartureImage: (url) => set((s) => {
         const id = s.activeTripId
         if (!id || !s.travelTrips[id]) return {}
+        if (typeof url === 'string' && url.startsWith('data:')) {
+          console.warn('[setDepartureImage] rejected data: URL — persistImage probably failed')
+          return {}
+        }
         return {
           travelTrips: {
             ...s.travelTrips,
@@ -1049,7 +1084,7 @@ export const useStore = create<StoreState>()(
     }),
     {
       name: 'chaptr-v2-story',
-      version: 11,
+      version: 12,
       migrate: (persisted: any, version: number) => {
         if (version < 2 && persisted) {
           // Migrate from flat store to multi-character
@@ -1153,6 +1188,35 @@ export const useStore = create<StoreState>()(
               if (trip?.sceneImages && typeof trip.sceneImages === 'object') {
                 for (const k of Object.keys(trip.sceneImages)) {
                   if (isEphemeral(trip.sceneImages[k])) delete trip.sceneImages[k]
+                }
+              }
+            }
+          }
+        }
+        if (version < 12 && persisted) {
+          // Same root cause as v11: data: URLs ballooning the JSONB row past
+          // the request size limit so EVERY save fails. v11 only swept chat
+          // history; this sweep gets the other offenders — sceneImages and
+          // departureImageUrl on each trip. A failed persistImage() during
+          // scene/departure rendering used to fall back to returning a
+          // base64 PNG, and those landed straight into store. Multiple
+          // 200–400KB PNGs blew the row size and cloud sync started
+          // 100%-failing — refresh then reverted the user's last successful
+          // (much older) cloud snapshot, losing trips they'd just started
+          // or deleted. Setters now also reject data: URLs at the boundary,
+          // so this is a last-ditch cleanup for state that already has them.
+          if (persisted.travelTrips && typeof persisted.travelTrips === 'object') {
+            for (const trip of Object.values(persisted.travelTrips as Record<string, any>)) {
+              if (!trip) continue
+              if (typeof trip.departureImageUrl === 'string' && trip.departureImageUrl.startsWith('data:')) {
+                trip.departureImageUrl = undefined
+              }
+              if (trip.sceneImages && typeof trip.sceneImages === 'object') {
+                for (const k of Object.keys(trip.sceneImages)) {
+                  const v = trip.sceneImages[k]
+                  if (typeof v === 'string' && v.startsWith('data:')) {
+                    delete trip.sceneImages[k]
+                  }
                 }
               }
             }

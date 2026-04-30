@@ -7,6 +7,7 @@ import { useStore } from '../store/useStore'
 import { DESTINATIONS, type Destination } from '../data/travel/destinations'
 import Globe, { type GlobeMethods } from 'react-globe.gl'
 import { flushPendingSave } from '../lib/gameStateSync'
+import { SyncIndicator } from '../components/SyncIndicator'
 
 const SG = "'Space Grotesk', sans-serif"
 
@@ -252,16 +253,21 @@ export function TravelHomePage() {
       <div className="flex-1 overflow-y-auto">
         <div className="page-container px-5 md:px-[60px] py-8 md:py-12 pb-24 md:pb-12">
           {/* Header */}
-          <div className="mb-4">
-            <h1
-              className="text-3xl md:text-4xl font-bold text-white mb-2"
-              style={{ fontFamily: "'Syne', sans-serif", letterSpacing: '-0.02em' }}
-            >
-              Where to next?
-            </h1>
-            <p className="text-white/50 text-sm" style={{ fontFamily: SG }}>
-              Spin the globe. Pick a destination. Your companion will help plan the rest.
-            </p>
+          <div className="mb-4 flex items-start justify-between gap-3">
+            <div>
+              <h1
+                className="text-3xl md:text-4xl font-bold text-white mb-2"
+                style={{ fontFamily: "'Syne', sans-serif", letterSpacing: '-0.02em' }}
+              >
+                Where to next?
+              </h1>
+              <p className="text-white/50 text-sm" style={{ fontFamily: SG }}>
+                Spin the globe. Pick a destination. Your companion will help plan the rest.
+              </p>
+            </div>
+            <div className="shrink-0 mt-2">
+              <SyncIndicator />
+            </div>
           </div>
 
           {/* Active Trips */}
