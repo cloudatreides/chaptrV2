@@ -1799,8 +1799,8 @@ export function TravelReaderPage() {
   )
 
   return (
-    <div className="flex h-dvh" style={{ background: '#0A0810' }}>
-      <div className="flex-1 flex flex-col h-full overflow-hidden">
+    <div className="flex h-dvh justify-center" style={{ background: '#0A0810' }}>
+      <div className="flex-1 lg:flex-initial w-full lg:w-[1024px] flex flex-col h-full overflow-hidden">
         {/* Header */}
         <div
           className="shrink-0 flex items-center gap-3 px-5 py-3 w-full max-w-[1024px] mx-auto"
