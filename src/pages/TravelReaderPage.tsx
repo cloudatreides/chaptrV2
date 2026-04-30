@@ -2714,9 +2714,13 @@ export function TravelReaderPage() {
                   {(() => {
                     type ActionPhase = 'day' | 'recap'
                     const currentPhase: ActionPhase = trip.phase === 'recap' ? 'recap' : 'day'
-                    const lockedHint = (p: ActionPhase) => p === 'recap'
-                      ? 'Available during wind down — finish today\'s scenes first.'
-                      : 'Used during the day — wait until tomorrow.'
+                    // Day actions stay live during wind-down (kiss, selfie,
+                    // gift still make sense). Wind-down actions are gated
+                    // to recap only — the only one-way lock.
+                    const isLocked = (actionPhase: ActionPhase) =>
+                      actionPhase === 'recap' && currentPhase !== 'recap'
+                    const lockedHint = (_p: ActionPhase) =>
+                      "Available during wind down — finish today's scenes first."
 
                     const actions: { id: string; emoji: string; label: string; desc: string; cost: number; phase: ActionPhase; handler: () => void }[] = [
                       { id: 'show-me', emoji: '📸', label: 'Show me', desc: 'Visualize the scene', cost: 2, phase: 'day', handler: handleShowMe },
@@ -2739,7 +2743,7 @@ export function TravelReaderPage() {
                         }}
                       >
                         {actions.map((action) => {
-                          const phaseLocked = action.phase !== currentPhase
+                          const phaseLocked = isLocked(action.phase)
                           const busyDisabled = isGeneratingChatImage
                           const disabled = phaseLocked || busyDisabled
                           const tooltip = phaseLocked ? lockedHint(action.phase) : action.desc
