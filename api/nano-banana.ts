@@ -102,7 +102,14 @@ export default async function handler(req: Request) {
     let modelUsed = ''
 
     for (const m of chain) {
-      const r = await callGemini(m, prompt, refs, apiKey)
+      let r = await callGemini(m, prompt, refs, apiKey)
+      // Single retry on 429 / 5xx with 1s backoff. Free-tier Gemini rate limits
+      // burst-trip easily under concurrent load; one retry recovers most of
+      // those without amplifying real outages.
+      if (!r.ok && (r.status === 429 || r.status >= 500)) {
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+        r = await callGemini(m, prompt, refs, apiKey)
+      }
       if (r.ok) {
         lastResponse = r
         modelUsed = m
@@ -110,7 +117,8 @@ export default async function handler(req: Request) {
       }
       const errText = await r.text().catch(() => '')
       errors.push({ model: m, status: r.status, message: errText.slice(0, 200) })
-      // Only walk the chain on 404/403/400 (model unavailable). On 5xx or rate limit, fail fast.
+      // Only walk the chain on 404/403/400 (model unavailable). On 5xx or
+      // sustained rate limit (after retry), fail fast.
       if (r.status >= 500 || r.status === 429) {
         return new Response(JSON.stringify({ error: 'Gemini upstream error', status: r.status, attempted: errors }), {
           status: r.status,

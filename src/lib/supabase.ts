@@ -79,11 +79,17 @@ async function blobToDataUrl(blob: Blob): Promise<string> {
   })
 }
 
+// Sync layer can't safely carry data: URLs above this size — Supabase rows have
+// a ~1MB hard cap and a single trip with multiple bloated images blows past it.
+// Gemini 2.5 Flash Image outputs ~1.5-2MB raw, so we never let that fallback land
+// in state. Caller gets null and either retries or shows an error UI.
+const MAX_FALLBACK_DATA_URL_BYTES = 400_000
+
 /** Persist an image URL to Supabase storage. Returns a durable URL or null —
  *  NEVER an ephemeral CDN URL. If Supabase upload fails but we already have
- *  the blob, falls back to a data: URL so the image still works (heavier in
- *  localStorage but zero broken-link risk). If even the fetch fails, returns
- *  null so callers can skip storing the result. */
+ *  the blob, falls back to a data: URL ONLY if the blob is small enough to
+ *  safely sit in localStorage + cloud sync (see MAX_FALLBACK_DATA_URL_BYTES).
+ *  Larger blobs return null so callers can fail loudly rather than poison state. */
 export async function uploadImageToStorage(imageUrl: string, path: string): Promise<string | null> {
   try {
     // Supabase URLs pass through unchanged.
@@ -109,7 +115,11 @@ export async function uploadImageToStorage(imageUrl: string, path: string): Prom
       .from('chaptr-images')
       .upload(path, blob, { contentType: 'image/png', upsert: true })
     if (error) {
-      console.warn('[Image persist] Supabase upload failed, falling back to data: URL:', error.message)
+      console.warn('[Image persist] Supabase upload failed:', error.message, `(blob ${blob.size}B)`)
+      if (blob.size > MAX_FALLBACK_DATA_URL_BYTES) {
+        console.warn('[Image persist] blob too large for data: URL fallback — returning null')
+        return null
+      }
       try {
         return await blobToDataUrl(blob)
       } catch {

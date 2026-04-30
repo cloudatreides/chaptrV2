@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plane } from 'lucide-react'
 import { generateNanoBananaImage } from '../../lib/nanoBanana'
+import { persistImage } from '../../lib/togetherAi'
 import { ambientAudio } from '../../lib/ambientAudio'
 import { SelfieImg } from '../SelfieImg'
 
@@ -91,13 +92,32 @@ export function DepartureScreen({
       .filter((u): u is string => !!u)
       .map(toAbs)
 
-    generateNanoBananaImage({
-      prompt,
-      referenceImageUrls: refs,
-      model: 'gemini-2.5-flash-image',
-    }).then((result) => {
+    // 45s timeout matches generateTravelImage's race in TravelReaderPage.
+    // Without it, a hung Gemini fetch leaks while the UI proceeds via the 8s
+    // max-wait fallback.
+    const timeout = new Promise<{ error: string }>((resolve) =>
+      setTimeout(() => resolve({ error: 'timeout after 45s' }), 45000)
+    )
+    Promise.race([
+      generateNanoBananaImage({
+        prompt,
+        referenceImageUrls: refs,
+        model: 'gemini-2.5-flash-image',
+      }),
+      timeout,
+    ]).then(async (result) => {
       if ('imageDataUrl' in result) {
-        onImageGenerated(result.imageDataUrl)
+        // Persist to Supabase storage BEFORE handing the URL up. Otherwise the
+        // raw ~1.5MB base64 data URL lands in trip.departureImageUrl → state
+        // sync, and a few trips later the user_game_state row breaks the 1MB
+        // row size limit.
+        const persistKey = `departure|${prompt}|${refs.join('|')}`
+        const persisted = await persistImage(result.imageDataUrl, persistKey, 'departures')
+        if (persisted) {
+          onImageGenerated(persisted)
+        } else {
+          console.warn('[DepartureScreen] Persist failed — skipping departure image to protect state')
+        }
       } else {
         console.warn('[DepartureScreen] Nano Banana failed:', result.error)
       }

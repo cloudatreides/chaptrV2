@@ -48,10 +48,27 @@ async function cacheImage(hash: string, imageUrl: string, prompt: string): Promi
   }
 }
 
-async function persistImage(imageUrl: string, promptKey: string, category: 'scenes' | 'portraits'): Promise<string | null> {
+// User-scoped path prevents cross-user overwrites at the same content hash.
+// Cross-user cache reuse still works via chaptr_image_cache (public bucket
+// means anyone can read another user's URL once it's in the cache table).
+async function getStoragePathPrefix(): Promise<string> {
+  try {
+    const { data } = await supabase.auth.getUser()
+    return data.user ? `users/${data.user.id}/` : ''
+  } catch {
+    return ''
+  }
+}
+
+export async function persistImage(
+  imageUrl: string,
+  promptKey: string,
+  category: 'scenes' | 'portraits' | 'departures'
+): Promise<string | null> {
   if (!imageUrl) return null
   const hash = await hashPrompt(promptKey)
-  const path = `${category}/${hash}.png`
+  const prefix = await getStoragePathPrefix()
+  const path = `${prefix}${category}/${hash}.png`
   return uploadImageToStorage(imageUrl, path)
 }
 
