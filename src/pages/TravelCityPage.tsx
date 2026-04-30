@@ -809,6 +809,36 @@ export function TravelCityPage() {
                 </div>
               </div>
 
+              {/* ── Relationship type ── */}
+              <div className="mb-6 pt-5 border-t border-white/[0.06]">
+                <label className="text-purple-300/80 text-[11px] uppercase tracking-[1.5px] font-semibold block mb-3" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>How are you traveling together?</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {(['romantic', 'friend'] as const).map((rel) => {
+                    const active = relationship === rel
+                    return (
+                      <button
+                        key={rel}
+                        onClick={() => setRelationship(rel)}
+                        className="cursor-pointer px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors"
+                        style={{
+                          background: active ? 'linear-gradient(135deg, #7C3AED, #c84b9e)' : 'rgba(255,255,255,0.04)',
+                          color: active ? '#fff' : 'rgba(255,255,255,0.5)',
+                          border: active ? '1px solid transparent' : '1px solid rgba(255,255,255,0.06)',
+                          fontFamily: "'Space Grotesk', sans-serif",
+                        }}
+                      >
+                        {rel === 'romantic' ? '💞 Romantic partners' : '🤝 Just friends'}
+                      </button>
+                    )
+                  })}
+                </div>
+                <p className="text-white/30 text-[11px] mt-2 leading-relaxed" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                  {relationship === 'romantic'
+                    ? `${remixName.trim() || remixTarget.character.name} will travel as your partner — flirty, intimate, affectionate.`
+                    : `${remixName.trim() || remixTarget.character.name} will travel as a close friend — fun, easy, no romantic subtext.`}
+                </p>
+              </div>
+
               {/* Save */}
               <div className="flex flex-col gap-2.5 pt-5 border-t border-white/[0.06]">
                 <button onClick={handleSaveRemix} disabled={isStylizing || isCropping} className="w-full py-3 rounded-xl text-white font-medium text-sm cursor-pointer disabled:opacity-40 flex items-center justify-center gap-2" style={{ fontFamily: "'Space Grotesk', sans-serif", background: 'linear-gradient(135deg, #7C3AED, #c84b9e)' }}>
