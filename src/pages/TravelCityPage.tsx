@@ -13,6 +13,7 @@ import { stylizeSelfie } from '../lib/togetherAi'
 import { getCroppedImg } from '../lib/cropImage'
 import { uploadSelfieToStorage, isEphemeralUrl } from '../lib/supabase'
 import { ambientAudio } from '../lib/ambientAudio'
+import { flushPendingSave } from '../lib/gameStateSync'
 
 export function TravelCityPage() {
   const { destinationId } = useParams<{ destinationId: string }>()
@@ -251,6 +252,10 @@ export function TravelCityPage() {
     } else if (selectedBase) {
       startTrip(destination!.id, selectedBase.characterId, sliders, undefined, relationship)
     }
+    // Flush the new trip to cloud immediately. Without this the save sits in
+    // the 500ms debounce queue, and a refresh on /travel/trip can let stale
+    // cloud state (which doesn't know about this trip) win the hydrate race.
+    flushPendingSave()
     navigate('/travel/trip')
   }
 

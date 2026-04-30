@@ -432,6 +432,9 @@ export function TravelReaderPage() {
   const chatEndRef = useRef<HTMLDivElement>(null)
   const abortRef = useRef<AbortController | null>(null)
   const engagementRef = useRef<number>(Date.now())
+  // Tracks whether the chat-mount auto-retry for the departure image has
+  // already fired this session, so we don't loop on Supabase failures.
+  const departureAutoRetriedRef = useRef(false)
 
   const [showAmbientLabel, setShowAmbientLabel] = useState(true)
   const [showPortraitModal, setShowPortraitModal] = useState(false)
@@ -458,6 +461,25 @@ export function TravelReaderPage() {
       setViewMode('departure')
     }
   }, [trip?.phase, trip?.planningChatHistory.length])
+
+  // Auto-recover the departure image when the user lands in chat without
+  // one. Cause: DepartureScreen auto-advances after 8s max, but Nano Banana
+  // can take up to 45s and persist to Supabase Storage adds another 1–3s.
+  // If the gen+persist takes longer than 8s OR if persist fails (Storage
+  // outage), the user lands in chat with no image and no loading state.
+  // This kicks off a fresh gen from the chat side so the image fills in
+  // organically while they read the opening message. Fires at most once
+  // per mount via the ref guard so a Supabase outage doesn't loop forever.
+  useEffect(() => {
+    if (!trip || !destination || !companionName) return
+    if (viewMode !== 'chat') return
+    if (trip.phase !== 'planning') return
+    if (trip.departureImageUrl) return
+    if (isRegeneratingDeparture) return
+    if (departureAutoRetriedRef.current) return
+    departureAutoRetriedRef.current = true
+    regenerateDepartureImage()
+  }, [viewMode, trip?.phase, trip?.departureImageUrl])
 
   useEffect(() => {
     if (trip?.destinationId) ambientPlayer.play(trip.destinationId)
@@ -2347,14 +2369,48 @@ export function TravelReaderPage() {
                   </div>
                 )}
 
-                {/* Recovery affordance when planning chat is missing its
-                    departure image. Happens when DepartureScreen's persist
-                    step fails (e.g., Supabase Storage outage). The image was
-                    discarded to "protect state" but that left the chat
-                    permanently without the image. This button re-runs the
-                    same gen+persist flow so users can recover without
-                    starting over. */}
-                {trip.phase === 'planning' && !trip.departureImageUrl && (
+                {/* Loading state when the trip-start image is being
+                    generated. Shimmer placeholder at the same 4:3 aspect as
+                    the eventual image so the chat doesn't jump when it
+                    arrives. Renders during the auto-retry on chat mount or
+                    when the user clicks Generate on the failure card below. */}
+                {trip.phase === 'planning' && !trip.departureImageUrl && isRegeneratingDeparture && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-5 rounded-2xl overflow-hidden relative"
+                    style={{ border: '1px solid rgba(124,58,237,0.18)' }}
+                  >
+                    <div className="relative w-full" style={{ aspectRatio: '4/3' }}>
+                      <div className="absolute inset-0 scene-image-shimmer" />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                        <Loader2 size={28} className="animate-spin text-purple-300/80" />
+                        <div className="text-center">
+                          <p className="text-white/85 text-sm font-medium" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                            Painting your arrival in {destination.city}…
+                          </p>
+                          <p className="text-white/45 text-[11px] mt-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                            Usually takes 5–15 seconds
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="px-4 py-3" style={{ background: 'rgba(124,58,237,0.06)' }}>
+                      <p className="text-white/40 text-xs" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                        You and {companionName} are arriving in {destination.city} {destination.countryEmoji}
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Recovery affordance — only renders if gen has actually
+                    failed (auto-retry done, no image, not currently retrying).
+                    The auto-retry on chat mount handles the common case;
+                    this is the fallback if Supabase Storage is still down or
+                    the gen genuinely failed. Same persist guard applies —
+                    successful gen sets trip.departureImageUrl, failure shows
+                    this card so the user can retry once Storage recovers. */}
+                {trip.phase === 'planning' && !trip.departureImageUrl && !isRegeneratingDeparture && departureAutoRetriedRef.current && (
                   <motion.div
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -2363,10 +2419,10 @@ export function TravelReaderPage() {
                   >
                     <div className="flex-1 min-w-0">
                       <p className="text-white/70 text-xs font-medium" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                        Trip start image not generated
+                        Trip start image didn't generate
                       </p>
                       <p className="text-white/40 text-[11px] mt-0.5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                        The airport-gate scene with you and {companionName} couldn't save earlier. Try again now.
+                        The airport-gate scene with you and {companionName} couldn't save. Try again.
                       </p>
                     </div>
                     <button
@@ -2375,26 +2431,34 @@ export function TravelReaderPage() {
                       className="shrink-0 cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-medium transition-colors hover:bg-purple-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
                       style={{ background: 'rgba(124,58,237,0.18)', color: '#DDD6FE', fontFamily: "'Space Grotesk', sans-serif", border: '1px solid rgba(124,58,237,0.4)' }}
                     >
-                      <RefreshCw size={11} className={isRegeneratingDeparture ? 'animate-spin' : ''} />
-                      {isRegeneratingDeparture ? 'Generating…' : 'Generate'}
+                      <RefreshCw size={11} />
+                      Try again
                     </button>
                   </motion.div>
                 )}
 
-                {/* Departure image */}
+                {/* Departure image — constrained card. Click to open
+                    full-size in the lightbox. */}
                 {trip.phase === 'planning' && trip.departureImageUrl && (
                   <motion.div
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mb-5 rounded-2xl overflow-hidden relative"
+                    className="mb-5 rounded-2xl overflow-hidden relative max-w-[360px]"
                     style={{ border: '1px solid rgba(124,58,237,0.15)' }}
                   >
-                    <img
-                      src={trip.departureImageUrl}
-                      alt=""
-                      className="w-full"
-                      style={{ aspectRatio: '4/3', objectFit: 'cover', opacity: isRegeneratingDeparture ? 0.4 : 1, transition: 'opacity 0.2s' }}
-                    />
+                    <button
+                      type="button"
+                      onClick={() => trip.departureImageUrl && setLightbox({ imageUrl: trip.departureImageUrl, label: `Arrived in ${destination.city}` })}
+                      className="block w-full cursor-zoom-in"
+                      title="Tap to view full size"
+                    >
+                      <img
+                        src={trip.departureImageUrl}
+                        alt=""
+                        className="w-full"
+                        style={{ aspectRatio: '4/3', objectFit: 'cover', opacity: isRegeneratingDeparture ? 0.4 : 1, transition: 'opacity 0.2s' }}
+                      />
+                    </button>
                     {isRegeneratingDeparture && (
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ aspectRatio: '4/3' }}>
                         <Loader2 size={28} className="animate-spin text-white/70" />

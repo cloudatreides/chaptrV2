@@ -7,6 +7,7 @@ import { useStore } from '../store/useStore'
 import { DESTINATIONS, type Destination } from '../data/travel/destinations'
 import Globe, { type GlobeMethods } from 'react-globe.gl'
 import { playSfx, startWind, stopWind } from '../lib/sfx'
+import { flushPendingSave } from '../lib/gameStateSync'
 
 const SG = "'Space Grotesk', sans-serif"
 
@@ -329,7 +330,15 @@ export function TravelHomePage() {
                             style={{ background: '#1E1A2E', border: '1px solid rgba(255,255,255,0.08)', minWidth: 140 }}
                           >
                             <button
-                              onClick={() => { deleteTrip(tripId); setTripMenuOpen(null) }}
+                              onClick={() => {
+                                deleteTrip(tripId)
+                                setTripMenuOpen(null)
+                                // Flush the deletion to cloud immediately. Without this the
+                                // save sits in the 500ms debounce queue, and a refresh or
+                                // navigation in that window lets stale cloud state win the
+                                // hydrate race and resurrect the trip.
+                                flushPendingSave()
+                              }}
                               className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-left text-red-400 text-xs font-medium cursor-pointer hover:bg-white/5 transition-colors"
                             >
                               <Trash2 size={12} /> Delete trip
