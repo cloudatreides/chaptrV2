@@ -21,9 +21,15 @@ export async function fetchPlaceImage(placeName: string, city: string): Promise<
 
 export function parsePlaceTags(text: string): { cleanText: string; places: string[] } {
   const places: string[] = []
+  const seen = new Set<string>()
   const cleanText = text.replace(/\[PLACE:([^\]]+)\]/g, (_, name) => {
-    places.push(name.trim())
-    return name.trim()
+    const trimmed = name.trim()
+    const key = trimmed.toLowerCase()
+    if (!seen.has(key)) {
+      seen.add(key)
+      places.push(trimmed)
+    }
+    return trimmed
   })
   return { cleanText: cleanText.trim(), places }
 }
@@ -49,9 +55,15 @@ export async function fetchFoodImage(dishName: string, _city: string): Promise<s
 
 export function parseFoodTags(text: string): { cleanText: string; foods: string[] } {
   const foods: string[] = []
+  const seen = new Set<string>()
   const cleanText = text.replace(/\[FOOD:([^\]]+)\]/g, (_, name) => {
-    foods.push(name.trim())
-    return name.trim()
+    const trimmed = name.trim()
+    const key = trimmed.toLowerCase()
+    if (!seen.has(key)) {
+      seen.add(key)
+      foods.push(trimmed)
+    }
+    return trimmed
   })
   return { cleanText: cleanText.trim(), foods }
 }

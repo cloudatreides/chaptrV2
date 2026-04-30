@@ -25,7 +25,7 @@ import { ambientPlayer } from '../lib/ambientPlayer'
 import { ambientAudio } from '../lib/ambientAudio'
 import { ImageLightbox } from '../components/ImageLightbox'
 
-interface LightboxState { imageUrl: string; label: string }
+interface LightboxState { imageUrl: string; label: string; urls?: string[]; labels?: string[] }
 
 type ViewMode = 'chat' | 'scene' | 'transition' | 'day-start' | 'day-end' | 'complete' | 'departure'
 
@@ -167,7 +167,7 @@ function PlaceFoodCard({ kind, msg, destinationId, companionId, onImageClick }: 
           urls={urls}
           labels={labels}
           onIndexChange={setActiveIndex}
-          onImageClick={(i) => onImageClick({ imageUrl: urls[i], label: labels[i] ?? labels[0] ?? '' })}
+          onImageClick={(i) => onImageClick({ imageUrl: urls[i], label: labels[i] ?? labels[0] ?? '', urls, labels })}
         />
         <div className="px-3 py-2 flex items-center gap-1.5">
           {kind === 'place' && <MapPin size={10} className="text-purple-400/60 shrink-0" />}
@@ -3143,6 +3143,8 @@ export function TravelReaderPage() {
         label={lightbox?.label ?? ''}
         destinationId={trip?.destinationId ?? ''}
         companionId={trip?.companionId ?? ''}
+        urls={lightbox?.urls}
+        labels={lightbox?.labels}
         onClose={() => setLightbox(null)}
       />
     </div>
