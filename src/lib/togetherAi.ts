@@ -145,6 +145,17 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
 
   if ('error' in result) {
     console.warn(`[Scene Nano Banana] error after ${elapsed}s:`, result.error)
+    // Schnell fallback: when Gemini refuses or errors, fall back to FLUX.1
+    // Schnell text-to-image. Schnell ignores reference images so the protag
+    // identity won't match — but for paid actions we'd rather show a
+    // tasteful generic anime scene than nothing. Schnell is also more
+    // permissive on safe-but-spicy prompts that Gemini's filter rejects.
+    const schnellUrl = await fluxSchnellFallback(animePrompt)
+    if (schnellUrl) {
+      const persistKey = `${cacheKey}|schnell-fallback`
+      const persisted = await persistImage(schnellUrl, persistKey, 'scenes')
+      return persisted ?? schnellUrl
+    }
     return null
   }
   console.log(`[Scene Nano Banana] generated in ${elapsed}s`)
@@ -156,6 +167,44 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
     cacheImage(hash, persisted, genderedPrompt)
   }
   return persisted ?? result.imageDataUrl
+}
+
+/** Last-resort scene fallback when Gemini fails. FLUX.1 Schnell, 16:9,
+ *  text-only. No reference images, no protag identity match — just a
+ *  tasteful generic anime scene so paid actions never silently fail. */
+async function fluxSchnellFallback(prompt: string): Promise<string | null> {
+  try {
+    const startTime = performance.now()
+    const response = await fetch('/api/together', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'black-forest-labs/FLUX.1-schnell',
+        prompt,
+        aspect_ratio: '16:9',
+        steps: 4,
+        n: 1,
+        response_format: 'b64_json',
+      }),
+    })
+    const elapsed = ((performance.now() - startTime) / 1000).toFixed(1)
+    if (!response.ok) {
+      console.error(`[Schnell fallback] HTTP ${response.status} after ${elapsed}s`)
+      return null
+    }
+    const data = await response.json()
+    const b64 = data.data?.[0]?.b64_json
+    if (b64) {
+      console.log(`[Schnell fallback] generated in ${elapsed}s`)
+      return `data:image/png;base64,${b64}`
+    }
+    const url = data.data?.[0]?.url
+    if (url) return url
+    return null
+  } catch (e) {
+    console.error('[Schnell fallback] threw:', e)
+    return null
+  }
 }
 
 /** Generate a character portrait using FLUX.1 Schnell */
