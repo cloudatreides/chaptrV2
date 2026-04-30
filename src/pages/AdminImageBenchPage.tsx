@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, Loader2, Image as ImageIcon, AlertTriangle, Trash2, RefreshCcw } from 'lucide-react'
+import { ChevronLeft, Loader2, Image as ImageIcon, AlertTriangle, Trash2, RefreshCcw, Upload } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
-import { supabase } from '../lib/supabase'
+import { supabase, uploadImageToStorage } from '../lib/supabase'
 import { useStore } from '../store/useStore'
 import { generateSceneImage } from '../lib/togetherAi'
 import { generateNanoBananaImage } from '../lib/nanoBanana'
@@ -351,6 +351,9 @@ export function AdminImageBenchPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [view, setView] = useState<'bench' | 'audit'>('bench')
   const [loadedAction, setLoadedAction] = useState<ImageGenAction | null>(null)
+  const [uploadingTwin, setUploadingTwin] = useState(false)
+  const [twinUploadError, setTwinUploadError] = useState<string | null>(null)
+  const twinFileInputRef = useRef<HTMLInputElement>(null)
 
   // Close modal on ESC
   useEffect(() => {
@@ -460,6 +463,32 @@ export function AdminImageBenchPage() {
     runNano('nano-banana')
   }
 
+  // Upload a raw photo to Supabase storage so all models (FLUX/Kontext need
+  // a public URL — data: URLs won't work for them) can fetch it as a reference.
+  async function handleTwinFileUpload(file: File) {
+    setTwinUploadError(null)
+    setUploadingTwin(true)
+    try {
+      const dataUrl: string = await new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onloadend = () => resolve(reader.result as string)
+        reader.onerror = reject
+        reader.readAsDataURL(file)
+      })
+      const path = `bench/raw-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`
+      const url = await uploadImageToStorage(dataUrl, path)
+      if (!url) {
+        setTwinUploadError('Upload failed — Supabase rejected the file. Try a smaller image.')
+      } else {
+        setTwinUrl(url)
+      }
+    } catch (e) {
+      setTwinUploadError(e instanceof Error ? e.message : 'Upload failed')
+    } finally {
+      setUploadingTwin(false)
+    }
+  }
+
   return (
     <div className="min-h-screen min-h-dvh" style={{ background: '#0a0810', fontFamily: SG }}>
       <div className="max-w-[1440px] mx-auto px-5 md:px-8 py-6">
@@ -514,6 +543,11 @@ export function AdminImageBenchPage() {
             onLoadIntoBench={(action) => {
               setPrompt(action.promptTemplate)
               setLoadedAction(action)
+              // Stylize takes a RAW selfie as input — the active twin URL
+              // is the already-stylized output. Clear it so user uploads a real photo.
+              if (action.feature === 'Stylize twin selfie') {
+                setTwinUrl('')
+              }
               setView('bench')
             }}
           />
@@ -528,6 +562,11 @@ export function AdminImageBenchPage() {
                 {loadedAction.category} · {loadedAction.trigger} · prod model: <span className="font-mono">{loadedAction.model}</span> · refs: {loadedAction.references}
               </p>
               <p className="text-white/30 text-[11px] font-mono mt-1">{loadedAction.source}</p>
+              {loadedAction.feature === 'Stylize twin selfie' && (
+                <p className="mt-2 text-amber-300/90 text-[12px] leading-relaxed">
+                  ⚠️ Upload a <strong>raw selfie photo</strong> below — this action transforms a real photo into anime style. Don't use the active twin URL (that's already stylized output).
+                </p>
+              )}
             </div>
             <button
               onClick={() => setLoadedAction(null)}
@@ -623,15 +662,36 @@ export function AdminImageBenchPage() {
                 Twin selfie URL
                 {activeChar?.name && <span className="text-white/30 normal-case ml-2">({activeChar.name})</span>}
               </label>
-              {canResetToActive && (
+              <div className="flex items-center gap-3">
                 <button
-                  onClick={() => setTwinUrl(liveTwinUrl)}
-                  className="cursor-pointer text-[10px] uppercase tracking-widest text-[#c84b9e] hover:text-[#e060b8]"
+                  onClick={() => twinFileInputRef.current?.click()}
+                  disabled={uploadingTwin}
+                  className="cursor-pointer flex items-center gap-1 text-[10px] uppercase tracking-widest text-[#c84b9e] hover:text-[#e060b8] disabled:opacity-50"
                 >
-                  Use active twin
+                  {uploadingTwin ? <Loader2 size={10} className="animate-spin" /> : <Upload size={10} />}
+                  {uploadingTwin ? 'Uploading...' : 'Upload photo'}
                 </button>
-              )}
+                {canResetToActive && (
+                  <button
+                    onClick={() => setTwinUrl(liveTwinUrl)}
+                    className="cursor-pointer text-[10px] uppercase tracking-widest text-[#c84b9e] hover:text-[#e060b8]"
+                  >
+                    Use active twin
+                  </button>
+                )}
+              </div>
             </div>
+            <input
+              ref={twinFileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) handleTwinFileUpload(file)
+                e.target.value = ''
+              }}
+            />
             <input
               type="text"
               value={twinUrl}
@@ -639,6 +699,9 @@ export function AdminImageBenchPage() {
               placeholder="https://..."
               className="w-full bg-[#13101c] border border-[#2a2040] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#c84b9e]"
             />
+            {twinUploadError && (
+              <p className="text-red-400/90 text-[11px] mt-1">{twinUploadError}</p>
+            )}
             {twinUrl && (
               <button
                 type="button"
