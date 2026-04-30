@@ -2636,7 +2636,7 @@ export function TravelReaderPage() {
 
         {/* Bottom Controls */}
         {viewMode === 'chat' && (
-          <div className="shrink-0 px-5 md:px-[60px] pb-5 pt-3 safe-bottom" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="shrink-0 px-5 md:px-[60px] pb-6 md:pb-8 pt-4 safe-bottom" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
             {/* Inline phase actions — compact, non-intrusive (no planning CTA here — sidebar only) */}
             {!isStreaming && trip.phase === 'day' && currentScene && !currentScene.prose && (
               <button
