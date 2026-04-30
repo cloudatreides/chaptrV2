@@ -258,6 +258,71 @@ function CarouselWithIndex({ urls, labels, onIndexChange, onImageClick }: {
   )
 }
 
+/** Asymptotic fake-progress for image generation. The Nano Banana proxy
+ *  doesn't stream progress, so we simulate it: progress = 1 - exp(-t/tau)
+ *  with tau ~= 8s, capped at 95% so it never reads "100% but still waiting".
+ *  When the actual image arrives the parent unmounts this component and the
+ *  bar disappears, which reads as completion. */
+function SceneImageProgress({ label, compact = false }: { label?: string; compact?: boolean }) {
+  const [pct, setPct] = useState(0)
+  useEffect(() => {
+    const start = performance.now()
+    const tau = 8000
+    const tick = () => {
+      const t = performance.now() - start
+      const p = 1 - Math.exp(-t / tau)
+      setPct(Math.min(95, Math.round(p * 100)))
+    }
+    tick()
+    const id = window.setInterval(tick, 200)
+    return () => window.clearInterval(id)
+  }, [])
+
+  if (compact) {
+    return (
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-4">
+        <div className="w-full max-w-[200px]">
+          <div className="w-full h-1 rounded-full overflow-hidden mb-1.5" style={{ background: 'rgba(255,255,255,0.1)' }}>
+            <motion.div
+              animate={{ width: `${pct}%` }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              className="h-full"
+              style={{ background: 'linear-gradient(90deg, #7C3AED, #c84b9e)' }}
+            />
+          </div>
+          <p className="text-white/55 text-[10px] text-center" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            {pct}%
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6">
+      <Loader2 size={28} className="animate-spin text-purple-300/80" />
+      <div className="text-center w-full max-w-xs">
+        {label && (
+          <p className="text-white/80 text-sm font-medium mb-2.5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            {label}
+          </p>
+        )}
+        <div className="w-full h-1.5 rounded-full overflow-hidden mb-1.5" style={{ background: 'rgba(255,255,255,0.08)' }}>
+          <motion.div
+            animate={{ width: `${pct}%` }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="h-full"
+            style={{ background: 'linear-gradient(90deg, #7C3AED, #c84b9e)' }}
+          />
+        </div>
+        <p className="text-white/40 text-[11px]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+          {pct}% — usually 5–15 seconds
+        </p>
+      </div>
+    </div>
+  )
+}
+
 export function TravelReaderPage() {
   const navigate = useNavigate()
   const location = useLocation()
