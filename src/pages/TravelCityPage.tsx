@@ -23,7 +23,6 @@ export function TravelCityPage() {
   const setActiveCharacter = useStore((s) => s.setActiveCharacter)
   const activeChar = characters.find((c) => c.id === activeCharacterId)
   const startTrip = useStore((s) => s.startTrip)
-  const createCharacter = useStore((s) => s.createCharacter)
   const customCompanions = useStore((s) => s.customCompanions)
   const addCustomCompanion = useStore((s) => s.addCustomCompanion)
   const updateCustomCompanion = useStore((s) => s.updateCustomCompanion)
@@ -225,9 +224,12 @@ export function TravelCityPage() {
   // ── Start trip ──
   function handleStartTrip() {
     if (!selectedId) return
-    let charId = activeCharacterId
-    if (!charId) {
-      charId = createCharacter({ name: 'Traveler', gender: 'female', selfieUrl: null, bio: null })
+    if (!activeChar) {
+      // Travel mode needs a real twin (name + selfie) to render the protagonist
+      // into scene/selfie images. Send the user through character creation
+      // instead of silently spawning a "Traveler" placeholder.
+      navigate('/create-character?next=' + encodeURIComponent(`/travel/${destination?.id ?? ''}`))
+      return
     }
 
     ambientAudio.unlock()
@@ -467,6 +469,25 @@ export function TravelCityPage() {
           </div>
 
           {/* Start Trip CTA */}
+          {selectedId && !activeChar && (
+            <div
+              className="w-full sm:max-w-md mb-3 px-4 py-3 rounded-xl flex items-start gap-3"
+              style={{
+                background: 'rgba(200,75,158,0.08)',
+                border: '1px solid rgba(200,75,158,0.3)',
+              }}
+            >
+              <div className="text-base leading-none mt-0.5">👤</div>
+              <div className="flex-1">
+                <p className="text-white text-sm font-semibold mb-0.5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                  Create your character first
+                </p>
+                <p className="text-white/60 text-xs leading-relaxed" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                  Travel mode needs a twin selfie so {displayName} has someone to travel with. It only takes a minute.
+                </p>
+              </div>
+            </div>
+          )}
           <motion.button
             whileTap={{ scale: 0.98 }}
             onClick={handleStartTrip}
@@ -478,9 +499,11 @@ export function TravelCityPage() {
               fontSize: 15,
             }}
           >
-            {selectedId
-              ? `Start your trip with ${displayName}`
-              : 'Select a companion to begin'
+            {!selectedId
+              ? 'Select a companion to begin'
+              : !activeChar
+                ? 'Create your character to start'
+                : `Start your trip with ${displayName}`
             }
           </motion.button>
         </div>

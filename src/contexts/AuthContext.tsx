@@ -19,40 +19,35 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 
 /** Hydrate the Zustand store from Supabase saved state.
  *
- *  Strategy: each browser tracks its own `last-local-save` timestamp in
- *  localStorage. On hydrate, compare that against the cloud row's
- *  `updated_at`:
- *   - cloud meaningfully newer → another browser/device has updated since
- *     this one last saved. Pull cloud state in. (Self-heals cross-browser
- *     drift like wiping twins in Chrome → VS Code integrated browser still
- *     showing the old set.)
- *   - otherwise → this browser is up-to-date or has unsynced edits. Keep
- *     local.
+ *  Strategy: strict timestamp comparison between cloud `updated_at` and this
+ *  browser's `last-local-save` (set after every successful save in
+ *  gameStateSync.ts). Cloud wins when it is *strictly* newer than this
+ *  browser's last save.
  *
- *  Per-browser localStorage key avoids the previous "local always wins"
- *  trap where stale localStorage silently outranked cloud, AND avoids the
- *  inverse trap where same-browser refreshes mistakenly re-pull cloud
- *  (because we never bumped the in-store `lastSessionTimestamp` on saves). */
-const CLOUD_WINS_THRESHOLD_MS = 30_000  // cloud must be ≥30s newer than this browser's last save
-
+ *  Why no slop / no threshold:
+ *   - Same browser, same session: lastLocalSave is set after the cloud save
+ *     completes (Date.now() includes the network round-trip), so it is
+ *     ~200ms *later* than cloudUpdatedAt. Cloud loses the comparison →
+ *     unsynced local edits survive a refresh. ✓
+ *   - Different browsers, same user: B's lastLocalSave reflects B's last
+ *     save, A's cloudUpdatedAt reflects A's save. If A is newer than B,
+ *     even by 1ms, cloud wins → cross-browser drift heals. ✓
+ *   - Brand-new browser (lastLocalSave = 0): cloud always wins. ✓
+ *
+ *  An earlier 30s threshold caused cross-browser writes within the same
+ *  session to be ignored, because both browsers' timestamps fell inside the
+ *  slop window. Removed — strict comparison is the correct rule. */
 async function hydrateFromCloud(userId: string) {
   const result = await loadGameState(userId)
   if (!result) return
 
   const { state: cloudState, updatedAt: cloudUpdatedAt } = result
   const local = useStore.getState()
-  const hasLocalData =
-    (local.characters?.length ?? 0) > 0 ||
-    Object.keys(local.storyProgress ?? {}).length > 0 ||
-    Object.keys(local.travelTrips ?? {}).length > 0
-
-  if (!hasLocalData) {
-    useStore.setState(cloudState as Partial<typeof local>)
-    return
-  }
-
   const lastLocalSave = getLastLocalSaveTimestamp()
-  if (cloudUpdatedAt - lastLocalSave > CLOUD_WINS_THRESHOLD_MS) {
+
+  // Cloud is strictly newer → another browser/device has updated since this
+  // browser last saved. Pull cloud state in.
+  if (cloudUpdatedAt > lastLocalSave) {
     useStore.setState(cloudState as Partial<typeof local>)
   }
 }

@@ -227,7 +227,12 @@ export function CreateCharacterPage() {
       })
       trackEvent('character_created', { gender, hasPhoto: !!finalPhoto, hasDefault: !!selectedDefault, hasBio: !!bio })
     }
-    navigate(isEditMode ? '/characters' : '/home')
+    const next = searchParams.get('next')
+    if (!isEditMode && next) {
+      navigate(next)
+    } else {
+      navigate(isEditMode ? '/characters' : '/home')
+    }
   }
 
   if (!isEditMode && characters.length >= 3) {
