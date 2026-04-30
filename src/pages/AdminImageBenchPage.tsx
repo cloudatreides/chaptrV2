@@ -35,6 +35,15 @@ const MODEL_LABELS: Record<ModelId, string> = {
   'nano-banana': 'Nano Banana (Gemini 2.5)',
 }
 
+const SHORT_MODEL_LABELS: Record<ModelId, string> = {
+  'flux2': 'FLUX.2',
+  'kontext': 'Kontext',
+  'schnell': 'Schnell',
+  'nano-banana-2': 'Nano Banana 2',
+  'nano-banana-pro': 'Nano Banana Pro',
+  'nano-banana': 'Nano Banana',
+}
+
 // Public per-image pricing in USD as of Apr 2026. Approximate; useful for
 // rough cost-at-scale comparison, not billing. Gemini prices are 1K
 // (1024x1024) tier — bench renders at 768x576 which falls into the same
@@ -433,6 +442,7 @@ export function AdminImageBenchPage() {
   const [prompt, setPrompt] = useState(initial?.prompt ?? DEFAULT_PROMPT)
   const [results, setResults] = useState<Record<ModelId, Result>>({} as Record<ModelId, Result>)
   const [running, setRunning] = useState<Record<ModelId, boolean>>({} as Record<ModelId, boolean>)
+  const [selected, setSelected] = useState<Record<ModelId, boolean>>({} as Record<ModelId, boolean>)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [view, setView] = useState<'bench' | 'audit'>('bench')
   const [loadedAction, setLoadedAction] = useState<ImageGenAction | null>(null)
@@ -539,13 +549,21 @@ export function AdminImageBenchPage() {
     setBusy(model, false)
   }
 
-  async function runAll() {
-    runFlux2()
-    runKontext()
-    runSchnell()
-    runNano('nano-banana-2')
-    runNano('nano-banana-pro')
-    runNano('nano-banana')
+  function runById(id: ModelId) {
+    if (id === 'flux2') return runFlux2()
+    if (id === 'kontext') return runKontext()
+    if (id === 'schnell') return runSchnell()
+    return runNano(id)
+  }
+
+  function toggleSelected(id: ModelId) {
+    setSelected((prev) => ({ ...prev, [id]: !prev[id] }))
+  }
+
+  async function runSelected() {
+    const ids = (Object.keys(MODEL_LABELS) as ModelId[]).filter((id) => selected[id])
+    const targets = ids.length > 0 ? ids : (Object.keys(MODEL_LABELS) as ModelId[])
+    targets.forEach((id) => runById(id))
   }
 
   // Upload a raw photo to Supabase storage so all models (FLUX/Kontext need
@@ -905,28 +923,32 @@ export function AdminImageBenchPage() {
           />
         </div>
 
-        <div className="flex flex-wrap gap-2 mb-8">
-          <button onClick={runAll} className="cursor-pointer px-4 py-2 rounded-lg bg-[#c84b9e] text-white text-sm font-semibold">
-            Run all
-          </button>
-          <button onClick={runFlux2} className="cursor-pointer px-4 py-2 rounded-lg bg-[#1a1525] border border-[#2a2040] text-white/80 text-sm">
-            FLUX.2 only
-          </button>
-          <button onClick={runKontext} className="cursor-pointer px-4 py-2 rounded-lg bg-[#1a1525] border border-[#2a2040] text-white/80 text-sm">
-            Kontext only
-          </button>
-          <button onClick={runSchnell} className="cursor-pointer px-4 py-2 rounded-lg bg-[#1a1525] border border-[#2a2040] text-white/80 text-sm">
-            Schnell only
-          </button>
-          <button onClick={() => runNano('nano-banana-2')} className="cursor-pointer px-4 py-2 rounded-lg bg-[#1a1525] border border-[#2a2040] text-white/80 text-sm">
-            Nano Banana 2 only
-          </button>
-          <button onClick={() => runNano('nano-banana-pro')} className="cursor-pointer px-4 py-2 rounded-lg bg-[#1a1525] border border-[#2a2040] text-white/80 text-sm">
-            Nano Banana Pro only
-          </button>
-          <button onClick={() => runNano('nano-banana')} className="cursor-pointer px-4 py-2 rounded-lg bg-[#1a1525] border border-[#2a2040] text-white/80 text-sm">
-            Nano Banana only
-          </button>
+        <div className="flex flex-wrap items-center gap-2 mb-8">
+          {(() => {
+            const selectedCount = (Object.keys(MODEL_LABELS) as ModelId[]).filter((id) => selected[id]).length
+            return (
+              <button onClick={runSelected} className="cursor-pointer px-4 py-2 rounded-lg bg-[#c84b9e] text-white text-sm font-semibold">
+                {selectedCount === 0 ? 'Run all' : `Run ${selectedCount} selected`}
+              </button>
+            )
+          })()}
+          <span className="text-white/30 text-xs px-1">click to select</span>
+          {(Object.keys(MODEL_LABELS) as ModelId[]).map((id) => {
+            const isSelected = !!selected[id]
+            return (
+              <button
+                key={id}
+                onClick={() => toggleSelected(id)}
+                className={`cursor-pointer px-3 py-2 rounded-lg text-sm transition-colors border ${
+                  isSelected
+                    ? 'bg-[#c84b9e]/20 border-[#c84b9e] text-white'
+                    : 'bg-[#1a1525] border-[#2a2040] text-white/70 hover:border-[#3d2e5e]'
+                }`}
+              >
+                {SHORT_MODEL_LABELS[id]}
+              </button>
+            )
+          })}
         </div>
 
         {/* Results grid */}
