@@ -2459,22 +2459,8 @@ export function TravelReaderPage() {
                         src={trip.departureImageUrl}
                         alt=""
                         className="w-full"
-                        style={{ aspectRatio: '4/3', objectFit: 'cover', opacity: isRegeneratingDeparture ? 0.4 : 1, transition: 'opacity 0.2s' }}
+                        style={{ aspectRatio: '4/3', objectFit: 'cover' }}
                       />
-                    </button>
-                    {isRegeneratingDeparture && (
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ aspectRatio: '4/3' }}>
-                        <Loader2 size={28} className="animate-spin text-white/70" />
-                      </div>
-                    )}
-                    <button
-                      onClick={regenerateDepartureImage}
-                      disabled={isRegeneratingDeparture}
-                      className="cursor-pointer absolute top-2.5 left-2.5 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-colors hover:bg-black/70 disabled:opacity-60 disabled:cursor-not-allowed"
-                      style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)', color: 'rgba(255,255,255,0.85)', fontFamily: "'Space Grotesk', sans-serif", border: '1px solid rgba(255,255,255,0.08)' }}
-                    >
-                      <RefreshCw size={11} className={isRegeneratingDeparture ? 'animate-spin' : ''} />
-                      {isRegeneratingDeparture ? 'Regenerating...' : 'Regenerate'}
                     </button>
                     <div className="px-4 py-3" style={{ background: 'rgba(124,58,237,0.06)' }}>
                       <p className="text-white/50 text-xs" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
