@@ -354,10 +354,6 @@ export async function generateTravelOpeningMessage(params: {
   const destination = getDestination(destinationId)
   if (!companion || !destination) return { content: '...' }
 
-  if (chatType === 'planning') {
-    return { content: getCompanionIntro(companion, destinationId, playerName) }
-  }
-
   let system = buildTravelSystemPrompt(companion, companionSliders, destination.locationKnowledge, companionRemix, relationship)
   if (bio) system += `\nTraveler personality: "${bio}"`
   if (tripContext) system += `\n\nTRIP SO FAR: ${tripContext}`
@@ -366,6 +362,7 @@ export async function generateTravelOpeningMessage(params: {
   }
 
   const openerInstructions: Record<string, string> = {
+    planning: `You and the traveler just landed in ${destination.city}. This is the very first message of the planning chat. Open in your voice with something specific and grounded: a neighborhood, a dish, a market, a hidden spot, the weather, a custom — whatever lights you up about THIS city. 1-3 sentences. Avoid the obvious tourist clichés; lean into a detail only someone who actually thought about this place would mention.`,
     reaction: `You just experienced something with the traveler. React naturally. 1-2 sentences. ${sceneContext ? `What happened: ${sceneContext}` : ''}`,
     freeform: `You have free time. Suggest something or ask what the traveler wants to do. 1-2 sentences. ${sceneContext ? `Current context: ${sceneContext}` : ''}`,
     recap: 'The day is ending. Start a reflective conversation about the day. 1-2 sentences.',
@@ -379,23 +376,31 @@ Format: [SUGGESTIONS: "reply 1" | "reply 2" | "reply 3"]
 - One adventurous, one curious, one personal
 - Under 50 characters each`
 
+  // Planning openers fall back to the static array if the API call fails
+  // — the user still sees a city-specific line, just not a freshly generated
+  // one. Other chat types fall back to "..." since they're mid-trip and the
+  // static array doesn't apply.
+  const fallback = chatType === 'planning'
+    ? getCompanionIntro(companion, destinationId, playerName)
+    : '...'
+
   try {
     const response = await makeClaudeRequest(system, 'Write your opening line.', {
       temperature: companion.character.chatTemperature,
       maxTokens: 150,
     })
 
-    if (!response.ok) return { content: '...' }
+    if (!response.ok) return { content: fallback }
     const data = await response.json()
-    const raw = data.content?.[0]?.text?.trim() ?? '...'
+    const raw = data.content?.[0]?.text?.trim() ?? fallback
     const suggestionsMatch = raw.match(/\[SUGGESTIONS:\s*"([^"]+)"\s*\|\s*"([^"]+)"\s*(?:\|\s*"([^"]*)"?)?\s*\]?/)
     const contentOnly = raw.replace(/\n?\[SUGGESTIONS[\s\S]*$/, '').trim()
     const suggestions = suggestionsMatch
       ? [suggestionsMatch[1], suggestionsMatch[2], ...(suggestionsMatch[3] ? [suggestionsMatch[3]] : [])]
       : undefined
-    return { content: stripMarkdown(contentOnly), suggestions }
+    return { content: stripMarkdown(contentOnly) || fallback, suggestions }
   } catch {
-    return { content: '...' }
+    return { content: fallback }
   }
 }
 
