@@ -169,7 +169,7 @@ function UploadHero({ onClick }: { onClick: () => void }) {
       className="cursor-pointer w-full rounded-2xl overflow-hidden text-left"
       style={{ border: '1px solid rgba(200,75,158,0.15)' }}
     >
-      <div className="relative h-[200px] md:h-[280px] overflow-hidden flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(200,75,158,0.06), rgba(124,58,237,0.04))' }}>
+      <div className="relative min-h-[260px] md:min-h-[280px] py-8 md:py-10 overflow-hidden flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(200,75,158,0.06), rgba(124,58,237,0.04))' }}>
         <div className="absolute inset-0 flex items-center justify-center opacity-[0.03]">
           <Camera size={200} className="text-white" />
         </div>
