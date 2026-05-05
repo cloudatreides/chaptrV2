@@ -24,7 +24,7 @@ export interface TravelCompanion {
   character: StoryCharacter
   travelSystemPrompt: string
   travelIntro: string
-  travelIntroByCity: Record<string, string>
+  travelIntroByCity: Record<string, string | string[]>
   defaultSliders: CompanionSliders
   bio: string
   personalityTraits: string[]
@@ -180,7 +180,12 @@ export const TRAVEL_COMPANIONS: TravelCompanion[] = [
       tokyo: "Yo I already found three ramen spots within walking distance and a guy at the station told me about a yakitori alley that closes at 2am. What are we hitting first?",
       seoul: "Okay I know this city but I just found out about a whole underground food street I've never been to?? Gwangjang Market, Euljiro, late-night tteokbokki. Where do we start?",
       bangkok: "Dude the street food here is on another level. I already talked to a tuk-tuk driver who gave me his personal top five. Chinatown first or Khao San Road?",
-      taipei: "No way, there are like TWELVE night markets here. Twelve! I'm making it a mission to hit at least five. Raohe tonight? Shilin tomorrow? Let's go!",
+      taipei: [
+        "No way, there are like TWELVE night markets here. Twelve! I'm making it a mission to hit at least five. Raohe tonight? Shilin tomorrow? Let's go!",
+        "Bro the customs guy literally drew me a map of his three favorite beef noodle spots. THREE. We're testing all of them. What else are you down for?",
+        "Already spotted a hot spring spot in Beitou and a 24-hour bookstore. We're sleeping when we get back home, not before.",
+        "I asked the cab driver for ONE recommendation and he gave me eleven. I wrote them down. Where do we start?",
+      ],
       marrakech: "Okay so I made friends with a guy at the airport who drew me a map of where to eat in the medina. Actual pen-on-napkin map. We're following it. You in?",
       kyoto: "I heard there's a tofu place near Arashiyama that's been open for like 400 years. Four hundred! We're eating there. What else is on your list?",
       medellin: "Yo the energy here is unreal! I already got a coffee recommendation from the hotel guy AND found a pickup football game happening later. What do you wanna do first?",
@@ -210,7 +215,12 @@ export const TRAVEL_COMPANIONS: TravelCompanion[] = [
       tokyo: "Okay so I've been watching Tokyo vlogs for like three weeks straight and I have OPINIONS. Shibuya at night? The ramen? The arcades? What are you most excited about?",
       seoul: "I literally grew up here but I've been making a list of all the places I never actually go to lol. Hongdae street food, Bukchon in the morning, soju in Euljiro... what's calling you?",
       bangkok: "The street food alone would take like five days tbh. Chinatown at night? Chatuchak on Saturday? Rooftop bars? Where do we even START?",
-      taipei: "Night markets, hot springs, AND hiking?? Taipei is literally built for us. Are you a Shilin person or a Raohe person? This matters.",
+      taipei: [
+        "Night markets, hot springs, AND hiking?? Taipei is literally built for us. Are you a Shilin person or a Raohe person? This matters.",
+        "Okay I have been on Taipei TikTok for weeks. Elephant Mountain at golden hour is non-negotiable. After that, what's calling you?",
+        "Bubble tea was invented HERE, in this city. We're doing a tasting tour. I made a list. Don't make fun of me.",
+        "Can we be honest, Taipei is the underrated one of the Asia trips. Night market food alone is criminal. What are you most excited about?",
+      ],
       marrakech: "Okay the medina looks INSANE in every vlog I've watched. The souks, the riads, the food stalls at Jemaa el-Fna... are you ready for sensory overload?",
       kyoto: "Bamboo forests at dawn, matcha everything, temples that are like a thousand years old... Kyoto is giving main character energy. What do you want to see first?",
       medellin: "Comuna 13 graffiti, paragliding over the valley, AND eternal spring weather?? I've been spiraling on Medellin content for weeks. What are you most hyped for?",
@@ -240,7 +250,12 @@ export const TRAVEL_COMPANIONS: TravelCompanion[] = [
       tokyo: "I found a jazz bar near Shinjuku that's only open past midnight. We should figure out the rest of the trip around that.",
       seoul: "There's a bar in Euljiro hidden behind a printing shop. No sign, just a door. We should build the trip around finding it.",
       bangkok: "There's a rooftop somewhere in Silom with no name on the door. We should plan the whole trip around finding it after dark.",
-      taipei: "I read about a speakeasy in Zhongshan behind a barbershop. That's night one. We can figure out the temples later.",
+      taipei: [
+        "I read about a speakeasy in Zhongshan behind a barbershop. That's night one. We can figure out the temples later.",
+        "There's a tea house in Jiufen that opens at 11pm. Only locals know about it. That's where we start.",
+        "Someone told me the best beef noodle soup is in a basement off a side street in Zhongshan. We're finding it. The rest can wait.",
+        "Read about a bar that just plays vinyl, no menu, no sign. Two hours from now. Plan around that.",
+      ],
       marrakech: "Someone told me about a riad in the medina where you can only get in if you know the door. That's our base. Everything else flows from there.",
       kyoto: "There's a sake bar in Gion that seats four people. No menu, the owner just pours what he thinks you need. We start there.",
       medellin: "There's a salsa spot in Laureles that only locals know about. No sign, just music through the wall. That's our first night.",
@@ -270,7 +285,12 @@ export const TRAVEL_COMPANIONS: TravelCompanion[] = [
       tokyo: "I made a list. Don't worry, it's short. Okay it's not short. But I ranked everything from Tsukiji to Shimokitazawa, so we can cut from the bottom.",
       seoul: "I made a list. Don't worry, it's short. Okay it's not short. But I ranked everything from Gwangjang Market to Namsan Tower, so we can cut from the bottom.",
       bangkok: "I ranked every night market, every temple, and every rooftop bar. The spreadsheet has tabs. We can cut from the bottom... maybe.",
-      taipei: "I ranked everything from Raohe Night Market to Elephant Mountain to every single beef noodle soup spot. The list has sections. We can cut from the bottom.",
+      taipei: [
+        "I ranked everything from Raohe Night Market to Elephant Mountain to every single beef noodle soup spot. The list has sections. We can cut from the bottom.",
+        "I made a sortable spreadsheet. Night markets, hot springs, hikes, cafes, color-coded by district. Don't laugh. We can cut from the bottom.",
+        "Top of the list is Yongkang Street. Bottom is the touristy stuff. Let me know what we're keeping and we'll work backwards.",
+        "Twelve night markets, eight hikes, four hot spring towns, and somewhere in there we sleep. The ranking is firm but negotiable.",
+      ],
       marrakech: "I ranked every souk, every riad, every tagine spot, and every hammam. The list is color-coded. We can cut from the bottom... probably.",
       kyoto: "I ranked every temple, every garden, every matcha spot, and every kaiseki restaurant. The list has a scoring system. We can cut from the bottom.",
       medellin: "I ranked Comuna 13 tours, coffee farms, viewpoints, and every arepa spot in Laureles. The spreadsheet has a rating column. We can cut from the bottom.",
@@ -298,7 +318,8 @@ export function getTravelCompanion(characterId: string): TravelCompanion | undef
 }
 
 export function getCompanionIntro(companion: TravelCompanion, destinationId: string, playerName?: string | null): string {
-  const intro = companion.travelIntroByCity[destinationId] ?? companion.travelIntro
+  const raw = companion.travelIntroByCity[destinationId] ?? companion.travelIntro
+  const intro = Array.isArray(raw) ? raw[Math.floor(Math.random() * raw.length)] : raw
   return playerName ? `${playerName}! ${intro}` : intro
 }
 
