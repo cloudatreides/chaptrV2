@@ -439,6 +439,7 @@ export function TravelReaderPage() {
   const [showAmbientLabel, setShowAmbientLabel] = useState(true)
   const [showPortraitModal, setShowPortraitModal] = useState(false)
   const [showProgressSheet, setShowProgressSheet] = useState(false)
+  const [showTripInfoModal, setShowTripInfoModal] = useState(false)
 
   // Wind-down chat actions (cuddle, closer, bath, undress) match the inline
   // pattern of the day-phase actions (Show me / Selfie / Hold hands / etc.):
@@ -1847,14 +1848,19 @@ export function TravelReaderPage() {
               )}
             </button>
           </div>
-          <div className="flex-1 min-w-0">
+          <button
+            type="button"
+            onClick={() => setShowTripInfoModal(true)}
+            className="flex-1 min-w-0 text-left cursor-pointer hover:opacity-80 transition-opacity"
+            aria-label="Show trip details"
+          >
             <p className="text-white text-sm font-semibold truncate" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               {activeChar ? `${activeChar.name} & ${companionName}` : companionName}
             </p>
             <p className="text-white/40 text-xs truncate" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               {destination.countryEmoji} {destination.city} — {trip.phase === 'planning' ? 'Planning' : `Day ${trip.currentDay}`}
             </p>
-          </div>
+          </button>
           {/* Mobile-only trip progress pill */}
           <button
             onClick={() => setShowProgressSheet(true)}
@@ -2929,6 +2935,108 @@ export function TravelReaderPage() {
             style={{ fontFamily: "'Space Grotesk', sans-serif", background: '#1E1A2E', border: '1px solid rgba(124,58,237,0.3)', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
           >
             {toastMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Trip info modal — opens on title tap */}
+      <AnimatePresence>
+        {showTripInfoModal && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center px-5"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowTripInfoModal(false)}
+          >
+            <div className="absolute inset-0 bg-black/80" />
+            <motion.div
+              className="relative max-w-sm w-full rounded-2xl overflow-hidden"
+              style={{ background: '#15101F', border: '1px solid rgba(124,58,237,0.18)' }}
+              initial={{ scale: 0.94, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.94, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setShowTripInfoModal(false)}
+                className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer bg-white/5 hover:bg-white/10 transition-colors z-10"
+                aria-label="Close"
+              >
+                <X size={16} className="text-white/70" />
+              </button>
+              <div className="p-6">
+                {/* Paired avatars */}
+                <div className="flex items-center mb-4">
+                  {activeChar && (
+                    <div className="w-14 h-14 rounded-full overflow-hidden" style={{ border: '2px solid #15101F', marginRight: -16 }}>
+                      {activeChar.selfieUrl ? (
+                        <SelfieImg src={activeChar.selfieUrl} alt="" className="w-full h-full object-cover" fallback={<div className="w-full h-full flex items-center justify-center text-lg font-semibold" style={{ background: 'rgba(124,58,237,0.2)', color: '#A78BFA' }}>{activeChar.name[0]}</div>} />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-lg font-semibold" style={{ background: 'rgba(124,58,237,0.2)', color: '#A78BFA' }}>
+                          {activeChar.name[0]}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <div className="w-14 h-14 rounded-full overflow-hidden" style={{ border: activeChar ? '2px solid #15101F' : 'none' }}>
+                    {companionPortrait ? (
+                      <SelfieImg src={companionPortrait} alt="" className="w-full h-full object-cover" fallback={<div className="w-full h-full flex items-center justify-center text-lg" style={{ background: '#2D2538' }}>{companion.character.avatar}</div>} />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-lg" style={{ background: '#2D2538' }}>
+                        {companion.character.avatar}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {/* Names */}
+                <p className="text-white text-lg font-bold mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                  {activeChar ? `${activeChar.name} & ${companionName}` : companionName}
+                </p>
+                {/* Destination */}
+                <p className="text-white/60 text-sm mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                  {destination.countryEmoji} {destination.city}, {destination.country}
+                </p>
+                {destination.description && (
+                  <p className="text-white/50 text-xs italic mb-4 leading-relaxed" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                    "{destination.description}"
+                  </p>
+                )}
+                {/* Status row */}
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="rounded-lg px-3 py-2" style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.15)' }}>
+                    <p className="text-white/40 text-[10px] uppercase tracking-wider mb-0.5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Status</p>
+                    <p className="text-white text-sm font-medium" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{progressLabel}</p>
+                  </div>
+                  <div className="rounded-lg px-3 py-2" style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.15)' }}>
+                    <p className="text-white/40 text-[10px] uppercase tracking-wider mb-0.5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Started</p>
+                    <p className="text-white text-sm font-medium" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                      {(() => {
+                        const days = Math.floor((Date.now() - trip.startedAt) / 86400000)
+                        if (days <= 0) return 'today'
+                        if (days === 1) return 'yesterday'
+                        if (days < 30) return `${days} days ago`
+                        return new Date(trip.startedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                      })()}
+                    </p>
+                  </div>
+                </div>
+                {/* Vibe tags */}
+                {destination.vibeTags && destination.vibeTags.length > 0 && (
+                  <div className="flex gap-1.5 flex-wrap">
+                    {destination.vibeTags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="text-[10px] px-2 py-1 rounded-full"
+                        style={{ background: 'rgba(124,58,237,0.12)', color: 'rgba(200,180,255,0.8)', fontFamily: "'Space Grotesk', sans-serif" }}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
