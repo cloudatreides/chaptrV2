@@ -1819,7 +1819,7 @@ export function TravelReaderPage() {
             {activeChar && (
               <button
                 onClick={() => navigate(`/create-character?edit=${activeChar.id}&next=/travel/trip`)}
-                className="w-8 h-8 rounded-full overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                className="hidden sm:block w-8 h-8 rounded-full overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
                 style={{ border: '2px solid #0A0810', marginRight: -10 }}
                 title={`Edit ${activeChar.name}`}
                 aria-label={`Edit ${activeChar.name}`}
@@ -1950,7 +1950,7 @@ export function TravelReaderPage() {
           <motion.div
             animate={!ambientPlaying && showAmbientLabel ? { scale: [1, 1.04, 1] } : {}}
             transition={!ambientPlaying && showAmbientLabel ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } : {}}
-            className="shrink-0 h-8 rounded-full flex items-center gap-0.5 px-1"
+            className="shrink-0 h-8 rounded-full hidden sm:flex items-center gap-0.5 px-1"
             style={{ background: ambientPlaying ? 'rgba(139,92,246,0.12)' : 'transparent', border: ambientPlaying ? '1px solid rgba(139,92,246,0.2)' : '1px solid rgba(255,255,255,0.08)' }}
           >
             <button
