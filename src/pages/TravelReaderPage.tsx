@@ -1806,7 +1806,7 @@ export function TravelReaderPage() {
       <div className="flex-1 lg:flex-initial w-full lg:w-[1024px] flex flex-col h-full overflow-hidden">
         {/* Header */}
         <div
-          className="shrink-0 flex items-center gap-3 px-5 py-3 w-full max-w-[1024px] mx-auto"
+          className="shrink-0 flex flex-wrap items-center gap-x-3 gap-y-1 px-5 py-3 w-full max-w-[1024px] mx-auto"
           style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
         >
           <button onClick={() => navigate('/travel')} className="text-white/40 hover:text-white/60 cursor-pointer">
@@ -1847,7 +1847,7 @@ export function TravelReaderPage() {
               )}
             </button>
           </div>
-          <div className="flex-1 min-w-0">
+          <div className="order-last w-full md:order-none md:w-auto md:flex-1 min-w-0">
             <p className="text-white text-sm font-semibold truncate" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               {activeChar ? `${activeChar.name} & ${companionName}` : companionName}
             </p>
