@@ -38,6 +38,14 @@ const AuthContext = createContext<AuthContextValue | null>(null)
  *  session to be ignored, because both browsers' timestamps fell inside the
  *  slop window. Removed — strict comparison is the correct rule. */
 async function hydrateFromCloud(userId: string) {
+  // Snapshot pre-fetch state so we can detect mutations during the
+  // hydrate window. Render is not blocked on hydrate (snappy UX) so the
+  // user can chat / advance days during the 200ms-1.5s round-trip. If
+  // we apply cloud state via setState() after they've mutated, Zustand's
+  // shallow merge replaces top-level keys (travelTrips, characters, etc)
+  // and silently wipes their just-made changes. Reference equality on
+  // the root state object is enough — every set() creates a new root.
+  const preFetchState = useStore.getState()
   const result = await loadGameState(userId)
   if (!result) return
 
@@ -48,6 +56,13 @@ async function hydrateFromCloud(userId: string) {
   // Cloud is strictly newer → another browser/device has updated since this
   // browser last saved. Pull cloud state in.
   if (cloudUpdatedAt > lastLocalSave) {
+    if (local !== preFetchState) {
+      // User mutated state during the fetch window — local is canonical.
+      // Skip the cloud overwrite. The post-hydrate nudge below will push
+      // the local state to cloud so the next session sees their work.
+      console.warn('[hydrateFromCloud] skipping cloud override — local mutated during fetch window')
+      return
+    }
     // Clamp the active-pointer invariant before applying: activeTripId must
     // belong to activeCharacterId. Cloud rows can carry drifted pointers
     // (mismatched activeCharacterId / activeTripId) that, once applied,
@@ -92,7 +107,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Saves stay suppressed via the hydration gate (gameStateSync.ts)
         // until this resolves, so a fresh-browser empty store can never
         // race ahead of cloud and POST `characters: []` over real data.
-        hydrateFromCloud(data.session.user.id).finally(() => markHydrated())
+        // After the gate flips, nudge the store so useGameStateSync's
+        // subscriber fires with current state — this picks up any
+        // mutations the user made during the hydrate window (which had
+        // their queueSave calls dropped by the gate) and pushes them to
+        // cloud.
+        hydrateFromCloud(data.session.user.id).finally(() => {
+          markHydrated()
+          useStore.getState().updateLastSessionTimestamp()
+        })
       } else {
         // No session → no hydrate fires → mark hydrated so the gate doesn't
         // block any save the unauthenticated landing page might trigger.
