@@ -801,11 +801,10 @@ export function HomePage() {
   }
 
   // ─── Journey stats ───
-  // TODO: REMOVE MOCK DATA — temporary for visual testing
   const storyMoments = useStore((s) => s.storyMoments)
-  const tripsCompleted = Object.values(travelTrips).filter((t) => t.phase === 'complete').length || 3
-  const storiesStarted = Object.values(storyProgress).filter((p) => p.currentStepIndex > 0).length || 2
-  const momentsCollected = storyMoments.length || 12
+  const tripsCompleted = Object.values(travelTrips).filter((t) => t.phase === 'complete').length
+  const storiesStarted = Object.values(storyProgress).filter((p) => p.currentStepIndex > 0).length
+  const momentsCollected = storyMoments.length
   const journeyStats = { tripsCompleted, storiesStarted, momentsCollected }
 
   // ─── Continue cards ───
