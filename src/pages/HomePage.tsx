@@ -842,7 +842,7 @@ export function HomePage() {
     <div className="bg-bg min-h-screen min-h-dvh">
       {/* ═══ MOBILE ═══ */}
       <div className="md:hidden">
-        <div className="overflow-y-auto px-5 pt-6 flex flex-col gap-5" style={{ paddingBottom: 'calc(96px + env(safe-area-inset-bottom))' }}>
+        <div className="overflow-y-auto px-6 pt-6 flex flex-col gap-6" style={{ paddingBottom: 'calc(96px + env(safe-area-inset-bottom))' }}>
           {/* Header */}
           <div className="flex items-center justify-between">
             <h1 className="text-white font-bold text-[22px]" style={{ fontFamily: SG }}>chaptr</h1>
