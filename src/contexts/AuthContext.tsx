@@ -37,7 +37,32 @@ const AuthContext = createContext<AuthContextValue | null>(null)
  *  An earlier 30s threshold caused cross-browser writes within the same
  *  session to be ignored, because both browsers' timestamps fell inside the
  *  slop window. Removed — strict comparison is the correct rule. */
+// Top-level keys that hold actual user work — chats, twins, trips, progress.
+// If any of these change between the snapshot (taken before the cloud fetch)
+// and apply time, the user mutated state during the hydrate window and we
+// must not clobber their work with cloud's older value for that specific
+// key. Other keys (lastSessionTimestamp, ambientPings) auto-mutate on mount
+// via HomePage's useEffect — those should always accept cloud's value, or
+// v1 of this fix wipes cloud (see project_hydrate_overwrite_bug.md / the
+// reverted commit 8839ac9).
+const USER_CONTENT_KEYS = [
+  'characters', 'travelTrips', 'storyProgress', 'castChatThreads',
+  'groupCastThreads', 'storyMoments', 'customCompanions', 'gemBalance',
+  'globalAffinities', 'favoriteCastIds', 'unlockedCastIds',
+  'playthroughHistory', 'selectedUniverse', 'activeCharacterId',
+  'activeTripId',
+] as const
+
 async function hydrateFromCloud(userId: string) {
+  // Snapshot user-content keys BEFORE the await so we can detect mutations
+  // the user makes during the 200ms-1.5s fetch window. Render isn't blocked
+  // on hydrate (snappy UX), so the user can chat / advance days before
+  // cloud lands. Without this, Zustand setState shallow-merges cloud's
+  // older travelTrips over the just-mutated local one, wiping the chat.
+  const before = useStore.getState() as unknown as Record<string, unknown>
+  const snapshot: Record<string, unknown> = {}
+  for (const k of USER_CONTENT_KEYS) snapshot[k] = before[k]
+
   const result = await loadGameState(userId)
   if (!result) return
 
@@ -58,7 +83,22 @@ async function hydrateFromCloud(userId: string) {
     if (cs.activeTripId && tripCharPrefix !== cs.activeCharacterId) {
       cs.activeTripId = null
     }
-    useStore.setState(cs)
+    // Field-level merge: cloud wins for keys the user didn't touch during
+    // the fetch window; local wins for keys the user mutated. Reference
+    // equality is enough — every Zustand set() creates a new top-level
+    // reference for the keys it touched.
+    const merged: Record<string, unknown> = {}
+    const localRecord = local as unknown as Record<string, unknown>
+    for (const [k, v] of Object.entries(cs as Record<string, unknown>)) {
+      if ((USER_CONTENT_KEYS as readonly string[]).includes(k)) {
+        if (localRecord[k] === snapshot[k]) merged[k] = v
+        // else: user mutated this key during fetch → keep local
+      } else {
+        // Ambient key (lastSessionTimestamp, ambientPings) → always accept cloud
+        merged[k] = v
+      }
+    }
+    useStore.setState(merged as Partial<typeof local>)
   }
 }
 
