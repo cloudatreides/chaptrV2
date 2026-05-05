@@ -2727,9 +2727,8 @@ export function TravelReaderPage() {
                     ]
                     return (
                       <div
-                        className="grid grid-cols-5 gap-1 p-1.5 rounded-xl"
+                        className="grid grid-cols-3 md:grid-cols-5 gap-1 p-1.5 rounded-xl w-full md:w-[540px]"
                         style={{
-                          width: 540,
                           background: 'rgba(255,255,255,0.04)',
                           border: '1px solid rgba(255,255,255,0.08)',
                         }}
