@@ -75,7 +75,6 @@ export function CreateCharacterPage() {
   const editId = searchParams.get('edit')
   const createCharacter = useStore((s) => s.createCharacter)
   const updateCharacter = useStore((s) => s.updateCharacter)
-  const setActiveCharacter = useStore((s) => s.setActiveCharacter)
   const characters = useStore((s) => s.characters)
   const editingChar = editId ? characters.find((c) => c.id === editId) : null
   const isEditMode = !!editingChar
@@ -213,10 +212,11 @@ export function CreateCharacterPage() {
       }
       if (photoTouched) updates.selfieUrl = selfieUrl
       updateCharacter(editId!, updates)
-      // Auto-switch active to the edited twin — otherwise users with multiple
-      // twins can edit a non-active one and the rest of the app keeps using
-      // the still-broken active twin (caused dead-URL ghosting in image bench).
-      setActiveCharacter(editId!)
+      // We used to auto-setActiveCharacter(editId) here so the image bench
+      // would visibly pick up the new selfieUrl. Removed — that silent flip
+      // was the upstream cause of the activeCharacter / activeTripId drift
+      // bug (travel-bug.md). The bench can switch twins manually; not worth
+      // a global pointer change on every edit.
       trackEvent('character_updated', { gender, hasPhoto: !!finalPhoto, hasDefault: !!selectedDefault, hasBio: !!bio })
     } else {
       createCharacter({

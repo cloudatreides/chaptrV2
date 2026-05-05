@@ -417,13 +417,30 @@ export const useStore = create<StoreState>()(
         }
       }),
 
-      setActiveCharacter: (id) => set({ activeCharacterId: id }),
+      // Switching the active character invalidates any activeTripId that
+      // belongs to a different character. Without this, the app can land in
+      // a state where activeTripId points at trip A:kyoto while the active
+      // character is B — TravelCityPage then can't find the trip under B's
+      // namespace and the next "Start trip" tap creates an empty B:kyoto,
+      // which the user reads as "I lost my Day 6 progress." See travel-bug.md.
+      setActiveCharacter: (id) => set((s) => {
+        const tripCharPrefix = s.activeTripId?.split(':')[0]
+        return {
+          activeCharacterId: id,
+          activeTripId: tripCharPrefix === id ? s.activeTripId : null,
+        }
+      }),
 
       setDefaultCharacter: (id) => set((s) => {
         const target = s.characters.find((c) => c.id === id)
         if (!target) return s
         const rest = s.characters.filter((c) => c.id !== id)
-        return { characters: [target, ...rest], activeCharacterId: id }
+        const tripCharPrefix = s.activeTripId?.split(':')[0]
+        return {
+          characters: [target, ...rest],
+          activeCharacterId: id,
+          activeTripId: tripCharPrefix === id ? s.activeTripId : null,
+        }
       }),
 
       updateCharacter: (id, updates) => set((s) => ({
@@ -721,22 +738,12 @@ export const useStore = create<StoreState>()(
         if (!charId) return
         const tripId = `${charId}:${destinationId}`
         const existing = get().travelTrips[tripId]
-        // Guard against silent progress loss: if a trip is already in progress
-        // for this character + destination, leave it alone. The city page
-        // calls startTrip() unconditionally on the "Start your trip" button,
-        // so without this guard a stray re-click (or navigating back through
-        // city selection) would wipe currentDay / itinerary / chat history /
-        // sceneImages — and the wipe gets persisted to cloud, so refresh can
-        // never recover it. To truly start over, the user can delete the trip
-        // from the travel home page first.
-        const hasProgress = !!existing && (
-          existing.phase !== 'planning' ||
-          existing.planningChatHistory.length > 0 ||
-          existing.itinerary.days.length > 0 ||
-          Object.keys(existing.dayChatHistories).length > 0
-        )
-        if (hasProgress) {
-          // Just promote to active so navigation continues into the in-progress trip.
+        // Refuse to overwrite ANY existing trip key. Earlier we only protected
+        // trips with progress (phase !== planning, chat present, etc.), but
+        // that left a hole: a fresh trip created in one session could be
+        // silently clobbered by another startTrip() call before the user typed
+        // anything. Now the only way to wipe a trip is explicit deleteTrip().
+        if (existing) {
           set({ activeTripId: tripId })
           return
         }

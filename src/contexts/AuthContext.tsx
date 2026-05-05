@@ -48,7 +48,17 @@ async function hydrateFromCloud(userId: string) {
   // Cloud is strictly newer → another browser/device has updated since this
   // browser last saved. Pull cloud state in.
   if (cloudUpdatedAt > lastLocalSave) {
-    useStore.setState(cloudState as Partial<typeof local>)
+    // Clamp the active-pointer invariant before applying: activeTripId must
+    // belong to activeCharacterId. Cloud rows can carry drifted pointers
+    // (mismatched activeCharacterId / activeTripId) that, once applied,
+    // make the travel page silently spawn an empty trip on the wrong twin.
+    // See travel-bug.md.
+    const cs = cloudState as Partial<typeof local> & { activeCharacterId?: string | null; activeTripId?: string | null }
+    const tripCharPrefix = cs.activeTripId?.split(':')[0]
+    if (cs.activeTripId && tripCharPrefix !== cs.activeCharacterId) {
+      cs.activeTripId = null
+    }
+    useStore.setState(cs)
   }
 }
 
