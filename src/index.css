@@ -191,7 +191,7 @@ input:focus, textarea:focus {
     padding-top: env(safe-area-inset-top);
   }
   .safe-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-bottom: max(env(safe-area-inset-bottom), 1.5rem);
   }
 }
 

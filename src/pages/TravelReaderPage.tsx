@@ -1848,10 +1848,10 @@ export function TravelReaderPage() {
             </button>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-white text-sm font-semibold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            <p className="text-white text-sm font-semibold truncate" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               {activeChar ? `${activeChar.name} & ${companionName}` : companionName}
             </p>
-            <p className="text-white/40 text-xs" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            <p className="text-white/40 text-xs truncate" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               {destination.countryEmoji} {destination.city} — {trip.phase === 'planning' ? 'Planning' : `Day ${trip.currentDay}`}
             </p>
           </div>
@@ -1956,7 +1956,7 @@ export function TravelReaderPage() {
             <button
               onClick={() => ambientPlayer.prev()}
               disabled={!ambientPlaying}
-              className="w-6 h-6 rounded-full flex items-center justify-center cursor-pointer transition-colors hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="hidden sm:flex w-6 h-6 rounded-full items-center justify-center cursor-pointer transition-colors hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed"
               title="Previous / restart"
               aria-label="Previous track"
             >
@@ -1977,7 +1977,7 @@ export function TravelReaderPage() {
             <button
               onClick={() => ambientPlayer.next()}
               disabled={!ambientPlaying}
-              className="w-6 h-6 rounded-full flex items-center justify-center cursor-pointer transition-colors hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="hidden sm:flex w-6 h-6 rounded-full items-center justify-center cursor-pointer transition-colors hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed"
               title="Next track"
               aria-label="Next track"
             >
