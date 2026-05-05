@@ -28,7 +28,7 @@ export function MobileNav() {
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-40 md:hidden flex items-center justify-around"
-      style={{ height: 64, borderTop: '1px solid rgba(255,255,255,0.06)', background: '#0D0B12', paddingBottom: 'env(safe-area-inset-bottom)' }}
+      style={{ height: 'calc(64px + env(safe-area-inset-bottom))', borderTop: '1px solid rgba(255,255,255,0.06)', background: '#0D0B12', paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       {TABS.map((tab) => {
         const active = pathname === tab.path ||
