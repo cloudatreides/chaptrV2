@@ -25,6 +25,21 @@ function recordLocalSave(ts: number) {
   try { localStorage.setItem(LAST_LOCAL_SAVE_KEY, String(ts)) } catch { /* ignore */ }
 }
 
+// Hydration gate. queueSave is suppressed until AuthContext signals that
+// cloud hydrate has resolved (success OR failure). Without this, a fresh
+// browser (empty Zustand store) that mutates state during the brief
+// pre-hydrate window — Supabase round-trip, ~200ms-1.5s on mobile —
+// races ahead of cloud and POSTs `characters: []` to the user's row.
+// Once cloud is overwritten, every device that hydrates next gets the
+// empty state, the user's twins/trips silently disappear, and the only
+// surviving copy is whichever browser still has the pre-wipe data in
+// its localStorage. Render still happens immediately (Nick's UX call —
+// see AuthContext comment) but writes wait until we know cloud's truth.
+let hydrated = false
+export function markHydrated() { hydrated = true }
+export function unmarkHydrated() { hydrated = false }
+export function isHydrated() { return hydrated }
+
 // Tracks the most recent save outcome so the UI can show a sync indicator.
 // Subscribers are notified on change.
 export type SyncStatus = 'idle' | 'saving' | 'saved' | 'error'
@@ -243,6 +258,8 @@ function scheduleRetry() {
 
 /** Queue a debounced save */
 export function queueSave(userId: string, state: Record<string, unknown>) {
+  // Pre-hydrate writes are unsafe — see hydration gate comment above.
+  if (!hydrated) return
   pendingUserId = userId
   pendingState = state
   // Cancel any in-flight retry — the new state supersedes whatever we were

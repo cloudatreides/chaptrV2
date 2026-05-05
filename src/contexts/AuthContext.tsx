@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
-import { loadGameState, flushPendingSave, saveGameState, getLastLocalSaveTimestamp } from '../lib/gameStateSync'
+import { loadGameState, flushPendingSave, saveGameState, getLastLocalSaveTimestamp, markHydrated, unmarkHydrated, isHydrated } from '../lib/gameStateSync'
 import { useStore } from '../store/useStore'
 
 const MASTER_EMAIL = 'nicholas@zentry.com'
@@ -89,7 +89,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // from localStorage; if cloud is newer, it'll override after the
         // fetch lands (brief re-render is much better UX than a multi-second
         // black spinner before the page is interactive).
-        hydrateFromCloud(data.session.user.id)
+        // Saves stay suppressed via the hydration gate (gameStateSync.ts)
+        // until this resolves, so a fresh-browser empty store can never
+        // race ahead of cloud and POST `characters: []` over real data.
+        hydrateFromCloud(data.session.user.id).finally(() => markHydrated())
+      } else {
+        // No session → no hydrate fires → mark hydrated so the gate doesn't
+        // block any save the unauthenticated landing page might trigger.
+        markHydrated()
       }
       setSession(data.session)
       setLoading(false)
@@ -99,10 +106,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (session) {
         const prevUserId = localStorage.getItem('chaptr-v2-uid')
         if (prevUserId && prevUserId !== session.user.id) {
+          unmarkHydrated()
           localStorage.removeItem('chaptr-v2-story')
           localStorage.removeItem('chaptr-v2-last-local-save')
           localStorage.setItem('chaptr-v2-uid', session.user.id)
           await hydrateFromCloud(session.user.id)
+          markHydrated()
           useStore.getState().setMasterMode(session.user.email === MASTER_EMAIL)
           window.location.reload()
           return
@@ -131,9 +140,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function signOut() {
-    // Save current state to cloud before clearing
+    // Save current state to cloud before clearing — but only if we
+    // actually hydrated this session. Otherwise the "current state" is
+    // the empty pre-hydrate store, and saving it would wipe cloud just
+    // as surely as the race we're guarding against in queueSave.
     const userId = localStorage.getItem('chaptr-v2-uid')
-    if (userId) {
+    if (userId && isHydrated()) {
       await flushPendingSave()
       // Final save with current state
       const state = useStore.getState()
@@ -158,6 +170,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       await saveGameState(userId, partialState)
     }
+    unmarkHydrated()
     localStorage.removeItem('chaptr-v2-story')
     localStorage.removeItem('chaptr-v2-uid')
     localStorage.removeItem('chaptr-v2-last-local-save')
