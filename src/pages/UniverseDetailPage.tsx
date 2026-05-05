@@ -58,7 +58,10 @@ export function UniverseDetailPage() {
         </div>
 
         {/* Content */}
-        <div className="px-5 pb-10 flex flex-col gap-7 -mt-2">
+        <div
+          className="px-5 flex flex-col gap-7 -mt-2"
+          style={{ paddingBottom: 'calc(96px + env(safe-area-inset-bottom))' }}
+        >
           {/* Title Section */}
           <div className="flex flex-col gap-3">
             <motion.h1
