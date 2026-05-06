@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { authedFetch } from './apiAuth'
 
 // ─── Per-User Game State Sync ───
 // Syncs the Zustand store to Supabase so state survives logout/login.
@@ -101,7 +102,7 @@ function trackSuccess(): void {
 async function logSyncError(userId: string, payloadSize: number, error: { code?: string; message: string; details?: string; hint?: string; classification: 'transient' | 'permanent' | 'unknown' }): Promise<void> {
   if (isCircuitOpen()) return
   try {
-    await fetch('/api/log-sync-error', {
+    await authedFetch('/api/log-sync-error', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

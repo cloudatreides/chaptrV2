@@ -1,6 +1,7 @@
 import { CHARACTERS, getCharacter, getSoraSystemPrompt } from '../../data/characters'
 import { getAffinityTier } from '../affinity'
 import { streamSSE, makeClaudeRequest, stripMarkdown, buildMemoryPrompt } from './core'
+import { authedFetch } from '../apiAuth'
 import type { ChatMessage, PlaythroughRecord } from '../../store/useStore'
 
 // ─── Types ───
@@ -203,7 +204,7 @@ Be honest as your character. Don't always give positive scores. If they're borin
     content: m.content,
   }))
 
-  const response = await fetch('/api/claude', {
+  const response = await authedFetch('/api/claude', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({

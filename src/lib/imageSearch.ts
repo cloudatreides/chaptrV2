@@ -1,3 +1,5 @@
+import { authedFetch } from './apiAuth'
+
 const cache = new Map<string, string | null>()
 
 export async function fetchPlaceImage(placeName: string, city: string): Promise<string | null> {
@@ -6,7 +8,7 @@ export async function fetchPlaceImage(placeName: string, city: string): Promise<
   if (cache.has(cacheKey)) return cache.get(cacheKey)!
 
   try {
-    const resp = await fetch(`/api/image-search?type=place&q=${encodeURIComponent(query)}`)
+    const resp = await authedFetch(`/api/image-search?type=place&q=${encodeURIComponent(query)}`)
     if (!resp.ok) return null
 
     const data = await resp.json()
@@ -40,7 +42,7 @@ export async function fetchFoodImage(dishName: string, _city: string): Promise<s
   if (cache.has(cacheKey)) return cache.get(cacheKey)!
 
   try {
-    const resp = await fetch(`/api/image-search?type=food&q=${encodeURIComponent(query)}`)
+    const resp = await authedFetch(`/api/image-search?type=food&q=${encodeURIComponent(query)}`)
     if (!resp.ok) return null
 
     const data = await resp.json()

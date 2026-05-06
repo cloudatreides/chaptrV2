@@ -1,3 +1,5 @@
+import { authedFetch } from './apiAuth'
+
 export interface NanoBananaParams {
   prompt: string
   referenceImageUrls?: string[]
@@ -11,7 +13,7 @@ export interface NanoBananaResult {
 
 export async function generateNanoBananaImage(params: NanoBananaParams): Promise<NanoBananaResult | { error: string; details?: string }> {
   try {
-    const response = await fetch('/api/nano-banana', {
+    const response = await authedFetch('/api/nano-banana', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(params),

@@ -720,7 +720,9 @@ export function AdminImageBenchPage() {
         reader.onerror = reject
         reader.readAsDataURL(file)
       })
-      const path = `bench/raw-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`
+      const { data: userData } = await supabase.auth.getUser()
+      const userPrefix = userData.user ? `users/${userData.user.id}/` : ''
+      const path = `${userPrefix}bench/raw-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`
       const url = await uploadImageToStorage(dataUrl, path)
       if (!url) {
         setTwinUploadError('Upload failed — Supabase rejected the file. Try a smaller image.')

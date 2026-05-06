@@ -1,4 +1,5 @@
 import { getAffinityTier } from '../affinity'
+import { authedFetch } from '../apiAuth'
 import type { PlaythroughRecord } from '../../store/useStore'
 
 // ─── Helpers ───
@@ -66,7 +67,7 @@ export function makeClaudeRequest(system: string, userMessage: string, options: 
   signal?: AbortSignal
 } = {}) {
   const { stream = false, maxTokens = 300, temperature = 0.6, signal } = options
-  return fetch('/api/claude', {
+  return authedFetch('/api/claude', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({

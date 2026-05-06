@@ -1,4 +1,5 @@
 import { rateLimit, rateLimitResponse, getClientIp } from './_rateLimit'
+import { verifyAuth, unauthorizedResponse } from './_auth'
 
 export const config = { runtime: 'edge' }
 
@@ -9,8 +10,16 @@ export default async function handler(req: Request) {
     return new Response('Method not allowed', { status: 405 })
   }
 
+  const user = await verifyAuth(req)
+  if (!user) return unauthorizedResponse()
+
+  if (!rateLimit(`claude:${user.id}`, MAX_REQUESTS_PER_MINUTE)) {
+    return rateLimitResponse()
+  }
+  // Keep IP-based rate limit as a secondary defense in case a single user
+  // somehow leaks their token to many clients.
   const ip = getClientIp(req)
-  if (!rateLimit(ip, MAX_REQUESTS_PER_MINUTE)) {
+  if (!rateLimit(`claude-ip:${ip}`, MAX_REQUESTS_PER_MINUTE * 2)) {
     return rateLimitResponse()
   }
 

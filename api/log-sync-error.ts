@@ -1,4 +1,5 @@
 import { rateLimit, rateLimitResponse, getClientIp } from './_rateLimit'
+import { verifyAuth, unauthorizedResponse } from './_auth'
 
 export const config = { runtime: 'edge' }
 
@@ -23,8 +24,12 @@ interface LogPayload {
 export default async function handler(req: Request) {
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 })
 
+  const user = await verifyAuth(req)
+  if (!user) return unauthorizedResponse()
+
   const ip = getClientIp(req)
-  if (!rateLimit(`sync-error:${ip}`, MAX_LOGS_PER_MINUTE)) return rateLimitResponse()
+  if (!rateLimit(`sync-error:${user.id}`, MAX_LOGS_PER_MINUTE)) return rateLimitResponse()
+  if (!rateLimit(`sync-error-ip:${ip}`, MAX_LOGS_PER_MINUTE * 2)) return rateLimitResponse()
 
   const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -41,6 +46,14 @@ export default async function handler(req: Request) {
   } catch {
     return new Response(JSON.stringify({ error: 'bad payload' }), {
       status: 400,
+      headers: { 'content-type': 'application/json' },
+    })
+  }
+
+  // Caller must only log errors for their own user_id. Reject spoofed rows.
+  if (body.user_id !== user.id) {
+    return new Response(JSON.stringify({ error: 'user_id mismatch' }), {
+      status: 403,
       headers: { 'content-type': 'application/json' },
     })
   }

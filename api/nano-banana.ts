@@ -1,4 +1,5 @@
 import { rateLimit, rateLimitResponse, getClientIp } from './_rateLimit'
+import { verifyAuth, unauthorizedResponse } from './_auth'
 
 export const config = { runtime: 'edge' }
 
@@ -68,6 +69,9 @@ export default async function handler(req: Request) {
     })
   }
 
+  const user = await verifyAuth(req)
+  if (!user) return unauthorizedResponse()
+
   // Debug: GET /api/nano-banana?action=list lists all models the key can see
   if (req.method === 'GET' && url.searchParams.get('action') === 'list') {
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`)
@@ -80,8 +84,9 @@ export default async function handler(req: Request) {
 
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 })
 
+  if (!rateLimit(`nano:${user.id}`, MAX_REQUESTS_PER_MINUTE)) return rateLimitResponse()
   const ip = getClientIp(req)
-  if (!rateLimit(ip, MAX_REQUESTS_PER_MINUTE)) return rateLimitResponse()
+  if (!rateLimit(`nano-ip:${ip}`, MAX_REQUESTS_PER_MINUTE * 2)) return rateLimitResponse()
 
   try {
     const body = (await req.json()) as RequestBody

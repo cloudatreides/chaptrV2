@@ -1,5 +1,6 @@
 import { supabase, uploadImageToStorage } from './supabase'
 import { generateNanoBananaImage } from './nanoBanana'
+import { authedFetch } from './apiAuth'
 
 export interface GenerateSceneParams {
   prompt: string
@@ -175,7 +176,7 @@ export async function generateSceneImage(params: GenerateSceneParams): Promise<s
 async function fluxSchnellFallback(prompt: string): Promise<string | null> {
   try {
     const startTime = performance.now()
-    const response = await fetch('/api/together', {
+    const response = await authedFetch('/api/together', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -210,7 +211,7 @@ async function fluxSchnellFallback(prompt: string): Promise<string | null> {
 /** Generate a character portrait using FLUX.1 Schnell */
 export async function generateCharacterPortrait(prompt: string): Promise<string | null> {
   try {
-    const response = await fetch('/api/together', {
+    const response = await authedFetch('/api/together', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

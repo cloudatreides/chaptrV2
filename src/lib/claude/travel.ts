@@ -1,6 +1,7 @@
 import { makeClaudeRequest, streamSSE, stripMarkdown } from './core'
 import { buildTravelSystemPrompt, getTravelCompanion, getCompanionIntro, type CompanionSliders, type CompanionRemix, type TripRelationship } from '../../data/travel/companions'
 import { getDestination, type Destination } from '../../data/travel/destinations'
+import { authedFetch } from '../apiAuth'
 import type { ChatMessage, TripDay, TripScene } from '../../store/useStore'
 
 // ─── Itinerary Generation ───
@@ -317,7 +318,7 @@ Format: [SUGGESTIONS: "reply 1" | "reply 2" | "reply 3"]
       content: m.content,
     }))
 
-  const response = await fetch('/api/claude', {
+  const response = await authedFetch('/api/claude', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
