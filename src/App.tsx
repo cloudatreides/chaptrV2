@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { Analytics } from '@vercel/analytics/react'
 import { AuthProvider } from './contexts/AuthContext'
 import { useGameStateSync } from './hooks/useGameStateSync'
 import { ProtectedRoute } from './components/ProtectedRoute'
@@ -78,6 +79,7 @@ export default function App() {
         <FeedbackModal open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
         </GameStateSync>
       </AuthProvider>
+      <Analytics />
     </BrowserRouter>
   )
 }

@@ -19,13 +19,19 @@ function getSessionId(): string {
 
 export async function trackEvent(event: string, properties: Record<string, unknown> = {}) {
   try {
-    await supabase.from('chaptr_events').insert({
+    const { error } = await supabase.from('chaptr_events').insert({
       event,
       properties,
       session_id: getSessionId(),
     })
-  } catch {
-    // Silent fail — analytics should never break the app
+    if (error && import.meta.env.DEV) {
+      console.warn('[trackEvent] insert failed:', event, error.message)
+    }
+  } catch (err) {
+    // Silent fail in prod — analytics should never break the app.
+    if (import.meta.env.DEV) {
+      console.warn('[trackEvent] threw:', event, err)
+    }
   }
 }
 
