@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { BookOpen, Users, Sparkles, Camera, LogOut, Star, MessageCircle, User } from 'lucide-react'
+import { BookOpen, Sparkles, Camera, LogOut, Star, MessageCircle, User } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { useStore } from '../store/useStore'
 import { CAST_ROSTER, getCastCharacter } from '../data/castRoster'
@@ -19,7 +19,6 @@ export function AppSidebar() {
     { icon: BookOpen, label: 'Home', path: '/home' },
     { icon: Sparkles, label: 'Travel Mode', path: '/travel' },
     { icon: BookOpen, label: 'Story Mode', path: '/stories', badge: 'Coming soon' },
-    { icon: Users, label: 'Characters To Meet', path: '/cast' },
     { icon: Camera, label: albumLabel, path: '/album' },
   ]
   const favoriteCastIds = useStore((s) => s.favoriteCastIds)
@@ -45,7 +44,7 @@ export function AppSidebar() {
   return (
     <div
       className="hidden md:flex flex-col shrink-0 h-full"
-      style={{ width: 260, background: '#0F0D14', borderRight: '1px solid #2D2538' }}
+      style={{ width: 280, background: '#0F0D14', borderRight: '1px solid #2D2538' }}
     >
       {/* Logo — click to go home */}
       <div
@@ -86,7 +85,7 @@ export function AppSidebar() {
                 style={{ color: isActive ? '#c84b9e' : 'rgba(255,255,255,0.5)' }}
               />
               <span
-                className="text-[13px]"
+                className="text-[13px] whitespace-nowrap"
                 style={{
                   fontFamily: "'Space Grotesk', sans-serif",
                   fontWeight: isActive ? 600 : 500,
@@ -97,7 +96,7 @@ export function AppSidebar() {
               </span>
               {item.badge && (
                 <span
-                  className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider"
+                  className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider whitespace-nowrap"
                   style={{
                     background: 'rgba(251,191,36,0.12)',
                     color: '#fbbf24',
