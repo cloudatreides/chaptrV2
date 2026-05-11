@@ -34,6 +34,18 @@ const MODEL_CHAIN = [
 
 const CHARACTERS = [
   {
+    id: 'sofia',
+    refPath: path.join(ROOT, 'char images', 'Sofia-Jin-9.jpg'),
+    prompt:
+      '2D anime illustration, cel-shaded manhwa art style, NOT a photograph. Portrait of a 23 year old young woman with long flowing dark brown hair cascading over one shoulder, soft European features, large soft brown eyes with a gentle thoughtful gaze, natural dewy skin with subtle pink cheeks, soft natural lips, wearing a flowing pastel blue off-shoulder dress with a delicate ruched neckline, standing in a yellow wildflower meadow at golden dusk with a soft pink sky in the distance, long hair softly blown by the breeze, K-drama manhwa aesthetic with clean linework and soft cel shading, dreamy poetic romantic energy. Use the reference photo to guide the facial structure, hairstyle, outfit, pose, and overall composition.',
+  },
+  {
+    id: 'bora',
+    refPath: path.join(ROOT, 'char images', 'swq.jpg'),
+    prompt:
+      '2D anime illustration, cel-shaded manhwa art style, NOT a photograph. Portrait of a 22 year old Korean woman, long flowing dark brown hair with subtle blonde balayage highlights, sun-kissed glowing skin, big bright warm smile showing teeth, sparkling almond eyes, wearing a fitted black triangle bikini top with visible cleavage and a small jade pendant necklace, sunny beach setting with rocky shore and pine forest in the background, soft warm golden afternoon lighting, K-drama manhwa aesthetic, bold confident beach-babe surf-girl energy. Use the reference photo to guide the facial structure, hair, smile, neckline, and overall composition. Head-and-shoulders to upper-chest framing only.',
+  },
+  {
     id: 'sora',
     refPath: path.join(ROOT, 'char images', 'beautiful-young-asian-woman-clean-600nw-2749398081.jpg.webp'),
     prompt:

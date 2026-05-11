@@ -244,8 +244,8 @@ const GENDER_FILTERS: { id: GenderFilter; label: string }[] = [
 // Display order for the picker. New characters surface first; the original
 // four (Kai/Sora/Jiwon/Yuna) sit at the bottom of the grid.
 const COMPANION_DISPLAY_ORDER = [
-  'mina', 'hana', 'junseo', 'hyun', 'riko', 'junho', 'beomseok', 'maya',
-  'kai', 'sora', 'jiwon', 'yuna',
+  'mina', 'bora', 'hana', 'sofia', 'junseo', 'hyun', 'riko', 'junho',
+  'beomseok', 'maya', 'kai', 'sora', 'jiwon', 'yuna',
 ]
 const orderIndex = (id: string) => {
   const i = COMPANION_DISPLAY_ORDER.indexOf(id)
