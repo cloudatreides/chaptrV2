@@ -233,14 +233,46 @@ function ContinueCard({ type, title, subtitle, meta, image, onClick }: {
 
 // ─── Companion Picker ───
 
+type GenderFilter = 'all' | 'male' | 'female'
+
+const GENDER_FILTERS: { id: GenderFilter; label: string }[] = [
+  { id: 'all', label: 'All' },
+  { id: 'male', label: 'Male' },
+  { id: 'female', label: 'Female' },
+]
+
 function CompanionPicker({ onSelect }: { onSelect: (c: TravelCompanion) => void }) {
+  const [filter, setFilter] = useState<GenderFilter>('all')
+  const filtered = filter === 'all'
+    ? TRAVEL_COMPANIONS
+    : TRAVEL_COMPANIONS.filter((c) => c.character.gender === filter)
+
   return (
     <div>
-      <p className="text-[10px] md:text-[11px] font-semibold tracking-[2px] uppercase mb-3" style={{ color: 'rgba(255,255,255,0.25)', fontFamily: SG }}>
-        Travel companions
-      </p>
+      <div className="flex items-center justify-between mb-3 gap-3">
+        <p className="text-[10px] md:text-[11px] font-semibold tracking-[2px] uppercase" style={{ color: 'rgba(255,255,255,0.25)', fontFamily: SG }}>
+          Travel companions
+        </p>
+        <div className="flex gap-1.5">
+          {GENDER_FILTERS.map((f) => (
+            <button
+              key={f.id}
+              onClick={() => setFilter(f.id)}
+              className="cursor-pointer text-[10px] md:text-[11px] font-semibold px-3 py-1 rounded-full transition-colors"
+              style={{
+                fontFamily: SG,
+                background: filter === f.id ? 'rgba(124,58,237,0.15)' : 'transparent',
+                color: filter === f.id ? '#A78BFA' : 'rgba(255,255,255,0.35)',
+                border: `1px solid ${filter === f.id ? 'rgba(124,58,237,0.3)' : 'rgba(255,255,255,0.06)'}`,
+              }}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
       <div className="flex gap-3 overflow-x-auto scrollbar-none pb-2 snap-x snap-mandatory md:grid md:grid-cols-4 md:overflow-visible md:pb-0">
-        {TRAVEL_COMPANIONS.map((c) => (
+        {filtered.map((c) => (
           <button
             key={c.characterId}
             onClick={() => onSelect(c)}
