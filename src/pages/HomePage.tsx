@@ -241,12 +241,22 @@ const GENDER_FILTERS: { id: GenderFilter; label: string }[] = [
   { id: 'female', label: 'Female' },
 ]
 
-// Display order for the picker. New characters surface first; the original
-// four (Kai/Sora/Jiwon/Yuna) sit at the bottom of the grid.
-const COMPANION_DISPLAY_ORDER = [
-  'mina', 'bora', 'hana', 'sofia', 'junseo', 'hyun', 'riko', 'junho',
-  'beomseok', 'maya', 'kai', 'sora', 'jiwon', 'yuna',
-]
+// Display order for the picker. Two fixed tiers up top (4 + 4), then the
+// remaining 6 are shuffled once per page load for variety / fairness.
+const COMPANION_TIER_1 = ['mina', 'sora', 'riko', 'sofia']
+const COMPANION_TIER_2 = ['junseo', 'hyun', 'junho', 'jiwon']
+const COMPANION_REST = ['hana', 'beomseok', 'maya', 'kai', 'yuna', 'bora']
+
+function shuffle<T>(arr: T[]): T[] {
+  const copy = arr.slice()
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[copy[i], copy[j]] = [copy[j], copy[i]]
+  }
+  return copy
+}
+
+const COMPANION_DISPLAY_ORDER = [...COMPANION_TIER_1, ...COMPANION_TIER_2, ...shuffle(COMPANION_REST)]
 const orderIndex = (id: string) => {
   const i = COMPANION_DISPLAY_ORDER.indexOf(id)
   return i === -1 ? COMPANION_DISPLAY_ORDER.length : i
