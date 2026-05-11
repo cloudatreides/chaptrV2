@@ -9,6 +9,17 @@ const ADMIN_EMAILS = new Set([
   'nicholas@zentry.com',
 ])
 
+// Email domains classified as "internal" — Zentry team, friends-and-family,
+// anyone whose engagement isn't a real-world demand signal. Strip these from
+// any external-facing metric (acquisition, retention).
+const INTERNAL_EMAIL_DOMAINS = ['zentry.com']
+
+function isInternalEmail(email: string | null | undefined): boolean {
+  if (!email) return false
+  const domain = email.toLowerCase().split('@')[1]
+  return !!domain && INTERNAL_EMAIL_DOMAINS.includes(domain)
+}
+
 interface AuthUserRow {
   id: string
   email?: string
@@ -204,16 +215,22 @@ export default async function handler(req: Request) {
         last_sign_in_at: u.last_sign_in_at,
         days_between: daysBetween,
         return_status: status,
+        is_internal: isInternalEmail(u.email),
       }
     })
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
+  // External-only counts power the headline acquisition + retention metrics.
+  // Internal users (Zentry team) skew the signal and shouldn't pad the totals.
+  const externalUsers = enrichedUsers.filter((u) => !u.is_internal)
   const userSummary = {
     total: enrichedUsers.length,
-    returned_next_day: enrichedUsers.filter((u) => u.return_status === 'returned_next_day').length,
-    returned_later: enrichedUsers.filter((u) => u.return_status === 'returned_later').length,
-    one_session: enrichedUsers.filter((u) => u.return_status === 'one_session').length,
-    never_signed_in: enrichedUsers.filter((u) => u.return_status === 'never_signed_in').length,
+    internal: enrichedUsers.length - externalUsers.length,
+    external: externalUsers.length,
+    returned_next_day: externalUsers.filter((u) => u.return_status === 'returned_next_day').length,
+    returned_later: externalUsers.filter((u) => u.return_status === 'returned_later').length,
+    one_session: externalUsers.filter((u) => u.return_status === 'one_session').length,
+    never_signed_in: externalUsers.filter((u) => u.return_status === 'never_signed_in').length,
   }
 
   return new Response(

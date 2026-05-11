@@ -17,6 +17,7 @@ interface AnalyticsUser {
   last_sign_in_at: string | null
   days_between: number | null
   return_status: ReturnStatus
+  is_internal: boolean
 }
 
 interface AnalyticsPayload {
@@ -25,6 +26,8 @@ interface AnalyticsPayload {
   users: AnalyticsUser[]
   user_summary: {
     total: number
+    internal: number
+    external: number
     returned_next_day: number
     returned_later: number
     one_session: number
@@ -198,14 +201,23 @@ export function AdminAnalyticsPage() {
 
         {data && (
           <>
-            {/* Top-line user funnel */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
-              <StatCard label="Total users" value={data.user_summary.total.toString()} accent="#c4b5fd" />
-              <StatCard label="Returned next day" value={data.user_summary.returned_next_day.toString()} accent="#6ee7b7" />
-              <StatCard label="Returned later" value={data.user_summary.returned_later.toString()} accent="#93c5fd" />
-              <StatCard label="One day only" value={data.user_summary.one_session.toString()} accent="#fcd34d" />
-              <StatCard label="Never signed in" value={data.user_summary.never_signed_in.toString()} accent="#fca5a5" />
+            {/* Top-line user funnel — return cadence is external-only so internal
+                team activity doesn't pad the retention numbers. */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-2">
+              <StatCard
+                label="Total users"
+                value={data.user_summary.total.toString()}
+                accent="#c4b5fd"
+                subtitle={`${data.user_summary.external} external · ${data.user_summary.internal} internal`}
+              />
+              <StatCard label="Returned next day" value={data.user_summary.returned_next_day.toString()} accent="#6ee7b7" subtitle="external only" />
+              <StatCard label="Returned later" value={data.user_summary.returned_later.toString()} accent="#93c5fd" subtitle="external only" />
+              <StatCard label="One day only" value={data.user_summary.one_session.toString()} accent="#fcd34d" subtitle="external only" />
+              <StatCard label="Never signed in" value={data.user_summary.never_signed_in.toString()} accent="#fca5a5" subtitle="external only" />
             </div>
+            <p className="text-white/30 text-xs mb-8">
+              Return-cadence cards exclude internal users (@zentry.com). Edit <span className="font-mono">INTERNAL_EMAIL_DOMAINS</span> in <span className="font-mono">api/admin-analytics.ts</span> to change the rule.
+            </p>
 
             {/* Users table */}
             <Section title="Users" subtitle={`${data.users.length} total · sorted by signup`}>
@@ -236,7 +248,18 @@ export function AdminAnalyticsPage() {
                                 </div>
                               )}
                               <div className="min-w-0">
-                                <p className="text-white text-sm truncate">{u.name ?? '—'}</p>
+                                <div className="flex items-center gap-2">
+                                  <p className="text-white text-sm truncate">{u.name ?? '—'}</p>
+                                  {u.is_internal && (
+                                    <span
+                                      className="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider"
+                                      style={{ background: 'rgba(167,139,250,0.15)', border: '1px solid rgba(167,139,250,0.4)', color: '#c4b5fd' }}
+                                      title="Internal user (@zentry.com)"
+                                    >
+                                      Internal
+                                    </span>
+                                  )}
+                                </div>
                                 <p className="text-white/40 text-xs truncate">{u.email ?? '—'}</p>
                               </div>
                             </div>
@@ -376,11 +399,12 @@ function Section({ title, subtitle, children }: { title: string; subtitle?: stri
   )
 }
 
-function StatCard({ label, value, accent }: { label: string; value: string; accent: string }) {
+function StatCard({ label, value, accent, subtitle }: { label: string; value: string; accent: string; subtitle?: string }) {
   return (
     <div className="rounded-xl p-4" style={{ background: '#13101e', border: '1px solid #1e1830' }}>
       <p className="text-white/40 text-[11px] uppercase tracking-wider font-bold mb-1">{label}</p>
       <p className="text-3xl font-bold tabular-nums" style={{ color: accent }}>{value}</p>
+      {subtitle && <p className="text-white/40 text-xs mt-1">{subtitle}</p>}
     </div>
   )
 }
