@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { BookOpen, Sparkles, Camera, LogOut, Star, MessageCircle, User } from 'lucide-react'
+import { BookOpen, Users, Sparkles, Camera, LogOut, Star, MessageCircle, User } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { useStore } from '../store/useStore'
 import { CAST_ROSTER, getCastCharacter } from '../data/castRoster'
@@ -19,6 +19,7 @@ export function AppSidebar() {
     { icon: BookOpen, label: 'Home', path: '/home' },
     { icon: Sparkles, label: 'Travel Mode', path: '/travel' },
     { icon: BookOpen, label: 'Story Mode', path: '/stories', badge: 'Coming soon' },
+    { icon: Users, label: 'Characters To Meet', path: '/cast' },
     { icon: Camera, label: albumLabel, path: '/album' },
   ]
   const favoriteCastIds = useStore((s) => s.favoriteCastIds)
