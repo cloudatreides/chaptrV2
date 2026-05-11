@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, Loader2, AlertTriangle, RefreshCcw } from 'lucide-react'
+import { ChevronLeft, Loader2, AlertTriangle, RefreshCcw, MessageSquare, Bug, Lightbulb, ExternalLink } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { getNotesFor, type AdminUserNote } from '../data/adminUserNotes'
 
 const SG = "'Space Grotesk', sans-serif"
 
@@ -32,6 +33,7 @@ interface AnalyticsPayload {
   sessions: {
     total: number
     multi_event: number
+    single_event: number
     avg_seconds: number
     median_seconds: number
     p90_seconds: number
@@ -41,6 +43,18 @@ interface AnalyticsPayload {
   daily_sessions: { day: string; sessions: number }[]
   top_events: { event: string; count: number }[]
   events_total: number
+  feedback: FeedbackItem[]
+}
+
+interface FeedbackItem {
+  id: string
+  type: string
+  message: string
+  image_url: string | null
+  page_url: string | null
+  created_at: string
+  user_email: string | null
+  user_name: string | null
 }
 
 function formatDuration(s: number): string {
@@ -208,6 +222,7 @@ export function AdminAnalyticsPage() {
                   <tbody>
                     {data.users.map((u) => {
                       const badge = RETURN_BADGES[u.return_status]
+                      const notes = getNotesFor(u.email, u.name)
                       return (
                         <tr key={u.id} className="border-t" style={{ borderColor: '#1e1830' }}>
                           <td className="px-4 py-3">
@@ -245,12 +260,17 @@ export function AdminAnalyticsPage() {
                               : `${u.days_between}d`}
                           </td>
                           <td className="px-4 py-3">
-                            <span
-                              className="inline-block px-2 py-1 rounded-md text-[11px] font-semibold"
-                              style={{ background: badge.bg, border: `1px solid ${badge.border}`, color: badge.color }}
-                            >
-                              {badge.label}
-                            </span>
+                            <div className="flex flex-col gap-2 items-start">
+                              <span
+                                className="inline-block px-2 py-1 rounded-md text-[11px] font-semibold"
+                                style={{ background: badge.bg, border: `1px solid ${badge.border}`, color: badge.color }}
+                              >
+                                {badge.label}
+                              </span>
+                              {notes.length > 0 && (
+                                <NotePopover notes={notes} />
+                              )}
+                            </div>
                           </td>
                         </tr>
                       )
@@ -265,12 +285,16 @@ export function AdminAnalyticsPage() {
             </Section>
 
             {/* Session duration */}
-            <Section title="Time on platform" subtitle={`${data.sessions.total} sessions · ${data.sessions.multi_event} with >1 event`}>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+            <Section
+              title="Time on platform"
+              subtitle={`${data.sessions.total} sessions · ${data.sessions.multi_event} measurable · ${data.sessions.single_event} single-event`}
+            >
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
                 <StatCard label="Avg session" value={formatDuration(data.sessions.avg_seconds)} accent="#c4b5fd" />
                 <StatCard label="Median" value={formatDuration(data.sessions.median_seconds)} accent="#6ee7b7" />
                 <StatCard label="p90" value={formatDuration(data.sessions.p90_seconds)} accent="#93c5fd" />
                 <StatCard label="Longest" value={formatDuration(data.sessions.max_seconds)} accent="#fcd34d" />
+                <StatCard label="Single-event" value={data.sessions.single_event.toString()} accent="#fca5a5" />
               </div>
 
               <div className="rounded-xl p-4" style={{ background: '#13101e', border: '1px solid #1e1830' }}>
@@ -288,6 +312,22 @@ export function AdminAnalyticsPage() {
               <div className="rounded-xl p-4" style={{ background: '#13101e', border: '1px solid #1e1830' }}>
                 <DailyBars days={data.daily_sessions} />
               </div>
+            </Section>
+
+            {/* In-app feedback (FeedbackFab submissions) */}
+            <Section title="In-app feedback" subtitle={`${data.feedback.length} submissions via the feedback button`}>
+              {data.feedback.length === 0 ? (
+                <p className="text-white/40 text-sm">No feedback yet. Tap the feedback button on any page to submit.</p>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {data.feedback.map((f) => (
+                    <FeedbackCard key={f.id} feedback={f} />
+                  ))}
+                </div>
+              )}
+              <p className="text-white/30 text-xs mt-3">
+                Out-of-band feedback (Reddit, DMs, in-person) lives in <span className="font-mono">src/data/adminUserNotes.ts</span> and shows as a "Note" badge on the user row above. Edit that file to add more.
+              </p>
             </Section>
 
             {/* Event counts */}
@@ -355,6 +395,109 @@ function BucketBars({ buckets }: { buckets: Record<string, number> }) {
           <div className="w-12 text-right text-white/80 text-sm tabular-nums">{count}</div>
         </div>
       ))}
+    </div>
+  )
+}
+
+function NotePopover({ notes }: { notes: AdminUserNote[] }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className="cursor-pointer inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold transition-colors"
+        style={{ background: 'rgba(200,75,158,0.10)', border: '1px solid rgba(200,75,158,0.3)', color: '#f0abfc' }}
+        title="View notes"
+      >
+        <MessageSquare size={11} />
+        {notes.length} note{notes.length === 1 ? '' : 's'}
+      </button>
+      {open && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.7)' }}
+          onClick={() => setOpen(false)}
+        >
+          <div
+            className="rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+            style={{ background: '#13101e', border: '1px solid #2a2040' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-5 border-b" style={{ borderColor: '#2a2040' }}>
+              <div className="flex items-center justify-between">
+                <h3 className="text-white text-lg font-bold">Notes</h3>
+                <button onClick={() => setOpen(false)} className="cursor-pointer text-white/40 hover:text-white text-sm">Close</button>
+              </div>
+            </div>
+            <div className="p-5 flex flex-col gap-4">
+              {notes.map((n, i) => (
+                <div key={i} className="rounded-xl p-4" style={{ background: '#0a0810', border: '1px solid #1e1830' }}>
+                  <div className="flex items-center gap-2 mb-2 text-[11px]">
+                    <span className="px-2 py-0.5 rounded-md font-semibold uppercase tracking-wider"
+                      style={{ background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.3)', color: '#c4b5fd' }}>
+                      {n.source}
+                    </span>
+                    {n.author && <span className="text-white/50 font-mono">{n.author}</span>}
+                    <span className="text-white/30">·</span>
+                    <span className="text-white/40">{n.date}</span>
+                    {n.url && (
+                      <a href={n.url} target="_blank" rel="noopener noreferrer" className="ml-auto text-[#f0abfc] hover:underline inline-flex items-center gap-1">
+                        <ExternalLink size={10} /> source
+                      </a>
+                    )}
+                  </div>
+                  <p className="text-white/80 text-sm leading-relaxed whitespace-pre-wrap">{n.note}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+
+function FeedbackCard({ feedback }: { feedback: FeedbackItem }) {
+  const isBug = feedback.type === 'bug'
+  const Icon = isBug ? Bug : Lightbulb
+  const accent = isBug ? '#fca5a5' : '#fcd34d'
+  const bg = isBug ? 'rgba(239,68,68,0.08)' : 'rgba(251,191,36,0.08)'
+  const border = isBug ? 'rgba(239,68,68,0.25)' : 'rgba(251,191,36,0.25)'
+  return (
+    <div className="rounded-xl p-4" style={{ background: bg, border: `1px solid ${border}` }}>
+      <div className="flex items-start gap-3">
+        <Icon size={16} style={{ color: accent }} className="shrink-0 mt-0.5" />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <span className="text-[11px] uppercase tracking-wider font-bold" style={{ color: accent }}>
+              {feedback.type}
+            </span>
+            <span className="text-white/30 text-xs">·</span>
+            <span className="text-white/60 text-xs">
+              {feedback.user_name ?? feedback.user_email ?? 'anonymous'}
+            </span>
+            <span className="text-white/30 text-xs">·</span>
+            <span className="text-white/40 text-xs">{formatRelative(feedback.created_at)}</span>
+            {feedback.page_url && (
+              <a
+                href={feedback.page_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-auto text-white/50 hover:text-white text-xs inline-flex items-center gap-1 font-mono truncate max-w-[200px]"
+                title={feedback.page_url}
+              >
+                <ExternalLink size={10} /> {new URL(feedback.page_url).pathname}
+              </a>
+            )}
+          </div>
+          <p className="text-white/90 text-sm leading-relaxed whitespace-pre-wrap">{feedback.message}</p>
+          {feedback.image_url && (
+            <a href={feedback.image_url} target="_blank" rel="noopener noreferrer" className="block mt-3">
+              <img src={feedback.image_url} alt="feedback screenshot" className="rounded-lg max-h-48 border" style={{ borderColor: '#2a2040' }} />
+            </a>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

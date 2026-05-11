@@ -1,8 +1,9 @@
-import { useState } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { Analytics } from '@vercel/analytics/react'
 import { AuthProvider } from './contexts/AuthContext'
 import { useGameStateSync } from './hooks/useGameStateSync'
+import { trackEvent } from './lib/supabase'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { FeedbackModal } from './components/FeedbackModal'
 import { FeedbackFab } from './components/FeedbackFab'
@@ -39,6 +40,17 @@ function GameStateSync({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
+// Fires once per route change. Without this every chaptr_events session is
+// 1 event long → time-on-platform is uncomputable. Strip the query string
+// so `?utm=foo` doesn't fragment the same path into different pages.
+function PageViewTracker() {
+  const location = useLocation()
+  useEffect(() => {
+    trackEvent('page_view', { path: location.pathname })
+  }, [location.pathname])
+  return null
+}
+
 export default function App() {
   const [feedbackOpen, setFeedbackOpen] = useState(false)
 
@@ -46,6 +58,7 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <GameStateSync>
+        <PageViewTracker />
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/terms" element={<TermsPage />} />

@@ -23,6 +23,17 @@ interface EventRow {
   created_at: string
 }
 
+interface FeedbackRow {
+  id: string
+  user_id: string | null
+  type: string
+  message: string
+  image_url: string | null
+  page_url: string | null
+  user_agent: string | null
+  created_at: string
+}
+
 type ReturnStatus = 'never_signed_in' | 'one_session' | 'returned_next_day' | 'returned_later'
 
 function classifyReturn(createdAt: string, lastSignIn: string | null): { status: ReturnStatus; daysBetween: number | null } {
@@ -88,6 +99,13 @@ export default async function handler(req: Request) {
   }
   const events = (await eventsRes.json()) as EventRow[]
 
+  // Feedback (bug + feature submissions from FeedbackFab)
+  const feedbackRes = await fetch(
+    `${supabaseUrl}/rest/v1/feedback?select=id,user_id,type,message,image_url,page_url,user_agent,created_at&order=created_at.desc&limit=200`,
+    { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } }
+  )
+  const feedback: FeedbackRow[] = feedbackRes.ok ? ((await feedbackRes.json()) as FeedbackRow[]) : []
+
   // ── Sessions: aggregate first/last/count per session_id
   const sessions = new Map<string, { first: number; last: number; count: number }>()
   for (const e of events) {
@@ -105,8 +123,10 @@ export default async function handler(req: Request) {
   // Multi-event sessions only — single-event sessions have 0 duration and
   // skew the average. We still report total session count separately.
   const multiEventDurations: number[] = []
+  let singleEventSessions = 0
   for (const s of sessions.values()) {
     if (s.count > 1) multiEventDurations.push(Math.round((s.last - s.first) / 1000))
+    else singleEventSessions++
   }
   multiEventDurations.sort((a, b) => a - b)
 
@@ -191,6 +211,7 @@ export default async function handler(req: Request) {
       sessions: {
         total: sessions.size,
         multi_event: multiEventDurations.length,
+        single_event: singleEventSessions,
         avg_seconds: avgSeconds,
         median_seconds: pct(0.5),
         p90_seconds: pct(0.9),
@@ -200,6 +221,20 @@ export default async function handler(req: Request) {
       daily_sessions: dailySessions,
       top_events: topEvents,
       events_total: events.length,
+      feedback: feedback.map((f) => {
+        // Match feedback user_id to enriched user info so we can show name/email.
+        const u = enrichedUsers.find((eu) => eu.id === f.user_id)
+        return {
+          id: f.id,
+          type: f.type,
+          message: f.message,
+          image_url: f.image_url,
+          page_url: f.page_url,
+          created_at: f.created_at,
+          user_email: u?.email ?? null,
+          user_name: u?.name ?? null,
+        }
+      }),
     }),
     { headers: { 'content-type': 'application/json' } }
   )
