@@ -32,6 +32,7 @@ import { TravelReaderPage } from './pages/TravelReaderPage'
 import { TermsPage } from './pages/TermsPage'
 import { PrivacyPage } from './pages/PrivacyPage'
 import { AdminImageBenchPage } from './pages/AdminImageBenchPage'
+import { AdminAnalyticsPage } from './pages/AdminAnalyticsPage'
 
 function GameStateSync({ children }: { children: React.ReactNode }) {
   useGameStateSync()
@@ -72,6 +73,7 @@ export default function App() {
           <Route path="/travel/:destinationId" element={<ProtectedRoute><TravelCityPage /></ProtectedRoute>} />
           <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
           <Route path="/admin/image-bench" element={<ProtectedRoute><AdminImageBenchPage /></ProtectedRoute>} />
+          <Route path="/admin/analytics" element={<ProtectedRoute><AdminAnalyticsPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <MobileNav />
