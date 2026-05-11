@@ -43,10 +43,10 @@ const CHARACTERS = [
     id: 'mina',
     refPath: path.join(ROOT, 'char images', '8DD47325-74A6-43E9-A737-E1FDC8D8AA8F.jpeg'),
     prompt:
-      'Anime style portrait of a 22 year old Korean woman, long flowing dark hair with a slight wave framing her face, expressive almond eyes with a confident playful expression, soft natural lips with a small smirk, wearing an oversized cropped denim jacket over a plain white t-shirt with a small silver cross necklace visible at the collar, soft studio lighting, clean dark background, high quality anime art style, detailed face, K-drama aesthetic, bold confident nightlife-savvy energy. Use the reference photo to guide the facial structure and overall look. Tasteful framing, head-and-shoulders only.',
+      '2D anime illustration, cel-shaded manhwa art style, NOT a photograph. Portrait of a 22 year old Korean woman, long flowing dark hair with a slight wave framing her face, large expressive anime almond eyes with a confident playful expression, soft natural lips with a small smirk, wearing a fitted scoop-neck pastel blue cap-sleeve tee with visible cleavage and a small silver cross pendant necklace at the collar, soft warm natural daylight from a window, clean dark background, K-drama manhwa aesthetic with clean linework and soft cel shading, detailed anime face, bold confident nightlife-savvy energy. Match the anime art style of typical Korean manhwa. Use the reference photo to guide only the facial structure, hairstyle, neckline, and pose. Head-and-shoulders framing.',
   },
   {
-    id: 'nia',
+    id: 'maya',
     refPath: path.join(ROOT, 'char images', 'WhatsApp Image 2026-04-03 at 4.25.27 PM.jpeg'),
     prompt:
       'Anime style portrait of a 22 year old Southeast Asian woman, short tousled dark hair just past chin length with a slight wave, big warm smile showing teeth, expressive smiling almond eyes with subtle laugh lines, soft cheeks with light freckles across the nose, wearing a casual fitted black ribbed crew-neck t-shirt, soft natural daylight, clean dark background, high quality anime art style, detailed face, K-drama aesthetic, warm girl-next-door easy-going energy. Use the reference photo to guide the facial structure and overall look. Tasteful framing, head-and-shoulders only.',
@@ -55,19 +55,19 @@ const CHARACTERS = [
     id: 'hana',
     refPath: path.join(ROOT, 'char images', 'square.jpeg'),
     prompt:
-      'Anime style portrait of a 24 year old Asian woman, long flowing wavy dark hair with subtle caramel highlights framing her face, large gold hoop earrings, delicate silver choker necklace, soft natural makeup with glossy peach-pink lips, full eyelashes, wearing a tasteful sleeveless coral pink sundress with a modest scoop neckline, soft golden hour lighting, clean dark background, high quality anime art style, detailed face, K-drama aesthetic, polished travel-aesthete vibe. Use the reference photo to guide the facial structure and overall look. Tasteful framing, head-and-shoulders only.',
+      'Anime style portrait of a 24 year old Asian woman, long flowing wavy dark hair with subtle caramel highlights framing her face, large gold hoop earrings, delicate silver tennis choker necklace, soft natural makeup with glossy peach-pink lips, full eyelashes, looking softly off camera, wearing a pink and coral tie-dye halter top with thin spaghetti straps and a deep V-neckline showing cleavage, soft warm golden hour lighting from the side, clean dark tropical background, high quality anime art style, detailed face, K-drama aesthetic, polished resort-vacation aesthete vibe. Use the reference photo to guide the facial structure, neckline, and overall look. Head-and-shoulders framing.',
   },
   {
     id: 'junseo',
     refPath: path.join(ROOT, 'char images', 'F-hWarWXkAAX-9K.jpg'),
     prompt:
-      'Anime style portrait of a handsome 21 year old Korean male K-pop idol, three-quarter view looking off camera, tousled dark brown hair with subtle lighter highlights, sharp jawline, calm focused dark eyes with quiet intensity, wearing a soft loose-fitting white linen button-up shirt with the top two buttons open, soft moody studio lighting with cool blue tones, clean dark background, high quality anime art style, detailed face, K-drama aesthetic, polished idol-on-a-quiet-break energy. Use the reference photo to guide the facial structure and overall look. Tasteful framing, head-and-shoulders only.',
+      'Anime style portrait of a handsome 21 year old Korean male K-pop idol, three-quarter side profile view looking off camera, tousled dark brown hair with subtle lighter highlights, sharp jawline, calm focused dark eyes with quiet intensity, shirtless K-pop magazine photoshoot showing a lean athletic build with defined chest and visible abs, soft loose white linen pants visible at the bottom, sitting against a wall, soft moody editorial studio lighting with cool blue and grey tones, clean minimalist background, high quality anime art style, detailed face and body, K-drama aesthetic, idol-on-a-quiet-break editorial vibe. Use the reference photo to guide the facial structure, body, and overall composition. Tasteful artistic framing.',
   },
   {
     id: 'hyun',
     refPath: path.join(ROOT, 'char images', 'Gt917h_XYAABxEM.jpg'),
     prompt:
-      'Anime style portrait of a 22 year old Korean man, bold cherry red dyed messy hair with the front sticking up dramatically, sharp angular face, multiple small silver ear piercings, defined jawline with a faint smirk, wearing an open black leather biker jacket over a fitted plain black t-shirt, chunky silver chain necklace at the collar, soft moody lighting with warm amber and shadow background tones, clean dark background, high quality anime art style, detailed face, K-drama aesthetic, edgy art-school-dropout Berlin-techno-scene energy. Use the reference photo to guide the facial structure and overall look. Tasteful framing, head-and-shoulders only.',
+      'Anime style half-body portrait of a 22 year old Korean man, bold cherry red dyed messy hair with the front sticking up dramatically, sharp angular face, multiple small silver ear piercings, defined jawline with a faint smirk, wearing an open black leather biker jacket over bare chest showing a lean athletic build with defined abs, chunky silver chain necklace and a silver dog-tag pendant resting against his chest, black studded belt visible at the waist, mirror-selfie editorial framing, soft moody lighting with warm amber and shadow background tones, clean dark background, high quality anime art style, detailed face and body, K-drama aesthetic, edgy art-school-dropout Berlin-techno-scene energy. Use the reference photo to guide the facial structure, body, and overall composition.',
   },
   {
     id: 'riko',
@@ -79,7 +79,7 @@ const CHARACTERS = [
     id: 'junho',
     refPath: path.join(ROOT, 'char images', 'GcB02niXYAAY0kj.jpg'),
     prompt:
-      'Anime style portrait of a 24 year old Korean man, tousled dark brown hair styled neatly, big bright warm smile showing teeth, friendly crinkled almond eyes, defined athletic shoulders and neck, wearing a fitted heather grey short-sleeve athletic t-shirt with a thin gold chain necklace just visible at the collar, soft warm directional lighting, clean dark background, high quality anime art style, detailed face, K-drama aesthetic, golden-retriever gym-buddy energy. Use the reference photo to guide the facial structure and overall look. Tasteful framing, head-and-shoulders only.',
+      'Anime style half-body portrait of a 24 year old Korean man, tousled dark brown hair, big bright warm smile showing teeth, friendly crinkled almond eyes, mid-flex double bicep pose with both arms raised, shirtless showing a muscular athletic build with broad shoulders, defined chest, and visible abs, thin gold chain necklace at the collar, light grey athletic shorts visible at the bottom, soft warm gym lighting with mirror reflections in the background, high quality anime art style, detailed face and body, K-drama aesthetic, golden-retriever gym-buddy energy. Use the reference photo to guide the facial structure, body, and overall composition.',
   },
 ]
 

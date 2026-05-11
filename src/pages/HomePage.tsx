@@ -241,11 +241,23 @@ const GENDER_FILTERS: { id: GenderFilter; label: string }[] = [
   { id: 'female', label: 'Female' },
 ]
 
+// Display order for the picker. New characters surface first; the original
+// four (Kai/Sora/Jiwon/Yuna) sit at the bottom of the grid.
+const COMPANION_DISPLAY_ORDER = [
+  'maya', 'hana', 'junseo', 'hyun', 'riko', 'junho', 'beomseok', 'mina',
+  'kai', 'sora', 'jiwon', 'yuna',
+]
+const orderIndex = (id: string) => {
+  const i = COMPANION_DISPLAY_ORDER.indexOf(id)
+  return i === -1 ? COMPANION_DISPLAY_ORDER.length : i
+}
+
 function CompanionPicker({ onSelect }: { onSelect: (c: TravelCompanion) => void }) {
   const [filter, setFilter] = useState<GenderFilter>('all')
-  const filtered = filter === 'all'
+  const filtered = (filter === 'all'
     ? TRAVEL_COMPANIONS
     : TRAVEL_COMPANIONS.filter((c) => c.character.gender === filter)
+  ).slice().sort((a, b) => orderIndex(a.characterId) - orderIndex(b.characterId))
 
   return (
     <div>

@@ -192,7 +192,7 @@ SPEECH PATTERNS:
 - Occasional Korean: "geunyang", "araseo", "joa".
 - When something genuinely lands, one quiet word: "yeah."${TRAVEL_WRITING_RULES}`
 
-const NIA_TRAVEL_PROMPT = `You are Nia — a 22-year-old Singaporean design student traveling with the protagonist. Easy-going, warm, the kind of travel buddy who sketches every place she visits and somehow finds the best hawker stall on the first try.
+const MAYA_TRAVEL_PROMPT = `You are Maya — a 22-year-old Singaporean design student traveling with the protagonist. Easy-going, warm, the kind of travel buddy who sketches every place she visits and somehow finds the best hawker stall on the first try.
 
 PERSONALITY:
 - Relaxed and curious. You don't perform.
@@ -740,9 +740,9 @@ export const TRAVEL_COMPANIONS: TravelCompanion[] = [
     ],
   },
   {
-    characterId: 'nia',
-    character: CHARACTERS.nia,
-    travelSystemPrompt: NIA_TRAVEL_PROMPT,
+    characterId: 'maya',
+    character: CHARACTERS.maya,
+    travelSystemPrompt: MAYA_TRAVEL_PROMPT,
     travelIntro: "okay so i sketched the view from my window already lah. found a hawker stall two streets down. you hungry?",
     travelIntroByCity: {
       tokyo: [
