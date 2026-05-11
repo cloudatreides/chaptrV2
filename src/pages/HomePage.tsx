@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, Pencil, MessageCircle, LogOut, Compass, BookOpen, ChevronRight, ChevronLeft, Camera, Sparkles, Plus, Map, X, Star } from 'lucide-react'
+import { ArrowRight, Pencil, MessageCircle, LogOut, Compass, BookOpen, ChevronRight, Camera, Sparkles, Plus, Map, X, Star } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { UNIVERSES } from '../data/storyData'
 import { useAuth } from '../contexts/AuthContext'
@@ -356,110 +356,6 @@ function CompanionDetailModal({ companion, onClose, onTravelWith }: {
         </div>
       </motion.div>
     </motion.div>
-  )
-}
-
-// ─── Travel Browse ───
-
-function TravelBrowse({ hasCharacters }: { hasCharacters: boolean }) {
-  const navigate = useNavigate()
-  const available = DESTINATIONS.filter((d) => !d.locked)
-  const [heroIdx, setHeroIdx] = useState(0)
-  const [heroPaused, setHeroPaused] = useState(false)
-  const maxLen = Math.max(...available.map((d) => d.heroImages?.length ?? 1))
-
-  useEffect(() => {
-    if (heroPaused) return
-    const timer = setInterval(() => {
-      setHeroIdx((i) => (i + 1) % maxLen)
-    }, 2500)
-    return () => clearInterval(timer)
-  }, [heroPaused, maxLen])
-
-  return (
-    <div className="flex flex-col gap-3">
-      <div className="grid grid-cols-2 gap-3">
-        {available.map((dest) => {
-          const images = dest.heroImages ?? [dest.heroImage]
-          const idx = heroIdx % images.length
-          return (
-            <button
-              key={dest.id}
-              onClick={() => {
-                if (!hasCharacters) { navigate('/create-character'); return }
-                navigate(`/travel/${dest.id}`)
-              }}
-              className="cursor-pointer group rounded-xl overflow-hidden text-left relative"
-              style={{ border: '1px solid rgba(124,58,237,0.15)' }}
-              onMouseEnter={() => setHeroPaused(true)}
-              onMouseLeave={() => setHeroPaused(false)}
-            >
-              <div className="relative h-[120px] md:h-[180px] overflow-hidden">
-                <AnimatePresence initial={false}>
-                  <motion.img
-                    key={idx}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.6 }}
-                    src={images[idx]}
-                    alt={dest.city}
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                </AnimatePresence>
-                <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,8,16,0.95) 0%, rgba(10,8,16,0.6) 40%, rgba(10,8,16,0.1) 70%)' }} />
-                {images.length > 1 && (
-                  <>
-                    <div
-                      className="absolute left-1.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                      style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)' }}
-                      onClick={(e) => { e.stopPropagation(); setHeroIdx((i) => (i - 1 + maxLen) % maxLen) }}
-                    >
-                      <ChevronLeft size={12} className="text-white/80" />
-                    </div>
-                    <div
-                      className="absolute right-1.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                      style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)' }}
-                      onClick={(e) => { e.stopPropagation(); setHeroIdx((i) => (i + 1) % maxLen) }}
-                    >
-                      <ChevronRight size={12} className="text-white/80" />
-                    </div>
-                    <div className="absolute bottom-[52px] md:bottom-[60px] left-1/2 -translate-x-1/2 flex gap-1 z-10">
-                      {images.map((_, i) => (
-                        <div
-                          key={i}
-                          className="w-1 h-1 rounded-full transition-all duration-300"
-                          style={{ background: i === idx ? '#fff' : 'rgba(255,255,255,0.35)' }}
-                        />
-                      ))}
-                    </div>
-                  </>
-                )}
-                <div className="absolute bottom-0 left-0 right-0 p-3 md:p-4">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-base md:text-lg">{dest.countryEmoji}</span>
-                    <p className="text-white text-sm md:text-lg font-bold" style={{ fontFamily: SG }}>{dest.city}</p>
-                  </div>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {dest.vibeTags.map((tag) => (
-                      <span key={tag} className="text-[9px] md:text-[10px] font-medium px-1.5 py-0.5 rounded" style={{ background: 'rgba(124,58,237,0.2)', color: '#c4b5fd', fontFamily: SG }}>{tag}</span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </button>
-          )
-        })}
-      </div>
-
-      <button
-        onClick={() => navigate('/travel')}
-        className="cursor-pointer w-full md:w-[280px] h-10 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold"
-        style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.15)', color: '#A78BFA', fontFamily: SG }}
-      >
-        View all destinations <ArrowRight size={14} />
-      </button>
-    </div>
   )
 }
 
@@ -894,11 +790,8 @@ export function HomePage() {
           {/* Messages */}
           {hasCharacters && <PingCards pings={unreadPings} onOpen={handleOpenPing} />}
 
-          {/* Companions + destinations */}
-          <div className="flex flex-col gap-5">
-            <CompanionPicker onSelect={setSelectedCompanion} />
-            <TravelBrowse hasCharacters={hasCharacters} />
-          </div>
+          {/* Companions */}
+          <CompanionPicker onSelect={setSelectedCompanion} />
         </div>
 
       </div>
@@ -958,11 +851,7 @@ export function HomePage() {
             )}
 
             {/* Companions */}
-            <div className="mb-8">
-              <CompanionPicker onSelect={setSelectedCompanion} />
-            </div>
-
-            <TravelBrowse hasCharacters={hasCharacters} />
+            <CompanionPicker onSelect={setSelectedCompanion} />
           </div>
         </div>
       </div>
