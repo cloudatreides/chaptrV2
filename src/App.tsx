@@ -51,6 +51,34 @@ function PageViewTracker() {
   return null
 }
 
+// Sparse heartbeats so single-page visits still produce a measurable
+// session duration. Without these, a user who lands and reads without
+// navigating fires only 1 event → 0s session in analytics. Marks chosen
+// to align with the bucket boundaries on /admin/analytics (30s, 2m, 5m, 10m).
+const HEARTBEAT_MARKS_MS = [30_000, 120_000, 300_000, 600_000]
+
+function SessionHeartbeat() {
+  useEffect(() => {
+    const start = Date.now()
+    const timers = HEARTBEAT_MARKS_MS.map((ms) =>
+      setTimeout(() => trackEvent('session_heartbeat', { elapsed_ms: ms }), ms)
+    )
+    // Best-effort end-of-session ping when the tab is hidden or closed.
+    // Use visibilitychange (more reliable than beforeunload on mobile).
+    const onHide = () => {
+      if (document.visibilityState === 'hidden') {
+        trackEvent('session_end', { duration_ms: Date.now() - start })
+      }
+    }
+    document.addEventListener('visibilitychange', onHide)
+    return () => {
+      timers.forEach(clearTimeout)
+      document.removeEventListener('visibilitychange', onHide)
+    }
+  }, [])
+  return null
+}
+
 export default function App() {
   const [feedbackOpen, setFeedbackOpen] = useState(false)
 
@@ -59,6 +87,7 @@ export default function App() {
       <AuthProvider>
         <GameStateSync>
         <PageViewTracker />
+        <SessionHeartbeat />
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/terms" element={<TermsPage />} />
