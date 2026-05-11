@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, Pencil, MessageCircle, LogOut, Compass, BookOpen, ChevronRight, Camera, Sparkles, Plus, Map, X, Star } from 'lucide-react'
+import { ArrowRight, Pencil, MessageCircle, LogOut, Compass, BookOpen, ChevronRight, Camera, Sparkles, Plus, Map, X, Star, Info } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { UNIVERSES } from '../data/storyData'
 import { useAuth } from '../contexts/AuthContext'
@@ -254,17 +254,56 @@ const orderIndex = (id: string) => {
 
 function CompanionPicker({ onSelect }: { onSelect: (c: TravelCompanion) => void }) {
   const [filter, setFilter] = useState<GenderFilter>('all')
+  const [tipOpen, setTipOpen] = useState(false)
   const filtered = (filter === 'all'
     ? TRAVEL_COMPANIONS
     : TRAVEL_COMPANIONS.filter((c) => c.character.gender === filter)
   ).slice().sort((a, b) => orderIndex(a.characterId) - orderIndex(b.characterId))
 
+  // Close tooltip when clicking outside
+  useEffect(() => {
+    if (!tipOpen) return
+    const close = () => setTipOpen(false)
+    window.addEventListener('click', close)
+    return () => window.removeEventListener('click', close)
+  }, [tipOpen])
+
   return (
     <div>
       <div className="flex items-center justify-between mb-3 gap-3">
-        <p className="text-[10px] md:text-[11px] font-semibold tracking-[2px] uppercase" style={{ color: 'rgba(255,255,255,0.25)', fontFamily: SG }}>
-          Travel companions
-        </p>
+        <div className="relative flex items-center gap-1.5">
+          <p className="text-[10px] md:text-[11px] font-semibold tracking-[2px] uppercase" style={{ color: 'rgba(255,255,255,0.25)', fontFamily: SG }}>
+            Travel companions
+          </p>
+          <button
+            onClick={(e) => { e.stopPropagation(); setTipOpen((o) => !o) }}
+            aria-label="What are travel companions?"
+            className="cursor-pointer flex items-center justify-center w-4 h-4 rounded-full transition-colors hover:bg-white/5"
+          >
+            <Info size={11} className="text-white/30 hover:text-white/60 transition-colors" />
+          </button>
+          <AnimatePresence>
+            {tipOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.15 }}
+                onClick={(e) => e.stopPropagation()}
+                className="absolute left-0 top-full mt-2 z-30 w-[260px] rounded-xl p-3 shadow-xl"
+                style={{
+                  background: '#1A1726',
+                  border: '1px solid rgba(124,58,237,0.25)',
+                  fontFamily: SG,
+                }}
+              >
+                <p className="text-white/80 text-[12px] leading-snug">
+                  Pick who you want to travel with. Each companion plans the trip differently — their voice, their picks, their style. Tap one to see how they roll.
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
         <div className="flex gap-1.5">
           {GENDER_FILTERS.map((f) => (
             <button
