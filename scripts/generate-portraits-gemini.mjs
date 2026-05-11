@@ -65,9 +65,9 @@ const CHARACTERS = [
   },
   {
     id: 'maya',
-    refPath: path.join(ROOT, 'char images', 'WhatsApp Image 2026-04-03 at 4.25.27 PM.jpeg'),
+    refPath: path.join(ROOT, 'char images', 'Hannah12-scaled.jpg'),
     prompt:
-      'Anime style portrait of a 22 year old Southeast Asian woman, short tousled dark hair just past chin length with a slight wave, big warm smile showing teeth, expressive smiling almond eyes with subtle laugh lines, soft cheeks with light freckles across the nose, wearing a casual fitted black ribbed crew-neck t-shirt, soft natural daylight, clean dark background, high quality anime art style, detailed face, K-drama aesthetic, warm girl-next-door easy-going energy. Use the reference photo to guide the facial structure and overall look. Tasteful framing, head-and-shoulders only.',
+      'Semi-realistic anime portrait illustration with detailed soft natural shading, polished K-drama webtoon art — NOT a flat cartoon, NOT a photograph. Highly detailed editorial portrait of a 22 year old mixed Eurasian-Asian woman, long flowing dark brown hair with subtle highlights cascading over one shoulder, soft sharp Eurasian features with high cheekbones, intense soft brown eyes with a thoughtful gaze looking directly at the camera, soft natural makeup with peach-glossy lips, one hand resting against her temple, wearing an elegant strapless khaki-beige tube top, sitting on a quiet city street with a modern minimalist building background slightly out of focus, soft warm directional natural lighting, K-drama webtoon aesthetic with realistic skin tones and detailed shading, polished editorial fashion vibe. Use the reference photo to guide the facial structure, hair, pose, outfit, and overall composition. Head-and-shoulders to upper-arm framing only.',
   },
   {
     id: 'hana',
