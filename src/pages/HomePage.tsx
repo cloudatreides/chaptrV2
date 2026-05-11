@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, Pencil, MessageCircle, LogOut, Compass, BookOpen, ChevronRight, ChevronLeft, Camera, Sparkles, Plus, Map, X, Star } from 'lucide-react'
 import { useStore } from '../store/useStore'
-import { UNIVERSES, GENRE_FILTERS } from '../data/storyData'
+import { UNIVERSES } from '../data/storyData'
 import { useAuth } from '../contexts/AuthContext'
 import { STORY_STEPS } from '../data/storyData'
 import { getStoryData } from '../data/stories'
@@ -14,7 +14,7 @@ import { SelfieImg } from '../components/SelfieImg'
 import { AmbientPingModal } from '../components/AmbientPingModal'
 import { SyncIndicator } from '../components/SyncIndicator'
 import { DESTINATIONS, getDestination } from '../data/travel/destinations'
-import { getTravelCompanion } from '../data/travel/companions'
+import { getTravelCompanion, TRAVEL_COMPANIONS, type TravelCompanion } from '../data/travel/companions'
 import type { AmbientPingDef } from '../data/ambientPings'
 
 const SG = "'Space Grotesk', sans-serif"
@@ -231,44 +231,131 @@ function ContinueCard({ type, title, subtitle, meta, image, onClick }: {
   )
 }
 
-// ─── Mode Toggle ───
+// ─── Companion Picker ───
 
-function ModeToggle({ mode, setMode }: { mode: 'travel' | 'stories'; setMode: (m: 'travel' | 'stories') => void }) {
+function CompanionPicker({ onSelect }: { onSelect: (c: TravelCompanion) => void }) {
   return (
-    <div className="flex gap-3">
-      <button
-        onClick={() => setMode('travel')}
-        className="cursor-pointer flex-1 rounded-xl p-3.5 text-left transition-all"
-        style={{
-          background: mode === 'travel' ? 'rgba(124,58,237,0.1)' : 'rgba(255,255,255,0.02)',
-          border: `1px solid ${mode === 'travel' ? 'rgba(124,58,237,0.25)' : 'rgba(255,255,255,0.05)'}`,
-        }}
-      >
-        <div className="flex items-center gap-1.5 mb-1">
-          <Compass size={14} style={{ color: mode === 'travel' ? '#A78BFA' : 'rgba(255,255,255,0.25)' }} />
-          <span className="text-[13px] font-semibold" style={{ color: mode === 'travel' ? '#fff' : 'rgba(255,255,255,0.3)', fontFamily: SG }}>Travel Mode</span>
-        </div>
-        <p className="text-[11px] leading-snug" style={{ color: mode === 'travel' ? 'rgba(167,139,250,0.6)' : 'rgba(255,255,255,0.15)', fontFamily: SG }}>
-          Explore real cities with a companion
-        </p>
-      </button>
-      <button
-        onClick={() => setMode('stories')}
-        className="cursor-pointer flex-1 rounded-xl p-3.5 text-left transition-all"
-        style={{
-          background: mode === 'stories' ? 'rgba(200,75,158,0.1)' : 'rgba(255,255,255,0.02)',
-          border: `1px solid ${mode === 'stories' ? 'rgba(200,75,158,0.25)' : 'rgba(255,255,255,0.05)'}`,
-        }}
-      >
-        <div className="flex items-center gap-1.5 mb-1">
-          <BookOpen size={14} style={{ color: mode === 'stories' ? '#e88bc4' : 'rgba(255,255,255,0.25)' }} />
-          <span className="text-[13px] font-semibold" style={{ color: mode === 'stories' ? '#fff' : 'rgba(255,255,255,0.3)', fontFamily: SG }}>Story Mode</span>
-        </div>
-        <p className="text-[11px] leading-snug" style={{ color: mode === 'stories' ? 'rgba(232,139,196,0.6)' : 'rgba(255,255,255,0.15)', fontFamily: SG }}>
-          Star in stories where you shape the plot
-        </p>
-      </button>
+    <div>
+      <p className="text-[10px] md:text-[11px] font-semibold tracking-[2px] uppercase mb-3" style={{ color: 'rgba(255,255,255,0.25)', fontFamily: SG }}>
+        Travel companions
+      </p>
+      <div className="flex gap-3 overflow-x-auto scrollbar-none pb-2 snap-x snap-mandatory md:grid md:grid-cols-4 md:overflow-visible md:pb-0">
+        {TRAVEL_COMPANIONS.map((c) => (
+          <button
+            key={c.characterId}
+            onClick={() => onSelect(c)}
+            className="cursor-pointer shrink-0 w-[140px] md:w-auto snap-start rounded-xl overflow-hidden text-left group transition-transform hover:scale-[1.02]"
+            style={{ background: '#13101c', border: '1px solid rgba(124,58,237,0.15)' }}
+          >
+            <div className="relative aspect-[3/4] overflow-hidden">
+              {c.character.staticPortrait ? (
+                <img
+                  src={c.character.staticPortrait}
+                  alt={c.character.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-3xl" style={{ background: 'rgba(124,58,237,0.1)' }}>
+                  {c.character.avatar}
+                </div>
+              )}
+              <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(19,16,28,0.95) 0%, rgba(19,16,28,0.4) 50%, transparent 80%)' }} />
+              <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                <p className="text-white text-sm font-bold leading-tight" style={{ fontFamily: SG }}>{c.character.name}</p>
+                <p className="text-white/55 text-[10px] mt-0.5 line-clamp-2" style={{ fontFamily: SG }}>{c.personalityTraits[0]}</p>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
     </div>
+  )
+}
+
+function CompanionDetailModal({ companion, onClose, onTravelWith }: {
+  companion: TravelCompanion
+  onClose: () => void
+  onTravelWith: () => void
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center px-5"
+      style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+        className="w-full max-w-md max-h-[85vh] overflow-y-auto rounded-2xl"
+        style={{ background: '#1A1726', border: '1px solid rgba(124,58,237,0.2)' }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="relative">
+          {companion.character.staticPortrait ? (
+            <img
+              src={companion.character.staticPortrait}
+              alt={companion.character.name}
+              className="w-full aspect-[4/3] object-cover"
+            />
+          ) : (
+            <div className="w-full aspect-[4/3] flex items-center justify-center text-6xl" style={{ background: 'rgba(124,58,237,0.1)' }}>
+              {companion.character.avatar}
+            </div>
+          )}
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, #1A1726 0%, transparent 60%)' }} />
+          <button
+            onClick={onClose}
+            className="cursor-pointer absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center"
+            style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
+          >
+            <X size={16} className="text-white/70" />
+          </button>
+          <div className="absolute bottom-3 left-4 right-4">
+            <h3 className="text-white text-2xl font-bold" style={{ fontFamily: SG }}>{companion.character.name}</h3>
+          </div>
+        </div>
+        <div className="p-5 flex flex-col gap-4">
+          <p className="text-white/70 text-sm leading-relaxed" style={{ fontFamily: SG }}>{companion.bio}</p>
+
+          <div>
+            <p className="text-[10px] font-semibold tracking-[1.5px] uppercase mb-2" style={{ color: '#A78BFA', fontFamily: SG }}>Personality</p>
+            <ul className="space-y-1.5">
+              {companion.personalityTraits.slice(0, 3).map((t, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <span className="text-[10px] mt-1" style={{ color: '#7C3AED' }}>•</span>
+                  <span className="text-white/60 text-[12px] leading-snug" style={{ fontFamily: SG }}>{t}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <p className="text-[10px] font-semibold tracking-[1.5px] uppercase mb-2" style={{ color: '#A78BFA', fontFamily: SG }}>Travel style</p>
+            <ul className="space-y-1.5">
+              {companion.travelStyle.slice(0, 3).map((t, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <span className="text-[10px] mt-1" style={{ color: '#7C3AED' }}>•</span>
+                  <span className="text-white/60 text-[12px] leading-snug" style={{ fontFamily: SG }}>{t}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <button
+            onClick={onTravelWith}
+            className="cursor-pointer w-full h-11 rounded-xl flex items-center justify-center gap-2 text-white font-semibold text-sm mt-1"
+            style={{ background: 'linear-gradient(90deg, #7C3AED, #A78BFA)', fontFamily: SG }}
+          >
+            Travel with me <ArrowRight size={16} />
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
   )
 }
 
@@ -371,71 +458,6 @@ function TravelBrowse({ hasCharacters }: { hasCharacters: boolean }) {
         style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.15)', color: '#A78BFA', fontFamily: SG }}
       >
         View all destinations <ArrowRight size={14} />
-      </button>
-    </div>
-  )
-}
-
-// ─── Stories Browse ───
-
-function StoriesBrowse() {
-  const navigate = useNavigate()
-  const [genreFilter, setGenreFilter] = useState('ALL')
-  const unlocked = UNIVERSES.filter((u) => !u.locked)
-  const filtered = genreFilter === 'ALL' ? unlocked.slice(0, 4) : unlocked.filter((u) => u.genre === genreFilter).slice(0, 4)
-
-  return (
-    <div className="flex flex-col gap-3">
-      {/* Genre filters */}
-      <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
-        {GENRE_FILTERS.map((g) => (
-          <button
-            key={g}
-            onClick={() => setGenreFilter(g)}
-            className="cursor-pointer shrink-0 text-[10px] md:text-[11px] font-semibold px-3 py-1.5 rounded-full transition-colors"
-            style={{
-              background: genreFilter === g ? 'rgba(200,75,158,0.15)' : 'rgba(255,255,255,0.04)',
-              color: genreFilter === g ? '#c84b9e' : 'rgba(255,255,255,0.35)',
-              border: `1px solid ${genreFilter === g ? 'rgba(200,75,158,0.25)' : 'rgba(255,255,255,0.06)'}`,
-              fontFamily: SG,
-            }}
-          >
-            {g[0] + g.slice(1).toLowerCase()}
-          </button>
-        ))}
-      </div>
-
-      {/* Story grid — same 2-col layout as travel */}
-      <div className="grid grid-cols-2 gap-3">
-        {filtered.map((u) => (
-          <button
-            key={u.id}
-            onClick={() => navigate(`/universes/${u.id}`)}
-            className="cursor-pointer group rounded-xl overflow-hidden text-left relative"
-            style={{ border: '1px solid rgba(200,75,158,0.12)' }}
-          >
-            <div className="relative h-[120px] md:h-[180px] overflow-hidden">
-              <img src={u.image} alt={u.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-              <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,8,16,0.95) 0%, rgba(10,8,16,0.6) 40%, rgba(10,8,16,0.1) 70%)' }} />
-              <div className="absolute bottom-0 left-0 right-0 p-3 md:p-4">
-                <span
-                  className="inline-block text-[8px] md:text-[9px] font-bold tracking-[1px] uppercase px-1.5 py-0.5 rounded"
-                  style={{ background: 'rgba(200,75,158,0.2)', color: '#e88bc4', fontFamily: SG }}
-                >{u.genreTag}</span>
-                <p className="text-white text-sm md:text-base font-bold leading-tight mt-1.5" style={{ fontFamily: SG }}>{u.title}</p>
-              </div>
-            </div>
-          </button>
-        ))}
-      </div>
-
-      {/* See all */}
-      <button
-        onClick={() => navigate('/stories')}
-        className="cursor-pointer w-full md:w-[280px] h-10 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold"
-        style={{ background: 'rgba(200,75,158,0.08)', border: '1px solid rgba(200,75,158,0.15)', color: '#c84b9e', fontFamily: SG }}
-      >
-        See all stories <ArrowRight size={14} />
       </button>
     </div>
   )
@@ -726,7 +748,7 @@ export function HomePage() {
   const setActiveTripId = useStore((s) => s.setActiveTripId)
 
 
-  const [mode, setMode] = useState<'travel' | 'stories'>('travel')
+  const [selectedCompanion, setSelectedCompanion] = useState<TravelCompanion | null>(null)
   const [activePingModal, setActivePingModal] = useState<AmbientPingDef | null>(null)
 
   const hasCharacters = characters.length > 0
@@ -872,14 +894,10 @@ export function HomePage() {
           {/* Messages */}
           {hasCharacters && <PingCards pings={unreadPings} onOpen={handleOpenPing} />}
 
-          {/* Browse toggle + content */}
-          <div className="flex flex-col gap-4">
-            <ModeToggle mode={mode} setMode={setMode} />
-            <AnimatePresence mode="wait">
-              <motion.div key={mode} initial={{ opacity: 0, x: mode === 'travel' ? -10 : 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                {mode === 'travel' ? <TravelBrowse hasCharacters={hasCharacters} /> : <StoriesBrowse />}
-              </motion.div>
-            </AnimatePresence>
+          {/* Companions + destinations */}
+          <div className="flex flex-col gap-5">
+            <CompanionPicker onSelect={setSelectedCompanion} />
+            <TravelBrowse hasCharacters={hasCharacters} />
           </div>
         </div>
 
@@ -939,16 +957,12 @@ export function HomePage() {
               </div>
             )}
 
-            {/* Browse */}
-            <div className="mb-8 max-w-[480px]">
-              <ModeToggle mode={mode} setMode={setMode} />
+            {/* Companions */}
+            <div className="mb-8">
+              <CompanionPicker onSelect={setSelectedCompanion} />
             </div>
 
-            <AnimatePresence mode="wait">
-              <motion.div key={mode} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                {mode === 'travel' ? <TravelBrowse hasCharacters={hasCharacters} /> : <StoriesBrowse />}
-              </motion.div>
-            </AnimatePresence>
+            <TravelBrowse hasCharacters={hasCharacters} />
           </div>
         </div>
       </div>
@@ -959,6 +973,17 @@ export function HomePage() {
           <AmbientPingModal
             ping={activePingModal}
             onDismiss={() => { dismissAmbientPing(activePingModal.id); setActivePingModal(null) }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Companion Detail Modal */}
+      <AnimatePresence>
+        {selectedCompanion && (
+          <CompanionDetailModal
+            companion={selectedCompanion}
+            onClose={() => setSelectedCompanion(null)}
+            onTravelWith={() => { setSelectedCompanion(null); navigate('/travel') }}
           />
         )}
       </AnimatePresence>
