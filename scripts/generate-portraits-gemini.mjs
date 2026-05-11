@@ -34,6 +34,12 @@ const MODEL_CHAIN = [
 
 const CHARACTERS = [
   {
+    id: 'sora',
+    refPath: path.join(ROOT, 'char images', 'beautiful-young-asian-woman-clean-600nw-2749398081.jpg.webp'),
+    prompt:
+      '2D anime illustration, cel-shaded manhwa art style, NOT a photograph. Beauty editorial portrait of a beautiful 21 year old Korean woman, sleek dark hair pulled back in a low center-parted bun with a few wispy strands framing her face, looking softly over her shoulder toward the camera, glowing dewy skin, full soft brown eyes with long lashes, soft natural makeup with peach-glossy lips, wearing a fitted white sleeveless tank top with thin straps, soft warm beige minimalist background, clean editorial lighting, K-drama manhwa aesthetic with clean linework and soft cel shading, detailed anime face, polished serene quiet beauty energy. Use the reference photo to guide the facial structure, hairstyle, pose, outfit, and overall composition.',
+  },
+  {
     id: 'beomseok',
     refPath: path.join(ROOT, 'char images', 'hongbeomseok.jpg'),
     prompt:
