@@ -21,6 +21,7 @@ interface EventRow {
   session_id: string
   event: string
   created_at: string
+  properties: Record<string, unknown> | null
 }
 
 interface FeedbackRow {
@@ -87,7 +88,7 @@ export default async function handler(req: Request) {
   // Events — last 30 days, capped. PostgREST default limit is 1000; ask for more.
   const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
   const eventsRes = await fetch(
-    `${supabaseUrl}/rest/v1/chaptr_events?select=session_id,event,created_at&created_at=gte.${since}&order=created_at.desc&limit=10000`,
+    `${supabaseUrl}/rest/v1/chaptr_events?select=session_id,event,created_at,properties&created_at=gte.${since}&order=created_at.desc&limit=10000`,
     { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } }
   )
   if (!eventsRes.ok) {
@@ -106,18 +107,31 @@ export default async function handler(req: Request) {
   )
   const feedback: FeedbackRow[] = feedbackRes.ok ? ((await feedbackRes.json()) as FeedbackRow[]) : []
 
-  // ── Sessions: aggregate first/last/count per session_id
-  const sessions = new Map<string, { first: number; last: number; count: number }>()
+  // ── Sessions: aggregate first/last/count + device per session_id
+  const sessions = new Map<string, { first: number; last: number; count: number; device: string | null }>()
   for (const e of events) {
     const t = new Date(e.created_at).getTime()
+    const device = (e.properties && typeof e.properties === 'object' && typeof (e.properties as Record<string, unknown>).device === 'string')
+      ? ((e.properties as Record<string, unknown>).device as string)
+      : null
     const s = sessions.get(e.session_id)
     if (s) {
       if (t < s.first) s.first = t
       if (t > s.last) s.last = t
       s.count++
+      // Prefer a non-null device tag if we have one; older events have none.
+      if (!s.device && device) s.device = device
     } else {
-      sessions.set(e.session_id, { first: t, last: t, count: 1 })
+      sessions.set(e.session_id, { first: t, last: t, count: 1, device })
     }
+  }
+
+  // Device split — count unique sessions per device. Sessions from before
+  // device tagging shipped land in 'unknown'.
+  const deviceCounts: Record<string, number> = { mobile: 0, desktop: 0, tablet: 0, unknown: 0 }
+  for (const s of sessions.values()) {
+    const key = s.device ?? 'unknown'
+    deviceCounts[key] = (deviceCounts[key] || 0) + 1
   }
 
   // Multi-event sessions only — single-event sessions have 0 duration and
@@ -218,6 +232,7 @@ export default async function handler(req: Request) {
         max_seconds: multiEventDurations[multiEventDurations.length - 1] ?? 0,
         duration_buckets: buckets,
       },
+      devices: deviceCounts,
       daily_sessions: dailySessions,
       top_events: topEvents,
       events_total: events.length,

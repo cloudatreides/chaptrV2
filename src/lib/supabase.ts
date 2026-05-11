@@ -17,11 +17,19 @@ function getSessionId(): string {
   return sessionId
 }
 
+function detectDevice(): 'mobile' | 'tablet' | 'desktop' {
+  if (typeof navigator === 'undefined') return 'desktop'
+  const ua = navigator.userAgent
+  if (/iPad|Android(?!.*Mobile)|Tablet/i.test(ua)) return 'tablet'
+  if (/Mobi|Android|iPhone|iPod/i.test(ua)) return 'mobile'
+  return 'desktop'
+}
+
 export async function trackEvent(event: string, properties: Record<string, unknown> = {}) {
   try {
     const { error } = await supabase.from('chaptr_events').insert({
       event,
-      properties,
+      properties: { ...properties, device: detectDevice() },
       session_id: getSessionId(),
     })
     if (error && import.meta.env.DEV) {

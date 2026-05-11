@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, Loader2, AlertTriangle, RefreshCcw, MessageSquare, Bug, Lightbulb, ExternalLink } from 'lucide-react'
+import { ChevronLeft, Loader2, AlertTriangle, RefreshCcw, MessageSquare, Bug, Lightbulb, ExternalLink, Smartphone, Monitor, Tablet, HelpCircle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { getNotesFor, type AdminUserNote } from '../data/adminUserNotes'
 
@@ -44,6 +44,7 @@ interface AnalyticsPayload {
   top_events: { event: string; count: number }[]
   events_total: number
   feedback: FeedbackItem[]
+  devices: Record<string, number>
 }
 
 interface FeedbackItem {
@@ -307,6 +308,11 @@ export function AdminAnalyticsPage() {
               </p>
             </Section>
 
+            {/* Devices */}
+            <Section title="Devices" subtitle="Sessions split by device type">
+              <DeviceBreakdown devices={data.devices} />
+            </Section>
+
             {/* Daily sessions */}
             <Section title="Daily sessions" subtitle="Last 14 days">
               <div className="rounded-xl p-4" style={{ background: '#13101e', border: '1px solid #1e1830' }}>
@@ -395,6 +401,36 @@ function BucketBars({ buckets }: { buckets: Record<string, number> }) {
           <div className="w-12 text-right text-white/80 text-sm tabular-nums">{count}</div>
         </div>
       ))}
+    </div>
+  )
+}
+
+function DeviceBreakdown({ devices }: { devices: Record<string, number> }) {
+  const order = ['mobile', 'desktop', 'tablet', 'unknown'] as const
+  const total = order.reduce((acc, k) => acc + (devices[k] || 0), 0)
+  const meta: Record<string, { label: string; accent: string; Icon: typeof Smartphone }> = {
+    mobile: { label: 'Mobile', accent: '#6ee7b7', Icon: Smartphone },
+    desktop: { label: 'Desktop', accent: '#c4b5fd', Icon: Monitor },
+    tablet: { label: 'Tablet', accent: '#93c5fd', Icon: Tablet },
+    unknown: { label: 'Unknown (pre-tracking)', accent: '#71717a', Icon: HelpCircle },
+  }
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+      {order.map((k) => {
+        const count = devices[k] || 0
+        const pct = total > 0 ? Math.round((count / total) * 100) : 0
+        const { label, accent, Icon } = meta[k]
+        return (
+          <div key={k} className="rounded-xl p-4" style={{ background: '#13101e', border: '1px solid #1e1830' }}>
+            <div className="flex items-center gap-2 mb-2">
+              <Icon size={14} style={{ color: accent }} />
+              <p className="text-white/40 text-[11px] uppercase tracking-wider font-bold">{label}</p>
+            </div>
+            <p className="text-3xl font-bold tabular-nums" style={{ color: accent }}>{count}</p>
+            <p className="text-white/40 text-xs mt-1 tabular-nums">{pct}% of sessions</p>
+          </div>
+        )
+      })}
     </div>
   )
 }
