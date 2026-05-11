@@ -270,57 +270,55 @@ function CompanionPicker({ onSelect }: { onSelect: (c: TravelCompanion) => void 
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-3 gap-3">
-        <div className="relative flex items-center gap-1.5">
-          <p className="text-[10px] md:text-[11px] font-semibold tracking-[2px] uppercase" style={{ color: 'rgba(255,255,255,0.25)', fontFamily: SG }}>
-            Travel companions
-          </p>
-          <button
-            onClick={(e) => { e.stopPropagation(); setTipOpen((o) => !o) }}
-            aria-label="What are travel companions?"
-            className="cursor-pointer flex items-center justify-center w-4 h-4 rounded-full transition-colors hover:bg-white/5"
-          >
-            <Info size={11} className="text-white/30 hover:text-white/60 transition-colors" />
-          </button>
-          <AnimatePresence>
-            {tipOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                transition={{ duration: 0.15 }}
-                onClick={(e) => e.stopPropagation()}
-                className="absolute left-0 top-full mt-2 z-30 w-[260px] rounded-xl p-3 shadow-xl"
-                style={{
-                  background: '#1A1726',
-                  border: '1px solid rgba(124,58,237,0.25)',
-                  fontFamily: SG,
-                }}
-              >
-                <p className="text-white/80 text-[12px] leading-snug">
-                  Pick who you want to travel with. Each companion plans the trip differently — their voice, their picks, their style. Tap one to see how they roll.
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-        <div className="flex gap-1.5">
-          {GENDER_FILTERS.map((f) => (
-            <button
-              key={f.id}
-              onClick={() => setFilter(f.id)}
-              className="cursor-pointer text-[10px] md:text-[11px] font-semibold px-3 py-1 rounded-full transition-colors"
+      <div className="relative flex items-center gap-1.5 mb-3">
+        <p className="text-[10px] md:text-[11px] font-semibold tracking-[2px] uppercase" style={{ color: 'rgba(255,255,255,0.25)', fontFamily: SG }}>
+          Travel companions
+        </p>
+        <button
+          onClick={(e) => { e.stopPropagation(); setTipOpen((o) => !o) }}
+          aria-label="What are travel companions?"
+          className="cursor-pointer flex items-center justify-center w-4 h-4 rounded-full transition-colors hover:bg-white/5"
+        >
+          <Info size={11} className="text-white/30 hover:text-white/60 transition-colors" />
+        </button>
+        <AnimatePresence>
+          {tipOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.15 }}
+              onClick={(e) => e.stopPropagation()}
+              className="absolute left-0 top-full mt-2 z-30 w-[260px] rounded-xl p-3 shadow-xl"
               style={{
+                background: '#1A1726',
+                border: '1px solid rgba(124,58,237,0.25)',
                 fontFamily: SG,
-                background: filter === f.id ? 'rgba(124,58,237,0.15)' : 'transparent',
-                color: filter === f.id ? '#A78BFA' : 'rgba(255,255,255,0.35)',
-                border: `1px solid ${filter === f.id ? 'rgba(124,58,237,0.3)' : 'rgba(255,255,255,0.06)'}`,
               }}
             >
-              {f.label}
-            </button>
-          ))}
-        </div>
+              <p className="text-white/80 text-[12px] leading-snug">
+                Pick who you want to travel with. Each companion plans the trip differently — their voice, their picks, their style. Tap one to see how they roll.
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+      <div className="flex gap-1.5 mb-3">
+        {GENDER_FILTERS.map((f) => (
+          <button
+            key={f.id}
+            onClick={() => setFilter(f.id)}
+            className="cursor-pointer text-[11px] md:text-[12px] font-semibold px-3.5 py-1.5 rounded-full transition-colors"
+            style={{
+              fontFamily: SG,
+              background: filter === f.id ? 'rgba(124,58,237,0.15)' : 'transparent',
+              color: filter === f.id ? '#A78BFA' : 'rgba(255,255,255,0.35)',
+              border: `1px solid ${filter === f.id ? 'rgba(124,58,237,0.3)' : 'rgba(255,255,255,0.06)'}`,
+            }}
+          >
+            {f.label}
+          </button>
+        ))}
       </div>
       <div className="flex gap-3 overflow-x-auto scrollbar-none pb-2 snap-x snap-mandatory md:grid md:grid-cols-4 md:overflow-visible md:pb-0">
         {filtered.map((c) => (
