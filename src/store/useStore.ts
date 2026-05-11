@@ -310,6 +310,11 @@ interface StoreState {
   travelTrips: Record<string, TripProgress>
   activeTripId: string | null
   setActiveTripId: (id: string) => void
+  // Preselected companion from homepage "Travel with me" CTA. When set,
+  // TravelCityPage auto-starts the trip with this companion + defaults
+  // and clears the field. Null when no preselection is active.
+  preselectedCompanionId: string | null
+  setPreselectedCompanionId: (id: string | null) => void
   startTrip: (destinationId: string, companionId: string, sliders: { chattiness: number; planningStyle: number; vibe: number }, remix?: { name: string; imageUrl?: string; personalityTraits: string[]; travelStyle: string[] }, relationship?: TripRelationship) => void
   addTravelPlanningMessage: (msg: ChatMessage) => void
   addTravelDayChatMessage: (day: number, msg: ChatMessage) => void
@@ -730,6 +735,8 @@ export const useStore = create<StoreState>()(
       // ── Travel ──
       travelTrips: {},
       activeTripId: null,
+      preselectedCompanionId: null,
+      setPreselectedCompanionId: (id) => set({ preselectedCompanionId: id }),
 
       setActiveTripId: (id) => set({ activeTripId: id }),
 

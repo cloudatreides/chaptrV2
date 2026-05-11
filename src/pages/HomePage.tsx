@@ -15,6 +15,7 @@ import { AmbientPingModal } from '../components/AmbientPingModal'
 import { SyncIndicator } from '../components/SyncIndicator'
 import { DESTINATIONS, getDestination } from '../data/travel/destinations'
 import { getTravelCompanion, TRAVEL_COMPANIONS, type TravelCompanion } from '../data/travel/companions'
+import { COMPANION_DISPLAY_ORDER } from '../lib/companionOrder'
 import type { AmbientPingDef } from '../data/ambientPings'
 
 const SG = "'Space Grotesk', sans-serif"
@@ -241,22 +242,6 @@ const GENDER_FILTERS: { id: GenderFilter; label: string }[] = [
   { id: 'female', label: 'Female' },
 ]
 
-// Display order for the picker. Two fixed tiers up top (4 + 4), then the
-// remaining 6 are shuffled once per page load for variety / fairness.
-const COMPANION_TIER_1 = ['mina', 'sora', 'riko', 'sofia']
-const COMPANION_TIER_2 = ['junseo', 'hyun', 'junho', 'jiwon']
-const COMPANION_REST = ['hana', 'beomseok', 'maya', 'kai', 'yuna', 'bora']
-
-function shuffle<T>(arr: T[]): T[] {
-  const copy = arr.slice()
-  for (let i = copy.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[copy[i], copy[j]] = [copy[j], copy[i]]
-  }
-  return copy
-}
-
-const COMPANION_DISPLAY_ORDER = [...COMPANION_TIER_1, ...COMPANION_TIER_2, ...shuffle(COMPANION_REST)]
 const orderIndex = (id: string) => {
   const i = COMPANION_DISPLAY_ORDER.indexOf(id)
   return i === -1 ? COMPANION_DISPLAY_ORDER.length : i
@@ -733,6 +718,7 @@ export function HomePage() {
   const activeCharacterId = useStore((s) => s.activeCharacterId)
   const travelTrips = useStore((s) => s.travelTrips)
   const setActiveTripId = useStore((s) => s.setActiveTripId)
+  const setPreselectedCompanionId = useStore((s) => s.setPreselectedCompanionId)
 
 
   const [selectedCompanion, setSelectedCompanion] = useState<TravelCompanion | null>(null)
@@ -963,7 +949,11 @@ export function HomePage() {
           <CompanionDetailModal
             companion={selectedCompanion}
             onClose={() => setSelectedCompanion(null)}
-            onTravelWith={() => { setSelectedCompanion(null); navigate('/travel') }}
+            onTravelWith={() => {
+              setPreselectedCompanionId(selectedCompanion.characterId)
+              setSelectedCompanion(null)
+              navigate('/travel')
+            }}
           />
         )}
       </AnimatePresence>

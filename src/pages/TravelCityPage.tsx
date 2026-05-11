@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react'
+import { useRef, useState, useCallback, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, X, Shuffle, Camera, Plus, Trash2 } from 'lucide-react'
@@ -9,6 +9,7 @@ import { SelfieImg } from '../components/SelfieImg'
 import { useStore, type CustomCompanion } from '../store/useStore'
 import { getDestination } from '../data/travel/destinations'
 import { TRAVEL_COMPANIONS, DEFAULT_SLIDERS, getCompanionIntro, type CompanionSliders, type CompanionRemix, type TravelCompanion } from '../data/travel/companions'
+import { ORDERED_TRAVEL_COMPANIONS } from '../lib/companionOrder'
 import { stylizeSelfie } from '../lib/togetherAi'
 import { getCroppedImg } from '../lib/cropImage'
 import { uploadSelfieToStorage, isEphemeralUrl } from '../lib/supabase'
@@ -28,6 +29,8 @@ export function TravelCityPage() {
   const addCustomCompanion = useStore((s) => s.addCustomCompanion)
   const updateCustomCompanion = useStore((s) => s.updateCustomCompanion)
   const deleteCustomCompanion = useStore((s) => s.deleteCustomCompanion)
+  const preselectedCompanionId = useStore((s) => s.preselectedCompanionId)
+  const setPreselectedCompanionId = useStore((s) => s.setPreselectedCompanionId)
 
   // Selection: either a base companion id (e.g. "kai") or a custom companion id (e.g. "custom-abc123")
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -261,6 +264,19 @@ export function TravelCityPage() {
     navigate('/travel/trip')
   }
 
+  // Auto-start when arriving with a preselected companion from the homepage
+  // "Travel with me" CTA. Skips the picker entirely. Clears the preselection
+  // immediately so reloads / back-nav don't re-fire it.
+  useEffect(() => {
+    if (!preselectedCompanionId) return
+    const comp = TRAVEL_COMPANIONS.find((c) => c.characterId === preselectedCompanionId)
+    if (!comp || !destination || !activeChar) return
+    setPreselectedCompanionId(null)
+    ambientAudio.unlock()
+    startTrip(destination.id, comp.characterId, comp.defaultSliders, undefined, 'romantic')
+    flushPendingSave().catch(() => {}).finally(() => navigate('/travel/trip'))
+  }, [preselectedCompanionId, destination, activeChar, startTrip, navigate, setPreselectedCompanionId])
+
   const sliderConfig = [
     { key: 'chattiness' as const, left: 'Quiet', right: 'Talkative' },
     { key: 'planningStyle' as const, left: 'Spontaneous', right: 'Organized' },
@@ -368,7 +384,7 @@ export function TravelCityPage() {
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {/* Base companions */}
-              {TRAVEL_COMPANIONS.map((comp) => {
+              {ORDERED_TRAVEL_COMPANIONS.map((comp) => {
                 const isSelected = selectedId === comp.characterId
                 return (
                   <motion.div
