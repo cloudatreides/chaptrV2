@@ -119,6 +119,23 @@ export default async function handler(req: Request) {
   )
   const feedback: FeedbackRow[] = feedbackRes.ok ? ((await feedbackRes.json()) as FeedbackRow[]) : []
 
+  // Per-user game-state write timestamps. This table predates user-tagged
+  // events, so it's the only durable per-user activity signal we have for
+  // users who were active before the trackEvent(user_id) deploy.
+  const gameStateRes = await fetch(
+    `${supabaseUrl}/rest/v1/user_game_state?select=user_id,updated_at&limit=2000`,
+    { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } }
+  )
+  const gameStateRows: { user_id: string; updated_at: string }[] = gameStateRes.ok
+    ? ((await gameStateRes.json()) as { user_id: string; updated_at: string }[])
+    : []
+  const gameStateUpdatedByUser = new Map<string, number>()
+  for (const row of gameStateRows) {
+    if (row.user_id && row.updated_at) {
+      gameStateUpdatedByUser.set(row.user_id, new Date(row.updated_at).getTime())
+    }
+  }
+
   // ── Sessions: aggregate first/last/count + device per session_id
   // Plus: last_active_at per user_id, from the most recent event tied to them.
   // This is the fix for "Last login" matching "Signed up" — auth.users.last_sign_in_at
@@ -213,18 +230,20 @@ export default async function handler(req: Request) {
     .sort((a, b) => b.count - a.count)
 
   // ── Users with relogin classification
-  // last_active_at = max(most-recent event for this user, auth.last_sign_in_at).
-  // The event-derived value is the truthful one for returning users; the
-  // auth value is only a fallback for users who pre-date user_id tagging on
-  // chaptr_events (or who signed in but never produced an event).
+  // last_active_at = max(most-recent tagged event, user_game_state.updated_at,
+  // auth.last_sign_in_at). Game-state write time is the only per-user activity
+  // signal that pre-dates user_id tagging on chaptr_events, so it backfills
+  // Kevin-style returning users whose historical events were untagged.
   const enrichedUsers = usersData.users
     .map((u) => {
-      const lastEventMs = lastActiveByUser.get(u.id) ?? null
+      const candidates: number[] = []
+      const lastEventMs = lastActiveByUser.get(u.id)
+      if (lastEventMs !== undefined) candidates.push(lastEventMs)
+      const lastGameStateMs = gameStateUpdatedByUser.get(u.id)
+      if (lastGameStateMs !== undefined) candidates.push(lastGameStateMs)
       const lastSignInMs = u.last_sign_in_at ? new Date(u.last_sign_in_at).getTime() : null
-      const lastActiveMs =
-        lastEventMs !== null && lastSignInMs !== null
-          ? Math.max(lastEventMs, lastSignInMs)
-          : lastEventMs ?? lastSignInMs
+      if (lastSignInMs !== null) candidates.push(lastSignInMs)
+      const lastActiveMs = candidates.length > 0 ? Math.max(...candidates) : null
       const lastActiveAt = lastActiveMs !== null ? new Date(lastActiveMs).toISOString() : null
       const { status, daysBetween } = classifyReturn(u.created_at, lastActiveAt)
       return {

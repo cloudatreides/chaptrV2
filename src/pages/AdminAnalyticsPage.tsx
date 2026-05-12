@@ -304,7 +304,7 @@ export function AdminAnalyticsPage() {
                 </table>
               </div>
               <p className="text-white/30 text-xs mt-3">
-                "Last active" = most recent <span className="font-mono">chaptr_events</span> row for the user, falling back to <span className="font-mono">auth.last_sign_in_at</span> for users with no tracked events.
+                "Last active" = max of (most recent tagged event, last <span className="font-mono">user_game_state</span> write, <span className="font-mono">auth.last_sign_in_at</span>). Game-state writes cover users active before event-tagging shipped.
                 "Returned later" means they came back at least once on a different day, not necessarily that they're active now.
               </p>
             </Section>
