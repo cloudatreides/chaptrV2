@@ -130,6 +130,19 @@ export default async function handler(req: Request) {
     ? ((await syncErrorsRes.json()) as { user_id: string; created_at: string }[])
     : []
 
+  // chaptr_playthroughs may or may not have a user_id column — the table
+  // pre-dates auth and stores anonymous shareable playthroughs. Try fetching
+  // with user_id and gracefully fall back if PostgREST rejects it (400 on
+  // unknown column). When present, each playthrough is a strong per-user
+  // engagement signal that dates back further than chaptr_events.user_id.
+  const playthroughsRes = await fetch(
+    `${supabaseUrl}/rest/v1/chaptr_playthroughs?select=user_id,created_at&user_id=not.is.null&order=created_at.desc&limit=5000`,
+    { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } }
+  )
+  const playthroughRows: { user_id: string; created_at: string }[] = playthroughsRes.ok
+    ? ((await playthroughsRes.json()) as { user_id: string; created_at: string }[])
+    : []
+
   // Per-user game-state write timestamps. This table predates user-tagged
   // events, so it's the only durable per-user activity signal we have for
   // users who were active before the trackEvent(user_id) deploy.
@@ -199,28 +212,31 @@ export default async function handler(req: Request) {
     }
   }
 
-  // Augment days-active with non-event activity signals — every sync_errors
-  // row is implicitly an action attempt with user_id attached, and the latest
-  // user_game_state write is one more known active day. Both predate
-  // chaptr_events.user_id so they recover some pre-tagging activity.
-  for (const r of syncErrorRows) {
-    if (!r.user_id) continue
-    const day = r.created_at.slice(0, 10)
-    let set = userDays.get(r.user_id)
-    if (!set) {
-      set = new Set()
-      userDays.set(r.user_id, set)
-    }
-    set.add(day)
-  }
-  for (const [userId, ms] of gameStateUpdatedByUser.entries()) {
-    const day = new Date(ms).toISOString().slice(0, 10)
+  // Augment days-active with non-event activity signals. All of these predate
+  // chaptr_events.user_id so they recover historical activity that the event
+  // table can't.
+  function addUserDay(userId: string | null, iso: string) {
+    if (!userId) return
+    const day = iso.slice(0, 10)
     let set = userDays.get(userId)
     if (!set) {
       set = new Set()
       userDays.set(userId, set)
     }
     set.add(day)
+  }
+  // sync_errors — every save failure is an action attempt with user_id.
+  for (const r of syncErrorRows) addUserDay(r.user_id, r.created_at)
+  // feedback — every in-app submission is a deliberate user action.
+  for (const f of feedback) {
+    if (f.user_id) addUserDay(f.user_id, f.created_at)
+  }
+  // chaptr_playthroughs — each completed playthrough is a strong engagement
+  // signal. Empty array if the table lacks a user_id column.
+  for (const p of playthroughRows) addUserDay(p.user_id, p.created_at)
+  // Latest user_game_state write — one more known active day per user.
+  for (const [userId, ms] of gameStateUpdatedByUser.entries()) {
+    addUserDay(userId, new Date(ms).toISOString())
   }
 
   // Per-user session aggregates: count of attributed sessions + cumulative

@@ -324,7 +324,7 @@ export function AdminAnalyticsPage() {
               <p className="text-white/30 text-xs mt-3">
                 "Last active" = max of (most recent tagged/attributed event, last <span className="font-mono">user_game_state</span> write, <span className="font-mono">auth.last_sign_in_at</span>).
                 "Sessions" and "Total time" use session-chain attribution: any session with at least one user-tagged event has all of its events attributed to that user. Sessions with zero tagged events stay unattributed.
-                "Days active" additionally pulls dates from <span className="font-mono">sync_errors</span> writes and the latest <span className="font-mono">user_game_state</span> update — both recover some pre-tagging activity.
+                "Days active" additionally pulls dates from <span className="font-mono">feedback</span>, <span className="font-mono">sync_errors</span>, <span className="font-mono">chaptr_playthroughs</span> (when user-attributed), and the latest <span className="font-mono">user_game_state</span> update — all four recover pre-tagging activity.
                 "Returned later" means they came back at least once on a different day, not necessarily that they're active now.
               </p>
             </Section>
