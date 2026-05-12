@@ -25,18 +25,31 @@ function detectDevice(): 'mobile' | 'tablet' | 'desktop' {
   return 'desktop'
 }
 
-// Cache the signed-in user id so trackEvent stays synchronous-ish and doesn't
-// hit the auth network path on every event. Kept fresh via onAuthStateChange.
+// Cache the signed-in user id so trackEvent stays fast and doesn't hit the
+// auth network path on every event. Kept fresh via onAuthStateChange.
+// The initial-resolve promise closes a race: page_view + session_heartbeat
+// can fire before getSession() resolves, which otherwise leaves the first
+// events of every fresh tab with user_id=null even for signed-in users.
 let currentUserId: string | null = null
-supabase.auth.getSession().then(({ data }) => {
-  currentUserId = data.session?.user.id ?? null
-})
+const initialUserIdResolved: Promise<void> = supabase.auth
+  .getSession()
+  .then(({ data }) => {
+    currentUserId = data.session?.user.id ?? null
+  })
+  .catch(() => {
+    // Network blip → fall through with currentUserId=null. Better to log an
+    // untagged event than to drop it entirely.
+  })
 supabase.auth.onAuthStateChange((_event, session) => {
   currentUserId = session?.user.id ?? null
 })
 
 export async function trackEvent(event: string, properties: Record<string, unknown> = {}) {
   try {
+    // Wait for the first getSession() to settle so the user_id tag is
+    // attached from the very first event. Subsequent calls await an
+    // already-resolved promise, so this is effectively free after warmup.
+    await initialUserIdResolved
     const { error } = await supabase.from('chaptr_events').insert({
       event,
       properties: { ...properties, device: detectDevice() },
