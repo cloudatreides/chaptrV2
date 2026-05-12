@@ -141,8 +141,9 @@ export default async function handler(req: Request) {
   // This is the fix for "Last login" matching "Signed up" — auth.users.last_sign_in_at
   // only updates on a fresh sign-in flow, not on session refresh, so returning users
   // were invisible to the dashboard.
-  const sessions = new Map<string, { first: number; last: number; count: number; device: string | null }>()
+  const sessions = new Map<string, { first: number; last: number; count: number; device: string | null; user_id: string | null }>()
   const lastActiveByUser = new Map<string, number>()
+  const userDays = new Map<string, Set<string>>()
   for (const e of events) {
     const t = new Date(e.created_at).getTime()
     const device = (e.properties && typeof e.properties === 'object' && typeof (e.properties as Record<string, unknown>).device === 'string')
@@ -155,12 +156,35 @@ export default async function handler(req: Request) {
       s.count++
       // Prefer a non-null device tag if we have one; older events have none.
       if (!s.device && device) s.device = device
+      // Attribute the session to the first user_id we see (anon→signed-in flow).
+      if (!s.user_id && e.user_id) s.user_id = e.user_id
     } else {
-      sessions.set(e.session_id, { first: t, last: t, count: 1, device })
+      sessions.set(e.session_id, { first: t, last: t, count: 1, device, user_id: e.user_id })
     }
     if (e.user_id) {
       const prev = lastActiveByUser.get(e.user_id)
       if (prev === undefined || t > prev) lastActiveByUser.set(e.user_id, t)
+      const day = e.created_at.slice(0, 10)
+      let set = userDays.get(e.user_id)
+      if (!set) {
+        set = new Set()
+        userDays.set(e.user_id, set)
+      }
+      set.add(day)
+    }
+  }
+
+  // Per-user session aggregates: count of attributed sessions + cumulative
+  // measurable duration. Single-event sessions count toward the session total
+  // but contribute 0 seconds (same rule as the platform-wide stats).
+  const userSessionCounts = new Map<string, number>()
+  const userTotalSeconds = new Map<string, number>()
+  for (const s of sessions.values()) {
+    if (!s.user_id) continue
+    userSessionCounts.set(s.user_id, (userSessionCounts.get(s.user_id) ?? 0) + 1)
+    if (s.count > 1) {
+      const seconds = Math.round((s.last - s.first) / 1000)
+      userTotalSeconds.set(s.user_id, (userTotalSeconds.get(s.user_id) ?? 0) + seconds)
     }
   }
 
@@ -257,6 +281,9 @@ export default async function handler(req: Request) {
         days_between: daysBetween,
         return_status: status,
         is_internal: isInternalEmail(u.email),
+        sessions: userSessionCounts.get(u.id) ?? 0,
+        total_seconds: userTotalSeconds.get(u.id) ?? 0,
+        days_active: userDays.get(u.id)?.size ?? 0,
       }
     })
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
