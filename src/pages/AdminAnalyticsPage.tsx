@@ -207,7 +207,7 @@ export function AdminAnalyticsPage() {
           <>
             {/* Top-line user funnel — return cadence is external-only so internal
                 team activity doesn't pad the retention numbers. */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-2">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-2">
               <StatCard
                 label="Total users"
                 value={data.user_summary.total.toString()}
@@ -221,7 +221,6 @@ export function AdminAnalyticsPage() {
                 subtitle={`${data.user_summary.returned_next_day} next day · ${data.user_summary.returned_later} later`}
               />
               <StatCard label="One day only" value={data.user_summary.one_session.toString()} accent="#fcd34d" subtitle="external only" />
-              <StatCard label="Never signed in" value={data.user_summary.never_signed_in.toString()} accent="#fca5a5" subtitle="external only" />
             </div>
             <p className="text-white/30 text-xs mb-8">
               Return-cadence cards exclude internal users (@zentry.com). Edit <span className="font-mono">INTERNAL_EMAIL_DOMAINS</span> in <span className="font-mono">api/admin-analytics.ts</span> to change the rule.
