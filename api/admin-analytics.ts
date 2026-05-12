@@ -30,6 +30,7 @@ interface AuthUserRow {
 
 interface EventRow {
   session_id: string
+  user_id: string | null
   event: string
   created_at: string
   properties: Record<string, unknown> | null
@@ -48,10 +49,10 @@ interface FeedbackRow {
 
 type ReturnStatus = 'never_signed_in' | 'one_session' | 'returned_next_day' | 'returned_later'
 
-function classifyReturn(createdAt: string, lastSignIn: string | null): { status: ReturnStatus; daysBetween: number | null } {
-  if (!lastSignIn) return { status: 'never_signed_in', daysBetween: null }
+function classifyReturn(createdAt: string, lastActive: string | null): { status: ReturnStatus; daysBetween: number | null } {
+  if (!lastActive) return { status: 'never_signed_in', daysBetween: null }
   const created = new Date(createdAt)
-  const last = new Date(lastSignIn)
+  const last = new Date(lastActive)
   // Use UTC date diff to avoid timezone-edge weirdness.
   const dayMs = 24 * 60 * 60 * 1000
   const createdDay = Math.floor(created.getTime() / dayMs)
@@ -99,7 +100,7 @@ export default async function handler(req: Request) {
   // Events — last 30 days, capped. PostgREST default limit is 1000; ask for more.
   const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
   const eventsRes = await fetch(
-    `${supabaseUrl}/rest/v1/chaptr_events?select=session_id,event,created_at,properties&created_at=gte.${since}&order=created_at.desc&limit=10000`,
+    `${supabaseUrl}/rest/v1/chaptr_events?select=session_id,user_id,event,created_at,properties&created_at=gte.${since}&order=created_at.desc&limit=10000`,
     { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } }
   )
   if (!eventsRes.ok) {
@@ -119,7 +120,12 @@ export default async function handler(req: Request) {
   const feedback: FeedbackRow[] = feedbackRes.ok ? ((await feedbackRes.json()) as FeedbackRow[]) : []
 
   // ── Sessions: aggregate first/last/count + device per session_id
+  // Plus: last_active_at per user_id, from the most recent event tied to them.
+  // This is the fix for "Last login" matching "Signed up" — auth.users.last_sign_in_at
+  // only updates on a fresh sign-in flow, not on session refresh, so returning users
+  // were invisible to the dashboard.
   const sessions = new Map<string, { first: number; last: number; count: number; device: string | null }>()
+  const lastActiveByUser = new Map<string, number>()
   for (const e of events) {
     const t = new Date(e.created_at).getTime()
     const device = (e.properties && typeof e.properties === 'object' && typeof (e.properties as Record<string, unknown>).device === 'string')
@@ -134,6 +140,10 @@ export default async function handler(req: Request) {
       if (!s.device && device) s.device = device
     } else {
       sessions.set(e.session_id, { first: t, last: t, count: 1, device })
+    }
+    if (e.user_id) {
+      const prev = lastActiveByUser.get(e.user_id)
+      if (prev === undefined || t > prev) lastActiveByUser.set(e.user_id, t)
     }
   }
 
@@ -203,9 +213,20 @@ export default async function handler(req: Request) {
     .sort((a, b) => b.count - a.count)
 
   // ── Users with relogin classification
+  // last_active_at = max(most-recent event for this user, auth.last_sign_in_at).
+  // The event-derived value is the truthful one for returning users; the
+  // auth value is only a fallback for users who pre-date user_id tagging on
+  // chaptr_events (or who signed in but never produced an event).
   const enrichedUsers = usersData.users
     .map((u) => {
-      const { status, daysBetween } = classifyReturn(u.created_at, u.last_sign_in_at)
+      const lastEventMs = lastActiveByUser.get(u.id) ?? null
+      const lastSignInMs = u.last_sign_in_at ? new Date(u.last_sign_in_at).getTime() : null
+      const lastActiveMs =
+        lastEventMs !== null && lastSignInMs !== null
+          ? Math.max(lastEventMs, lastSignInMs)
+          : lastEventMs ?? lastSignInMs
+      const lastActiveAt = lastActiveMs !== null ? new Date(lastActiveMs).toISOString() : null
+      const { status, daysBetween } = classifyReturn(u.created_at, lastActiveAt)
       return {
         id: u.id,
         email: u.email ?? null,
@@ -213,6 +234,7 @@ export default async function handler(req: Request) {
         avatar: u.user_metadata?.avatar_url ?? null,
         created_at: u.created_at,
         last_sign_in_at: u.last_sign_in_at,
+        last_active_at: lastActiveAt,
         days_between: daysBetween,
         return_status: status,
         is_internal: isInternalEmail(u.email),

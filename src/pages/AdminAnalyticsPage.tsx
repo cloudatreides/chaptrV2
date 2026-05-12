@@ -15,6 +15,7 @@ interface AnalyticsUser {
   avatar: string | null
   created_at: string
   last_sign_in_at: string | null
+  last_active_at: string | null
   days_between: number | null
   return_status: ReturnStatus
   is_internal: boolean
@@ -227,7 +228,7 @@ export function AdminAnalyticsPage() {
                     <tr style={{ background: '#13101e', color: 'rgba(255,255,255,0.4)' }} className="text-left text-[11px] uppercase tracking-wider">
                       <th className="px-4 py-3 font-semibold">User</th>
                       <th className="px-4 py-3 font-semibold">Signed up</th>
-                      <th className="px-4 py-3 font-semibold">Last login</th>
+                      <th className="px-4 py-3 font-semibold">Last active</th>
                       <th className="px-4 py-3 font-semibold">Gap</th>
                       <th className="px-4 py-3 font-semibold">Return</th>
                     </tr>
@@ -272,8 +273,8 @@ export function AdminAnalyticsPage() {
                           </td>
                           <td className="px-4 py-3 text-white/70">
                             <div className="flex flex-col">
-                              <span>{formatExact(u.last_sign_in_at)}</span>
-                              <span className="text-white/30 text-xs">{formatRelative(u.last_sign_in_at)}</span>
+                              <span>{formatExact(u.last_active_at)}</span>
+                              <span className="text-white/30 text-xs">{formatRelative(u.last_active_at)}</span>
                             </div>
                           </td>
                           <td className="px-4 py-3 text-white/60">
@@ -303,7 +304,7 @@ export function AdminAnalyticsPage() {
                 </table>
               </div>
               <p className="text-white/30 text-xs mt-3">
-                Note: <span className="font-mono">last_sign_in_at</span> only stores the most recent login.
+                "Last active" = most recent <span className="font-mono">chaptr_events</span> row for the user, falling back to <span className="font-mono">auth.last_sign_in_at</span> for users with no tracked events.
                 "Returned later" means they came back at least once on a different day, not necessarily that they're active now.
               </p>
             </Section>
@@ -327,7 +328,7 @@ export function AdminAnalyticsPage() {
               </div>
 
               <p className="text-white/30 text-xs mt-3">
-                Sessions are anonymous (keyed by <span className="font-mono">session_id</span>, not user). Wire <span className="font-mono">user_id</span> into <span className="font-mono">trackEvent</span> properties to link sessions to users.
+                Sessions are keyed by <span className="font-mono">session_id</span> and linked to <span className="font-mono">user_id</span> when signed in. Anonymous landing-page sessions remain unattributed.
               </p>
             </Section>
 

@@ -25,12 +25,23 @@ function detectDevice(): 'mobile' | 'tablet' | 'desktop' {
   return 'desktop'
 }
 
+// Cache the signed-in user id so trackEvent stays synchronous-ish and doesn't
+// hit the auth network path on every event. Kept fresh via onAuthStateChange.
+let currentUserId: string | null = null
+supabase.auth.getSession().then(({ data }) => {
+  currentUserId = data.session?.user.id ?? null
+})
+supabase.auth.onAuthStateChange((_event, session) => {
+  currentUserId = session?.user.id ?? null
+})
+
 export async function trackEvent(event: string, properties: Record<string, unknown> = {}) {
   try {
     const { error } = await supabase.from('chaptr_events').insert({
       event,
       properties: { ...properties, device: detectDevice() },
       session_id: getSessionId(),
+      user_id: currentUserId,
     })
     if (error && import.meta.env.DEV) {
       console.warn('[trackEvent] insert failed:', event, error.message)
