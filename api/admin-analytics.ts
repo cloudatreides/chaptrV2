@@ -119,6 +119,17 @@ export default async function handler(req: Request) {
   )
   const feedback: FeedbackRow[] = feedbackRes.ok ? ((await feedbackRes.json()) as FeedbackRow[]) : []
 
+  // sync_errors gives us another per-user activity timestamp source — every save
+  // failure is implicitly an action attempt, with user_id attached. Useful as a
+  // days-active backfill for users active before chaptr_events.user_id shipped.
+  const syncErrorsRes = await fetch(
+    `${supabaseUrl}/rest/v1/sync_errors?select=user_id,created_at&order=created_at.desc&limit=5000`,
+    { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } }
+  )
+  const syncErrorRows: { user_id: string; created_at: string }[] = syncErrorsRes.ok
+    ? ((await syncErrorsRes.json()) as { user_id: string; created_at: string }[])
+    : []
+
   // Per-user game-state write timestamps. This table predates user-tagged
   // events, so it's the only durable per-user activity signal we have for
   // users who were active before the trackEvent(user_id) deploy.
@@ -141,6 +152,20 @@ export default async function handler(req: Request) {
   // This is the fix for "Last login" matching "Signed up" — auth.users.last_sign_in_at
   // only updates on a fresh sign-in flow, not on session refresh, so returning users
   // were invisible to the dashboard.
+  // ── First pass: build session_id → user_id attribution map from any
+  // tagged event in the session. This lets us retroactively attribute every
+  // event in a session (including pre-tagging or pre-getSession-resolution
+  // events) to the user, as long as the session had at least one tagged event.
+  const sessionToUser = new Map<string, string>()
+  for (const e of events) {
+    if (e.user_id && !sessionToUser.has(e.session_id)) {
+      sessionToUser.set(e.session_id, e.user_id)
+    }
+  }
+
+  // ── Second pass: aggregate sessions + per-user metrics using the attribution
+  // map. An event without its own user_id still counts toward the user if the
+  // session was attributed elsewhere.
   const sessions = new Map<string, { first: number; last: number; count: number; device: string | null; user_id: string | null }>()
   const lastActiveByUser = new Map<string, number>()
   const userDays = new Map<string, Set<string>>()
@@ -149,6 +174,7 @@ export default async function handler(req: Request) {
     const device = (e.properties && typeof e.properties === 'object' && typeof (e.properties as Record<string, unknown>).device === 'string')
       ? ((e.properties as Record<string, unknown>).device as string)
       : null
+    const attributedUserId = e.user_id ?? sessionToUser.get(e.session_id) ?? null
     const s = sessions.get(e.session_id)
     if (s) {
       if (t < s.first) s.first = t
@@ -156,22 +182,45 @@ export default async function handler(req: Request) {
       s.count++
       // Prefer a non-null device tag if we have one; older events have none.
       if (!s.device && device) s.device = device
-      // Attribute the session to the first user_id we see (anon→signed-in flow).
-      if (!s.user_id && e.user_id) s.user_id = e.user_id
+      if (!s.user_id && attributedUserId) s.user_id = attributedUserId
     } else {
-      sessions.set(e.session_id, { first: t, last: t, count: 1, device, user_id: e.user_id })
+      sessions.set(e.session_id, { first: t, last: t, count: 1, device, user_id: attributedUserId })
     }
-    if (e.user_id) {
-      const prev = lastActiveByUser.get(e.user_id)
-      if (prev === undefined || t > prev) lastActiveByUser.set(e.user_id, t)
+    if (attributedUserId) {
+      const prev = lastActiveByUser.get(attributedUserId)
+      if (prev === undefined || t > prev) lastActiveByUser.set(attributedUserId, t)
       const day = e.created_at.slice(0, 10)
-      let set = userDays.get(e.user_id)
+      let set = userDays.get(attributedUserId)
       if (!set) {
         set = new Set()
-        userDays.set(e.user_id, set)
+        userDays.set(attributedUserId, set)
       }
       set.add(day)
     }
+  }
+
+  // Augment days-active with non-event activity signals — every sync_errors
+  // row is implicitly an action attempt with user_id attached, and the latest
+  // user_game_state write is one more known active day. Both predate
+  // chaptr_events.user_id so they recover some pre-tagging activity.
+  for (const r of syncErrorRows) {
+    if (!r.user_id) continue
+    const day = r.created_at.slice(0, 10)
+    let set = userDays.get(r.user_id)
+    if (!set) {
+      set = new Set()
+      userDays.set(r.user_id, set)
+    }
+    set.add(day)
+  }
+  for (const [userId, ms] of gameStateUpdatedByUser.entries()) {
+    const day = new Date(ms).toISOString().slice(0, 10)
+    let set = userDays.get(userId)
+    if (!set) {
+      set = new Set()
+      userDays.set(userId, set)
+    }
+    set.add(day)
   }
 
   // Per-user session aggregates: count of attributed sessions + cumulative
