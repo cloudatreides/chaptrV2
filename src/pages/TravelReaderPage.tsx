@@ -1454,7 +1454,7 @@ export function TravelReaderPage() {
           imageTriggered = true
           const proseSnippet = full.slice(0, 300).replace(/[.!?][^.!?]*$/, '.').trim()
           const imagePrompt = `anime illustration, cel-shaded, cinematic wide shot, ${scene.timeOfDay} atmosphere in ${scene.location}, ${destination.city}. ${proseSnippet} Detailed background, atmospheric lighting, vibrant anime art`
-          generateTravelImage(imagePrompt, scene.protagonistVisible ? activeChar?.selfieUrl : undefined)
+          generateTravelImage(imagePrompt, activeChar?.selfieUrl)
             .then((url) => { if (url) setTripSceneImage(scene.id, url) })
             .finally(() => setImageLoadingSceneId(null))
         }
@@ -1463,7 +1463,7 @@ export function TravelReaderPage() {
       if (needsImage && !imageTriggered) {
         imageTriggered = true
         const imagePrompt = `anime illustration, cel-shaded, cinematic wide shot, ${scene.timeOfDay} atmosphere in ${scene.location}, ${destination.city}. ${full.slice(0, 300)} Detailed background, atmospheric lighting, vibrant anime art`
-        generateTravelImage(imagePrompt, scene.protagonistVisible ? activeChar?.selfieUrl : undefined)
+        generateTravelImage(imagePrompt, activeChar?.selfieUrl)
           .then((url) => { if (url) setTripSceneImage(scene.id, url) })
           .finally(() => setImageLoadingSceneId(null))
       }
