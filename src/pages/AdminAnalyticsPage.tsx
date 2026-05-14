@@ -229,15 +229,15 @@ export function AdminAnalyticsPage() {
             {/* Users table */}
             <Section title="Users" subtitle={`${data.users.length} total · sorted by signup`}>
               <div className="overflow-x-auto rounded-xl" style={{ border: '1px solid #1e1830' }}>
-                <table className="w-full text-sm" style={{ minWidth: 720 }}>
+                <table className="w-full text-sm" style={{ minWidth: 960 }}>
                   <thead>
                     <tr style={{ background: '#13101e', color: 'rgba(255,255,255,0.4)' }} className="text-left text-[11px] uppercase tracking-wider">
                       <th className="px-4 py-3 font-semibold">User</th>
                       <th className="px-4 py-3 font-semibold">Signed up</th>
                       <th className="px-4 py-3 font-semibold">Last active</th>
-                      {/* Sessions / Total time / Days active are hidden until enough post-tagging
-                          data accrues to make them meaningful for all users. API still produces
-                          them — re-enable the <th>s + <td>s below to unhide. */}
+                      <th className="px-4 py-3 font-semibold text-right">Sessions</th>
+                      <th className="px-4 py-3 font-semibold text-right">Total time</th>
+                      <th className="px-4 py-3 font-semibold text-right">Days active</th>
                       <th className="px-4 py-3 font-semibold">Gap</th>
                       <th className="px-4 py-3 font-semibold">Return</th>
                     </tr>
@@ -286,7 +286,15 @@ export function AdminAnalyticsPage() {
                               <span className="text-white/30 text-xs">{formatRelative(u.last_active_at)}</span>
                             </div>
                           </td>
-                          {/* Sessions / Total time / Days active cells hidden — see thead above. */}
+                          <td className="px-4 py-3 text-white/80 text-right tabular-nums">
+                            {u.sessions || <span className="text-white/30">—</span>}
+                          </td>
+                          <td className="px-4 py-3 text-white/80 text-right tabular-nums">
+                            {u.total_seconds > 0 ? formatDuration(u.total_seconds) : <span className="text-white/30">—</span>}
+                          </td>
+                          <td className="px-4 py-3 text-white/80 text-right tabular-nums">
+                            {u.days_active || <span className="text-white/30">—</span>}
+                          </td>
                           <td className="px-4 py-3 text-white/60">
                             {u.days_between === null
                               ? '—'
@@ -315,8 +323,9 @@ export function AdminAnalyticsPage() {
               </div>
               <p className="text-white/30 text-xs mt-3">
                 "Last active" = max of (most recent tagged/attributed event, last <span className="font-mono">user_game_state</span> write, <span className="font-mono">auth.last_sign_in_at</span>).
+                "Sessions" and "Total time" use session-chain attribution: any session with at least one user-tagged event has all of its events attributed to that user. Sessions with zero tagged events stay unattributed.
+                "Days active" additionally pulls dates from <span className="font-mono">feedback</span>, <span className="font-mono">sync_errors</span>, <span className="font-mono">chaptr_playthroughs</span> (when user-attributed), and the latest <span className="font-mono">user_game_state</span> update — all four recover pre-tagging activity.
                 "Returned later" means they came back at least once on a different day, not necessarily that they're active now.
-                Per-user Sessions / Total time / Days active are tracked in the API but hidden in the UI until enough post-tagging data accrues across all users.
               </p>
             </Section>
 
