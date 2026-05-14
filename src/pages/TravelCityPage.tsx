@@ -90,10 +90,13 @@ export function TravelCityPage() {
     setCustomDetailId(id)
   }
 
-  function handleSelectFromCustomDetail() {
+  async function handleSelectFromCustomDetail() {
     if (!customDetailId) return
+    const cc = customCompanions.find((c) => c.id === customDetailId)
+    if (!cc) return
     handleSelectCustom(customDetailId)
     setCustomDetailId(null)
+    await launchTrip(cc.baseId, cc.sliders, cc.remix)
   }
 
   function handleOpenProfile(comp: TravelCompanion) {
@@ -101,11 +104,14 @@ export function TravelCityPage() {
     setModalSliders(selectedId === comp.characterId ? { ...sliders } : { ...comp.defaultSliders })
   }
 
-  function handleSelectFromProfile() {
+  async function handleSelectFromProfile() {
     if (!modalCompanion) return
-    setSelectedId(modalCompanion.characterId)
-    setSliders({ ...modalSliders })
+    const comp = modalCompanion
+    const slidersToUse = { ...modalSliders }
+    setSelectedId(comp.characterId)
+    setSliders(slidersToUse)
     setModalCompanion(null)
+    await launchTrip(comp.characterId, slidersToUse)
   }
 
   function handleOpenRemixFromProfile() {
@@ -238,8 +244,11 @@ export function TravelCityPage() {
   }
 
   // ── Start trip ──
-  async function handleStartTrip() {
-    if (!selectedId) return
+  // Shared launcher used by the modal "Start trip" buttons and the fallback
+  // page CTA. Reads `relationship` from page state but takes character/sliders
+  // explicitly so it can fire on the same tick as the selection — modal
+  // selections can't rely on the async selectedId/sliders setState landing.
+  async function launchTrip(characterId: string, useSliders: CompanionSliders, remix?: CompanionRemix) {
     if (!activeChar) {
       // Travel mode needs a real twin (name + selfie) to render the protagonist
       // into scene/selfie images. Send the user through character creation
@@ -249,12 +258,7 @@ export function TravelCityPage() {
     }
 
     ambientAudio.unlock()
-
-    if (selectedCustom && selectedBase) {
-      startTrip(destination!.id, selectedCustom.baseId, selectedCustom.sliders, selectedCustom.remix, relationship)
-    } else if (selectedBase) {
-      startTrip(destination!.id, selectedBase.characterId, sliders, undefined, relationship)
-    }
+    startTrip(destination!.id, characterId, useSliders, remix, relationship)
     // Await the cloud flush so the new trip is persisted BEFORE we navigate.
     // Earlier non-awaited version was vulnerable to a fast refresh after
     // landing on /travel/trip — the in-flight fetch would get cancelled and
@@ -262,6 +266,15 @@ export function TravelCityPage() {
     // Worth the extra ~200ms latency on the click to avoid silent trip loss.
     try { await flushPendingSave() } catch {}
     navigate('/travel/trip')
+  }
+
+  async function handleStartTrip() {
+    if (!selectedId) return
+    if (selectedCustom && selectedBase) {
+      await launchTrip(selectedCustom.baseId, selectedCustom.sliders, selectedCustom.remix)
+    } else if (selectedBase) {
+      await launchTrip(selectedBase.characterId, sliders)
+    }
   }
 
   // Auto-start when arriving with a preselected companion from the homepage
@@ -656,7 +669,7 @@ export function TravelCityPage() {
 
               <div className="flex flex-col gap-2.5">
                 <button onClick={handleSelectFromProfile} className="w-full py-3 rounded-xl text-white font-medium text-sm cursor-pointer" style={{ fontFamily: "'Space Grotesk', sans-serif", background: 'linear-gradient(135deg, #7C3AED, #c84b9e)' }}>
-                  Select {modalCompanion.character.name}
+                  {activeChar ? `Start trip with ${modalCompanion.character.name}` : `Create your character to start`}
                 </button>
                 <button onClick={handleOpenRemixFromProfile} className="w-full py-3 rounded-xl text-white/60 font-medium text-sm cursor-pointer flex items-center justify-center gap-2" style={{ fontFamily: "'Space Grotesk', sans-serif", background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
                   <Shuffle size={14} /> Remix {modalCompanion.character.name}
@@ -778,7 +791,7 @@ export function TravelCityPage() {
 
                 <div className="flex flex-col gap-2.5">
                   <button onClick={handleSelectFromCustomDetail} className="w-full py-3 rounded-xl text-white font-medium text-sm cursor-pointer" style={{ fontFamily: "'Space Grotesk', sans-serif", background: 'linear-gradient(135deg, #7C3AED, #c84b9e)' }}>
-                    Select {cc.remix.name}
+                    {activeChar ? `Start trip with ${cc.remix.name}` : `Create your character to start`}
                   </button>
                   <button onClick={() => { setCustomDetailId(null); openRemixModal(base, cc.id) }} className="w-full py-3 rounded-xl text-white/60 font-medium text-sm cursor-pointer flex items-center justify-center gap-2" style={{ fontFamily: "'Space Grotesk', sans-serif", background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
                     <Shuffle size={14} /> Edit remix
