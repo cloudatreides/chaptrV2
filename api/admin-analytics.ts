@@ -13,10 +13,13 @@ const ADMIN_EMAILS = new Set([
 // anyone whose engagement isn't a real-world demand signal. Strip these from
 // any external-facing metric (acquisition, retention).
 const INTERNAL_EMAIL_DOMAINS = ['zentry.com']
+const INTERNAL_EMAIL_ADDRESSES = new Set(['itsnickchua@gmail.com'])
 
 function isInternalEmail(email: string | null | undefined): boolean {
   if (!email) return false
-  const domain = email.toLowerCase().split('@')[1]
+  const normalized = email.toLowerCase()
+  if (INTERNAL_EMAIL_ADDRESSES.has(normalized)) return true
+  const domain = normalized.split('@')[1]
   return !!domain && INTERNAL_EMAIL_DOMAINS.includes(domain)
 }
 
