@@ -182,36 +182,68 @@ export default async function handler(req: Request) {
   // ── Second pass: aggregate sessions + per-user metrics using the attribution
   // map. An event without its own user_id still counts toward the user if the
   // session was attributed elsewhere.
+  //
+  // We split a session_id into multiple "logical sessions" whenever consecutive
+  // events are >30min apart. Without this, a tab left open overnight (or a
+  // background bot pinging every few hours) produces a single ~19h session
+  // that poisons the avg / median / p90 / longest stats. 30min idle is the
+  // GA-standard threshold.
+  const INACTIVITY_SPLIT_MS = 30 * 60 * 1000
+
+  // Group events by session_id so we can sort within each group and detect
+  // idle gaps. The outer Map iterates in event-arrival order, which is fine.
+  const eventsBySession = new Map<string, EventRow[]>()
+  for (const e of events) {
+    let arr = eventsBySession.get(e.session_id)
+    if (!arr) {
+      arr = []
+      eventsBySession.set(e.session_id, arr)
+    }
+    arr.push(e)
+  }
+
   const sessions = new Map<string, { first: number; last: number; count: number; device: string | null; user_id: string | null }>()
   const lastActiveByUser = new Map<string, number>()
   const userDays = new Map<string, Set<string>>()
-  for (const e of events) {
-    const t = new Date(e.created_at).getTime()
-    const device = (e.properties && typeof e.properties === 'object' && typeof (e.properties as Record<string, unknown>).device === 'string')
-      ? ((e.properties as Record<string, unknown>).device as string)
-      : null
-    const attributedUserId = e.user_id ?? sessionToUser.get(e.session_id) ?? null
-    const s = sessions.get(e.session_id)
-    if (s) {
-      if (t < s.first) s.first = t
-      if (t > s.last) s.last = t
-      s.count++
-      // Prefer a non-null device tag if we have one; older events have none.
-      if (!s.device && device) s.device = device
-      if (!s.user_id && attributedUserId) s.user_id = attributedUserId
-    } else {
-      sessions.set(e.session_id, { first: t, last: t, count: 1, device, user_id: attributedUserId })
-    }
-    if (attributedUserId) {
-      const prev = lastActiveByUser.get(attributedUserId)
-      if (prev === undefined || t > prev) lastActiveByUser.set(attributedUserId, t)
-      const day = e.created_at.slice(0, 10)
-      let set = userDays.get(attributedUserId)
-      if (!set) {
-        set = new Set()
-        userDays.set(attributedUserId, set)
+
+  for (const [sessionId, sessionEvents] of eventsBySession.entries()) {
+    sessionEvents.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+    const attributedFromMap = sessionToUser.get(sessionId) ?? null
+    let chunkIdx = 0
+    let chunkKey = `${sessionId}#0`
+    let prevT: number | null = null
+    for (const e of sessionEvents) {
+      const t = new Date(e.created_at).getTime()
+      if (prevT !== null && t - prevT > INACTIVITY_SPLIT_MS) {
+        chunkIdx++
+        chunkKey = `${sessionId}#${chunkIdx}`
       }
-      set.add(day)
+      prevT = t
+      const device = (e.properties && typeof e.properties === 'object' && typeof (e.properties as Record<string, unknown>).device === 'string')
+        ? ((e.properties as Record<string, unknown>).device as string)
+        : null
+      const attributedUserId = e.user_id ?? attributedFromMap
+      const s = sessions.get(chunkKey)
+      if (s) {
+        if (t < s.first) s.first = t
+        if (t > s.last) s.last = t
+        s.count++
+        if (!s.device && device) s.device = device
+        if (!s.user_id && attributedUserId) s.user_id = attributedUserId
+      } else {
+        sessions.set(chunkKey, { first: t, last: t, count: 1, device, user_id: attributedUserId })
+      }
+      if (attributedUserId) {
+        const prev = lastActiveByUser.get(attributedUserId)
+        if (prev === undefined || t > prev) lastActiveByUser.set(attributedUserId, t)
+        const day = e.created_at.slice(0, 10)
+        let set = userDays.get(attributedUserId)
+        if (!set) {
+          set = new Set()
+          userDays.set(attributedUserId, set)
+        }
+        set.add(day)
+      }
     }
   }
 
